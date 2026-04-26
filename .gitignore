@@ -32,7 +32,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-
+/_reference_wp
+/.vscode
+/memory-bank
+/.agents
+9trip-b2c-web.code-workspace
+.clinerules
 # vercel
 .vercel
 

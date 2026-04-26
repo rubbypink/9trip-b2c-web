@@ -1,0 +1,131 @@
+import Image from "next/image";
+import StarRating from "@/components/shared/StarRating";
+import PriceDisplay from "@/components/shared/PriceDisplay";
+import { formatDate } from "@/lib/utils";
+
+/**
+ * TourHeader — header cho trang chi tiết tour.
+ * Hiển thị gallery, title, rating, location, duration, price.
+ *
+ * @param {{ tour: object }} props
+ */
+export default function TourHeader({ tour }) {
+  const {
+    title,
+    featuredImage,
+    gallery = [],
+    ratingAverage = 0,
+    ratingCount = 0,
+    viewCount = 0,
+    locationName,
+    duration = {},
+    pricing = {},
+    isFeatured,
+    excerpt,
+  } = tour;
+
+  const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
+
+  const durationText = duration.days
+    ? `${duration.days} ngày ${duration.nights || duration.days - 1 || 0} đêm`
+    : duration.unit === "hour"
+    ? `${duration.days || 0} giờ`
+    : "";
+
+  const discountPct =
+    pricing.discount > 0 && pricing.adultPrice
+      ? Math.round((pricing.discount / pricing.adultPrice) * 100)
+      : pricing.discountPercent || 0;
+
+  return (
+    <div className="bg-white">
+      {/* Gallery */}
+      <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-1 max-h-[480px] overflow-hidden rounded-xl">
+          {allImages.length > 0 ? (
+            <>
+              <div className="md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto relative">
+                <Image
+                  src={allImages[0]}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+              {allImages[1] && (
+                <div className="hidden md:block aspect-[4/3] relative">
+                  <Image src={allImages[1]} alt={`${title} - 2`} fill className="object-cover" sizes="25vw" />
+                </div>
+              )}
+              {allImages[2] && (
+                <div className="hidden md:block aspect-[4/3] relative">
+                  <Image src={allImages[2]} alt={`${title} - 3`} fill className="object-cover" sizes="25vw" />
+                </div>
+              )}
+              {allImages[3] && (
+                <div className="hidden md:block aspect-[4/3] relative">
+                  <Image src={allImages[3]} alt={`${title} - 4`} fill className="object-cover" sizes="25vw" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="col-span-4 aspect-[21/9] bg-gray-200 rounded-xl flex items-center justify-center">
+              <span className="text-gray-400 text-lg">No image</span>
+            </div>
+          )}
+        </div>
+        {allImages.length > 4 && (
+          <button className="absolute bottom-3 right-3 rounded-lg bg-black/60 text-white text-sm px-3 py-1.5 hover:bg-black/80 transition-colors">
+            +{allImages.length - 4} ảnh
+          </button>
+        )}
+
+        {/* Badges */}
+        {isFeatured && (
+          <span className="absolute top-3 left-3 rounded bg-primary px-3 py-1 text-xs font-medium text-white">
+            Nổi bật
+          </span>
+        )}
+        {discountPct > 0 && (
+          <span className="absolute top-3 left-24 rounded bg-red-500 px-3 py-1 text-xs font-medium text-white">
+            Giảm {discountPct}%
+          </span>
+        )}
+      </div>
+
+      {/* Title & Meta */}
+      <div className="max-w-7xl mx-auto px-4 pt-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{title}</h1>
+
+        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+          <StarRating rating={ratingAverage} showCount reviewCount={ratingCount} />
+          {viewCount > 0 && <span>{viewCount.toLocaleString("vi-VN")} lượt xem</span>}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-2">
+          {locationName && (
+            <span className="inline-flex items-center gap-1">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {locationName}
+            </span>
+          )}
+          {durationText && (
+            <span className="inline-flex items-center gap-1">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {durationText}
+            </span>
+          )}
+        </div>
+
+        {excerpt && <p className="text-gray-600 mt-3 line-clamp-2">{excerpt}</p>}
+      </div>
+    </div>
+  );
+}

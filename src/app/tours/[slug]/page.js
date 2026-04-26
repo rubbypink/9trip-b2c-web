@@ -1,0 +1,144 @@
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getTourBySlug, getRelatedTours, getTourReviews } from "@/lib/firestore";
+import Breadcrumb from "@/components/layout/Breadcrumb";
+import TourHeader from "@/components/tours/TourDetail/TourHeader";
+import TourDetailClient from "./TourDetailClient";
+
+export const revalidate = 3600; // ISR: revalidate sau 1h
+
+/**
+ * generateMetadata — dynamic metadata cho SEO.
+ * Dùng title, excerpt, featuredImage từ tour để tạo meta tags.
+ */
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const { tour } = await getTourBySlug(resolvedParams.slug);
+
+  if (!tour) {
+    return { title: "Tour không tìm thấy — 9Trip" };
+  }
+
+  return {
+    title: `${tour.title} — 9Trip`,
+    description: tour.excerpt || `Đặt tour ${tour.title} giá tốt nhất tại 9Trip.`,
+    openGraph: {
+      title: `${tour.title} — 9Trip`,
+      description: tour.excerpt || "",
+      images: tour.featuredImage ? [{ url: tour.featuredImage, width: 1200, height: 630 }] : [],
+      type: "article",
+      locale: "vi_VN",
+    },
+  };
+}
+
+/**
+ * generateStaticParams — pre-build các tour phổ biến (tối ưu ISR).
+ * Trong thực tế có thể fetch danh sách slug từ Firestore.
+ */
+export async function generateStaticParams() {
+  // Trả về mảng rỗng — tất cả route sẽ được render on-demand + cache bởi ISR
+  return [];
+}
+
+/**
+ * Tour Detail Page — Server Component (ISR).
+ * Hiển thị đầy đủ thông tin tour: gallery, mô tả, lịch trình, bản đồ, đánh giá, FAQ + Booking sidebar.
+ *
+ * URL: /tours/[slug]
+ */
+export default async function TourDetailPage({ params }) {
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+
+  // Fetch data từ Firestore
+  const [{ tour }, { tours: relatedTours }, { reviews, totalRating, avgRating }] = await Promise.all([
+    getTourBySlug(slug),
+    getRelatedTours(slug),
+    getTourReviews(slug),
+  ]);
+
+  if (!tour) {
+    notFound();
+  }
+
+  // JSON-LD structured data for SEO (TouristTrip schema)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: tour.title,
+    description: tour.excerpt || tour.description?.replace(/<[^>]*>/g, "").slice(0, 200),
+    image: tour.featuredImage,
+    url: `/tours/${slug}`,
+    ...(tour.locationName && {
+      touristDestination: {
+        "@type": "City",
+        name: tour.locationName,
+      },
+    }),
+    ...(tour.pricing?.adultPrice && {
+      offers: {
+        "@type": "Offer",
+        price: tour.pricing.adultPrice,
+        priceCurrency: tour.pricing.currency || "VND",
+        availability: "https://schema.org/InStock",
+      },
+    }),
+    ...(tour.ratingAverage && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: tour.ratingAverage,
+        reviewCount: tour.ratingCount || 0,
+      },
+    }),
+    ...(tour.duration?.days && {
+      itinerary: {
+        "@type": "Trip",
+        duration: `P${tour.duration.days}D`,
+      },
+    }),
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: "Trang chủ", href: "/" },
+          { label: "Tours", href: "/tours" },
+          { label: tour.title, href: `/tours/${slug}` },
+        ]}
+      />
+
+      {/* Tour Header (Gallery, Title, Rating, Location, Duration) */}
+      <TourHeader tour={tour} />
+
+      {/* Main Layout: Content + Sidebar */}
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="flex flex-col lg:flex-row gap-10">
+          {/* Main Content (2/3) */}
+          <div className="flex-1 min-w-0">
+            <TourDetailClient
+              tour={tour}
+              relatedTours={relatedTours || []}
+              reviews={reviews || []}
+              avgRating={avgRating || tour.ratingAverage || 0}
+              totalRating={totalRating || tour.ratingCount || 0}
+            />
+          </div>
+
+          {/* Sidebar Booking Form (1/3) */}
+          <div className="w-full lg:w-[380px] flex-shrink-0">
+            <TourDetailClient.BookingSidebar tour={tour} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
