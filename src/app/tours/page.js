@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import { searchTours, getLocations } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
-import TourList from "@/components/tours/TourList";
+import TourCard from "@/components/shared/TourCard";
+import ServiceList from "@/components/shared/ServiceList";
 import SearchFormPopup from "@/components/shared/SearchFormPopup";
 
 export const metadata = {
@@ -80,19 +81,16 @@ export default async function ToursPage({ searchParams }) {
                 </div>
               }
             >
-              <TourListWrapper tours={tours} filters={filters} />
+              <ServiceList 
+                items={tours}
+                CardComponent={TourCard}
+                emptyTitle="Không tìm thấy tour nào"
+                emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác."
+              />
             </Suspense>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-/**
- * Client wrapper để xử lý load-more & sort client-side.
- * Giữ logic server fetch ban đầu, nhưng cho phép client pagination.
- */
-function TourListWrapper({ tours: initialTours, filters }) {
-  return <TourList tours={initialTours} totalCount={initialTours.length} hasMore={false} />;
 }

@@ -1,0 +1,169 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+/**
+ * HotelFilters — sidebar filter cho trang danh sách khách sạn.
+ * Các filter: hạng sao, giá, tiện nghi, khu vực.
+ */
+export default function HotelFilters({ locations = [], className }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [priceFrom, setPriceFrom] = useState(searchParams.get("price_from") || "");
+  const [priceTo, setPriceTo] = useState(searchParams.get("price_to") || "");
+  const [starRating, setStarRating] = useState(searchParams.get("starRating") || "");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const applyFilter = (key, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.delete("page");
+    router.push(`/hotels?${params.toString()}`);
+  };
+
+  const clearAll = () => {
+    router.push("/hotels");
+  };
+
+  const hasFilters = searchParams.toString().length > 0;
+
+  const filterContent = (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-gray-900">Bộ lọc</h3>
+        {hasFilters && (
+          <button onClick={clearAll} className="text-xs text-blue-600 hover:underline">
+            Xóa tất cả
+          </button>
+        )}
+      </div>
+
+      {/* Star Rating */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-800 mb-3">Hạng sao</h4>
+        <div className="space-y-2">
+          {[5, 4, 3, 2, 1].map((star) => (
+            <button
+              key={star}
+              onClick={() => {
+                const val = starRating === String(star) ? "" : String(star);
+                setStarRating(val);
+                applyFilter("starRating", val);
+              }}
+              className={cn(
+                "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
+                starRating === String(star)
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-gray-600 hover:bg-gray-50"
+              )}
+            >
+              <div className="flex text-yellow-400">
+                {Array.from({ length: star }).map((_, i) => (
+                  <svg key={i} className="h-3.5 w-3.5 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span>{star} sao</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Price Range */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-800 mb-3">Khoảng giá (đêm)</h4>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            placeholder="Từ"
+            value={priceFrom}
+            onChange={(e) => setPriceFrom(e.target.value)}
+            onBlur={() => applyFilter("price_from", priceFrom)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+          />
+          <span className="text-gray-400">—</span>
+          <input
+            type="number"
+            placeholder="Đến"
+            value={priceTo}
+            onChange={(e) => setPriceTo(e.target.value)}
+            onBlur={() => applyFilter("price_to", priceTo)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      {/* Locations */}
+      {locations.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-gray-800 mb-3">Khu vực</h4>
+          <div className="space-y-1.5 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+            {locations.map((loc) => (
+              <button
+                key={loc.id}
+                onClick={() => applyFilter("locationId", searchParams.get("locationId") === loc.id ? "" : loc.id)}
+                className={cn(
+                  "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors text-left",
+                  searchParams.get("locationId") === loc.id
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                {loc.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile Toggle */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 mb-4"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Lọc khách sạn
+      </button>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="fixed inset-y-0 left-0 w-80 bg-white p-6 shadow-xl animate-slide-in-left">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-lg">Bộ lọc</h3>
+              <button onClick={() => setMobileOpen(false)}>
+                <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {filterContent}
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <div className={cn("hidden lg:block w-64 flex-shrink-0", className)}>
+        <div className="sticky top-24 bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+          {filterContent}
+        </div>
+      </div>
+    </>
+  );
+}

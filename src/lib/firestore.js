@@ -184,16 +184,55 @@ export async function searchTours(filters = {}) {
 }
 
 /**
- * Fetch related tours (same location, excluding current).
- * @param {string} tourId - Current tour ID to exclude
- * @param {string} locationId
+ * Fetch related tours (same location, excluding current), looked up by slug.
+ * @param {string} slug - Current tour slug
  * @param {number} [count=4]
- * @returns {Promise<Object[]>}
+ * @returns {Promise<{tours: Object[]}>}
  */
-export async function getRelatedTours(tourId, locationId, count = 4) {
-  const q = query(toursCol, where("locationId", "==", locationId), orderBy("createdAt", "desc"), limit(count * 2));
+export async function getRelatedTours(slug, count = 4) {
+  const tour = await getDocBySlug("tours", slug);
+  if (!tour) return { tours: [] };
+
+  const q = query(
+    toursCol,
+    where("locationId", "==", tour.locationId),
+    orderBy("createdAt", "desc"),
+    limit(count * 2)
+  );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((t) => t.id !== tourId).slice(0, count);
+  const tours = snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((t) => t.id !== tour.id)
+    .slice(0, count);
+  return { tours };
+}
+
+/**
+ * Fetch a single tour by slug.
+ * @param {string} slug
+ * @returns {Promise<{tour: Object|null}>}
+ */
+export async function getTourBySlug(slug) {
+  const tour = await getDocBySlug("tours", slug);
+  return { tour };
+}
+
+/**
+ * Fetch reviews for a tour, looked up by slug.
+ * @param {string} slug - Tour slug
+ * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
+ */
+export async function getTourReviews(slug) {
+  const tour = await getDocBySlug("tours", slug);
+  if (!tour) return { reviews: [], totalRating: 0, avgRating: 0 };
+  
+  const { reviews } = await getReviews("tour", tour.id);
+  const totalRating = reviews.length;
+  const avgRating = totalRating > 0
+    ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating
+    : 0;
+  
+  return { reviews, totalRating, avgRating };
 }
 
 // ─── Hotels ───────────────────────────────────────────────────────────
@@ -207,6 +246,52 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
   if (cursor) q = query(hotelsCol, orderBy("createdAt", "desc"), startAfter(cursor), limit(pageSize));
   const snap = await getDocs(q);
   const hotels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
+}
+
+/**
+ * Search hotels with filters.
+ * @param {Object} filters
+ */
+export async function searchHotels(filters = {}) {
+  const {
+    locationId,
+    starRating,
+    minPrice,
+    maxPrice,
+    sortBy = "newest",
+    pageSize = 12,
+    cursor,
+  } = filters;
+
+  const constraints = [];
+  if (locationId) constraints.push(where("address.cityId", "==", locationId));
+  if (starRating) constraints.push(where("starRating", ">=", Number(starRating)));
+
+  switch (sortBy) {
+    case "price_asc":
+      constraints.push(orderBy("pricing.basePrice", "asc"));
+      break;
+    case "price_desc":
+      constraints.push(orderBy("pricing.basePrice", "desc"));
+      break;
+    case "rating":
+      constraints.push(orderBy("rating", "desc"));
+      break;
+    default:
+      constraints.push(orderBy("createdAt", "desc"));
+  }
+
+  constraints.push(limit(pageSize));
+  if (cursor) constraints.push(startAfter(cursor));
+
+  const q = query(hotelsCol, ...constraints);
+  const snap = await getDocs(q);
+  let hotels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  if (minPrice != null) hotels = hotels.filter((h) => h.pricing?.basePrice >= minPrice);
+  if (maxPrice != null) hotels = hotels.filter((h) => h.pricing?.basePrice <= maxPrice);
+
   return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
@@ -244,6 +329,136 @@ export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
   const snap = await getDocs(q);
   const activities = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+}
+
+/**
+ * Search activities with filters.
+ */
+export async function searchActivities(filters = {}) {
+  const {
+    locationId,
+    categoryId,
+    minPrice,
+    maxPrice,
+    sortBy = "newest",
+    pageSize = 12,
+    cursor,
+  } = filters;
+
+  const constraints = [];
+  if (locationId) constraints.push(where("locationId", "==", locationId));
+  if (categoryId) constraints.push(where("categoryId", "==", categoryId));
+
+  switch (sortBy) {
+    case "price_asc":
+      constraints.push(orderBy("pricing.basePrice", "asc"));
+      break;
+    case "price_desc":
+      constraints.push(orderBy("pricing.basePrice", "desc"));
+      break;
+    default:
+      constraints.push(orderBy("createdAt", "desc"));
+  }
+
+  constraints.push(limit(pageSize));
+  if (cursor) constraints.push(startAfter(cursor));
+
+  const q = query(activitiesCol, ...constraints);
+  const snap = await getDocs(q);
+  let activities = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  if (minPrice != null) activities = activities.filter((a) => a.pricing?.basePrice >= minPrice);
+  if (maxPrice != null) activities = activities.filter((a) => a.pricing?.basePrice <= maxPrice);
+
+  return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+}
+
+// ─── Cars ─────────────────────────────────────────────────────────────
+
+/**
+ * Search cars with filters.
+ */
+export async function searchCars(filters = {}) {
+  const {
+    carType,
+    transmission,
+    minPrice,
+    maxPrice,
+    sortBy = "newest",
+    pageSize = 12,
+    cursor,
+  } = filters;
+
+  const constraints = [];
+  if (carType) constraints.push(where("carType", "==", carType));
+  if (transmission) constraints.push(where("transmission", "==", transmission));
+
+  switch (sortBy) {
+    case "price_asc":
+      constraints.push(orderBy("pricing.basePrice", "asc"));
+      break;
+    case "price_desc":
+      constraints.push(orderBy("pricing.basePrice", "desc"));
+      break;
+    default:
+      constraints.push(orderBy("createdAt", "desc"));
+  }
+
+  constraints.push(limit(pageSize));
+  if (cursor) constraints.push(startAfter(cursor));
+
+  const q = query(carsCol, ...constraints);
+  const snap = await getDocs(q);
+  let cars = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  if (minPrice != null) cars = cars.filter((c) => c.pricing?.basePrice >= minPrice);
+  if (maxPrice != null) cars = cars.filter((c) => c.pricing?.basePrice <= maxPrice);
+
+  return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
+}
+
+// ─── Rentals ──────────────────────────────────────────────────────────
+
+/**
+ * Search rentals with filters.
+ */
+export async function searchRentals(filters = {}) {
+  const {
+    type,
+    locationId,
+    minPrice,
+    maxPrice,
+    sortBy = "newest",
+    pageSize = 12,
+    cursor,
+  } = filters;
+
+  const constraints = [];
+  if (type) constraints.push(where("type", "==", type));
+  if (locationId) constraints.push(where("locationId", "==", locationId));
+
+  switch (sortBy) {
+    case "price_asc":
+      constraints.push(orderBy("pricing.basePrice", "asc"));
+      break;
+    case "price_desc":
+      constraints.push(orderBy("pricing.basePrice", "desc"));
+      break;
+    default:
+      constraints.push(orderBy("createdAt", "desc"));
+  }
+
+  constraints.push(limit(pageSize));
+  if (cursor) constraints.push(startAfter(cursor));
+
+  const q = query(collection(db, "rentals"), ...constraints);
+  const snap = await getDocs(q);
+  let rentals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  if (minPrice != null) rentals = rentals.filter((r) => r.pricing?.basePrice >= minPrice);
+  if (maxPrice != null) rentals = rentals.filter((r) => r.pricing?.basePrice <= maxPrice);
+
+  return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
 // ─── Locations ────────────────────────────────────────────────────────
@@ -287,11 +502,21 @@ export async function getLocationBySlug(slug) {
 export async function createBooking(bookingData) {
   const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
   return createDoc("bookings", {
+    ...bookingCode,
     ...bookingData,
-    bookingCode,
     bookingStatus: "pending",
     paymentStatus: "pending",
+    erpSyncStatus: "pending",
   });
+}
+
+/**
+ * Get a booking by ID.
+ * @param {string} id
+ * @returns {Promise<Object|null>}
+ */
+export async function getBookingById(id) {
+  return getDocById("bookings", id);
 }
 
 /**
@@ -415,23 +640,25 @@ export async function validateCoupon(code) {
 const inventoryHoldsCol = collection(db, "inventory_holds");
 
 /**
- * Hold inventory temporarily (10 minutes, cleared by client or Cloud Function).
+ * Hold inventory temporarily (15 minutes, cleared by client or Cloud Function).
  * @param {string} serviceId
  * @param {string} serviceType
  * @param {*} startDate
+ * @param {*} endDate
  * @param {number} quantity
  * @param {string} userId
  * @returns {Promise<string>}
  */
-export async function createInventoryHold(serviceId, serviceType, startDate, quantity, userId) {
+export async function createInventoryHold(serviceId, serviceType, startDate, endDate, quantity, userId) {
   return createDoc("inventory_holds", {
     serviceId,
     serviceType,
     startDate,
+    endDate,
     quantity,
     userId,
     heldAt: serverTimestamp(),
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000), // Updated to 15 mins as per implementation_plan
   });
 }
 
@@ -441,6 +668,39 @@ export async function createInventoryHold(serviceId, serviceType, startDate, qua
  */
 export async function releaseInventoryHold(holdId) {
   await deleteDocById("inventory_holds", holdId);
+}
+
+/**
+ * Check real-time availability considering bookings and active holds.
+ * @param {string} serviceId
+ * @param {string} serviceType
+ * @param {*} startDate
+ * @param {number} totalCapacity
+ * @returns {Promise<number>} Available slots
+ */
+export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
+  // 1. Count confirmed bookings
+  const bookingsQ = query(
+    bookingsCol,
+    where("serviceId", "==", serviceId),
+    where("startDate", "==", startDate),
+    where("bookingStatus", "==", "confirmed")
+  );
+  const bookingsSnap = await getDocs(bookingsQ);
+  const bookedCount = bookingsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+
+  // 2. Count active inventory holds (not expired)
+  const now = new Date();
+  const holdsQ = query(
+    inventoryHoldsCol,
+    where("serviceId", "==", serviceId),
+    where("startDate", "==", startDate),
+    where("expiresAt", ">", now)
+  );
+  const holdsSnap = await getDocs(holdsQ);
+  const heldCount = holdsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+
+  return Math.max(0, totalCapacity - bookedCount - heldCount);
 }
 
 // ─── Notifications ────────────────────────────────────────────────────

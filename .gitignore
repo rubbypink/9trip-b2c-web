@@ -19,7 +19,7 @@
 
 # production
 /build
-
+/scripts/
 # misc
 .DS_Store
 *.pem
@@ -36,8 +36,9 @@ yarn-error.log*
 /.vscode
 /memory-bank
 /.agents
+/.clinerules
 9trip-b2c-web.code-workspace
-.clinerules
+tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # vercel
 .vercel
 
