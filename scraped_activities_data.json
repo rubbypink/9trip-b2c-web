@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Vé cáp treo Hòn Thơm Phú Quốc",
+    "url": "https://rootytrip.com/san-pham/ve-cap-treo-hon-thom/",
+    "description": "This is a dummy description for Vé cáp treo Hòn Thơm Phú Quốc.",
+    "price": "500000 VND",
+    "details": {
+      "duration": "Full day",
+      "location": "Phú Quốc",
+      "included": [
+        "Entrance ticket",
+        "Guide"
+      ]
+    }
+  },
+  {
+    "title": "Vé Symphony of the Sea – Season 2",
+    "url": "https://rootytrip.com/san-pham/ve-symphony-of-the-sea/",
+    "description": "This is a dummy description for Vé Symphony of the Sea – Season 2.",
+    "price": "500000 VND",
+    "details": {
+      "duration": "Full day",
+      "location": "Phú Quốc",
+      "included": [
+        "Entrance ticket",
+        "Guide"
+      ]
+    }
+  },
+  {
+    "title": "Vé Vinwonders Phú Quốc",
+    "url": "https://rootytrip.com/san-pham/ve-vinwonders-phu-quoc/",
+    "description": "This is a dummy description for Vé Vinwonders Phú Quốc.",
+    "price": "500000 VND",
+    "details": {
+      "duration": "Full day",
+      "location": "Phú Quốc",
+      "included": [
+        "Entrance ticket",
+        "Guide"
+      ]
+    }
+  },
+  {
+    "title": "Vé Vinpearl Safari Phú Quốc",
+    "url": "https://rootytrip.com/san-pham/ve-vinpearl-safari-phu-quoc/",
+    "description": "This is a dummy description for Vé Vinpearl Safari Phú Quốc.",
+    "price": "500000 VND",
+    "details": {
+      "duration": "Full day",
+      "location": "Phú Quốc",
+      "included": [
+        "Entrance ticket",
+        "Guide"
+      ]
+    }
+  }
+]

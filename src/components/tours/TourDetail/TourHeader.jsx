@@ -39,48 +39,39 @@ export default function TourHeader({ tour }) {
 
   return (
     <div className="bg-white">
-      {/* Gallery */}
-      <div className="relative">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-1 max-h-[480px] overflow-hidden rounded-xl">
+      {/* Gallery — Banner Carousel */}
+      <div className="relative mx-auto max-w-[1400px] px-4">
+        <div className="rounded-xl overflow-hidden">
           {allImages.length > 0 ? (
-            <>
-              <div className="md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto relative">
-                <Image
-                  src={allImages[0]}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
+            <div className="relative">
+              <div className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide">
+                {allImages.map((img, idx) => (
+                  <div key={idx} className="min-w-full snap-start aspect-[21/9] relative flex-shrink-0">
+                    <Image
+                      src={img}
+                      alt={`${title} - ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      priority={idx === 0}
+                      sizes="(max-width: 1400px) 100vw, 1400px"
+                    />
+                  </div>
+                ))}
               </div>
-              {allImages[1] && (
-                <div className="hidden md:block aspect-[4/3] relative">
-                  <Image src={allImages[1]} alt={`${title} - 2`} fill className="object-cover" sizes="25vw" />
+              {allImages.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {allImages.map((_, idx) => (
+                    <div key={idx} className="w-2 h-2 rounded-full bg-white/70 shadow-sm" />
+                  ))}
                 </div>
               )}
-              {allImages[2] && (
-                <div className="hidden md:block aspect-[4/3] relative">
-                  <Image src={allImages[2]} alt={`${title} - 3`} fill className="object-cover" sizes="25vw" />
-                </div>
-              )}
-              {allImages[3] && (
-                <div className="hidden md:block aspect-[4/3] relative">
-                  <Image src={allImages[3]} alt={`${title} - 4`} fill className="object-cover" sizes="25vw" />
-                </div>
-              )}
-            </>
+            </div>
           ) : (
-            <div className="col-span-4 aspect-[21/9] bg-gray-200 rounded-xl flex items-center justify-center">
-              <span className="text-gray-400 text-lg">No image</span>
+            <div className="aspect-[21/9] bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-400 text-lg">Chưa có ảnh</span>
             </div>
           )}
         </div>
-        {allImages.length > 4 && (
-          <button className="absolute bottom-3 right-3 rounded-lg bg-black/60 text-white text-sm px-3 py-1.5 hover:bg-black/80 transition-colors">
-            +{allImages.length - 4} ảnh
-          </button>
-        )}
 
         {/* Badges */}
         {isFeatured && (

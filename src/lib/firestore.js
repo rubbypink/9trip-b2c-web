@@ -258,6 +258,24 @@ export async function getTourBySlug(slug) {
 }
 
 /**
+ * Fetch pricing tiers for a specific tour (subcollection: tours/{tourId}/tourPricing).
+ * Sorted by sortOrder ascending.
+ * @param {string} tourId
+ * @returns {Promise<Object[]>}
+ */
+export async function getTourPricing(tourId) {
+	try {
+		const pricingCol = collection(db, 'tours', tourId, 'tourPricing');
+		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getTourPricing] Error:', error.message);
+		return [];
+	}
+}
+
+/**
  * Fetch reviews for a tour, looked up by slug.
  * @param {string} slug - Tour slug
  * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
@@ -404,6 +422,271 @@ export async function getRelatedHotels(currentSlug, locationId, count = 3) {
 	return { hotels };
 }
 
+/**
+ * Fetch pricing tiers for a specific room (subcollection: rooms/{roomId}/roomPricing).
+ * Sorted by sortOrder ascending. Tương tự getTourPricing pattern.
+ * @param {string} roomId
+ * @returns {Promise<Object[]>}
+ */
+export async function getRoomPricing(roomId) {
+	try {
+		const pricingCol = collection(db, 'rooms', roomId, 'roomPricing');
+		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getRoomPricing] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch tổng hợp pricing cho hotel: lấy tất cả rooms + pricing tiers.
+ * Dùng cho view tổng hợp ở sidebar và room cards.
+ * @param {string} hotelId
+ * @returns {Promise<Object[]>} Array of rooms với pricingTiers embedded
+ */
+export async function getHotelPricing(hotelId) {
+	try {
+		// Lấy tất cả rooms
+		const rooms = await getRoomsByHotel(hotelId);
+		if (rooms.length === 0) return [];
+
+		// Lấy pricing tiers cho mỗi room song song
+		const roomsWithPricing = await Promise.all(
+			rooms.map(async (room) => {
+				const pricingTiers = await getRoomPricing(room.id);
+				return { ...room, pricingTiers };
+			})
+		);
+		return roomsWithPricing;
+	} catch (error) {
+		console.error('[getHotelPricing] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch reviews for a hotel, looked up by slug.
+ * Tương tự getTourReviews pattern.
+ * @param {string} slug - Hotel slug
+ * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
+ */
+export async function getHotelReviews(slug) {
+	try {
+		const hotel = await getDocBySlug('hotels', slug);
+		if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
+
+		const { reviews } = await getReviews('hotel', hotel.id);
+		const totalRating = reviews.length;
+		const avgRating = totalRating > 0
+			? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating
+			: hotel.rating?.average || 0;
+
+		return { reviews, totalRating, avgRating };
+	} catch (error) {
+		console.error('[getHotelReviews] Error:', error.message);
+		// Fallback: dùng rating từ hotel document
+		const hotel = await getDocBySlug('hotels', slug);
+		if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
+		return {
+			reviews: [],
+			totalRating: hotel.rating?.count || 0,
+			avgRating: hotel.rating?.average || 0,
+		};
+	}
+}
+
+// ─── Hotels v3: Room Types, Physical Rooms, Inventory ─────────────────
+
+/**
+ * Fetch room types for a hotel (subcollection: hotels/{hotelId}/roomTypes).
+ * Sorted by sortOrder ascending.
+ * Hotels v3 schema — thay thế rooms/ flat collection cho UI.
+ * @param {string} hotelId
+ * @returns {Promise<Object[]>}
+ */
+export async function getRoomTypesByHotel(hotelId) {
+	try {
+		const roomTypesCol = collection(db, 'hotels', hotelId, 'roomTypes');
+		const q = query(roomTypesCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getRoomTypesByHotel] Error:', error.message);
+		// Fallback: dùng rooms/ top-level collection
+		return getRoomsByHotel(hotelId);
+	}
+}
+
+/**
+ * Fetch pricing tiers for a room type (subcollection: hotels/{hotelId}/roomTypes/{roomTypeId}/roomPricing).
+ * Hotels v3 schema — path mới thay cho rooms/{roomId}/roomPricing.
+ * @param {string} hotelId
+ * @param {string} roomTypeId
+ * @returns {Promise<Object[]>}
+ */
+export async function getRoomTypePricing(hotelId, roomTypeId) {
+	try {
+		const pricingCol = collection(db, 'hotels', hotelId, 'roomTypes', roomTypeId, 'roomPricing');
+		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getRoomTypePricing] Error:', error.message);
+		// Fallback: dùng old path rooms/{roomId}/roomPricing
+		const oldPricing = await getRoomPricing(roomTypeId);
+		return oldPricing;
+	}
+}
+
+/**
+ * Fetch tổng hợp pricing cho hotel từ roomTypes subcollection.
+ * Hotels v3 — thay thế getHotelPricing (dùng rooms flat).
+ * @param {string} hotelId
+ * @returns {Promise<Object[]>} Array of roomTypes với pricingTiers embedded
+ */
+export async function getHotelPricingV3(hotelId) {
+	try {
+		// Lấy tất cả room types
+		const roomTypes = await getRoomTypesByHotel(hotelId);
+		if (roomTypes.length === 0) return [];
+
+		// Lấy pricing tiers cho mỗi room type song song
+		const roomTypesWithPricing = await Promise.all(
+			roomTypes.map(async (rt) => {
+				const pricingTiers = await getRoomTypePricing(hotelId, rt.id);
+				return { ...rt, pricingTiers };
+			})
+		);
+		return roomTypesWithPricing;
+	} catch (error) {
+		console.error('[getHotelPricingV3] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch physical rooms for a hotel (subcollection: hotels/{hotelId}/rooms).
+ * Dùng cho inventory tracking: mỗi document = 1 phòng vật lý.
+ * @param {string} hotelId
+ * @param {string} [roomTypeId] - Optional: filter by room type
+ * @returns {Promise<Object[]>}
+ */
+export async function getPhysicalRooms(hotelId, roomTypeId = null) {
+	try {
+		const roomsSubCol = collection(db, 'hotels', hotelId, 'rooms');
+		let q;
+		if (roomTypeId) {
+			q = query(roomsSubCol, where('roomTypeId', '==', roomTypeId), where('isActive', '==', true));
+		} else {
+			q = query(roomsSubCol, where('isActive', '==', true));
+		}
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getPhysicalRooms] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch daily inventory for a hotel (subcollection: hotels/{hotelId}/inventory).
+ * Mỗi document = 1 ngày, chứa map roomType → availability.
+ * @param {string} hotelId
+ * @param {string} [startDate] - YYYY-MM-DD, mặc định hôm nay
+ * @param {number} [days] - Số ngày, mặc định 30
+ * @returns {Promise<Object[]>}
+ */
+export async function getHotelInventory(hotelId, startDate = null, days = 30) {
+	try {
+		const today = startDate || new Date().toISOString().split('T')[0];
+		const endDate = new Date(today);
+		endDate.setDate(endDate.getDate() + days);
+		const endStr = endDate.toISOString().split('T')[0];
+
+		const inventoryCol = collection(db, 'hotels', hotelId, 'inventory');
+		const q = query(
+			inventoryCol,
+			where('date', '>=', today),
+			where('date', '<=', endStr),
+			orderBy('date', 'asc')
+		);
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getHotelInventory] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch inventory for a specific date.
+ * @param {string} hotelId
+ * @param {string} date - YYYY-MM-DD
+ * @returns {Promise<Object|null>}
+ */
+export async function getHotelInventoryByDate(hotelId, date) {
+	try {
+		const inventoryCol = collection(db, 'hotels', hotelId, 'inventory');
+		const q = query(inventoryCol, where('date', '==', date), limit(1));
+		const snap = await getDocs(q);
+		if (snap.empty) return null;
+		return serializeDoc(snap.docs[0]);
+	} catch (error) {
+		console.error('[getHotelInventoryByDate] Error:', error.message);
+		return null;
+	}
+}
+
+/**
+ * Tính số phòng còn trống thực tế cho 1 hotel vào 1 ngày cụ thể.
+ * Kết hợp: inventory subcollection + bookings + holds.
+ * Hotels v3 — thay thế getRealAvailability cho hotel.
+ * @param {string} hotelId
+ * @param {string} date - YYYY-MM-DD
+ * @param {string} roomTypeId - Loại phòng cần kiểm tra
+ * @param {number} totalRooms - Tổng số phòng loại này
+ * @returns {Promise<number>}
+ */
+export async function getHotelRoomAvailability(hotelId, date, roomTypeId, totalRooms) {
+	try {
+		// 1. Check inventory subcollection first
+		const inventory = await getHotelInventoryByDate(hotelId, date);
+		if (inventory && inventory.roomTypes?.[roomTypeId]?.available !== undefined) {
+			return inventory.roomTypes[roomTypeId].available;
+		}
+
+		// 2. Calculate from bookings + holds
+		const confirmedBookings = await getDocs(
+			query(
+				bookingsCol,
+				where('serviceId', '==', hotelId),
+				where('serviceType', '==', 'hotel'),
+				where('startDate', '==', date),
+				where('bookingStatus', '==', 'confirmed')
+			)
+		);
+		const bookedCount = confirmedBookings.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+
+		const now = new Date();
+		const activeHolds = await getDocs(
+			query(
+				collection(db, 'inventory_holds'),
+				where('serviceId', '==', hotelId),
+				where('startDate', '==', date),
+				where('expiresAt', '>', now)
+			)
+		);
+		const heldCount = activeHolds.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+
+		return Math.max(0, totalRooms - bookedCount - heldCount);
+	} catch (error) {
+		console.error('[getHotelRoomAvailability] Error:', error.message);
+		return totalRooms;
+	}
+}
+
 // ─── Activities ───────────────────────────────────────────────────────
 
 /**
@@ -471,6 +754,44 @@ export async function searchActivities(filters = {}) {
 export async function getActivityBySlug(slug) {
 	const activity = await getDocBySlug('activities', slug);
 	return { activity };
+}
+
+/**
+ * Fetch pricing tiers for a specific activity.
+ * Subcollection: activities/{activityId}/activityPricing/{priceId}
+ * Sorted by sortOrder ascending.
+ * @param {string} activityId
+ * @returns {Promise<Object[]>}
+ */
+export async function getActivityPricing(activityId) {
+	try {
+		const pricingCol = collection(db, 'activities', activityId, 'activityPricing');
+		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getActivityPricing] Error:', error.message);
+		return [];
+	}
+}
+
+/**
+ * Fetch related activities (same location, excluding current).
+ * @param {string} slug - Current activity slug
+ * @param {number} [count=4]
+ * @returns {Promise<{activities: Object[]}>}
+ */
+export async function getRelatedActivities(slug, count = 4) {
+	const activity = await getDocBySlug('activities', slug);
+	if (!activity) return { activities: [] };
+
+	const q = query(activitiesCol, where('locationId', '==', activity.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
+	const snap = await getDocs(q);
+	const activities = snap.docs
+		.map((d) => serializeDoc(d))
+		.filter((a) => a.id !== activity.id)
+		.slice(0, count);
+	return { activities };
 }
 
 // ─── Cars ─────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getActivityBySlug, getReviews } from "@/lib/firestore";
+import { getActivityBySlug, getReviews, getActivityPricing, getRelatedActivities } from "@/lib/firestore";
 import { resolveDocImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "./ActivityDetailClient";
@@ -50,15 +50,20 @@ export default async function ActivityDetailPage({ params }) {
   // Resolve image URLs (gs:// → HTTPS)
   const activity = await resolveDocImages(rawActivity);
 
-  // Fetch reviews in parallel
-  const { reviews } = await getReviews("activity", activity.id);
+  // Fetch pricing tiers, reviews, and related activities in parallel
+  const [pricingTiers, { reviews }, { activities: relatedActivities }] = await Promise.all([
+    getActivityPricing(activity.id),
+    getReviews("activity", activity.id),
+    getRelatedActivities(slug, 3),
+  ]);
+
   const totalRating = reviews.length;
   const avgRating =
     totalRating > 0
       ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating
       : 0;
 
-  // JSON-LD TouristAttraction schema
+  // JSON-LD schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TouristAttraction",
@@ -72,11 +77,11 @@ export default async function ActivityDetailPage({ params }) {
         name: activity.locationName,
       },
     }),
-    ...(activity.pricing?.basePrice && {
+    ...((activity.pricing?.basePrice || pricingTiers[0]?.adultPrice) && {
       offers: {
         "@type": "Offer",
-        price: activity.pricing.basePrice,
-        priceCurrency: activity.pricing.currency || "VND",
+        price: activity.pricing?.basePrice || pricingTiers[0]?.adultPrice,
+        priceCurrency: activity.pricing?.currency || pricingTiers[0]?.currency || "VND",
         availability: "https://schema.org/InStock",
       },
     }),
@@ -106,6 +111,8 @@ export default async function ActivityDetailPage({ params }) {
 
         <ActivityDetailClient
           activity={activity}
+          pricingTiers={pricingTiers}
+          relatedActivities={relatedActivities}
           reviews={reviews}
           avgRating={avgRating}
           totalRating={totalRating}

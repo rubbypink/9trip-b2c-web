@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getTourBySlug, getRelatedTours, getTourReviews } from "@/lib/firestore";
+import { getTourBySlug, getRelatedTours, getTourReviews, getTourPricing } from "@/lib/firestore";
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourHeader from "@/components/tours/TourDetail/TourHeader";
+import TourBookingWidget from "@/components/tours/TourBookingWidget";
 import TourDetailClient from "./TourDetailClient";
 
 export const revalidate = 3600; // ISR: revalidate sau 1h
@@ -53,10 +54,11 @@ export default async function TourDetailPage({ params }) {
   const { slug } = resolvedParams;
 
   // Fetch data từ Firestore
-  const [{ tour: rawTour }, { tours: rawRelatedTours }, { reviews, totalRating, avgRating }] = await Promise.all([
+  const [{ tour: rawTour }, { tours: rawRelatedTours }, { reviews, totalRating, avgRating }, pricingTiers] = await Promise.all([
     getTourBySlug(slug),
     getRelatedTours(slug),
     getTourReviews(slug),
+    rawTour ? getTourPricing(rawTour.id) : Promise.resolve([]),
   ]);
 
   if (!rawTour) {
@@ -83,11 +85,11 @@ export default async function TourDetailPage({ params }) {
         name: tour.locationName,
       },
     }),
-    ...(tour.pricing?.adultPrice && {
+    ...((tour.pricing?.adultPrice || pricingTiers[0]?.adultPrice) && {
       offers: {
         "@type": "Offer",
-        price: tour.pricing.adultPrice,
-        priceCurrency: tour.pricing.currency || "VND",
+        price: tour.pricing?.adultPrice || pricingTiers[0]?.adultPrice,
+        priceCurrency: tour.pricing?.currency || pricingTiers[0]?.currency || "VND",
         availability: "https://schema.org/InStock",
       },
     }),
@@ -133,6 +135,7 @@ export default async function TourDetailPage({ params }) {
           <div className="flex-1 min-w-0">
             <TourDetailClient
               tour={tour}
+              pricingTiers={pricingTiers || []}
               relatedTours={relatedTours || []}
               reviews={reviews || []}
               avgRating={avgRating || tour.ratingAverage || 0}
@@ -142,7 +145,15 @@ export default async function TourDetailPage({ params }) {
 
           {/* Sidebar Booking Form (1/3) */}
           <div className="w-full lg:w-[380px] flex-shrink-0">
-            <TourDetailClient.BookingSidebar tour={tour} />
+            <TourBookingWidget
+              pricingTiers={pricingTiers || []}
+              tourTitle={tour.title}
+              tourId={tour.id}
+              basePrice={tour.pricing?.adultPrice || 0}
+              baseChildPrice={tour.pricing?.childPrice || 0}
+              baseInfantPrice={tour.pricing?.infantPrice || 0}
+              currency={tour.pricing?.currency || "VND"}
+            />
           </div>
         </div>
       </div>

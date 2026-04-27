@@ -8,14 +8,17 @@ import ReviewsPanel from "@/components/tours/TourDetail/ReviewsPanel";
 import BookingSidebar from "@/components/tours/TourDetail/BookingSidebar";
 import TourCard from "@/components/tours/TourCard";
 import GoogleMap from "@/components/shared/GoogleMap";
+import { formatCurrency } from "@/lib/utils";
 
 const TABS = [
   { id: "overview", label: "Tổng quan" },
   { id: "itinerary", label: "Lịch trình" },
+  { id: "pricing", label: "Bảng giá" },
   { id: "details", label: "Chi tiết" },
   { id: "map", label: "Bản đồ" },
   { id: "reviews", label: "Đánh giá" },
   { id: "faq", label: "FAQ" },
+  { id: "guide", label: "Hướng dẫn" },
 ];
 
 /**
@@ -24,13 +27,14 @@ const TABS = [
  *
  * @param {{
  *   tour: object,
+ *   pricingTiers: Array<object>,
  *   relatedTours: Array<object>,
  *   reviews: Array<object>,
  *   avgRating: number,
  *   totalRating: number,
  * }} props
  */
-export default function TourDetailClient({ tour, relatedTours = [], reviews = [], avgRating = 0, totalRating = 0 }) {
+export default function TourDetailClient({ tour, pricingTiers = [], relatedTours = [], reviews = [], avgRating = 0, totalRating = 0 }) {
   const [activeTab, setActiveTab] = useState("overview");
   const router = useRouter();
 
@@ -47,6 +51,35 @@ export default function TourDetailClient({ tour, relatedTours = [], reviews = []
 
   return (
     <div className="space-y-6">
+      {/* Product Info Badges */}
+      <div className="flex flex-wrap gap-2">
+        {tour.duration?.days > 0 && (
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
+            🕐 {tour.duration.days} ngày {tour.duration.nights || tour.duration.days - 1 || 0} đêm
+          </span>
+        )}
+        {tour.locationName && (
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
+            📍 {tour.locationName}
+          </span>
+        )}
+        {tour.departurePoint && (
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
+            🚩 Xuất phát: {tour.departurePoint}
+          </span>
+        )}
+        {tour.transport && (
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
+            🚌 {tour.transport}
+          </span>
+        )}
+        {(tour.pricing?.discountPercent || tour.discountPercent) > 0 && (
+          <span className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">
+            🏷️ Giảm {tour.pricing?.discountPercent || tour.discountPercent}%
+          </span>
+        )}
+      </div>
+
       {/* Tab Navigation */}
       <TourTabs tabs={TABS} activeTab={activeTab} onTabChange={handleTabChange} />
 
@@ -88,6 +121,51 @@ export default function TourDetailClient({ tour, relatedTours = [], reviews = []
 
         {activeTab === "itinerary" && (
           <ItineraryPanel itinerary={tour.itinerary} />
+        )}
+
+        {activeTab === "pricing" && (
+          <div className="space-y-6">
+            {pricingTiers.length > 0 ? (
+              <>
+                <p className="text-sm text-gray-500">Bảng giá chi tiết các gói dịch vụ:</p>
+                <div className="overflow-x-auto rounded-xl border border-gray-200">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200">
+                        <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói dịch vụ</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Người lớn</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Trẻ em</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Số khách</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {pricingTiers.map((tier) => (
+                        <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
+                          <td className="px-4 py-3 text-right font-semibold text-blue-600">
+                            {tier.adultPrice > 0 ? formatCurrency(tier.adultPrice, tier.currency || "VND") : "Liên hệ"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-600">
+                            {tier.childPrice != null ? formatCurrency(tier.childPrice, tier.currency || "VND") : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-500">
+                            {tier.minPeople || 1}-{tier.maxPeople || 99} khách
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-10 text-gray-500">
+                <p className="text-lg font-semibold text-gray-900 mb-1">
+                  {tour.pricing?.adultPrice > 0 ? formatCurrency(tour.pricing.adultPrice, "VND") : "Liên hệ"}
+                </p>
+                <p className="text-sm">Giá cơ bản cho 1 người</p>
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === "details" && (
@@ -176,6 +254,27 @@ export default function TourDetailClient({ tour, relatedTours = [], reviews = []
                 <p>Chưa có câu hỏi thường gặp cho tour này.</p>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "guide" && (
+          <div className="text-center py-10">
+            <p className="text-gray-500 mb-6">Hướng dẫn đặt tour:</p>
+            <ol className="space-y-3 text-sm text-left max-w-md mx-auto">
+              {[
+                "Chọn ngày khởi hành và gói dịch vụ phù hợp.",
+                "Nhập số lượng khách và tiến hành thanh toán.",
+                "Nhận voucher điện tử qua Zalo/Email (có mã QR).",
+                "Xuất trình voucher tại điểm khởi hành.",
+              ].map((step, i) => (
+                <li key={i} className="flex gap-3 items-start">
+                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                    {i + 1}
+                  </span>
+                  <span className="text-gray-700 pt-0.5">{step}</span>
+                </li>
+              ))}
+            </ol>
           </div>
         )}
       </div>

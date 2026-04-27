@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { useBooking } from "@/lib/hooks/useBooking";
@@ -34,12 +35,8 @@ export default function CheckoutPage() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [bookingId, setBookingId] = useState(null);
 
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (items.length === 0 && !bookingLoading) {
-      // router.push("/tours");
-    }
-  }, [items, router, bookingLoading]);
+  // Show empty state if cart is empty and not loading
+  const showEmptyCart = items.length === 0 && !bookingLoading;
 
   // Start checkout hold when component mounts or step 1 starts
   useEffect(() => {
@@ -135,6 +132,32 @@ export default function CheckoutPage() {
 
     setPaymentLoading(false);
   };
+
+  if (showEmptyCart) {
+    return (
+      <AuthGuard>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center max-w-md px-4">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Giỏ hàng trống</h2>
+            <p className="text-gray-500 mb-8">Bạn chưa chọn dịch vụ nào. Hãy khám phá các tour và khách sạn của chúng tôi.</p>
+            <div className="flex gap-4 justify-center">
+              <Link href="/tours" className="px-6 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all">
+                Khám phá Tour
+              </Link>
+              <Link href="/hotels" className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-all">
+                Khám phá Khách sạn
+              </Link>
+            </div>
+          </div>
+        </div>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard>

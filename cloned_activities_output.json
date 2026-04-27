@@ -1,0 +1,391 @@
+{
+  "serviceType": "activity",
+  "documents": [
+    {
+      "slug": "ve-cap-treo-hon-thom",
+      "title": "Vé cáp treo Hòn Thơm Phú Quốc",
+      "excerpt": "Cáp treo Hòn Thơm Phú Quốc giá vé bao nhiêu? Cùng khám phá các hoạt động vui chơi tuyệt vời tại Sun World Hòn Thơm ngay thôi!",
+      "description": "Cáp treo Hòn Thơm Phú Quốc giá vé bao nhiêu? Cùng khám phá các hoạt động vui chơi tuyệt vời tại Sun World Hòn Thơm ngay thôi!",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-phu-quoc-1.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-2-chieu-1024x576.jpg",
+        "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-phu-quoc-1024x576.jpg",
+        "https://rootytrip.com/wp-content/uploads/2025/04/cong-vien-nuoc-ve-cap-treo-hon-thom-phu-quoc-1024x576.jpg"
+      ],
+      "duration": "1 ngày",
+      "location": "Hòn Thơm, Phú Quốc",
+      "pricing": {
+        "basePrice": 850000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "Sightseeing",
+        "Tickets",
+        "cable car",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé cáp treo Hòn Thơm Phú Quốc",
+      "metaDescription": "Cáp treo Hòn Thơm Phú Quốc giá vé bao nhiêu? Cùng khám phá các hoạt động vui chơi tuyệt vời tại Sun World Hòn Thơm ngay thôi!",
+      "createdAt": "2026-04-28T16:05:21.743Z",
+      "updatedAt": "2026-04-28T16:05:21.743Z"
+    },
+    {
+      "slug": "ve-vinwonders-phu-quoc",
+      "title": "Vé Vinwonders Phú Quốc",
+      "excerpt": "Trải nghiệm không gian vui chơi đẳng cấp",
+      "description": "Đắm mình trong Cung Điện Hải Vương. Thưởng thức show diễn triệu đô.",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-vinwonders-phu-quoc.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2025/04/ve-vinwonders-phu-quoc.jpg",
+        "https://rootytrip.com/wp-content/uploads/2024/12/rootytrip-cover.jpg"
+      ],
+      "duration": "1 ngày",
+      "location": "Vinwonders, Phú Quốc",
+      "pricing": {
+        "basePrice": 950000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "Sightseeing",
+        "Tickets",
+        "amusement park",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Vinwonders Phú Quốc",
+      "metaDescription": "Trải nghiệm không gian vui chơi đẳng cấp",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-di-bo-duoi-day-bien-seawalker",
+      "title": "Vé đi bộ dưới đáy biển Phú Quốc (Seawalker)",
+      "excerpt": "Khám phá cận cảnh hơn 250 loại san hô quý hiếm",
+      "description": "Trang thiết bị lặn chuyên nghiệp. Huấn luyện viên (thợ lặn) đi kèm.",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2024/10/ve-di-bo-duoi-day-bien.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2023/12/san-ho-trong-tour-di-bo-duoi-day-bien.jpg",
+        "https://rootytrip.com/wp-content/uploads/2023/12/ngam-san-ho-tour-di-bo-duoi-day-bien.jpg",
+        "https://rootytrip.com/wp-content/uploads/2023/12/hinh-anh-san-ho-duoi-day-bien.jpg"
+      ],
+      "duration": "1/2 ngày",
+      "location": "Phú Quốc",
+      "pricing": {
+        "basePrice": 1250000,
+        "currency": "VND",
+        "discountPercent": 8
+      },
+      "categories": [
+        "Sightseeing",
+        "Tickets",
+        "water activities",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé đi bộ dưới đáy biển Phú Quốc (Seawalker)",
+      "metaDescription": "Khám phá cận cảnh hơn 250 loại san hô quý hiếm",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-tour-giao-lo-the-gioi-grand-world",
+      "title": "Vé Tour Giao Lộ Thế Giới Grand World Phú Quốc",
+      "excerpt": "Địa điểm hẹn hò lãng mạn với tiệc trà chiều tình yêu",
+      "description": "Check in với nhiều biểu tượng đẹp và thú vị. Đi thuyền Gondola trên sông Vencie.",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2024/10/thuyen-gondola-grand-world-phu-quoc-tour-giao-lo-the-gioi.jpg",
+      "gallery": [],
+      "duration": "1/2 ngày",
+      "location": "Grand World, Phú Quốc",
+      "pricing": {
+        "basePrice": 0,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "Sightseeing",
+        "Tickets",
+        "romantic",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Tour Giao Lộ Thế Giới Grand World Phú Quốc",
+      "metaDescription": "Địa điểm hẹn hò lãng mạn với tiệc trà chiều tình yêu",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-symphony-of-the-sea",
+      "title": "Vé Symphony of the Sea – Season 2 Phú Quốc",
+      "excerpt": "Trải nghiệm Symphony of the Sea Phú Quốc – show ánh sáng & pháo hoa đẳng cấp thế giới.",
+      "description": "Trải nghiệm Symphony of the Sea Phú Quốc – show ánh sáng & pháo hoa đẳng cấp thế giới. Mua vé nhanh, giá ưu đãi tại Rooty Trip!",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/10/show-symphony-of-the-sea-2.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2025/10/show-symphony-of-the-sea-2.jpg",
+        "https://rootytrip.com/wp-content/uploads/2024/12/rootytrip-cover.jpg"
+      ],
+      "duration": "1/2 ngày",
+      "location": "",
+      "pricing": {
+        "basePrice": 660000,
+        "currency": "VND",
+        "discountPercent": 5
+      },
+      "categories": [
+        "sightseeing",
+        "entertainment",
+        "Tickets",
+        "shows",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Symphony of the Sea – Season 2 Phú Quốc",
+      "metaDescription": "Trải nghiệm Symphony of the Sea Phú Quốc – show ánh sáng & pháo hoa đẳng cấp thế giới.",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-grand-world-phu-quoc",
+      "title": "Vé Grand World Phú Quốc",
+      "excerpt": "đ 300,000",
+      "description": "Show diễn thực cảnh \"Tinh Hoa Việt Nam\"\nDu ngoạn trên kênh đào Venice\nTham quan Bảo tàng Gấu Teddy\nCông trình Huyền Thoại Tre\nCông viên Nghệ thuật Đương đại Urban Park\nThưởng thức ẩm thực đa dạng",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-grand-world-phu-quoc.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2025/05/ve-grand-world-phu-quoc-12-1024x682.jpg",
+        "https://rootytrip.com/wp-content/uploads/2025/05/ve-grand-world-phu-quoc-13-1024x718.jpg",
+        "https://rootytrip.com/wp-content/uploads/2025/05/ve-grand-world-phu-quoc-11-1024x576.jpg"
+      ],
+      "duration": "1/2 ngày",
+      "location": "Phú Quốc",
+      "pricing": {
+        "basePrice": 300000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "sightseeing",
+        "tickets",
+        "cultural",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Grand World Phú Quốc",
+      "metaDescription": "đ 300,000",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-vinpearl-safari-phu-quoc",
+      "title": "Vé Vinpearl Safari Phú Quốc",
+      "excerpt": "Sở hữu tấm vé Vinpearl Safari Phú Quốc sẽ giúp bạn trải nghiệm mô hình sở thú có 1-0-2, check-in sống ảo cùng các loài động vật quý hiếm...",
+      "description": "Sở hữu tấm vé Vinpearl Safari Phú Quốc sẽ giúp bạn trải nghiệm mô hình sở thú có 1-0-2, check-in sống ảo cùng các loài động vật quý hiếm...",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-vinpearl-safari-phu-quoc.jpg",
+      "gallery": [],
+      "duration": "1/2 ngày",
+      "location": "",
+      "pricing": {
+        "basePrice": 850000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "sightseeing",
+        "wildlife",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Vinpearl Safari Phú Quốc",
+      "metaDescription": "Sở hữu tấm vé Vinpearl Safari Phú Quốc sẽ giúp bạn trải nghiệm mô hình sở thú có 1-0-2, check-in sống ảo cùng các loài động vật quý hiếm...",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-cau-hon-phu-quoc",
+      "title": "Vé Cầu Hôn Phú Quốc (Kiss Bridge)",
+      "excerpt": "Cập nhật giá vé Cầu Hôn Phú Quốc mới nhất. Khám phá Kiss Bridge - biểu tượng tình yêu tuyệt đẹp. Đặt vé ngay để không bỏ lỡ ưu đãi!",
+      "description": "Cập nhật giá vé Cầu Hôn Phú Quốc mới nhất. Khám phá Kiss Bridge - biểu tượng tình yêu tuyệt đẹp. Đặt vé ngay để không bỏ lỡ ưu đãi!",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2024/10/ve-cau-hon-kiss-bridge-phu-quoc-4.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2024/10/ve-cau-hon-kiss-bridge-phu-quoc-4.jpg",
+        "https://rootytrip.com/wp-content/uploads/2024/10/ve-cau-hon-kiss-bridge-phu-quoc-3.jpg",
+        "https://rootytrip.com/wp-content/uploads/2024/10/ve-cau-hon-kiss-bridge-phu-quoc-2.jpg"
+      ],
+      "duration": "1/2 ngày",
+      "location": "Phú Quốc",
+      "pricing": {
+        "basePrice": 100000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "Sightseeing",
+        "Tickets",
+        "romantic",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Cầu Hôn Phú Quốc (Kiss Bridge)",
+      "metaDescription": "Cập nhật giá vé Cầu Hôn Phú Quốc mới nhất. Khám phá Kiss Bridge - biểu tượng tình yêu tuyệt đẹp. Đặt vé ngay để không bỏ lỡ ưu đãi!",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-kiss-of-the-sea",
+      "title": "Vé Kiss of The Sea (Nụ hôn của Biển cả) Sunset Town",
+      "excerpt": "Kiss of the Sea Phú Quốc – show nghệ thuật đêm kết hợp laser, nhạc nước, ánh sáng và pháo hoa trên sân khấu biển hoành tráng.",
+      "description": "Kiss of the Sea Phú Quốc – show nghệ thuật đêm kết hợp laser, nhạc nước, ánh sáng và pháo hoa trên sân khấu biển hoành tráng.",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2026/01/kiss-of-the-sea-phu-quoc.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2026/01/kiss-of-the-sea-phu-quoc.jpg",
+        "https://rootytrip.com/wp-content/uploads/2024/12/rootytrip-cover.jpg"
+      ],
+      "duration": "",
+      "location": "",
+      "pricing": {
+        "basePrice": 750000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "Tour cano",
+        "combo Vinpearl",
+        "Kiss of the Sea",
+        "trải nghiệm bản địa độc đáo tại Phú Quốc"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Kiss of The Sea (Nụ hôn của Biển cả) Sunset Town",
+      "metaDescription": "Kiss of the Sea Phú Quốc – show nghệ thuật đêm kết hợp laser, nhạc nước, ánh sáng và pháo hoa trên sân khấu biển hoành tráng.",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-bao-tang-gau-teddy-bear",
+      "title": "Vé bảo tàng gấu Teddy Bear Grand World Phú Quốc",
+      "excerpt": "",
+      "description": "Hành trình thám hiểm của gấu Teddy Jones\nHàng trăm phiên bản gấu Teddy ấn tượng\nTận hưởng nhiều tiện ích tại nhà gấu Teddy Museum",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/bao-tang-gau-teddybear.jpg",
+      "gallery": [],
+      "duration": "1/2 ngày",
+      "location": "",
+      "pricing": {
+        "basePrice": 200000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "sightseeing",
+        "museum",
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé bảo tàng gấu Teddy Bear Grand World Phú Quốc",
+      "metaDescription": "",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-show-tinh-hoa-viet-nam",
+      "title": "Vé xem show Tinh Hoa Việt Nam – Grand World Phú Quốc",
+      "excerpt": "",
+      "description": "",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/ve-tinh-hoa-viet-nam.jpg",
+      "gallery": [],
+      "duration": "1/2 ngày",
+      "location": "",
+      "pricing": {
+        "basePrice": 300000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "sightseeing",
+        "shows"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé xem show Tinh Hoa Việt Nam – Grand World Phú Quốc",
+      "metaDescription": "",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    },
+    {
+      "slug": "ve-sunset-sanato-beach-club",
+      "title": "Vé Sunset Sanato Beach Club",
+      "excerpt": "Vé Sunset Sanato Beach Club bao nhiêu? Một trong những địa điểm ngắm hoàng hôn \"đắt giá\" nhất đảo Ngọc được giới trẻ ưa thích check-in...",
+      "description": "Vé Sunset Sanato Beach Club bao nhiêu? Một trong những địa điểm ngắm hoàng hôn \"đắt giá\" nhất đảo Ngọc được giới trẻ ưa thích check-in...",
+      "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/hoang-hon-sunset-sanato.jpg",
+      "gallery": [
+        "https://rootytrip.com/wp-content/uploads/2022/11/ve-sunset-sanato-phu-quoc-1024x576.jpg",
+        "https://rootytrip.com/wp-content/uploads/2022/11/ve-sunset-sanato-4-1024x576.jpg",
+        "https://rootytrip.com/wp-content/uploads/2022/11/ve-sunset-sanato-bao-nhieu-1024x576.jpg"
+      ],
+      "duration": "1/2 ngày",
+      "location": "",
+      "pricing": {
+        "basePrice": 100000,
+        "currency": "VND",
+        "discountPercent": 0
+      },
+      "categories": [
+        "vé tham quan",
+        "sightseeing tickets"
+      ],
+      "rating": 0,
+      "reviewCount": 0,
+      "featured": false,
+      "status": "active",
+      "metaTitle": "Vé Sunset Sanato Beach Club",
+      "metaDescription": "Vé Sunset Sanato Beach Club bao nhiêu? Một trong những địa điểm ngắm hoàng hôn \"đắt giá\" nhất đảo Ngọc được giới trẻ ưa thích check-in...",
+      "createdAt": "2026-04-28T16:05:21.744Z",
+      "updatedAt": "2026-04-28T16:05:21.744Z"
+    }
+  ],
+  "meta": {
+    "sourceUrl": "https://rootytrip.com/ve-tham-quan/",
+    "clonedAt": "2026-04-28T16:05:21.744Z",
+    "totalDocuments": 12
+  }
+}
