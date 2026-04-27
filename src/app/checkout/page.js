@@ -12,18 +12,27 @@ import CouponInput from "@/components/checkout/CouponInput";
 import PaymentSelector from "@/components/checkout/PaymentSelector";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
+// ─── Gateway API endpoints ────────────────────────────────────────────
+const GATEWAY_ENDPOINTS = {
+  vnpay: "/api/payments/vnpay/create",
+  momo: "/api/payments/momo/create",
+  paypal: "/api/payments/paypal/create",
+};
+
 /**
  * Checkout Page component handling the multi-step flow.
  */
 export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { items } = useCart();
+  const { items, subtotal, tax, grandTotal, couponDiscount, couponData, clearCart } = useCart();
   const { startCheckout, confirmBooking, loading: bookingLoading, error: bookingError } = useBooking();
   
   const [step, setStep] = useState(1); // 1: Info, 2: Payment
   const [contactInfo, setContactInfo] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("stripe");
+  const [paymentMethod, setPaymentMethod] = useState("vnpay");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -45,11 +54,86 @@ export default function CheckoutPage() {
     window.scrollTo(0, 0);
   };
 
-  const handleFinalizeBooking = async () => {
-    const id = await confirmBooking(contactInfo, paymentMethod);
-    if (id) {
-      router.push(`/booking/confirmation/${id}`);
+  /**
+   * Send booking data to the payment gateway API route.
+   * The API creates the booking (pending) and returns the gateway URL.
+   * @param {Object} bookingData
+   */
+  const redirectToGateway = async (bookingData) => {
+    const endpoint = GATEWAY_ENDPOINTS[paymentMethod];
+    if (!endpoint) return;
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingData }),
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      setBookingError(data.error);
+      return;
     }
+
+    // Store bookingId for return page (API creates booking + returns the ID)
+    if (data.bookingId) {
+      localStorage.setItem("9trip_last_booking_id", data.bookingId);
+    }
+    if (paymentMethod === "paypal" && data.orderId) {
+      localStorage.setItem("9trip_paypal_order_id", data.orderId);
+    }
+
+    // Clear cart before redirect (booking is created by the API)
+    clearCart();
+
+    // Redirect to gateway payment page
+    const redirectUrl = data.paymentUrl || data.approvalUrl;
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    }
+  };
+
+  const handleFinalizeBooking = async () => {
+    setPaymentLoading(true);
+    setBookingError(null);
+
+    // Cash: use existing confirmBooking flow (creates booking + goes to confirmation)
+    if (paymentMethod === "cash") {
+      const id = await confirmBooking(contactInfo, paymentMethod);
+      if (id) {
+        router.push(`/booking/confirmation/${id}`);
+      }
+      setPaymentLoading(false);
+      return;
+    }
+
+    // Gateway payments: API creates the booking + returns gateway URL
+    const item = items[0];
+    await redirectToGateway({
+      userId: user?.uid,
+      serviceId: item?.serviceId,
+      serviceType: item?.serviceType,
+      startDate: item?.startDate,
+      endDate: item?.endDate || null,
+      guests: {
+        adults: item?.adults || 1,
+        children: item?.children || 0,
+        infants: item?.infants || 0,
+      },
+      pricing: {
+        subtotal,
+        tax,
+        discount: couponDiscount,
+        total: grandTotal,
+        currency: item?.currency || "VND",
+      },
+      contactInfo,
+      paymentGateway: paymentMethod,
+      couponCode: couponData?.code || null,
+    });
+
+    setPaymentLoading(false);
   };
 
   return (
@@ -119,10 +203,10 @@ export default function CheckoutPage() {
                     </button>
                     <button
                       onClick={handleFinalizeBooking}
-                      disabled={bookingLoading}
+                      disabled={bookingLoading || paymentLoading}
                       className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 disabled:bg-gray-300 flex items-center gap-2"
                     >
-                      {bookingLoading && <LoadingSpinner className="w-4 h-4 border-white" />}
+                      {(bookingLoading || paymentLoading) && <LoadingSpinner className="w-4 h-4 border-white" />}
                       {paymentMethod === "cash" ? "Hoàn tất đặt chỗ" : "Thanh toán ngay"}
                     </button>
                   </div>
