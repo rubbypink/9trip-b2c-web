@@ -23,7 +23,6 @@ export default function HotelCard({ hotel, item }) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => { e.currentTarget.src = "/placeholder-hotel.jpg"; }}
         />
         {data.isFeatured && (
           <span className="absolute top-3 right-3 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">

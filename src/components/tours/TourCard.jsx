@@ -49,7 +49,6 @@ export default function TourCard({ tour, variant = "grid", className }) {
             fill
             className="object-cover"
             sizes="256px"
-            onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }}
           />
           {isFeatured && (
             <span className="absolute top-2 left-2 rounded bg-primary px-2 py-0.5 text-xs font-medium text-white">
@@ -94,7 +93,6 @@ export default function TourCard({ tour, variant = "grid", className }) {
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }}
         />
         {isFeatured && (
           <span className="absolute top-2 left-2 rounded bg-primary px-2 py-0.5 text-xs font-medium text-white">

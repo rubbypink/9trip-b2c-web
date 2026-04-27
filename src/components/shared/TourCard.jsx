@@ -19,7 +19,6 @@ export default function TourCard({ tour, item, variant = "grid" }) {
             fill
             className="object-cover"
             sizes="240px"
-            onError={(e) => { e.currentTarget.src = "/placeholder-tour.jpg"; }}
           />
         </Link>
         <div className="flex flex-col flex-1 min-w-0">
@@ -60,7 +59,6 @@ export default function TourCard({ tour, item, variant = "grid" }) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => { e.currentTarget.src = "/placeholder-tour.jpg"; }}
         />
         {data.pricing?.discountPercent > 0 && (
           <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">

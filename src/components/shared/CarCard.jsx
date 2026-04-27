@@ -17,7 +17,6 @@ export default function CarCard({ car, item }) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => { e.currentTarget.src = "/placeholder-car.jpg"; }}
         />
         <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold px-2 py-1 rounded">
           {data.carType}

@@ -16,7 +16,6 @@ export default function RentalCard({ rental, item }) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => { e.currentTarget.src = "/placeholder-rental.jpg"; }}
         />
         <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] font-bold px-2 py-1 rounded">
           {data.type}

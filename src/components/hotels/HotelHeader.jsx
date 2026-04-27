@@ -34,7 +34,6 @@ export default function HotelHeader({ hotel }) {
                   className="object-cover"
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  onError={(e) => { e.currentTarget.src = "/placeholder-hotel.jpg"; }}
                 />
               </div>
               {/* Secondary images */}
