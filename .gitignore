@@ -41,6 +41,7 @@ yarn-error.log*
 tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # vercel
 .vercel
+.gitignore
 
 # typescript
 *.tsbuildinfo
