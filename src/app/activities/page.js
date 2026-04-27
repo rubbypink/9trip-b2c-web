@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { searchActivities, getLocations } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
-import ActivityCard from "@/components/shared/ActivityCard";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
@@ -72,7 +71,7 @@ export default async function ActivitiesPage({ searchParams }) {
             </div>}>
               <ServiceList 
                 items={activities}
-                CardComponent={ActivityCard}
+                type="activity"
                 emptyTitle="Không tìm thấy hoạt động nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở địa điểm khác nhé."
               />

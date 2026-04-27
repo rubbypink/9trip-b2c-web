@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { searchHotels, getLocations } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
-import HotelCard from "@/components/shared/HotelCard";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
@@ -65,7 +64,7 @@ export default async function HotelsPage({ searchParams }) {
             </div>}>
               <ServiceList 
                 items={hotels}
-                CardComponent={HotelCard}
+                type="hotel"
                 emptyTitle="Không tìm thấy khách sạn nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở khu vực khác nhé."
               />

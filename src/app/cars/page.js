@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { searchCars } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import CarFilters from "@/components/cars/CarFilters";
-import CarCard from "@/components/shared/CarCard";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
@@ -58,7 +57,7 @@ export default async function CarsPage({ searchParams }) {
             </div>}>
               <ServiceList 
                 items={cars}
-                CardComponent={CarCard}
+                type="car"
                 emptyTitle="Không tìm thấy xe nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc loại xe khác nhé."
               />

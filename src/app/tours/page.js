@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { searchTours, getLocations } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
-import TourCard from "@/components/shared/TourCard";
 import ServiceList from "@/components/shared/ServiceList";
 import SearchFormPopup from "@/components/shared/SearchFormPopup";
 
@@ -83,7 +82,7 @@ export default async function ToursPage({ searchParams }) {
             >
               <ServiceList 
                 items={tours}
-                CardComponent={TourCard}
+                type="tour"
                 emptyTitle="Không tìm thấy tour nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác."
               />

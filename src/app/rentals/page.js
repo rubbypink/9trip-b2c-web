@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { searchRentals } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
-import RentalCard from "@/components/shared/RentalCard";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
@@ -72,7 +71,7 @@ export default async function RentalsPage({ searchParams }) {
             </div>}>
               <ServiceList 
                 items={rentals}
-                CardComponent={RentalCard}
+                type="rental"
                 emptyTitle="Không tìm thấy dịch vụ nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc xem các danh mục khác nhé."
               />
