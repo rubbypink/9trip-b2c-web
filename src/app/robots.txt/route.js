@@ -4,7 +4,7 @@
  * @returns {Promise<Response>}
  */
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://9trip.vn";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com";
 
   const robots = `User-agent: *
 Allow: /

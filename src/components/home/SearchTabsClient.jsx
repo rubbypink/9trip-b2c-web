@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import HotelSearchForm from "./HotelSearchForm";
 
 /**
  * SearchTabsClient — Tab điều hướng giữa các loại tìm kiếm: Tour, Khách sạn, Vé máy bay.
@@ -39,7 +40,7 @@ export default function SearchTabsClient() {
 
       {/* Search Form theo tab */}
       {activeTab === "tour" && <TourSearchForm />}
-      {activeTab === "hotel" && <PlaceholderForm label="Tìm khách sạn" />}
+      {activeTab === "hotel" && <HotelSearchForm />}
       {activeTab === "flight" && <PlaceholderForm label="Tìm vé máy bay" />}
     </div>
   );

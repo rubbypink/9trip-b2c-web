@@ -50,7 +50,7 @@ export default async function HotelDetailPage({ params }) {
 
   if (!hotel) notFound();
 
-  const [{ rooms }, { hotels: relatedHotels }] = await Promise.all([
+  const [rooms, { hotels: relatedHotels }] = await Promise.all([
     getRoomsByHotel(hotel.id),
     getRelatedHotels(slug, hotel.address?.cityId, 3),
   ]);

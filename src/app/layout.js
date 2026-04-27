@@ -4,16 +4,24 @@ import AuthWrapper from '@/components/auth/AuthWrapper';
 import { CartProvider } from '@/lib/cart';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { SITE, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata = {
-	title: '9 Trip — Đặt Tour & Khách Sạn Trực Tuyến',
-	description: 'Nền tảng đặt Tour du lịch, Khách sạn, Hoạt động trải nghiệm và Thuê xe hàng đầu Việt Nam. Giá tốt nhất, hỗ trợ 24/7.',
-	keywords: 'tour du lịch, đặt khách sạn, travel, booking, việt nam',
-	openGraph: { title: '9 Trip — Đặt Tour & Khách Sạn Trực Tuyến', description: 'Nền tảng đặt Tour du lịch, Khách sạn hàng đầu Việt Nam.', type: 'website', locale: 'vi_VN' },
+	title: `${SITE.name} — ${SITE.tagline}`,
+	description: SITE_DESCRIPTION,
+	keywords: SITE_KEYWORDS,
+	openGraph: {
+		title: `${SITE.name} — ${SITE.tagline}`,
+		description: SITE_DESCRIPTION,
+		type: 'website',
+		locale: 'vi_VN',
+		siteName: SITE.name,
+		url: SITE.url,
+	},
 };
 
 export default function RootLayout({ children }) {

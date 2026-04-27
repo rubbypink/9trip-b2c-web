@@ -1,10 +1,46 @@
+import { getDocs, query, collection, where, orderBy, limit } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
 /**
- * Testimonials / ReviewsCarousel — Section hiển thị đánh giá từ khách hàng.
- * Hiển thị dạng grid card với avatar, tên, rating, nội dung.
- *
- * @param {{ reviews: Array<{id: string, userName: string, userAvatar?: string, rating: number, title?: string, content: string}> }} props
+ * Serialize Firestore doc to plain object — local helper since serializeDoc is module-private.
+ * @param {import("firebase/firestore").DocumentSnapshot} snap
+ * @returns {{ id: string, [key: string]: any }}
  */
-export default function Testimonials({ reviews }) {
+function serializeDoc(snap) {
+  const data = snap.data();
+  const result = { id: snap.id };
+  for (const [key, value] of Object.entries(data)) {
+    // Convert Firestore Timestamps to ISO strings
+    if (value && typeof value === "object" && "toDate" in value) {
+      result[key] = value.toDate().toISOString();
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Testimonials — Server component hiển thị đánh giá từ khách hàng.
+ * Tự fetch approved reviews 4-5 sao từ Firestore.
+ */
+export default async function Testimonials() {
+  let reviews = [];
+  try {
+    const q = query(
+      collection(db, "reviews"),
+      where("status", "==", "approved"),
+      where("rating", ">=", 4),
+      orderBy("rating", "desc"),
+      orderBy("createdAt", "desc"),
+      limit(8)
+    );
+    const snap = await getDocs(q);
+    reviews = snap.docs.map((d) => serializeDoc(d));
+  } catch {
+    // Firestore unavailable — render empty gracefully
+  }
+
   if (!reviews || reviews.length === 0) return null;
 
   return (
@@ -12,11 +48,14 @@ export default function Testimonials({ reviews }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Khách hàng nói gì về 9Trip
+          <span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">
+            Đánh giá
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+            Khách hàng nói gì về chúng tôi
           </h2>
           <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-            Hàng nghìn khách hàng đã tin tưởng và có những trải nghiệm tuyệt vời cùng chúng tôi
+            Hàng nghìn khách hàng đã tin tưởng và có những trải nghiệm tuyệt vời cùng 9 Trip Phú Quốc.
           </p>
         </div>
 
@@ -33,7 +72,7 @@ export default function Testimonials({ reviews }) {
                   <svg
                     key={star}
                     className={`w-5 h-5 ${
-                      star <= review.rating ? "text-yellow-400" : "text-gray-200"
+                      star <= (review.rating || 0) ? "text-yellow-400" : "text-gray-200"
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -45,24 +84,28 @@ export default function Testimonials({ reviews }) {
 
               {/* Content */}
               <p className="text-gray-600 leading-relaxed mb-4 line-clamp-4">
-                &ldquo;{review.content}&rdquo;
+                &ldquo;{review.comment || review.content || review.text || "Dịch vụ tuyệt vời!"}&rdquo;
               </p>
+
+              {/* Service name if available */}
+              {review.serviceName && (
+                <p className="text-xs text-blue-600 font-medium mb-3">
+                  {review.serviceName}
+                </p>
+              )}
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                <img
-                  src={review.userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.userName)}&background=3b82f6&color=fff`}
-                  alt={review.userName}
-                  className="w-10 h-10 rounded-full object-cover"
-                  loading="lazy"
-                />
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                  {(review.userName || review.displayName || "A")[0].toUpperCase()}
+                </div>
                 <div>
                   <p className="font-semibold text-gray-900 text-sm">
-                    {review.userName}
+                    {review.userName || review.displayName || "Khách hàng"}
                   </p>
-                  {review.title && (
-                    <p className="text-xs text-gray-400">{review.title}</p>
-                  )}
+                  <p className="text-xs text-gray-400">
+                    {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                  </p>
                 </div>
               </div>
             </div>

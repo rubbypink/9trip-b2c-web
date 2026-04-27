@@ -9,6 +9,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { SITE } from "@/lib/constants";
+import logoImg from "@/media/pics/favicon.webp";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -25,8 +27,8 @@ export default function Header() {
       <div className="bg-blue-600 text-white text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <span>📞 +84 123 456 789</span>
-            <span>✉️ info@9trip.vn</span>
+            <span>📞 {SITE.phone}</span>
+            <span>✉️ {SITE.email}</span>
           </div>
           <div className="flex items-center gap-3">
             <span>🌐 VN</span>
@@ -40,10 +42,14 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              9T
-            </div>
-            <span className="font-bold text-xl text-gray-900 hidden sm:block">9Trip</span>
+            <Image
+              src={logoImg}
+              alt={SITE.name}
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
+            <span className="font-bold text-xl text-gray-900 hidden sm:block">{SITE.name}</span>
           </Link>
 
           {/* Desktop nav */}

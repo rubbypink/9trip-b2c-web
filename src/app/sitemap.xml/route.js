@@ -5,7 +5,7 @@
  * @returns {Promise<Response>}
  */
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://9trip.vn";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com";
 
   // Static routes
   const staticRoutes = [
@@ -15,6 +15,9 @@ export async function GET() {
     { path: "/activities", priority: "0.8", changefreq: "daily" },
     { path: "/cars", priority: "0.7", changefreq: "weekly" },
     { path: "/rentals", priority: "0.7", changefreq: "weekly" },
+    { path: "/terms", priority: "0.4", changefreq: "monthly" },
+    { path: "/privacy", priority: "0.4", changefreq: "monthly" },
+    { path: "/cancellation", priority: "0.4", changefreq: "monthly" },
     { path: "/login", priority: "0.3", changefreq: "monthly" },
     { path: "/register", priority: "0.3", changefreq: "monthly" },
   ];

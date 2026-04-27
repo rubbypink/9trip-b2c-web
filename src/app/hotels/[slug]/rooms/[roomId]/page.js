@@ -66,7 +66,7 @@ export default async function RoomDetailPage({ params }) {
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
             <div className="aspect-[4/3] md:aspect-[16/10] relative">
-              {room.featuredImage ? (
+              {typeof room.featuredImage === 'string' && room.featuredImage.startsWith('http') ? (
                 <Image
                   src={room.featuredImage}
                   alt={room.name}
@@ -82,12 +82,12 @@ export default async function RoomDetailPage({ params }) {
               )}
             </div>
             <div className="hidden md:grid grid-cols-2 gap-1">
-              {(room.gallery || []).slice(0, 4).map((img, idx) => (
+              {(room.gallery || []).filter(img => typeof img === 'string' && img.startsWith('http')).slice(0, 4).map((img, idx) => (
                 <div key={idx} className="aspect-[4/3] relative">
                   <Image src={img} alt={`${room.name} - ${idx + 2}`} fill className="object-cover" sizes="25vw" />
                 </div>
               ))}
-              {(room.gallery || []).length === 0 && (
+              {((room.gallery || []).filter(img => typeof img === 'string' && img.startsWith('http')).length === 0) && (
                 <div className="col-span-2 flex items-center justify-center bg-gray-100 text-gray-400">
                   Chưa có ảnh bổ sung
                 </div>
