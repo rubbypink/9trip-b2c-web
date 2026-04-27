@@ -26,7 +26,7 @@ export default function HotelHeader({ hotel }) {
           {allImages.length > 0 ? (
             <>
               {/* Main image — spans 2 cols, 2 rows */}
-              <div className="md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto relative">
+              <div className="md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto relative" data-service-type="hotel" data-service-id={hotel.id}>
                 <Image
                   src={allImages[0]}
                   alt={name}
@@ -34,6 +34,7 @@ export default function HotelHeader({ hotel }) {
                   className="object-cover"
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  onError={(e) => { e.currentTarget.src = "/placeholder-hotel.jpg"; }}
                 />
               </div>
               {/* Secondary images */}

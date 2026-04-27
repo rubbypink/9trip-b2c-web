@@ -19,22 +19,56 @@ const notificationsCol = collection(db, 'notifications');
 // ─── Generic Helpers ──────────────────────────────────────────────────
 
 /**
- * Convert Firestore Timestamp to a plain serializable object.
- * Deep-walks objects/arrays to convert all {seconds, nanoseconds} Timestamps.
- * @param {*} value - Any value potentially containing Firestore Timestamps
+ * Convert Firestore special types to plain serializable objects.
+ * Handles: Timestamp → ISO string, DocumentReference → { _ref: path },
+ * GeoPoint → { lat, lng }, Bytes → base64.
+ * Deep-walks objects/arrays recursively.
+ * @param {*} value - Any value potentially containing Firestore types
  * @returns {*} Plain serializable value
  */
 function serializeTimestamp(value) {
 	if (value === null || value === undefined) return value;
+
 	// Firestore Timestamp
 	if (value && typeof value.toDate === 'function' && typeof value.seconds === 'number') {
 		return value.toDate().toISOString();
 	}
+
+	// Firestore DocumentReference
+	if (value && typeof value.path === 'string' && typeof value.id === 'string' && typeof value.parent === 'object') {
+		return { _ref: value.path };
+	}
+
+	// Firestore GeoPoint
+	if (value && typeof value.latitude === 'number' && typeof value.longitude === 'number' && typeof value.isEqual === 'function') {
+		return { lat: value.latitude, lng: value.longitude };
+	}
+
+	// Firestore Bytes (Uint8Array)
+	if (value instanceof Uint8Array) {
+		// Convert to base64
+		let binary = '';
+		for (let i = 0; i < value.length; i++) {
+			binary += String.fromCharCode(value[i]);
+		}
+		return btoa(binary);
+	}
+
+	// Firestore FieldValue sentinel — ignore
+	if (value && typeof value.isEqual === 'function' && typeof value._methodName === 'string') {
+		return undefined;
+	}
+
 	if (Array.isArray(value)) return value.map(serializeTimestamp);
+
 	if (typeof value === 'object' && value.constructor === Object) {
 		const out = {};
 		for (const [k, v] of Object.entries(value)) {
-			out[k] = serializeTimestamp(v);
+			const serialized = serializeTimestamp(v);
+			// Skip undefined values (from FieldValue sentinels)
+			if (serialized !== undefined) {
+				out[k] = serialized;
+			}
 		}
 		return out;
 	}

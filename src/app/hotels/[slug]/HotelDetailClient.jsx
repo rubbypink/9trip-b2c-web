@@ -69,6 +69,10 @@ export default function HotelDetailClient({ hotel, rooms = [], relatedHotels = [
               <Link
                 key={h.id}
                 href={`/hotels/${h.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-service-type="hotel"
+                data-service-id={h.id}
                 className="group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="aspect-[4/3] relative bg-gray-100">
@@ -437,5 +441,4 @@ function HotelBookingSidebar({ hotel, rooms = [] }) {
   );
 }
 
-// Attach BookingSidebar as static property
-HotelDetailClient.BookingSidebar = HotelBookingSidebar;
+export { HotelBookingSidebar };

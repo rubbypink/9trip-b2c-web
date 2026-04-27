@@ -27,8 +27,8 @@ export default function Header() {
       <div className="bg-blue-600 text-white text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <span>📞 {SITE.phone}</span>
-            <span>✉️ {SITE.email}</span>
+            <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-blue-200 transition-colors">📞 {SITE.phone}</a>
+            <a href={`mailto:${SITE.email}`} className="hover:text-blue-200 transition-colors">✉️ {SITE.email}</a>
           </div>
           <div className="flex items-center gap-3">
             <span>🌐 VN</span>

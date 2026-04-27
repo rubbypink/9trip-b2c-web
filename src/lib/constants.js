@@ -27,9 +27,10 @@ export const COMPANY = {
 
 export const SOCIAL = {
   facebook: "https://facebook.com/9tripphuquoc",
-  instagram: "https://instagram.com/9tripphuquoc",
-  youtube: "https://youtube.com/@9tripphuquoc",
-  tiktok: "https://tiktok.com/@9tripphuquoc",
+  instagram: "https://www.instagram.com/9tripphuquoc/",
+  youtube: "https://www.youtube.com/@9tripphuquoc",
+  tiktok: "https://www.tiktok.com/@9tripphuquoc",
+  zalo: "https://m.me/0877901901",
 };
 
 /** Mô tả ngắn dùng trong footer và metadata */

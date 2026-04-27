@@ -3,6 +3,7 @@
  * @param {{ activity: object }} props
  */
 import Link from "next/link";
+import Image from "next/image";
 import StarRating from "./StarRating";
 import PriceDisplay from "./PriceDisplay";
 
@@ -10,11 +11,14 @@ export default function ActivityCard({ activity, item }) {
   const data = activity || item;
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
-      <Link href={`/activities/${data.slug}`} className="block relative aspect-[4/3] overflow-hidden">
-        <img
+      <Link href={`/activities/${data.slug}`} target="_blank" rel="noopener noreferrer" className="block relative aspect-[4/3] overflow-hidden" data-service-type="activity" data-service-id={data.id}>
+        <Image
           src={data.featuredImage || "/placeholder-activity.jpg"}
           alt={data.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => { e.currentTarget.src = "/placeholder-activity.jpg"; }}
         />
         {data.pricing?.discountPercent > 0 && (
           <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -28,7 +32,7 @@ export default function ActivityCard({ activity, item }) {
         )}
       </Link>
       <div className="p-4">
-        <Link href={`/activities/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1">
+        <Link href={`/activities/${data.slug}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.title}
         </Link>
         <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || "Đang cập nhật"}</p>
@@ -47,7 +51,7 @@ export default function ActivityCard({ activity, item }) {
             currency="VND"
             size="sm"
           />
-          <Link href={`/activities/${data.slug}`} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          <Link href={`/activities/${data.slug}`} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Chi tiết
           </Link>
         </div>

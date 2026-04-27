@@ -42,13 +42,14 @@ export default function TourCard({ tour, variant = "grid", className }) {
           className
         )}
       >
-        <Link href={`/tours/${slug}`} className="relative h-48 sm:h-auto sm:w-64 flex-shrink-0 overflow-hidden rounded-lg">
+        <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer" className="relative h-48 sm:h-auto sm:w-64 flex-shrink-0 overflow-hidden rounded-lg" data-service-type="tour" data-service-id={id}>
           <Image
             src={featuredImage || "/placeholder.jpg"}
             alt={title}
             fill
             className="object-cover"
             sizes="256px"
+            onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }}
           />
           {isFeatured && (
             <span className="absolute top-2 left-2 rounded bg-primary px-2 py-0.5 text-xs font-medium text-white">
@@ -62,7 +63,7 @@ export default function TourCard({ tour, variant = "grid", className }) {
               {locationName && <span>{locationName}</span>}
               {durationText && <span>• {durationText}</span>}
             </div>
-            <Link href={`/tours/${slug}`}>
+            <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer">
               <h3 className="text-lg font-semibold text-gray-900 hover:text-primary line-clamp-2">
                 {title}
               </h3>
@@ -86,13 +87,14 @@ export default function TourCard({ tour, variant = "grid", className }) {
         className
       )}
     >
-      <Link href={`/tours/${slug}`} className="relative block aspect-[4/3] overflow-hidden">
+      <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer" className="relative block aspect-[4/3] overflow-hidden" data-service-type="tour" data-service-id={id}>
         <Image
           src={featuredImage || "/placeholder.jpg"}
           alt={title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => { e.currentTarget.src = "/placeholder.jpg"; }}
         />
         {isFeatured && (
           <span className="absolute top-2 left-2 rounded bg-primary px-2 py-0.5 text-xs font-medium text-white">
@@ -110,8 +112,8 @@ export default function TourCard({ tour, variant = "grid", className }) {
           {locationName && <span>{locationName}</span>}
           {durationText && <span>• {durationText}</span>}
         </div>
-        <Link href={`/tours/${slug}`}>
-          <h3 className="font-semibold text-gray-900 hover:text-primary line-clamp-2 mb-2">
+        <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer">
+          <h3 className="font-semibold text-gray-900 hover:text-primary line-clamp-2 mb-2 min-h-[2.5rem]">
             {title}
           </h3>
         </Link>

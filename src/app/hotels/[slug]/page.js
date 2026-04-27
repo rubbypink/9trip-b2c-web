@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getHotelBySlug, getRoomsByHotel, getRelatedHotels } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelHeader from "@/components/hotels/HotelHeader";
-import HotelDetailClient from "./HotelDetailClient";
+import HotelDetailClient, { HotelBookingSidebar } from "./HotelDetailClient";
 
 export const revalidate = 3600; // ISR: revalidate sau 1h
 
@@ -122,7 +122,7 @@ export default async function HotelDetailPage({ params }) {
             {/* Booking Sidebar — sticky */}
             <aside className="lg:w-96 flex-shrink-0">
               <div className="sticky top-24">
-                <HotelDetailClient.BookingSidebar hotel={hotel} rooms={rooms} />
+                <HotelBookingSidebar hotel={hotel} rooms={rooms} />
               </div>
             </aside>
           </div>

@@ -12,7 +12,7 @@
 	--color-foreground: #111827;
 	--color-muted: #6b7280;
 	--color-border: #e5e7eb;
-	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+	--font-sans: var(--font-roboto), Roboto, Arial, sans-serif;
 	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 

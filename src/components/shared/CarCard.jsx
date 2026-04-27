@@ -2,6 +2,7 @@
  * CarCard - Card hiển thị dịch vụ thuê xe.
  */
 import Link from "next/link";
+import Image from "next/image";
 import PriceDisplay from "./PriceDisplay";
 import StarRating from "./StarRating";
 
@@ -9,18 +10,21 @@ export default function CarCard({ car, item }) {
   const data = car || item;
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
-      <Link href={`/cars/${data.slug}`} className="block relative aspect-[16/10] overflow-hidden">
-        <img
+      <Link href={`/cars/${data.slug}`} target="_blank" rel="noopener noreferrer" className="block relative aspect-[16/10] overflow-hidden" data-service-type="car" data-service-id={data.id}>
+        <Image
           src={data.images?.[0] || "/placeholder-car.jpg"}
           alt={data.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => { e.currentTarget.src = "/placeholder-car.jpg"; }}
         />
         <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold px-2 py-1 rounded">
           {data.carType}
         </span>
       </Link>
       <div className="p-4">
-        <Link href={`/cars/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-1 mb-1">
+        <Link href={`/cars/${data.slug}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-1 mb-1">
           {data.name}
         </Link>
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">

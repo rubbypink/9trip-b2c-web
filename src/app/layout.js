@@ -1,12 +1,19 @@
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist_Mono, Roboto } from 'next/font/google';
 import './globals.css';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import { CartProvider } from '@/lib/cart';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import FloatButtonGroup from '@/components/shared/FloatButtonGroup';
+import BackToTop from '@/components/shared/BackToTop';
 import { SITE, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants';
 
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700'],
+  subsets: ['vietnamese', 'latin'],
+  display: 'swap',
+  variable: '--font-roboto',
+});
 
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
@@ -28,7 +35,7 @@ export default function RootLayout({ children }) {
 	return (
 		<html
 			lang="vi"
-			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+			className={`${roboto.variable} ${geistMono.variable} h-full antialiased`}
 		>
 			<body className="min-h-full flex flex-col bg-white text-gray-900">
 				<AuthWrapper>
@@ -36,6 +43,8 @@ export default function RootLayout({ children }) {
 						<Header />
 						<main className="flex-1">{children}</main>
 						<Footer />
+						<FloatButtonGroup />
+						<BackToTop />
 					</CartProvider>
 				</AuthWrapper>
 			</body>
