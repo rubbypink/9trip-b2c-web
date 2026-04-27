@@ -1,4 +1,5 @@
 import { getFeaturedTours } from "@/lib/firestore";
+import { resolveDocsImages } from "@/lib/storage";
 import FeaturedTours from "@/components/home/FeaturedTours";
 
 /**
@@ -8,7 +9,8 @@ import FeaturedTours from "@/components/home/FeaturedTours";
 export default async function FeaturedToursServer() {
   let tours = [];
   try {
-    tours = await getFeaturedTours(8);
+    const rawTours = await getFeaturedTours(8);
+    tours = await resolveDocsImages(rawTours);
   } catch {
     // Firestore unavailable — render empty gracefully
   }

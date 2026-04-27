@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getActivityBySlug, getReviews } from "@/lib/firestore";
+import { resolveDocImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "./ActivityDetailClient";
 
@@ -42,9 +43,12 @@ export default async function ActivityDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  const { activity } = await getActivityBySlug(slug);
+  const { activity: rawActivity } = await getActivityBySlug(slug);
 
-  if (!activity) notFound();
+  if (!rawActivity) notFound();
+
+  // Resolve image URLs (gs:// → HTTPS)
+  const activity = await resolveDocImages(rawActivity);
 
   // Fetch reviews in parallel
   const { reviews } = await getReviews("activity", activity.id);

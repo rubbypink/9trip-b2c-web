@@ -42,6 +42,51 @@ export async function getStorageImageUrl(imagePath) {
 }
 
 /**
+ * Resolve all image fields in a document to full HTTPS download URLs.
+ * Handles common image field names: featuredImage, gallery, images, media, logo.
+ * Works recursively for arrays and nested objects.
+ *
+ * @param {Object} doc - Firestore document (already serialized)
+ * @returns {Promise<Object>} Document with resolved image URLs
+ */
+export async function resolveDocImages(doc) {
+  if (!doc || typeof doc !== "object") return doc;
+
+  const imageFields = ["featuredImage", "gallery", "images", "media", "logo"];
+
+  const result = { ...doc };
+
+  for (const field of imageFields) {
+    if (result[field]) {
+      if (Array.isArray(result[field])) {
+        // Resolve each image in an array
+        const resolved = await Promise.all(
+          result[field].map((url) => getStorageImageUrl(url))
+        );
+        result[field] = resolved.filter(Boolean);
+      } else if (typeof result[field] === "string") {
+        // Resolve single image URL
+        const resolved = await getStorageImageUrl(result[field]);
+        result[field] = resolved || result[field];
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Resolve images for multiple documents in parallel.
+ *
+ * @param {Object[]} docs - Array of Firestore documents
+ * @returns {Promise<Object[]>} Documents with resolved image URLs
+ */
+export async function resolveDocsImages(docs) {
+  if (!Array.isArray(docs)) return docs;
+  return Promise.all(docs.map((doc) => resolveDocImages(doc)));
+}
+
+/**
  * Synchronous helper to determine if a string is a valid image URL.
  * Use this for initial rendering; use getStorageImageUrl for gs:// paths.
  *

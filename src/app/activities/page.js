@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { searchActivities, getLocations } from "@/lib/firestore";
+import { resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -34,10 +35,13 @@ export default async function ActivitiesPage({ searchParams }) {
     { id: "workshop", name: "Lớp học & Workshop" },
   ];
 
-  const [{ activities }, locations] = await Promise.all([
+  const [{ activities: rawActivities }, locations] = await Promise.all([
     searchActivities(filters),
     getLocations(),
   ]);
+
+  // Resolve image URLs (gs:// → HTTPS)
+  const activities = await resolveDocsImages(rawActivities);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">

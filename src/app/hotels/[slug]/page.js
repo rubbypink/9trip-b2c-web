@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getHotelBySlug, getRoomsByHotel, getRelatedHotels } from "@/lib/firestore";
+import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelHeader from "@/components/hotels/HotelHeader";
 import HotelDetailClient, { HotelBookingSidebar } from "./HotelDetailClient";
@@ -46,13 +47,19 @@ export default async function HotelDetailPage({ params }) {
   const { slug } = resolvedParams;
 
   // Fetch data song song — Vercel best practice: async-parallel
-  const { hotel } = await getHotelBySlug(slug);
+  const { hotel: rawHotel } = await getHotelBySlug(slug);
 
-  if (!hotel) notFound();
+  if (!rawHotel) notFound();
 
-  const [rooms, { hotels: relatedHotels }] = await Promise.all([
-    getRoomsByHotel(hotel.id),
-    getRelatedHotels(slug, hotel.address?.cityId, 3),
+  const [rooms, { hotels: rawRelatedHotels }] = await Promise.all([
+    getRoomsByHotel(rawHotel.id),
+    getRelatedHotels(slug, rawHotel.address?.cityId, 3),
+  ]);
+
+  // Resolve image URLs (gs:// → HTTPS)
+  const [hotel, relatedHotels] = await Promise.all([
+    resolveDocImages(rawHotel),
+    resolveDocsImages(rawRelatedHotels),
   ]);
 
   // Build reviews summary from hotel.rating

@@ -349,13 +349,22 @@ export async function getFeaturedHotels(count = 6) {
 
 /**
  * Fetch rooms for a specific hotel.
+ * Sorts by price client-side to avoid composite index requirement.
  * @param {string} hotelId
  * @returns {Promise<Object[]>}
  */
 export async function getRoomsByHotel(hotelId) {
-	const q = query(roomsCol, where('hotelId', '==', hotelId), orderBy('price', 'asc'));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => serializeDoc(d));
+  try {
+    const q = query(roomsCol, where('hotelId', '==', hotelId));
+    const snap = await getDocs(q);
+    const rooms = snap.docs.map((d) => serializeDoc(d));
+    // Sort client-side by price ascending (avoids composite index)
+    rooms.sort((a, b) => (a.price || 0) - (b.price || 0));
+    return rooms;
+  } catch (error) {
+    console.error('[getRoomsByHotel] Error:', error.message);
+    return [];
+  }
 }
 
 /**
