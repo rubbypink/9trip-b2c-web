@@ -1,15 +1,5 @@
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithPopup,
-  FacebookAuthProvider,
-} from "firebase/auth";
-import { app } from "./config";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
+import { app } from '../firebase';
 
 const auth = getAuth(app);
 
@@ -21,11 +11,11 @@ const auth = getAuth(app);
  * @returns {Promise<import("firebase/auth").UserCredential>}
  */
 export async function registerWithEmail(email, password, displayName) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  if (displayName) {
-    await updateProfile(cred.user, { displayName });
-  }
-  return cred;
+	const cred = await createUserWithEmailAndPassword(auth, email, password);
+	if (displayName) {
+		await updateProfile(cred.user, { displayName });
+	}
+	return cred;
 }
 
 /**
@@ -35,7 +25,7 @@ export async function registerWithEmail(email, password, displayName) {
  * @returns {Promise<import("firebase/auth").UserCredential>}
  */
 export async function loginWithEmail(email, password) {
-  return signInWithEmailAndPassword(auth, email, password);
+	return signInWithEmailAndPassword(auth, email, password);
 }
 
 /**
@@ -43,9 +33,9 @@ export async function loginWithEmail(email, password) {
  * @returns {Promise<import("firebase/auth").UserCredential>}
  */
 export async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: "select_account" });
-  return signInWithPopup(auth, provider);
+	const provider = new GoogleAuthProvider();
+	provider.setCustomParameters({ prompt: 'select_account' });
+	return signInWithPopup(auth, provider);
 }
 
 /**
@@ -53,9 +43,9 @@ export async function loginWithGoogle() {
  * @returns {Promise<import("firebase/auth").UserCredential>}
  */
 export async function loginWithFacebook() {
-  const provider = new FacebookAuthProvider();
-  provider.setCustomParameters({ display: "popup" });
-  return signInWithPopup(auth, provider);
+	const provider = new FacebookAuthProvider();
+	provider.setCustomParameters({ display: 'popup' });
+	return signInWithPopup(auth, provider);
 }
 
 /**
@@ -63,7 +53,7 @@ export async function loginWithFacebook() {
  * @returns {Promise<void>}
  */
 export async function logout() {
-  return signOut(auth);
+	return signOut(auth);
 }
 
 /**
@@ -72,7 +62,7 @@ export async function logout() {
  * @returns {import("firebase/auth").Unsubscribe}
  */
 export function onAuthChange(callback) {
-  return onAuthStateChanged(auth, callback);
+	return onAuthStateChanged(auth, callback);
 }
 
 export { auth };
