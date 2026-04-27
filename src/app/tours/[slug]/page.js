@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTourBySlug, getRelatedTours, getTourReviews } from "@/lib/firestore";
-import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourHeader from "@/components/tours/TourDetail/TourHeader";
 import TourDetailClient from "./TourDetailClient";
@@ -53,21 +52,15 @@ export default async function TourDetailPage({ params }) {
   const { slug } = resolvedParams;
 
   // Fetch data từ Firestore
-  const [{ tour: rawTour }, { tours: rawRelatedTours }, { reviews, totalRating, avgRating }] = await Promise.all([
+  const [{ tour }, { tours: relatedTours }, { reviews, totalRating, avgRating }] = await Promise.all([
     getTourBySlug(slug),
     getRelatedTours(slug),
     getTourReviews(slug),
   ]);
 
-  if (!rawTour) {
+  if (!tour) {
     notFound();
   }
-
-  // Resolve image URLs (gs:// → HTTPS)
-  const [tour, relatedTours] = await Promise.all([
-    resolveDocImages(rawTour),
-    resolveDocsImages(rawRelatedTours),
-  ]);
 
   // JSON-LD structured data for SEO (TouristTrip schema)
   const jsonLd = {

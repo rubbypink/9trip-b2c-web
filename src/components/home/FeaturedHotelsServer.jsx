@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getFeaturedHotels } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
 import { formatCurrency } from "@/lib/utils";
 
 /**
@@ -11,8 +10,7 @@ import { formatCurrency } from "@/lib/utils";
 export default async function FeaturedHotelsServer() {
   let hotels = [];
   try {
-    const rawHotels = await getFeaturedHotels(6);
-    hotels = await resolveDocsImages(rawHotels);
+    hotels = await getFeaturedHotels(6);
   } catch {
     // Firestore unavailable — render empty gracefully
   }

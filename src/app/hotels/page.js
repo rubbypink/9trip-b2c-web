@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { searchHotels, getLocations } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -26,13 +25,10 @@ export default async function HotelsPage({ searchParams }) {
     pageSize: 12,
   };
 
-  const [{ hotels: rawHotels }, locations] = await Promise.all([
+  const [{ hotels }, locations] = await Promise.all([
     searchHotels(filters),
     getLocations(),
   ]);
-
-  // Resolve image URLs (gs:// → HTTPS)
-  const hotels = await resolveDocsImages(rawHotels);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
