@@ -48,6 +48,8 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
+        // Sync cookie cho middleware — defense-in-depth
+        document.cookie = `auth-session=1; path=/; max-age=86400; SameSite=Lax`;
         try {
           const p = await getUserProfile(firebaseUser.uid);
           setProfile(p || { uid: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
@@ -55,6 +57,8 @@ export function AuthProvider({ children }) {
           setProfile({ uid: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         }
       } else {
+        // Clear cookie khi logout
+        document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
         setProfile(null);
       }
       setLoading(false);

@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the request is from the user themselves
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Public read-only collections
+    match /{collection}/{docId} where collection in ['tours', 'hotels', 'activities', 'locations', 'rooms', 'cars', 'settings', 'coupons'] {
+      allow read: if true;
+      allow write: if false; // Managed by backend/admin
+    }
+
+    // Users can only read, create, and update their own profile.
+    match /users/{userId} {
+      allow read, update: if isOwner(userId);
+      // Allow create only if the document does not exist yet
+      allow create: if isOwner(userId) && !exists(/databases/$(database)/documents/users/$(userId));
+    }
+
+    // Bookings can be read and created by the owner. No updates or deletes from the client.
+    match /bookings/{bookingId} {
+      allow read: if isOwner(resource.data.userId);
+      // User must be creating a booking for themselves
+      allow create: if isOwner(request.resource.data.userId);
+      allow update, delete: if false; // Should be handled by backend functions
+    }
+
+    // Anyone can read approved reviews. Logged-in users can create new reviews.
+    // Users can only update or delete their own reviews.
+    match /reviews/{reviewId} {
+      allow read: if resource.data.status == 'approved';
+      allow create: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+
+    // Users can manage their own inventory holds.
+    match /inventory_holds/{holdId} {
+      // Must be owner to read, create, or delete a hold
+      allow read, delete: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId);
+      allow update: if false; // Holds are not meant to be updated
+    }
+  }
+}

@@ -300,6 +300,38 @@ export async function getRoomsByHotel(hotelId) {
 	return snap.docs.map((d) => serializeDoc(d));
 }
 
+/**
+ * Fetch a single hotel by slug.
+ * @param {string} slug
+ * @returns {Promise<{hotel: Object|null}>}
+ */
+export async function getHotelBySlug(slug) {
+	const q = query(hotelsCol, where('slug', '==', slug), limit(1));
+	const snap = await getDocs(q);
+	if (snap.empty) return { hotel: null };
+	return { hotel: serializeDoc(snap.docs[0]) };
+}
+
+/**
+ * Fetch related hotels by location.
+ * @param {string} currentSlug - slug của hotel hiện tại để loại trừ
+ * @param {string} locationId - ID của địa điểm
+ * @param {number} count
+ * @returns {Promise<{hotels: Object[]}>}
+ */
+export async function getRelatedHotels(currentSlug, locationId, count = 3) {
+	const q = query(
+		hotelsCol,
+		where('address.cityId', '==', locationId),
+		where('slug', '!=', currentSlug),
+		orderBy('slug'),
+		orderBy('rating', 'desc'),
+		limit(count)
+	);
+	const snap = await getDocs(q);
+	return { hotels: snap.docs.map((d) => serializeDoc(d)) };
+}
+
 // ─── Activities ───────────────────────────────────────────────────────
 
 /**
@@ -519,6 +551,17 @@ export async function createReview(reviewData) {
 	return createDoc('reviews', { ...reviewData, status: 'pending' });
 }
 
+/**
+ * Fetch all reviews written by a specific user.
+ * @param {string} userId
+ * @returns {Promise<Object[]>}
+ */
+export async function getUserReviews(userId) {
+	const q = query(reviewsCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => serializeDoc(d));
+}
+
 // ─── Users ────────────────────────────────────────────────────────────
 
 /**
@@ -560,6 +603,44 @@ export async function toggleWishlist(uid, serviceId, isAdding) {
 	} else {
 		await updateDoc(ref, { wishlist: arrayRemove(serviceId) });
 	}
+}
+
+/**
+ * Remove an item from user's wishlist.
+ * @param {string} uid
+ * @param {string} serviceId
+ */
+export async function removeFromWishlist(uid, serviceId) {
+	return toggleWishlist(uid, serviceId, false);
+}
+
+/**
+ * Fetch detailed wishlist items for a user.
+ * @param {string} uid
+ * @returns {Promise<Object[]>}
+ */
+export async function getUserWishlist(uid) {
+	const userProfile = await getUserProfile(uid);
+	if (!userProfile || !userProfile.wishlist || userProfile.wishlist.length === 0) {
+		return [];
+	}
+
+	// Fetch details for each item in the wishlist
+	// Note: In a real app with many items, you might want to batch this or use a different schema.
+	const detailPromises = userProfile.wishlist.map(async (itemId) => {
+		// Try fetching from different collections
+		const collections = ['tours', 'hotels', 'activities'];
+		for (const col of collections) {
+			const item = await getDocById(col, itemId);
+			if (item) {
+				return { ...item, type: col.replace(/s$/, '') }; // 'tours' -> 'tour'
+			}
+		}
+		return null;
+	});
+
+	const results = await Promise.all(detailPromises);
+	return results.filter((item) => item !== null);
 }
 
 // ─── Coupons ──────────────────────────────────────────────────────────

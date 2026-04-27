@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from "react";
 import GuestSelector from "@/components/shared/GuestSelector";
 import { formatCurrency } from "@/lib/utils";
+import { getRealAvailability } from "@/lib/firestore";
 
 /**
  * BookingSidebar — sidebar đặt tour với date picker, guest selector, real-time price.
@@ -40,13 +41,25 @@ export default function BookingSidebar({ tour, onBookNow }) {
   const handleCheckAvailability = useCallback(async () => {
     if (!startDate) return;
     setChecking(true);
-    // TODO: Call Firestore to check inventory_holds + bookings
-    // Mock for now
-    setTimeout(() => {
-      setAvailabilityResult({ available: true, remaining: 15 });
+    try {
+      const totalGuests = adults + children + infants;
+      const totalCapacity = tour.maxPeople || tour.availability?.totalSlots || 99;
+      const remaining = await getRealAvailability(
+        tour.id,
+        "tour",
+        new Date(startDate),
+        totalCapacity
+      );
+      setAvailabilityResult({
+        available: remaining >= totalGuests,
+        remaining,
+      });
+    } catch {
+      setAvailabilityResult({ available: false, remaining: 0, error: true });
+    } finally {
       setChecking(false);
-    }, 800);
-  }, [startDate]);
+    }
+  }, [startDate, adults, children, infants, tour.id, tour.maxPeople, tour.availability?.totalSlots]);
 
   const handleBookNow = useCallback(() => {
     if (!startDate) return;
