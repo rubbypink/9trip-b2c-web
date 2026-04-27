@@ -38,7 +38,13 @@ export default function HotelCard({ hotel, item }) {
           <span className="text-xs text-gray-400">({data.ratingCount})</span>
         </div>
         <div className="flex items-center justify-between">
-          <PriceDisplay price={data.minPrice} currency="VND" size="sm" label="Từ " />
+          <PriceDisplay
+            price={data.pricing?.basePrice || data.pricing?.adultPrice || data.minPrice || 0}
+            childPrice={data.pricing?.childPrice}
+            currency="VND"
+            size="sm"
+            label="Từ "
+          />
           <Link href={`/hotels/${data.slug}`} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Chi tiết
           </Link>

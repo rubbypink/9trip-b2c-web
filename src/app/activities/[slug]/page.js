@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getDocBySlug, getReviews } from "@/lib/firestore";
+import { getActivityBySlug, getReviews } from "@/lib/firestore";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "./ActivityDetailClient";
 
@@ -10,7 +10,7 @@ export const revalidate = 3600;
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const { activity } = await getDocBySlug("activities", resolvedParams.slug);
+  const { activity } = await getActivityBySlug(resolvedParams.slug);
 
   if (!activity) return { title: "Hoạt động không tìm thấy — 9Trip" };
 
@@ -42,13 +42,11 @@ export default async function ActivityDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  const [{ activity }] = await Promise.all([
-    getDocBySlug("activities", slug),
-  ]);
+  const { activity } = await getActivityBySlug(slug);
 
   if (!activity) notFound();
 
-  // Fetch reviews
+  // Fetch reviews in parallel
   const { reviews } = await getReviews("activity", activity.id);
   const totalRating = reviews.length;
   const avgRating =

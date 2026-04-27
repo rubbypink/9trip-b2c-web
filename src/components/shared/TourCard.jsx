@@ -32,7 +32,12 @@ export default function TourCard({ tour, item, variant = "grid" }) {
             <span className="text-xs text-gray-400">({data.ratingCount} đánh giá)</span>
           </div>
           <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
-            <PriceDisplay price={data.pricing?.adultPrice} discount={data.pricing?.discount} currency={data.pricing?.currency} />
+            <PriceDisplay
+              price={data.pricing?.adultPrice || 0}
+              childPrice={data.pricing?.childPrice}
+              discount={data.pricing?.discountPercent || data.pricing?.discount}
+              currency={data.pricing?.currency || "VND"}
+            />
             <Link href={`/tours/${data.slug}`} className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
               Xem chi tiết
             </Link>
@@ -50,9 +55,14 @@ export default function TourCard({ tour, item, variant = "grid" }) {
           alt={data.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {data.pricing?.discount > 0 && (
+        {data.pricing?.discountPercent > 0 && (
           <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            -{data.pricing.discount}%
+            -{data.pricing.discountPercent}%
+          </span>
+        )}
+        {!data.pricing?.discountPercent && data.discountPercent > 0 && (
+          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            -{data.discountPercent}%
           </span>
         )}
         {data.isFeatured && (
@@ -74,7 +84,13 @@ export default function TourCard({ tour, item, variant = "grid" }) {
           <span className="text-xs text-gray-400">({data.ratingCount})</span>
         </div>
         <div className="flex items-center justify-between">
-          <PriceDisplay price={data.pricing?.adultPrice} discount={data.pricing?.discount} currency={data.pricing?.currency} size="sm" />
+          <PriceDisplay
+            price={data.pricing?.adultPrice || 0}
+            childPrice={data.pricing?.childPrice}
+            discount={data.pricing?.discountPercent || data.pricing?.discount}
+            currency={data.pricing?.currency || "VND"}
+            size="sm"
+          />
           <Link href={`/tours/${data.slug}`} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Chi tiết
           </Link>

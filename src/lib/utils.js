@@ -143,6 +143,92 @@ export function generateBookingCode() {
   return `${prefix}${timestamp}${random}`;
 }
 
+// ─── Pricing Helpers ──────────────────────────────────────────────────
+
+/**
+ * Resolve giá theo ngày từ mảng pricingPeriods.
+ * Nếu không có pricingPeriods, fallback về pricing gốc.
+ * Nếu ngày không nằm trong bất kỳ period nào, trả về null.
+ *
+ * @param {Object} pricing — pricing object từ Firestore document
+ * @param {string} pricing.adultPrice — giá mặc định
+ * @param {string} pricing.childPrice
+ * @param {Array<{startDate: string, endDate: string, adultPrice: number, childPrice?: number}>} [pricing.pricingPeriods]
+ * @param {string} date — ISO date string (YYYY-MM-DD)
+ * @returns {{ adultPrice: number, childPrice: number }|null}
+ */
+export function getPriceForDate(pricing, date) {
+  if (!pricing || !date) return null;
+
+  const periods = pricing.pricingPeriods;
+  if (!periods || periods.length === 0) {
+    // Không có giai đoạn — dùng giá mặc định
+    if (pricing.adultPrice) {
+      return {
+        adultPrice: Number(pricing.adultPrice),
+        childPrice: Number(pricing.childPrice || 0),
+      };
+    }
+    return null;
+  }
+
+  const targetDate = new Date(date);
+
+  for (const period of periods) {
+    const start = new Date(period.startDate);
+    const end = new Date(period.endDate);
+    if (targetDate >= start && targetDate <= end) {
+      return {
+        adultPrice: Number(period.adultPrice),
+        childPrice: Number(period.childPrice || 0),
+      };
+    }
+  }
+
+  // Ngày không nằm trong period nào — không có giá
+  return null;
+}
+
+/**
+ * Lấy giá thấp nhất từ tất cả pricingPeriods (dùng cho listing/card).
+ * @param {Object} pricing
+ * @returns {number}
+ */
+export function getMinPriceFromPeriods(pricing) {
+  if (!pricing) return 0;
+
+  const periods = pricing.pricingPeriods;
+  if (!periods || periods.length === 0) {
+    return Number(pricing.adultPrice || pricing.basePrice || 0);
+  }
+
+  let min = Infinity;
+  for (const period of periods) {
+    const price = Number(period.adultPrice || period.basePrice || 0);
+    if (price < min) min = price;
+  }
+
+  return min === Infinity ? Number(pricing.adultPrice || pricing.basePrice || 0) : min;
+}
+
+/**
+ * Tính số tiền giảm giá theo số lượng khách (quantity-based discount).
+ * @param {{ quantityDiscounts?: Array<{minQuantity: number, maxQuantity: number, discountPercent: number}> }} pricing
+ * @param {number} totalGuests — tổng số khách (adults + children)
+ * @returns {number} Phần trăm giảm giá (0-100)
+ */
+export function getQuantityDiscount(pricing, totalGuests) {
+  const discounts = pricing?.quantityDiscounts;
+  if (!discounts || discounts.length === 0) return 0;
+
+  for (const tier of discounts) {
+    if (totalGuests >= tier.minQuantity && totalGuests <= tier.maxQuantity) {
+      return tier.discountPercent || 0;
+    }
+  }
+  return 0;
+}
+
 /**
  * Validate email format.
  * @param {string} email

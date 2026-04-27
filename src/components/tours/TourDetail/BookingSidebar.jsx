@@ -2,11 +2,12 @@
 
 import { useState, useCallback, useMemo } from "react";
 import GuestSelector from "@/components/shared/GuestSelector";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getPriceForDate, getQuantityDiscount, getMinPriceFromPeriods } from "@/lib/utils";
 import { getRealAvailability } from "@/lib/firestore";
 
 /**
  * BookingSidebar — sidebar đặt tour với date picker, guest selector, real-time price.
+ * Hỗ trợ: giá theo giai đoạn (pricingPeriods), giá trẻ em, giảm giá theo số lượng khách.
  * @param {{
  *   tour: object,
  *   onBookNow: (data: object) => void,
@@ -22,21 +23,40 @@ export default function BookingSidebar({ tour, onBookNow }) {
   const [checking, setChecking] = useState(false);
   const [availabilityResult, setAvailabilityResult] = useState(null);
 
-  const adultPrice = pricing?.adultPrice || 0;
-  const childPrice = pricing?.childPrice || 0;
+  // Resolve giá theo ngày đã chọn
+  const resolvedPricing = useMemo(() => {
+    if (!startDate) return null;
+    return getPriceForDate(pricing, startDate);
+  }, [pricing, startDate]);
+
+  const adultPrice = resolvedPricing?.adultPrice || pricing?.adultPrice || 0;
+  const childPrice = resolvedPricing?.childPrice || pricing?.childPrice || 0;
   const infantPrice = pricing?.infantPrice || 0;
   const currency = pricing?.currency || "VND";
   const discountPct = pricing?.discountPercent || 0;
+
+  // Giá hiển thị mặc định (thấp nhất) khi chưa chọn ngày
+  const displayPrice = getMinPriceFromPeriods(pricing);
+  const displayChildPrice = pricing?.childPrice || 0;
 
   const startDates = availability?.startDates || [];
 
   // Tính giá real-time
   const priceBreakdown = useMemo(() => {
+    const totalGuests = adults + children + infants;
     const base = adults * adultPrice + children * childPrice + infants * infantPrice;
-    const discount = discountPct > 0 ? Math.round((base * discountPct) / 100) : pricing?.discount || 0;
+
+    // Quantity-based discount (áp dụng sau discount percent)
+    const quantityDiscountPct = getQuantityDiscount(pricing, totalGuests);
+    const effectiveDiscountPct = Math.max(discountPct, quantityDiscountPct);
+
+    const discount = effectiveDiscountPct > 0
+      ? Math.round((base * effectiveDiscountPct) / 100)
+      : pricing?.discount || 0;
     const total = base - discount;
-    return { base, discount, total };
-  }, [adults, children, infants, adultPrice, childPrice, infantPrice, discountPct, pricing?.discount]);
+
+    return { base, discount, discountPercent: effectiveDiscountPct, total };
+  }, [adults, children, infants, adultPrice, childPrice, infantPrice, discountPct, pricing]);
 
   const handleCheckAvailability = useCallback(async () => {
     if (!startDate) return;
@@ -62,7 +82,7 @@ export default function BookingSidebar({ tour, onBookNow }) {
   }, [startDate, adults, children, infants, tour.id, tour.maxPeople, tour.availability?.totalSlots]);
 
   const handleBookNow = useCallback(() => {
-    if (!startDate) return;
+    if (!startDate || !resolvedPricing) return;
     onBookNow?.({
       serviceId: tour.id,
       serviceType: "tour",
@@ -75,9 +95,11 @@ export default function BookingSidebar({ tour, onBookNow }) {
       pricing: priceBreakdown,
       currency,
     });
-  }, [startDate, adults, children, infants, priceBreakdown, currency, tour, onBookNow]);
+  }, [startDate, adults, children, infants, priceBreakdown, currency, tour, onBookNow, resolvedPricing]);
 
   const totalGuests = adults + children + infants;
+  const hasPricingPeriods = pricing?.pricingPeriods?.length > 0;
+  const noPriceForDate = startDate && !resolvedPricing && hasPricingPeriods;
 
   return (
     <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -86,10 +108,15 @@ export default function BookingSidebar({ tour, onBookNow }) {
         <div className="text-sm text-gray-500 mb-1">Giá từ</div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-gray-900">
-            {formatCurrency(adultPrice, currency)}
+            {formatCurrency(displayPrice, currency)}
           </span>
           <span className="text-sm text-gray-500">/ người</span>
         </div>
+        {displayChildPrice > 0 && (
+          <div className="text-xs text-gray-500 mt-1">
+            Trẻ em từ {formatCurrency(displayChildPrice, currency)}/người
+          </div>
+        )}
         {discountPct > 0 && (
           <span className="inline-block mt-1 rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
             Giảm {discountPct}%
@@ -115,13 +142,17 @@ export default function BookingSidebar({ tour, onBookNow }) {
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
             />
           </div>
-          {startDates.length > 0 && (
+          {noPriceForDate && (
+            <div className="mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-xs text-yellow-700">
+              Không có giá cho ngày này. Vui lòng chọn ngày khác.
+            </div>
+          )}
+          {startDates.length > 0 && !noPriceForDate && (
             <div className="mt-2 text-xs text-gray-500">
               {startDates.length} ngày khởi hành có sẵn
             </div>
           )}
         </div>
-
         {/* Guest Selector */}
         <GuestSelector
           adults={adults}
@@ -185,7 +216,10 @@ export default function BookingSidebar({ tour, onBookNow }) {
           )}
           {priceBreakdown.discount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Giảm giá</span>
+              <span>
+                Giảm giá
+                {priceBreakdown.discountPercent > 0 && ` (${priceBreakdown.discountPercent}%)`}
+              </span>
               <span>-{formatCurrency(priceBreakdown.discount, currency)}</span>
             </div>
           )}
@@ -206,10 +240,10 @@ export default function BookingSidebar({ tour, onBookNow }) {
           </button>
           <button
             onClick={handleBookNow}
-            disabled={!startDate || totalGuests === 0}
+            disabled={!startDate || totalGuests === 0 || noPriceForDate}
             className="w-full rounded-lg bg-primary text-white font-semibold py-3 text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Đặt ngay
+            {noPriceForDate ? "Không có giá cho ngày này" : "Đặt ngay"}
           </button>
         </div>
 

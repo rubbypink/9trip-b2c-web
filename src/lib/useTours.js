@@ -13,9 +13,6 @@ export default function useTours({ featured = false, limit = 8 } = {}) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-
     // Mock data — sẽ thay bằng Firebase query sau khi Firestore được setup
     const mockTours = generateMockTours(limit, featured);
 

@@ -25,6 +25,23 @@ const auth = getAuth(app);
 const AuthContext = createContext(null);
 
 /**
+ * Forward event to ERP webhook (fire-and-forget, non-blocking).
+ * @param {string} event - 'new-customer' | 'update-account'
+ * @param {Object} payload - User data
+ */
+async function forwardToERP(event, payload) {
+  try {
+    await fetch(`/api/webhooks/erp/${event}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Fire-and-forget — không xử lý lỗi, không chặn UX
+  }
+}
+
+/**
  * @typedef {Object} AuthUser
  * @property {string} uid
  * @property {string} email
@@ -86,6 +103,8 @@ export function AuthProvider({ children }) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName });
     await upsertUserProfile(cred.user.uid, { email, displayName });
+    // Notify ERP — new customer
+    forwardToERP('new-customer', { id: cred.user.uid, email, displayName, createdAt: new Date().toISOString() });
     return cred.user;
   }, []);
 
@@ -100,6 +119,7 @@ export function AuthProvider({ children }) {
       displayName: cred.user.displayName,
       avatar: cred.user.photoURL,
     });
+    forwardToERP('update-account', { id: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName, provider: 'google' });
     return cred.user;
   }, []);
 
@@ -114,6 +134,7 @@ export function AuthProvider({ children }) {
       displayName: cred.user.displayName,
       avatar: cred.user.photoURL,
     });
+    forwardToERP('update-account', { id: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName, provider: 'facebook' });
     return cred.user;
   }, []);
 
@@ -140,6 +161,7 @@ export function AuthProvider({ children }) {
     if (!user) return;
     await upsertUserProfile(user.uid, data);
     setProfile((prev) => ({ ...prev, ...data }));
+    forwardToERP('update-account', { id: user.uid, ...data });
   }, [user]);
 
   const value = {

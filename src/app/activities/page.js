@@ -19,8 +19,8 @@ export default async function ActivitiesPage({ searchParams }) {
   const filters = {
     locationId: params.locationId || "",
     categoryId: params.categoryId || "",
-    minPrice: params.price_from ? Number(params.price_from) : null,
-    maxPrice: params.price_to ? Number(params.price_to) : null,
+    minPrice: params.minPrice ? Number(params.minPrice) : null,
+    maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
     sortBy: params.sortBy || "newest",
     pageSize: 12,
   };

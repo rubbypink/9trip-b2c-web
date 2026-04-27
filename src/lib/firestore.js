@@ -1,4 +1,5 @@
 import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
+import { cache } from 'react';
 import { db } from './firebase';
 
 // ─── Collection References ────────────────────────────────────────────
@@ -145,40 +146,52 @@ export async function getFeaturedTours(count = 8) {
 export async function searchTours(filters = {}) {
 	const { locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy = 'newest', pageSize = 12, cursor } = filters;
 
-	const constraints = [];
+	try {
+		const constraints = [];
 
-	if (locationId) constraints.push(where('locationId', '==', locationId));
-	if (tourTypeId) constraints.push(where('tourTypeId', '==', tourTypeId));
-	if (minRating) constraints.push(where('ratingAverage', '>=', minRating));
+		if (locationId) constraints.push(where('locationId', '==', locationId));
+		if (tourTypeId) constraints.push(where('tourTypeId', '==', tourTypeId));
+		if (minRating) constraints.push(where('ratingAverage', '>=', minRating));
 
-	switch (sortBy) {
-		case 'price_asc':
-			constraints.push(orderBy('pricing.adultPrice', 'asc'));
-			break;
-		case 'price_desc':
-			constraints.push(orderBy('pricing.adultPrice', 'desc'));
-			break;
-		case 'rating':
-			constraints.push(orderBy('ratingAverage', 'desc'));
-			break;
-		case 'newest':
-		default:
-			constraints.push(orderBy('createdAt', 'desc'));
+		switch (sortBy) {
+			case 'price_asc':
+				constraints.push(orderBy('pricing.adultPrice', 'asc'));
+				break;
+			case 'price_desc':
+				constraints.push(orderBy('pricing.adultPrice', 'desc'));
+				break;
+			case 'rating':
+				constraints.push(orderBy('ratingAverage', 'desc'));
+				break;
+			case 'newest':
+			default:
+				constraints.push(orderBy('createdAt', 'desc'));
+		}
+
+		constraints.push(limit(pageSize));
+		if (cursor) constraints.push(startAfter(cursor));
+
+		const q = query(toursCol, ...constraints);
+		const snap = await getDocs(q);
+
+		let tours = snap.docs.map((d) => serializeDoc(d));
+
+		// Client-side price filtering (Firestore can't compound range queries across different fields)
+		if (minPrice != null && minPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice >= minPrice);
+		if (maxPrice != null && maxPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice <= maxPrice);
+
+		return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[searchTours] Error:', error.message);
+		// Fallback: try simpler query without filters
+		try {
+			const q = query(toursCol, orderBy('createdAt', 'desc'), limit(pageSize));
+			const snap = await getDocs(q);
+			return { tours: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		} catch {
+			return { tours: [], lastVisible: null };
+		}
 	}
-
-	constraints.push(limit(pageSize));
-	if (cursor) constraints.push(startAfter(cursor));
-
-	const q = query(toursCol, ...constraints);
-	const snap = await getDocs(q);
-
-	let tours = snap.docs.map((d) => serializeDoc(d));
-
-	// Client-side price filtering (Firestore can't compound range queries across different fields)
-	if (minPrice != null) tours = tours.filter((t) => t.pricing?.adultPrice >= minPrice);
-	if (maxPrice != null) tours = tours.filter((t) => t.pricing?.adultPrice <= maxPrice);
-
-	return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
 /**
@@ -247,35 +260,46 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
 export async function searchHotels(filters = {}) {
 	const { locationId, starRating, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
 
-	const constraints = [];
-	if (locationId) constraints.push(where('address.cityId', '==', locationId));
-	if (starRating) constraints.push(where('starRating', '>=', Number(starRating)));
+	try {
+		const constraints = [];
+		if (locationId) constraints.push(where('address.cityId', '==', locationId));
+		if (starRating) constraints.push(where('starRating', '>=', Number(starRating)));
 
-	switch (sortBy) {
-		case 'price_asc':
-			constraints.push(orderBy('pricing.basePrice', 'asc'));
-			break;
-		case 'price_desc':
-			constraints.push(orderBy('pricing.basePrice', 'desc'));
-			break;
-		case 'rating':
-			constraints.push(orderBy('rating', 'desc'));
-			break;
-		default:
-			constraints.push(orderBy('createdAt', 'desc'));
+		switch (sortBy) {
+			case 'price_asc':
+				constraints.push(orderBy('pricing.basePrice', 'asc'));
+				break;
+			case 'price_desc':
+				constraints.push(orderBy('pricing.basePrice', 'desc'));
+				break;
+			case 'rating':
+				constraints.push(orderBy('rating', 'desc'));
+				break;
+			default:
+				constraints.push(orderBy('createdAt', 'desc'));
+		}
+
+		constraints.push(limit(pageSize));
+		if (cursor) constraints.push(startAfter(cursor));
+
+		const q = query(hotelsCol, ...constraints);
+		const snap = await getDocs(q);
+		let hotels = snap.docs.map((d) => serializeDoc(d));
+
+		if (minPrice != null && minPrice !== '') hotels = hotels.filter((h) => h.pricing?.basePrice >= minPrice);
+		if (maxPrice != null && maxPrice !== '') hotels = hotels.filter((h) => h.pricing?.basePrice <= maxPrice);
+
+		return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[searchHotels] Error:', error.message);
+		try {
+			const q = query(hotelsCol, orderBy('createdAt', 'desc'), limit(pageSize));
+			const snap = await getDocs(q);
+			return { hotels: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		} catch {
+			return { hotels: [], lastVisible: null };
+		}
 	}
-
-	constraints.push(limit(pageSize));
-	if (cursor) constraints.push(startAfter(cursor));
-
-	const q = query(hotelsCol, ...constraints);
-	const snap = await getDocs(q);
-	let hotels = snap.docs.map((d) => serializeDoc(d));
-
-	if (minPrice != null) hotels = hotels.filter((h) => h.pricing?.basePrice >= minPrice);
-	if (maxPrice != null) hotels = hotels.filter((h) => h.pricing?.basePrice <= maxPrice);
-
-	return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
 /**
@@ -314,22 +338,27 @@ export async function getHotelBySlug(slug) {
 
 /**
  * Fetch related hotels by location.
+ * Note: Firestore does not support '!=' in queries, so we fetch extra
+ * and filter out the current hotel on the client side.
  * @param {string} currentSlug - slug của hotel hiện tại để loại trừ
  * @param {string} locationId - ID của địa điểm
  * @param {number} count
  * @returns {Promise<{hotels: Object[]}>}
  */
 export async function getRelatedHotels(currentSlug, locationId, count = 3) {
+	if (!locationId) return { hotels: [] };
 	const q = query(
 		hotelsCol,
 		where('address.cityId', '==', locationId),
-		where('slug', '!=', currentSlug),
-		orderBy('slug'),
 		orderBy('rating', 'desc'),
-		limit(count)
+		limit(count + 1)
 	);
 	const snap = await getDocs(q);
-	return { hotels: snap.docs.map((d) => serializeDoc(d)) };
+	const hotels = snap.docs
+		.map((d) => serializeDoc(d))
+		.filter((h) => h.slug !== currentSlug)
+		.slice(0, count);
+	return { hotels };
 }
 
 // ─── Activities ───────────────────────────────────────────────────────
@@ -352,32 +381,53 @@ export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
 export async function searchActivities(filters = {}) {
 	const { locationId, categoryId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
 
-	const constraints = [];
-	if (locationId) constraints.push(where('locationId', '==', locationId));
-	if (categoryId) constraints.push(where('categoryId', '==', categoryId));
+	try {
+		const constraints = [];
+		if (locationId) constraints.push(where('locationId', '==', locationId));
+		if (categoryId) constraints.push(where('categoryId', '==', categoryId));
 
-	switch (sortBy) {
-		case 'price_asc':
-			constraints.push(orderBy('pricing.basePrice', 'asc'));
-			break;
-		case 'price_desc':
-			constraints.push(orderBy('pricing.basePrice', 'desc'));
-			break;
-		default:
-			constraints.push(orderBy('createdAt', 'desc'));
+		switch (sortBy) {
+			case 'price_asc':
+				constraints.push(orderBy('pricing.basePrice', 'asc'));
+				break;
+			case 'price_desc':
+				constraints.push(orderBy('pricing.basePrice', 'desc'));
+				break;
+			default:
+				constraints.push(orderBy('createdAt', 'desc'));
+		}
+
+		constraints.push(limit(pageSize));
+		if (cursor) constraints.push(startAfter(cursor));
+
+		const q = query(activitiesCol, ...constraints);
+		const snap = await getDocs(q);
+		let activities = snap.docs.map((d) => serializeDoc(d));
+
+		if (minPrice != null && minPrice !== '') activities = activities.filter((a) => a.pricing?.basePrice >= minPrice);
+		if (maxPrice != null && maxPrice !== '') activities = activities.filter((a) => a.pricing?.basePrice <= maxPrice);
+
+		return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[searchActivities] Error:', error.message);
+		try {
+			const q = query(activitiesCol, orderBy('createdAt', 'desc'), limit(pageSize));
+			const snap = await getDocs(q);
+			return { activities: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		} catch {
+			return { activities: [], lastVisible: null };
+		}
 	}
+}
 
-	constraints.push(limit(pageSize));
-	if (cursor) constraints.push(startAfter(cursor));
-
-	const q = query(activitiesCol, ...constraints);
-	const snap = await getDocs(q);
-	let activities = snap.docs.map((d) => serializeDoc(d));
-
-	if (minPrice != null) activities = activities.filter((a) => a.pricing?.basePrice >= minPrice);
-	if (maxPrice != null) activities = activities.filter((a) => a.pricing?.basePrice <= maxPrice);
-
-	return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+/**
+ * Fetch a single activity by slug.
+ * @param {string} slug
+ * @returns {Promise<{activity: Object|null}>}
+ */
+export async function getActivityBySlug(slug) {
+	const activity = await getDocBySlug('activities', slug);
+	return { activity };
 }
 
 // ─── Cars ─────────────────────────────────────────────────────────────
@@ -388,32 +438,43 @@ export async function searchActivities(filters = {}) {
 export async function searchCars(filters = {}) {
 	const { carType, transmission, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
 
-	const constraints = [];
-	if (carType) constraints.push(where('carType', '==', carType));
-	if (transmission) constraints.push(where('transmission', '==', transmission));
+	try {
+		const constraints = [];
+		if (carType) constraints.push(where('carType', '==', carType));
+		if (transmission) constraints.push(where('transmission', '==', transmission));
 
-	switch (sortBy) {
-		case 'price_asc':
-			constraints.push(orderBy('pricing.basePrice', 'asc'));
-			break;
-		case 'price_desc':
-			constraints.push(orderBy('pricing.basePrice', 'desc'));
-			break;
-		default:
-			constraints.push(orderBy('createdAt', 'desc'));
+		switch (sortBy) {
+			case 'price_asc':
+				constraints.push(orderBy('pricing.basePrice', 'asc'));
+				break;
+			case 'price_desc':
+				constraints.push(orderBy('pricing.basePrice', 'desc'));
+				break;
+			default:
+				constraints.push(orderBy('createdAt', 'desc'));
+		}
+
+		constraints.push(limit(pageSize));
+		if (cursor) constraints.push(startAfter(cursor));
+
+		const q = query(carsCol, ...constraints);
+		const snap = await getDocs(q);
+		let cars = snap.docs.map((d) => serializeDoc(d));
+
+		if (minPrice != null && minPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice >= minPrice);
+		if (maxPrice != null && maxPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice <= maxPrice);
+
+		return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[searchCars] Error:', error.message);
+		try {
+			const q = query(carsCol, orderBy('createdAt', 'desc'), limit(pageSize));
+			const snap = await getDocs(q);
+			return { cars: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		} catch {
+			return { cars: [], lastVisible: null };
+		}
 	}
-
-	constraints.push(limit(pageSize));
-	if (cursor) constraints.push(startAfter(cursor));
-
-	const q = query(carsCol, ...constraints);
-	const snap = await getDocs(q);
-	let cars = snap.docs.map((d) => serializeDoc(d));
-
-	if (minPrice != null) cars = cars.filter((c) => c.pricing?.basePrice >= minPrice);
-	if (maxPrice != null) cars = cars.filter((c) => c.pricing?.basePrice <= maxPrice);
-
-	return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
 // ─── Rentals ──────────────────────────────────────────────────────────
@@ -424,44 +485,55 @@ export async function searchCars(filters = {}) {
 export async function searchRentals(filters = {}) {
 	const { type, locationId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
 
-	const constraints = [];
-	if (type) constraints.push(where('type', '==', type));
-	if (locationId) constraints.push(where('locationId', '==', locationId));
+	try {
+		const constraints = [];
+		if (type) constraints.push(where('type', '==', type));
+		if (locationId) constraints.push(where('locationId', '==', locationId));
 
-	switch (sortBy) {
-		case 'price_asc':
-			constraints.push(orderBy('pricing.basePrice', 'asc'));
-			break;
-		case 'price_desc':
-			constraints.push(orderBy('pricing.basePrice', 'desc'));
-			break;
-		default:
-			constraints.push(orderBy('createdAt', 'desc'));
+		switch (sortBy) {
+			case 'price_asc':
+				constraints.push(orderBy('pricing.basePrice', 'asc'));
+				break;
+			case 'price_desc':
+				constraints.push(orderBy('pricing.basePrice', 'desc'));
+				break;
+			default:
+				constraints.push(orderBy('createdAt', 'desc'));
+		}
+
+		constraints.push(limit(pageSize));
+		if (cursor) constraints.push(startAfter(cursor));
+
+		const q = query(collection(db, 'rentals'), ...constraints);
+		const snap = await getDocs(q);
+		let rentals = snap.docs.map((d) => serializeDoc(d));
+
+		if (minPrice != null && minPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice >= minPrice);
+		if (maxPrice != null && maxPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice <= maxPrice);
+
+		return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[searchRentals] Error:', error.message);
+		try {
+			const q = query(collection(db, 'rentals'), orderBy('createdAt', 'desc'), limit(pageSize));
+			const snap = await getDocs(q);
+			return { rentals: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		} catch {
+			return { rentals: [], lastVisible: null };
+		}
 	}
-
-	constraints.push(limit(pageSize));
-	if (cursor) constraints.push(startAfter(cursor));
-
-	const q = query(collection(db, 'rentals'), ...constraints);
-	const snap = await getDocs(q);
-	let rentals = snap.docs.map((d) => serializeDoc(d));
-
-	if (minPrice != null) rentals = rentals.filter((r) => r.pricing?.basePrice >= minPrice);
-	if (maxPrice != null) rentals = rentals.filter((r) => r.pricing?.basePrice <= maxPrice);
-
-	return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
 }
 
 // ─── Locations ────────────────────────────────────────────────────────
 
 /**
- * Fetch all locations.
+ * Fetch all locations (cached per request — React.cache deduplicates).
  * @returns {Promise<Object[]>}
  */
-export async function getLocations() {
+export const getLocations = cache(async () => {
 	const snap = await getDocs(query(locationsCol, orderBy('name', 'asc')));
 	return snap.docs.map((d) => serializeDoc(d));
-}
+});
 
 /**
  * Fetch featured locations.

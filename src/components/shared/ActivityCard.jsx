@@ -16,9 +16,14 @@ export default function ActivityCard({ activity, item }) {
           alt={data.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        {data.pricing?.discount > 0 && (
+        {data.pricing?.discountPercent > 0 && (
           <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-            -{data.pricing.discount}%
+            -{data.pricing.discountPercent}%
+          </span>
+        )}
+        {!data.pricing?.discountPercent && data.discountPercent > 0 && (
+          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            -{data.discountPercent}%
           </span>
         )}
       </Link>
@@ -35,7 +40,13 @@ export default function ActivityCard({ activity, item }) {
           <span className="text-xs text-gray-400">({data.ratingCount})</span>
         </div>
         <div className="flex items-center justify-between">
-          <PriceDisplay price={data.pricing?.adultPrice} discount={data.pricing?.discount} currency="VND" size="sm" />
+          <PriceDisplay
+            price={data.pricing?.adultPrice || data.pricing?.basePrice || 0}
+            childPrice={data.pricing?.childPrice}
+            discount={data.pricing?.discountPercent || data.pricing?.discount}
+            currency="VND"
+            size="sm"
+          />
           <Link href={`/activities/${data.slug}`} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
             Chi tiết
           </Link>

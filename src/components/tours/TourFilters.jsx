@@ -13,9 +13,11 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [priceFrom, setPriceFrom] = useState(searchParams.get("price_from") || "");
-  const [priceTo, setPriceTo] = useState(searchParams.get("price_to") || "");
-  const [minRating, setMinRating] = useState(searchParams.get("rating") || "");
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
+  const [minRating, setMinRating] = useState(searchParams.get("minRating") || "");
+  const [locationId, setLocationId] = useState(searchParams.get("locationId") || "");
+  const [tourTypeId, setTourTypeId] = useState(searchParams.get("tourTypeId") || "");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const applyFilter = (key, value) => {
@@ -57,18 +59,18 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
           <input
             type="number"
             placeholder={priceRange.min.toLocaleString()}
-            value={priceFrom}
-            onChange={(e) => setPriceFrom(e.target.value)}
-            onBlur={() => applyFilter("price_from", priceFrom)}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            onBlur={() => applyFilter("minPrice", minPrice)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
           <span className="text-gray-400 text-sm">—</span>
           <input
             type="number"
             placeholder={priceRange.max.toLocaleString()}
-            value={priceTo}
-            onChange={(e) => setPriceTo(e.target.value)}
-            onBlur={() => applyFilter("price_to", priceTo)}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            onBlur={() => applyFilter("maxPrice", maxPrice)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
@@ -84,7 +86,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
               onClick={() => {
                 const val = minRating === String(star) ? "" : String(star);
                 setMinRating(val);
-                applyFilter("rating", val);
+                applyFilter("minRating", val);
               }}
               className={cn(
                 "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
@@ -114,10 +116,14 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
             {tourTypes.map((type) => (
               <button
                 key={type.id}
-                onClick={() => applyFilter("tour_type", searchParams.get("tour_type") === type.id ? "" : type.id)}
+                onClick={() => {
+                  const val = tourTypeId === type.id ? "" : type.id;
+                  setTourTypeId(val);
+                  applyFilter("tourTypeId", val);
+                }}
                 className={cn(
                   "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
-                  searchParams.get("tour_type") === type.id
+                  tourTypeId === type.id
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 )}
@@ -137,10 +143,14 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
             {locations.map((loc) => (
               <button
                 key={loc.id}
-                onClick={() => applyFilter("location", searchParams.get("location") === loc.id ? "" : loc.id)}
+                onClick={() => {
+                  const val = locationId === loc.id ? "" : loc.id;
+                  setLocationId(val);
+                  applyFilter("locationId", val);
+                }}
                 className={cn(
                   "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
-                  searchParams.get("location") === loc.id
+                  locationId === loc.id
                     ? "bg-primary/10 text-primary font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 )}

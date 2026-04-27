@@ -11,8 +11,8 @@ export default function ActivityFilters({ locations = [], categories = [], class
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [priceFrom, setPriceFrom] = useState(searchParams.get("price_from") || "");
-  const [priceTo, setPriceTo] = useState(searchParams.get("price_to") || "");
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [categoryId, setCategoryId] = useState(searchParams.get("categoryId") || "");
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -79,18 +79,18 @@ export default function ActivityFilters({ locations = [], categories = [], class
           <input
             type="number"
             placeholder="Từ"
-            value={priceFrom}
-            onChange={(e) => setPriceFrom(e.target.value)}
-            onBlur={() => applyFilter("price_from", priceFrom)}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            onBlur={() => applyFilter("minPrice", minPrice)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
           />
           <span className="text-gray-400">—</span>
           <input
             type="number"
             placeholder="Đến"
-            value={priceTo}
-            onChange={(e) => setPriceTo(e.target.value)}
-            onBlur={() => applyFilter("price_to", priceTo)}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            onBlur={() => applyFilter("maxPrice", maxPrice)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
           />
         </div>
