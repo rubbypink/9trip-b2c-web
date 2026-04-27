@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { searchTours, getLocations } from "@/lib/firestore";
+import { resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -30,10 +31,13 @@ export default async function ToursPage({ searchParams }) {
   };
 
   // Fetch initial data
-  const [{ tours }, locations] = await Promise.all([
+  const [{ tours: rawTours }, locations] = await Promise.all([
     searchTours(filters),
     getLocations(),
   ]);
+
+  // Resolve image URLs (gs:// → HTTPS)
+  const tours = await resolveDocsImages(rawTours);
 
   return (
     <div className="min-h-screen bg-gray-50">
