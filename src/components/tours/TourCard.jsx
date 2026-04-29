@@ -6,9 +6,10 @@ import PriceDisplay from "@/components/shared/PriceDisplay";
 
 /**
  * TourCard — card tour cho grid/list view.
- * @param {{ tour: object, variant?: 'grid' | 'list', className?: string }} props
+ * @param {{ tour?: object, item?: object, variant?: 'grid' | 'list', className?: string }} props
  */
-export default function TourCard({ tour, variant = "grid", className }) {
+export default function TourCard({ tour: tourProp, item, variant = "grid", className }) {
+  const tour = tourProp || item;
   const {
     id,
     title = "Untitled Tour",

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { formatCurrency, calcNights } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 
 /**

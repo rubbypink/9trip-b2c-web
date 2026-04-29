@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Pagination from "./Pagination";
 import EmptyState from "./EmptyState";
 import HotelCard from "@/components/shared/HotelCard";
-import TourCard from "@/components/shared/TourCard";
+import TourCard from "@/components/tours/TourCard";
 import ActivityCard from "@/components/shared/ActivityCard";
 import CarCard from "@/components/shared/CarCard";
 import RentalCard from "@/components/shared/RentalCard";

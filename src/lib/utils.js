@@ -92,6 +92,24 @@ export function starRatingLabel(rating) {
 }
 
 /**
+ * Format price to VND currency string.
+ * @param {number} price
+ * @returns {string} Formatted price (e.g. "1.200.000 ₫")
+ */
+export function formatPrice(price) {
+  return formatCurrency(price, "VND");
+}
+
+/**
+ * Calculate total for a list of items.
+ * @param {Array<{price: number, quantity: number}>} items
+ * @returns {number}
+ */
+export function calcTotal(items) {
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+}
+
+/**
  * Build query string from an object.
  * @param {Object} params
  * @returns {string}

@@ -3,14 +3,10 @@
 import { useCart } from '@/lib/cart';
 import CartItem from '@/components/cart/CartItem';
 import CartSummary from '@/components/cart/CartSummary';
-import { calcTotal } from '@/lib/utils/price';
 import Link from 'next/link';
 
 export default function CartPage() {
-	const { items, updateQuantity, removeItem, clearCart } = useCart();
-
-	const totalPrice = calcTotal(items);
-	const totalItems = items.reduce((s, i) => s + i.quantity, 0);
+	const { items, removeItem, clearCart, subtotal, itemCount } = useCart();
 
 	return (
 		<div className="min-h-screen bg-slate-50">
@@ -85,11 +81,11 @@ export default function CartPage() {
 					<div className="flex flex-col lg:flex-row gap-6">
 						{/* Items */}
 						<div className="flex-1 space-y-4">
-							{items.map((item) => (
+							{items.map((item, idx) => (
 								<CartItem
-									key={item.id}
+									key={idx}
 									item={item}
-									onUpdateQuantity={updateQuantity}
+									index={idx}
 									onRemove={removeItem}
 								/>
 							))}
@@ -98,8 +94,8 @@ export default function CartPage() {
 						{/* Summary sidebar */}
 						<div className="lg:w-80">
 							<CartSummary
-								totalItems={totalItems}
-								totalPrice={totalPrice}
+								totalItems={itemCount}
+								totalPrice={subtotal}
 							/>
 						</div>
 					</div>

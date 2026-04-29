@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getHotelBySlug, getRoomsByHotel, getRelatedHotels, getRoomPricing, getHotelReviews } from "@/lib/firestore";
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
+import { formatCurrency } from "@/lib/utils";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelHeader from "@/components/hotels/HotelHeader";
 import HotelDetailClient from "./HotelDetailClient";
@@ -179,10 +180,10 @@ export default async function HotelDetailPage({ params }) {
                   ? (() => {
                       const prices = roomsWithPricing.map((r) => r.promoPrice || r.price || 0).filter(Boolean);
                       const minPrice = prices.length > 0 ? Math.min(...prices) : hotel.pricing?.basePrice || 0;
-                      return minPrice > 0 ? new Intl.NumberFormat("vi-VN", { style: "decimal" }).format(minPrice) + " ₫" : "Liên hệ";
+                      return minPrice > 0 ? formatCurrency(minPrice, "VND") : "Liên hệ";
                     })()
                   : hotel.pricing?.basePrice > 0
-                    ? new Intl.NumberFormat("vi-VN", { style: "decimal" }).format(hotel.pricing.basePrice) + " ₫"
+                    ? formatCurrency(hotel.pricing.basePrice, "VND")
                     : "Liên hệ"}
                 /đêm
               </p>

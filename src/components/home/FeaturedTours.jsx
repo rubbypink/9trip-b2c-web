@@ -1,5 +1,5 @@
-import TourCard from "@/components/tour/TourCard";
-import EmptyState from "@/components/common/EmptyState";
+import TourCard from "@/components/tours/TourCard";
+import EmptyState from "@/components/shared/EmptyState";
 
 /**
  * FeaturedTours — Hiển thị danh sách tour nổi bật dạng grid responsive.
