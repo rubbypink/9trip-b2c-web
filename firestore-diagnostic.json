@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T17:49:38.441Z",
+  "generatedAt": "2026-04-29T08:58:57.073Z",
   "collections": {
     "tours": {
       "collection": "tours",
@@ -30,11 +30,13 @@
           "slug": "kham-pha-da-nang-hoi-an-ba-na-hills-4-ngay-3-dem",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1559592413-7cec4b5e2a8e?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 3,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
             "hasAdultPrice": true,
-            "hasBasePrice": false
+            "hasBasePrice": true
           },
           "galleryCount": 3,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -45,11 +47,13 @@
           "slug": "ha-noi-ha-long-ninh-binh-5-ngay-4-dem",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1509030450996-dd1a26dda5b4?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
             "hasAdultPrice": true,
-            "hasBasePrice": false
+            "hasBasePrice": true
           },
           "galleryCount": 1,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -60,24 +64,27 @@
           "slug": "phu-quoc-thien-duong-bien-3-ngay-2-dem",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1571989795247-0b5295e3e4ef?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 2,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
             "hasAdultPrice": true,
-            "hasBasePrice": false
+            "hasBasePrice": true
           },
           "galleryCount": 2,
           "createdAt": "2026-04-26T23:44:40.291Z"
         }
       ],
+      "note": null,
       "errors": []
     },
     "hotels": {
       "collection": "hotels",
       "exists": true,
-      "documentCount": 3,
+      "documentCount": 8,
       "hasSlug": true,
-      "slugCount": 3,
+      "slugCount": 5,
       "slugExamples": [
         {
           "id": "hotel-da-nang-1",
@@ -101,7 +108,14 @@
           "slug": "furama-resort-da-nang",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800",
-          "pricing": {},
+          "imageStatus": "✅ external URL",
+          "totalImages": 2,
+          "pricing": {
+            "hasPricing": true,
+            "currency": "VND",
+            "hasAdultPrice": false,
+            "hasBasePrice": true
+          },
           "galleryCount": 2,
           "createdAt": "2026-04-26T23:44:40.291Z"
         },
@@ -111,7 +125,14 @@
           "slug": "sofitel-legend-metropole-hanoi",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800",
-          "pricing": {},
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
+          "pricing": {
+            "hasPricing": true,
+            "currency": "VND",
+            "hasAdultPrice": false,
+            "hasBasePrice": true
+          },
           "galleryCount": 1,
           "createdAt": "2026-04-26T23:44:40.291Z"
         },
@@ -121,82 +142,66 @@
           "slug": "jw-marriott-phu-quoc-emerald-bay",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800",
-          "pricing": {},
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
+          "pricing": {
+            "hasPricing": true,
+            "currency": "VND",
+            "hasAdultPrice": false,
+            "hasBasePrice": true
+          },
           "galleryCount": 1,
           "createdAt": "2026-04-26T23:44:40.291Z"
+        },
+        {
+          "id": "hotel_blessed",
+          "name": "Khách sạn BLESSED Phú Quốc",
+          "slug": "khach-san-blessed-phu-quoc",
+          "hasFeaturedImage": true,
+          "featuredImage": "https://cdn1.ivivu.com/images/hotel-placeholder.webp",
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
+          "pricing": {
+            "hasPricing": true,
+            "currency": "VND",
+            "hasAdultPrice": false,
+            "hasBasePrice": true
+          },
+          "galleryCount": 1,
+          "createdAt": "2026-04-29T06:29:30.790Z"
+        },
+        {
+          "id": "hotel_elyday_la_isla",
+          "name": "Căn hộ Elyday - La Isla Phú Quốc",
+          "slug": "can-ho-elyday-la-isla-phu-quoc",
+          "hasFeaturedImage": true,
+          "featuredImage": "https://cdn1.ivivu.com/images/hotel-placeholder.webp",
+          "imageStatus": "✅ external URL",
+          "totalImages": 2,
+          "pricing": {
+            "hasPricing": true,
+            "currency": "VND",
+            "hasAdultPrice": false,
+            "hasBasePrice": true
+          },
+          "galleryCount": 2,
+          "createdAt": "2026-04-29T06:29:30.790Z"
         }
       ],
+      "note": null,
       "errors": []
     },
     "rooms": {
       "collection": "rooms",
-      "exists": true,
-      "documentCount": 3,
-      "hasSlug": false,
+      "exists": false,
+      "documentCount": 0,
+      "hasSlug": null,
       "slugCount": 0,
       "slugExamples": [],
-      "missingSlugExamples": [
-        {
-          "id": "room-furama-deluxe",
-          "name": "Deluxe Ocean View"
-        },
-        {
-          "id": "room-furama-suite",
-          "name": "Premier Suite Ocean View"
-        },
-        {
-          "id": "room-jw-premier",
-          "name": "Emerald Bay View Room"
-        }
-      ],
+      "missingSlugExamples": [],
       "fields": {},
-      "sampleDocs": [
-        {
-          "id": "room-furama-deluxe",
-          "name": "Deluxe Ocean View",
-          "slug": "❌ MISSING",
-          "hasFeaturedImage": false,
-          "featuredImage": null,
-          "pricing": {
-            "hasPricing": true,
-            "currency": "not set",
-            "hasAdultPrice": true,
-            "hasBasePrice": false
-          },
-          "galleryCount": 1,
-          "createdAt": "2026-04-26T23:44:40.291Z"
-        },
-        {
-          "id": "room-furama-suite",
-          "name": "Premier Suite Ocean View",
-          "slug": "❌ MISSING",
-          "hasFeaturedImage": false,
-          "featuredImage": null,
-          "pricing": {
-            "hasPricing": true,
-            "currency": "not set",
-            "hasAdultPrice": true,
-            "hasBasePrice": false
-          },
-          "galleryCount": 1,
-          "createdAt": "2026-04-26T23:44:40.291Z"
-        },
-        {
-          "id": "room-jw-premier",
-          "name": "Emerald Bay View Room",
-          "slug": "❌ MISSING",
-          "hasFeaturedImage": false,
-          "featuredImage": null,
-          "pricing": {
-            "hasPricing": true,
-            "currency": "not set",
-            "hasAdultPrice": true,
-            "hasBasePrice": false
-          },
-          "galleryCount": 1,
-          "createdAt": "2026-04-26T23:44:40.291Z"
-        }
-      ],
+      "sampleDocs": [],
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
       "errors": []
     },
     "activities": {
@@ -228,11 +233,13 @@
           "slug": "lop-hoc-nau-an-hoi-an",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
           "pricing": {
             "hasPricing": true,
-            "currency": "not set",
+            "currency": "VND",
             "hasAdultPrice": true,
-            "hasBasePrice": false
+            "hasBasePrice": true
           },
           "galleryCount": 1,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -243,11 +250,13 @@
           "slug": "lan-bien-nha-trang-hon-mun",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 1,
           "pricing": {
             "hasPricing": true,
-            "currency": "not set",
+            "currency": "VND",
             "hasAdultPrice": true,
-            "hasBasePrice": false
+            "hasBasePrice": true
           },
           "galleryCount": 1,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -258,10 +267,12 @@
           "slug": "ve-bao-tang-gau-teddy-bear",
           "hasFeaturedImage": true,
           "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/bao-tang-gau-teddybear.jpg",
+          "imageStatus": "🔄 wordpress (needs migrate)",
+          "totalImages": 0,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
-            "hasAdultPrice": false,
+            "hasAdultPrice": true,
             "hasBasePrice": true
           },
           "galleryCount": 0,
@@ -273,10 +284,12 @@
           "slug": "ve-cap-treo-hon-thom",
           "hasFeaturedImage": true,
           "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-phu-quoc-1...",
+          "imageStatus": "🔄 wordpress (needs migrate)",
+          "totalImages": 3,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
-            "hasAdultPrice": false,
+            "hasAdultPrice": true,
             "hasBasePrice": true
           },
           "galleryCount": 3,
@@ -288,16 +301,19 @@
           "slug": "ve-cau-hon-phu-quoc",
           "hasFeaturedImage": true,
           "featuredImage": "https://rootytrip.com/wp-content/uploads/2024/10/ve-cau-hon-kiss-bridge-phu-quoc...",
+          "imageStatus": "🔄 wordpress (needs migrate)",
+          "totalImages": 3,
           "pricing": {
             "hasPricing": true,
             "currency": "VND",
-            "hasAdultPrice": false,
+            "hasAdultPrice": true,
             "hasBasePrice": true
           },
           "galleryCount": 3,
           "createdAt": "2026-04-28T16:05:21.744Z"
         }
       ],
+      "note": null,
       "errors": []
     },
     "cars": {
@@ -325,9 +341,11 @@
           "slug": "honda-city-4-cho-tiet-kiem",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {
             "hasPricing": true,
-            "currency": "not set",
+            "currency": "VND",
             "hasAdultPrice": false,
             "hasBasePrice": false
           },
@@ -340,9 +358,11 @@
           "slug": "toyota-fortuner-7-cho-cao-cap",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {
             "hasPricing": true,
-            "currency": "not set",
+            "currency": "VND",
             "hasAdultPrice": false,
             "hasBasePrice": false
           },
@@ -350,6 +370,7 @@
           "createdAt": "2026-04-26T23:44:40.291Z"
         }
       ],
+      "note": null,
       "errors": []
     },
     "rentals": {
@@ -362,8 +383,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "locations": {
       "collection": "locations",
@@ -394,6 +415,8 @@
           "slug": "da-nang",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1559592413-7cec4b5e2a8e?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -404,6 +427,8 @@
           "slug": "ha-noi",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1509030450996-dd1a26dda5b4?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -414,6 +439,8 @@
           "slug": "hoi-an",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1558041653-72e75f28eaa8?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -424,6 +451,8 @@
           "slug": "nha-trang",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1600583494340-1781f81f7c7c?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "2026-04-26T23:44:40.291Z"
@@ -434,11 +463,239 @@
           "slug": "phu-quoc",
           "hasFeaturedImage": true,
           "featuredImage": "https://images.unsplash.com/photo-1571989795247-0b5295e3e4ef?w=800",
+          "imageStatus": "✅ external URL",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "2026-04-26T23:44:40.291Z"
         }
       ],
+      "note": null,
+      "errors": []
+    },
+    "hotel_price_schedules": {
+      "collection": "hotel_price_schedules",
+      "exists": true,
+      "documentCount": 8,
+      "hasSlug": false,
+      "slugCount": 0,
+      "slugExamples": [],
+      "missingSlugExamples": [
+        {
+          "id": "hotel-da-nang-1_base_2026",
+          "name": "(no name)"
+        },
+        {
+          "id": "hotel-ha-noi-1_base_2026",
+          "name": "(no name)"
+        },
+        {
+          "id": "hotel-phu-quoc-1_base_2026",
+          "name": "(no name)"
+        }
+      ],
+      "fields": {},
+      "sampleDocs": [
+        {
+          "id": "hotel-da-nang-1_base_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "hotel-ha-noi-1_base_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "hotel-phu-quoc-1_base_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "hotel_blessed_base_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "hotel_elyday_la_isla_base_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        }
+      ],
+      "note": null,
+      "errors": []
+    },
+    "service_price_schedules": {
+      "collection": "service_price_schedules",
+      "exists": true,
+      "documentCount": 4,
+      "hasSlug": false,
+      "slugCount": 0,
+      "slugExamples": [],
+      "missingSlugExamples": [
+        {
+          "id": "sup_local_guide_2026",
+          "name": "(no name)"
+        },
+        {
+          "id": "sup_local_transport_2026",
+          "name": "(no name)"
+        },
+        {
+          "id": "sup_vinpearl_2026",
+          "name": "(no name)"
+        }
+      ],
+      "fields": {},
+      "sampleDocs": [
+        {
+          "id": "sup_local_guide_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "sup_local_transport_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "sup_vinpearl_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "sup_vinwonders_2026",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        }
+      ],
+      "note": null,
+      "errors": []
+    },
+    "tour_prices": {
+      "collection": "tour_prices",
+      "exists": true,
+      "documentCount": 3,
+      "hasSlug": false,
+      "slugCount": 0,
+      "slugExamples": [],
+      "missingSlugExamples": [
+        {
+          "id": "tour-da-nang-1",
+          "name": "(no name)"
+        },
+        {
+          "id": "tour-ha-noi-1",
+          "name": "(no name)"
+        },
+        {
+          "id": "tour-phu-quoc-1",
+          "name": "(no name)"
+        }
+      ],
+      "fields": {},
+      "sampleDocs": [
+        {
+          "id": "tour-da-nang-1",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "tour-ha-noi-1",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        },
+        {
+          "id": "tour-phu-quoc-1",
+          "name": "(no name/title)",
+          "slug": "❌ MISSING",
+          "hasFeaturedImage": false,
+          "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
+          "pricing": {},
+          "galleryCount": 0,
+          "createdAt": "unknown"
+        }
+      ],
+      "note": null,
       "errors": []
     },
     "settings": {
@@ -462,11 +719,14 @@
           "slug": "❌ MISSING",
           "hasFeaturedImage": false,
           "featuredImage": null,
+          "imageStatus": "❌ MISSING",
+          "totalImages": 0,
           "pricing": {},
           "galleryCount": 0,
           "createdAt": "unknown"
         }
       ],
+      "note": null,
       "errors": []
     },
     "coupons": {
@@ -479,8 +739,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "reviews": {
       "collection": "reviews",
@@ -492,8 +752,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "users": {
       "collection": "users",
@@ -505,8 +765,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "bookings": {
       "collection": "bookings",
@@ -518,8 +778,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "inventory_holds": {
       "collection": "inventory_holds",
@@ -531,8 +791,8 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     },
     "notifications": {
       "collection": "notifications",
@@ -544,69 +804,31 @@
       "missingSlugExamples": [],
       "fields": {},
       "sampleDocs": [],
-      "errors": [],
-      "note": "Collection tồn tại nhưng KHÔNG có documents nào"
-    }
-  },
-  "subcollections": {
-    "tours/tourPricing": {
-      "path": "tours/{docId}/tourPricing",
-      "exists": false,
-      "docCount": 0,
-      "errors": [],
-      "note": "Subcollection tồn tại nhưng empty (parent: tour-da-nang-1)"
-    },
-    "hotels/roomTypes": {
-      "path": "hotels/{docId}/roomTypes",
-      "exists": false,
-      "docCount": 0,
-      "errors": [],
-      "note": "Subcollection tồn tại nhưng empty (parent: hotel-da-nang-1)"
-    },
-    "hotels/rooms": {
-      "path": "hotels/{docId}/rooms",
-      "exists": false,
-      "docCount": 0,
-      "errors": [],
-      "note": "Subcollection tồn tại nhưng empty (parent: hotel-da-nang-1)"
-    },
-    "hotels/inventory": {
-      "path": "hotels/{docId}/inventory",
-      "exists": false,
-      "docCount": 0,
-      "errors": [],
-      "note": "Subcollection tồn tại nhưng empty (parent: hotel-da-nang-1)"
-    },
-    "activities/activityPricing": {
-      "path": "activities/{docId}/activityPricing",
-      "exists": false,
-      "docCount": 0,
-      "errors": [],
-      "note": "Subcollection tồn tại nhưng empty (parent: act-hoi-an-cooking)"
+      "note": "Collection tồn tại nhưng KHÔNG có documents nào",
+      "errors": []
     }
   },
   "issues": [
-    "⚠️ rooms: Có 3 documents nhưng KHÔNG có slug field",
+    "❌ rooms: Collection không có documents nào",
     "❌ rentals: Collection không có documents nào",
+    "✅ hotel_price_schedules: Collection mới — đã có 8 documents",
+    "✅ service_price_schedules: Collection mới — đã có 4 documents",
+    "✅ tour_prices: Collection mới — đã có 3 documents",
     "⚠️ settings: Có 1 documents nhưng KHÔNG có slug field",
     "❌ coupons: Collection không có documents nào",
     "❌ reviews: Collection không có documents nào",
     "❌ users: Collection không có documents nào",
     "❌ bookings: Collection không có documents nào",
     "❌ inventory_holds: Collection không có documents nào",
-    "❌ notifications: Collection không có documents nào",
-    "ℹ️ tours/tourPricing: Không có dữ liệu (chưa tạo)",
-    "ℹ️ hotels/roomTypes: Không có dữ liệu (chưa tạo)",
-    "ℹ️ hotels/rooms: Không có dữ liệu (chưa tạo)",
-    "ℹ️ hotels/inventory: Không có dữ liệu (chưa tạo)",
-    "ℹ️ activities/activityPricing: Không có dữ liệu (chưa tạo)"
+    "❌ notifications: Collection không có documents nào"
   ],
   "summary": {
-    "totalCollections": 14,
-    "emptyCollections": 7,
+    "totalCollections": 17,
+    "emptyCollections": 8,
     "collectionsWithSlug": 5,
-    "collectionsWithoutSlug": 2,
-    "subcollectionsExist": 0,
+    "collectionsWithoutSlug": 1,
+    "newPriceCollectionsWithData": 3,
+    "newPriceCollectionsEmpty": 0,
     "errors": 0
   }
 }

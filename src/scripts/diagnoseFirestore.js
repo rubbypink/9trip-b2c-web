@@ -2,11 +2,11 @@
  * Firestore Diagnostic Script — Kiểm tra dữ liệu hiện tại trong Firestore.
  *
  * Mục đích:
- * 1. Kiểm tra collections có tồn tại không, có documents không
+ * 1. Kiểm tra tất cả collections có tồn tại không, có documents không
  * 2. Kiểm tra slug fields có trong documents không
- * 3. Lấy mẫu documents để xem cấu trúc field
- * 4. Báo cáo lỗi nếu có (thiếu slug, thiếu index, etc.)
- * 5. Kiểm tra subcollections (roomPricing, tourPricing, roomTypes)
+ * 3. Lấy mẫu documents để xem cấu trúc field + phân loại ảnh
+ * 4. Kiểm tra 3 collection bảng giá mới (hotel_price_schedules, service_price_schedules, tour_prices)
+ * 5. Báo cáo TRUNG THỰC — ghi nhận mọi lỗi, không báo cáo gian dối
  *
  * Chạy: node src/scripts/diagnoseFirestore.js
  */
@@ -31,17 +31,28 @@ const db = admin.firestore();
 
 // ─── Config ───────────────────────────────────────────────────────────
 
-const COLLECTIONS = ["tours", "hotels", "rooms", "activities", "cars", "rentals", "locations", "settings", "coupons", "reviews", "users", "bookings", "inventory_holds", "notifications"];
-
-const MAIN_COLLECTIONS = ["tours", "hotels", "activities", "cars", "rentals"];
-
-const SUBCOLLECTION_PATHS = [
-  { parent: "tours", sub: "tourPricing" },
-  { parent: "hotels", sub: "roomTypes" },
-  { parent: "hotels", sub: "rooms" },
-  { parent: "hotels", sub: "inventory" },
-  { parent: "activities", sub: "activityPricing" },
+/** All Firestore collections expected in the project. */
+const COLLECTIONS = [
+  // Core service collections (ERP sync — read only)
+  "tours", "hotels", "rooms", "activities", "cars", "rentals", "locations",
+  // Pricing collections (MỚI — cần seed data)
+  "hotel_price_schedules", "service_price_schedules", "tour_prices",
+  // System collections
+  "settings", "coupons", "reviews", "users", "bookings", "inventory_holds", "notifications",
 ];
+
+/** Core service collections to show detailed sample output for. */
+const MAIN_COLLECTIONS = [
+  "tours", "hotels", "activities", "cars", "rentals",
+  "hotel_price_schedules", "service_price_schedules", "tour_prices",
+];
+
+/** Known image fields to scan per document. */
+const IMAGE_FIELDS = [
+  "featuredImage", "gallery", "images", "media", "logo",
+  "avatar", "userAvatar", "photoURL", "coverImage",
+];
+
 
 async function checkCollection(colName) {
   const result = {
@@ -54,6 +65,7 @@ async function checkCollection(colName) {
     missingSlugExamples: [],
     fields: new Set(),
     sampleDocs: [],
+    note: null,
     errors: [],
   };
 
@@ -107,11 +119,37 @@ async function checkCollection(colName) {
         pricingInfo.hasBasePrice = !!data.pricing.basePrice;
       }
 
-      // Check featuredImage
+      // Check featuredImage — classify URL type
       const hasFeaturedImage = !!data.featuredImage;
-      const featuredImagePreview = data.featuredImage
-        ? data.featuredImage.substring(0, 80) + (data.featuredImage.length > 80 ? "..." : "")
-        : null;
+      let featuredImagePreview = null;
+      let imageStatus = "none";
+      if (data.featuredImage) {
+        featuredImagePreview = data.featuredImage.substring(0, 80) + (data.featuredImage.length > 80 ? "..." : "");
+        // Quick classify
+        if (data.featuredImage.startsWith("gs://")) {
+          imageStatus = "gs-path (needs resolve)";
+        } else if (data.featuredImage.includes("picsum.photos")) {
+          imageStatus = "⚠️ placeholder (picsum)";
+        } else if (data.featuredImage.includes("rootytrip.com")) {
+          imageStatus = "🔄 wordpress (needs migrate)";
+        } else if (data.featuredImage.startsWith("http")) {
+          imageStatus = "✅ external URL";
+        } else if (data.featuredImage.startsWith("/")) {
+          imageStatus = "relative path";
+        } else {
+          imageStatus = "❓ unknown format";
+        }
+      } else {
+        imageStatus = "❌ MISSING";
+      }
+
+      // Count images across all known fields
+      let totalImages = data.gallery?.length || 0;
+      for (const f of IMAGE_FIELDS) {
+        if (f === "gallery" || f === "featuredImage") continue;
+        if (Array.isArray(data[f])) totalImages += data[f].length;
+        else if (data[f]) totalImages += 1;
+      }
 
       result.sampleDocs.push({
         id: doc.id,
@@ -119,6 +157,8 @@ async function checkCollection(colName) {
         slug: data.slug || "❌ MISSING",
         hasFeaturedImage,
         featuredImage: featuredImagePreview,
+        imageStatus,
+        totalImages,
         pricing: pricingInfo,
         galleryCount: data.gallery?.length || 0,
         createdAt: data.createdAt?.toDate?.()?.toISOString?.() || data.createdAt || "unknown",
@@ -127,47 +167,28 @@ async function checkCollection(colName) {
 
     result.hasSlug = result.slugCount > 0;
   } catch (error) {
-    result.errors.push(error.message);
-    console.error(`  ❌ Error checking ${colName}:`, error.message);
-  }
+    const msg = error.message || String(error);
+    result.errors.push(msg);
 
-  return result;
-}
-
-async function checkSubcollection(parentCol, subName) {
-  const result = {
-    path: `${parentCol}/{docId}/${subName}`,
-    exists: false,
-    docCount: 0,
-    errors: [],
-  };
-
-  try {
-    // Try to find a parent document first
-    const parentSnap = await db.collection(parentCol).limit(1).get();
-    if (parentSnap.empty) {
-      result.note = `Parent collection '${parentCol}' is empty, can't check subcollection`;
-      return result;
-    }
-
-    const parentId = parentSnap.docs[0].id;
-    const subRef = db.collection(parentCol).doc(parentId).collection(subName);
-    const subSnap = await subRef.limit(5).get();
-
-    if (!subSnap.empty) {
-      result.exists = true;
-      result.docCount = subSnap.size;
-      result.parentId = parentId;
-      result.sampleFields = subSnap.docs[0] ? Object.keys(subSnap.docs[0].data()) : [];
+    // Categorize the error for better reporting
+    if (msg.includes("PERMISSION_DENIED") || msg.includes("Missing or insufficient permissions")) {
+      result.note = "🚫 Permission denied — collection may not exist or security rules block access";
+      console.error(`  🔴 [PERMISSION] ${colName}: ${msg}`);
+    } else if (msg.includes("NOT_FOUND") || msg.includes("does not exist")) {
+      result.note = "❌ Collection does not exist in Firestore";
+      console.error(`  🔴 [NOT_FOUND] ${colName}: ${msg}`);
+    } else if (msg.includes("UNAVAILABLE") || msg.includes("ENOTFOUND") || msg.includes("ECONNREFUSED")) {
+      result.note = "🌐 Network error — cannot reach Firestore";
+      console.error(`  🔴 [NETWORK] ${colName}: ${msg}`);
     } else {
-      result.note = `Subcollection tồn tại nhưng empty (parent: ${parentId})`;
+      result.note = `⚠️ Unknown error: ${msg}`;
+      console.error(`  ❌ [ERROR] ${colName}: ${msg}`);
     }
-  } catch (error) {
-    result.errors.push(error.message);
   }
 
   return result;
 }
+
 
 async function main() {
   console.log("=".repeat(70));
@@ -178,19 +199,19 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     collections: {},
-    subcollections: {},
     issues: [],
     summary: {
       totalCollections: 0,
       emptyCollections: 0,
       collectionsWithSlug: 0,
       collectionsWithoutSlug: 0,
-      subcollectionsExist: 0,
+      newPriceCollectionsWithData: 0,
+      newPriceCollectionsEmpty: 0,
       errors: 0,
     },
   };
 
-  // Check main collections
+  // ── Check all collections ─────────────────────────────────────────
   for (const col of COLLECTIONS) {
     console.log(`📂 Checking ${col}...`);
     const result = await checkCollection(col);
@@ -199,19 +220,25 @@ async function main() {
 
   console.log();
 
-  // Check subcollections
-  console.log("📂 Checking subcollections...");
-  for (const sc of SUBCOLLECTION_PATHS) {
-    console.log(`   ${sc.parent}/{id}/${sc.sub}...`);
-    const result = await checkSubcollection(sc.parent, sc.sub);
-    report.subcollections[`${sc.parent}/${sc.sub}`] = result;
-  }
+  // ── Analyze results ──────────────────────────────────────────────
 
-  // Analyze
+  const NEW_PRICE_COLLECTIONS = ["hotel_price_schedules", "service_price_schedules", "tour_prices"];
+
   for (const [col, result] of Object.entries(report.collections)) {
+    const isNewPriceCol = NEW_PRICE_COLLECTIONS.includes(col);
+
     if (!result.exists) {
       report.summary.emptyCollections++;
-      report.issues.push(`❌ ${col}: Collection không có documents nào`);
+      if (isNewPriceCol) {
+        report.summary.newPriceCollectionsEmpty++;
+        report.issues.push(`🆕 ${col}: Collection mới — CHƯA CÓ dữ liệu. Cần chạy: node src/scripts/seedPriceData.js`);
+      } else {
+        report.issues.push(`❌ ${col}: Collection không có documents nào`);
+      }
+    } else if (isNewPriceCol) {
+      // New price collections don't need slug — check document count instead
+      report.summary.newPriceCollectionsWithData++;
+      report.issues.push(`✅ ${col}: Collection mới — đã có ${result.documentCount} documents`);
     } else if (!result.hasSlug) {
       report.summary.collectionsWithoutSlug++;
       report.issues.push(`⚠️ ${col}: Có ${result.documentCount} documents nhưng KHÔNG có slug field`);
@@ -220,19 +247,10 @@ async function main() {
     }
 
     if (result.errors.length > 0) {
-      report.summary.errors++;
+      report.summary.errors += result.errors.length;
       result.errors.forEach(e =>
         report.issues.push(`🔴 ${col}: Lỗi — ${e}`)
       );
-    }
-  }
-
-  for (const [path, result] of Object.entries(report.subcollections)) {
-    if (result.exists) {
-      report.summary.subcollectionsExist++;
-      report.issues.push(`✅ ${path}: Có ${result.docCount} documents`);
-    } else {
-      report.issues.push(`ℹ️ ${path}: Không có dữ liệu (chưa tạo)`);
     }
   }
 
@@ -244,12 +262,13 @@ async function main() {
   console.log("📊 DIAGNOSTIC REPORT");
   console.log("=".repeat(70));
   console.log();
-  console.log(`Collections checked:    ${report.summary.totalCollections}`);
-  console.log(`Empty collections:      ${report.summary.emptyCollections}`);
-  console.log(`With slug:              ${report.summary.collectionsWithSlug}`);
-  console.log(`Without slug:           ${report.summary.collectionsWithoutSlug}`);
-  console.log(`Subcollections found:   ${report.summary.subcollectionsExist}`);
-  console.log(`Errors:                 ${report.summary.errors}`);
+  console.log(`Collections checked:         ${report.summary.totalCollections}`);
+  console.log(`Empty collections:           ${report.summary.emptyCollections}`);
+  console.log(`With slug field:             ${report.summary.collectionsWithSlug}`);
+  console.log(`Without slug field:          ${report.summary.collectionsWithoutSlug}`);
+  console.log(`New price collections ready: ${report.summary.newPriceCollectionsWithData}/3`);
+  console.log(`New price collections empty: ${report.summary.newPriceCollectionsEmpty}/3`);
+  console.log(`Errors encountered:          ${report.summary.errors}`);
   console.log();
 
   console.log("📋 Issue Summary:");
@@ -283,8 +302,8 @@ async function main() {
       r.sampleDocs.forEach(d => {
         console.log(`     - ${d.name}`);
         console.log(`       slug: ${d.slug}`);
-        console.log(`       featuredImage: ${d.hasFeaturedImage ? "✅" : "❌"} ${d.featuredImage || ""}`);
-        console.log(`       gallery: ${d.galleryCount} images`);
+        console.log(`       featuredImage: ${d.hasFeaturedImage ? "✅" : "❌"} ${d.imageStatus || ""} ${d.featuredImage || ""}`);
+        console.log(`       gallery: ${d.galleryCount} images (total images: ${d.totalImages || 0})`);
         console.log(`       pricing: ${JSON.stringify(d.pricing)}`);
       });
     }

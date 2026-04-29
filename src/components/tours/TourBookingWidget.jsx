@@ -83,24 +83,28 @@ export default function TourBookingWidget({
   }, []);
 
   const handleBookNow = useCallback(() => {
-    // Add to cart first
-    addItem({
-      serviceId: tourId,
-      serviceType: "tour",
-      serviceTitle: tourTitle,
-      featuredImage: "",
-      startDate: selectedDate || new Date().toISOString(),
-      endDate: "",
-      adults,
-      children,
-      infants,
-      rooms: 1,
-      basePrice: selectedTier?.adultPrice || basePrice,
-      discount: 0,
-      total: total,
-      currency: selectedTier?.currency || currency,
-    });
-    router.push("/checkout");
+    try {
+      // Add to cart first
+      addItem({
+        serviceId: tourId,
+        serviceType: "tour",
+        serviceTitle: tourTitle,
+        featuredImage: "",
+        startDate: selectedDate || new Date().toISOString(),
+        endDate: "",
+        adults,
+        children,
+        infants,
+        rooms: 1,
+        basePrice: selectedTier?.adultPrice || basePrice,
+        discount: 0,
+        total: total,
+        currency: selectedTier?.currency || currency,
+      });
+      router.push("/checkout");
+    } catch (error) {
+      console.error('[TourBookingWidget] Error booking:', error.message);
+    }
   }, [router, tourId, tourTitle, selectedDate, selectedTierId, selectedTier, adults, children, infants, total, basePrice, currency, addItem]);
 
   const handleConsult = useCallback(() => {

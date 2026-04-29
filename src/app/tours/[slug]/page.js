@@ -59,18 +59,39 @@ export default async function TourDetailPage({ params }) {
     notFound();
   }
 
-  // Fetch các data còn lại song song (rawTour đã có — không còn TDZ)
-  const [{ tours: rawRelatedTours }, { reviews, totalRating, avgRating }, pricingTiers] = await Promise.all([
-    getRelatedTours(slug),
-    getTourReviews(slug),
-    getTourPricing(rawTour.id),
-  ]);
+  // Fetch các data còn lại song song — with fallback on individual failures
+  let rawRelatedTours = [];
+  let reviews = [], totalRating = 0, avgRating = 0;
+  let pricingTiers = [];
 
-  // Resolve image URLs (gs:// → HTTPS)
-  const [tour, relatedTours] = await Promise.all([
-    resolveDocImages(rawTour),
-    resolveDocsImages(rawRelatedTours),
-  ]);
+  try {
+    const [relatedResult, reviewResult, tiers] = await Promise.all([
+      getRelatedTours(slug),
+      getTourReviews(slug),
+      getTourPricing(rawTour.id),
+    ]);
+    rawRelatedTours = relatedResult?.tours || [];
+    reviews = reviewResult?.reviews || [];
+    totalRating = reviewResult?.totalRating || 0;
+    avgRating = reviewResult?.avgRating || 0;
+    pricingTiers = tiers || [];
+  } catch (error) {
+    console.error('[TourDetailPage] Error fetching parallel data:', error.message);
+    // All fallbacks already set to empty/default above
+  }
+
+  // Resolve image URLs (gs:// → HTTPS) — with fallback
+  let tour = rawTour;
+  let relatedTours = [];
+  try {
+    [tour, relatedTours] = await Promise.all([
+      resolveDocImages(rawTour),
+      resolveDocsImages(rawRelatedTours),
+    ]);
+  } catch (error) {
+    console.error('[TourDetailPage] Error resolving images:', error.message);
+    // tour stays as rawTour, relatedTours stays empty
+  }
 
   // JSON-LD structured data for SEO (TouristTrip schema)
   const jsonLd = {

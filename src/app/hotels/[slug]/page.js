@@ -53,16 +53,29 @@ export default async function HotelDetailPage({ params }) {
   const { hotel: rawHotel } = await getHotelBySlug(slug);
   if (!rawHotel) notFound();
 
-  // Parallel: reviews, related hotels, price schedule
-  const [
-    { reviews, totalRating, avgRating },
-    { hotels: rawRelatedHotels },
-    priceSchedule,
-  ] = await Promise.all([
-    getHotelReviews(slug),
-    getRelatedHotels(slug, rawHotel.address?.cityId, 3),
-    getHotelPriceSchedule(rawHotel.id),
-  ]);
+  // Parallel: reviews, related hotels, price schedule — with fallback on individual failures
+  let reviews = [], totalRating = 0, avgRating = 0;
+  let rawRelatedHotels = [];
+  let priceSchedule = null;
+
+  try {
+    [
+      { reviews: r, totalRating: tr, avgRating: ar },
+      { hotels: rawRelated },
+      priceSchedule,
+    ] = await Promise.all([
+      getHotelReviews(slug),
+      getRelatedHotels(slug, rawHotel.address?.cityId, 3),
+      getHotelPriceSchedule(rawHotel.id),
+    ]);
+    reviews = r || [];
+    totalRating = tr || 0;
+    avgRating = ar || 0;
+    rawRelatedHotels = rawRelated || [];
+  } catch (error) {
+    console.error('[HotelDetailPage] Error fetching parallel data:', error.message);
+    // All fallbacks already set to empty/default above
+  }
 
   // Build pricing table from embedded rooms + price schedule
   const today = new Date().toISOString().split("T")[0];
@@ -77,11 +90,18 @@ export default async function HotelDetailPage({ params }) {
     checkOut
   );
 
-  // Resolve image URLs (gs:// → HTTPS)
-  const [hotel, relatedHotels] = await Promise.all([
-    resolveDocImages(rawHotel),
-    resolveDocsImages(rawRelatedHotels),
-  ]);
+  // Resolve image URLs (gs:// → HTTPS) — with fallback
+  let hotel = rawHotel;
+  let relatedHotels = [];
+  try {
+    [hotel, relatedHotels] = await Promise.all([
+      resolveDocImages(rawHotel),
+      resolveDocsImages(rawRelatedHotels),
+    ]);
+  } catch (error) {
+    console.error('[HotelDetailPage] Error resolving images:', error.message);
+    // hotel stays as rawHotel (may have gs:// URLs), relatedHotels stays empty
+  }
 
   // JSON-LD Hotel schema cho SEO (v4: dùng rooms embedded + pricingTable)
   const roomOffers = pricingTable

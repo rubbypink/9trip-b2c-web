@@ -114,26 +114,30 @@ export default function HotelBookingWidget({
   }, []);
 
   const handleBookNow = useCallback(() => {
-    // Add to cart first
-    if (selectedRoom) {
-      addItem({
-        serviceId: hotelId,
-        serviceType: "hotel_room",
-        serviceTitle: `${hotelName} - ${selectedRoom.name}`,
-        featuredImage: selectedRoom.featuredImage || "",
-        startDate: checkIn || new Date().toISOString(),
-        endDate: checkOut || "",
-        adults,
-        children,
-        infants: 0,
-        rooms: 1,
-        basePrice: roomPrice,
-        discount: selectedRoom.promoPrice ? (selectedRoom.price - selectedRoom.promoPrice) : 0,
-        total: total,
-        currency,
-      });
+    try {
+      // Add to cart first
+      if (selectedRoom) {
+        addItem({
+          serviceId: hotelId,
+          serviceType: "hotel_room",
+          serviceTitle: `${hotelName} - ${selectedRoom.name}`,
+          featuredImage: selectedRoom.featuredImage || "",
+          startDate: checkIn || new Date().toISOString(),
+          endDate: checkOut || "",
+          adults,
+          children,
+          infants: 0,
+          rooms: 1,
+          basePrice: roomPrice,
+          discount: selectedRoom.promoPrice ? (selectedRoom.price - selectedRoom.promoPrice) : 0,
+          total: total,
+          currency,
+        });
+      }
+      router.push("/checkout");
+    } catch (error) {
+      console.error('[HotelBookingWidget] Error booking:', error.message);
     }
-    router.push("/checkout");
   }, [router, hotelId, hotelName, selectedRoom, checkIn, checkOut, adults, children, roomPrice, total, currency, addItem]);
 
   const handleConsult = useCallback(() => {

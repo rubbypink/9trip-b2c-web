@@ -88,39 +88,44 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
    * Xác nhận chọn phòng — thêm tất cả selected rooms vào cart.
    */
   const handleConfirmSelection = useCallback(() => {
-    for (const room of pricingTable) {
-      for (const rt of room.rateTypes) {
-        const key = `${room.roomId}_${rt.rateType}`;
-        const qty = quantities[key] || 0;
-        if (qty === 0) continue;
+    try {
+      for (const room of pricingTable) {
+        for (const rt of room.rateTypes) {
+          const key = `${room.roomId}_${rt.rateType}`;
+          const qty = quantities[key] || 0;
+          if (qty === 0) continue;
 
-        const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
+          const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
-        addItem({
-          serviceId: hotel.id,
-          roomId: room.roomId,
-          serviceType: "hotel_room",
-          serviceTitle: `${hotel.name} — ${room.roomName}`,
-          featuredImage: room.featuredImage || hotel.featuredImage || "",
-          startDate: checkIn || new Date().toISOString(),
-          endDate: checkOut || "",
-          adults: 2,
-          children: 0,
-          infants: 0,
-          rooms: qty,
-          rateType: rt.rateType,
-          basePrice: rt.avgSellPrice,
-          costPrice: rt.dailyPrices[0]?.costPrice || 0,
-          discount: 0,
-          total: lineTotal,
-          currency: "VND",
-          hotelId: hotel.id,
-          hotelName: hotel.name,
-          roomName: room.roomName,
-        });
+          addItem({
+            serviceId: hotel.id,
+            roomId: room.roomId,
+            serviceType: "hotel_room",
+            serviceTitle: `${hotel.name} — ${room.roomName}`,
+            featuredImage: room.featuredImage || hotel.featuredImage || "",
+            startDate: checkIn || new Date().toISOString(),
+            endDate: checkOut || "",
+            adults: 2,
+            children: 0,
+            infants: 0,
+            rooms: qty,
+            rateType: rt.rateType,
+            basePrice: rt.avgSellPrice,
+            costPrice: rt.dailyPrices[0]?.costPrice || 0,
+            discount: 0,
+            total: lineTotal,
+            currency: "VND",
+            hotelId: hotel.id,
+            hotelName: hotel.name,
+            roomName: room.roomName,
+          });
+        }
       }
+      router.push("/cart");
+    } catch (error) {
+      console.error('[RoomsPanel] Error confirming selection:', error.message);
+      // Cart add failed — user can retry
     }
-    router.push("/cart");
   }, [pricingTable, quantities, getLineTotal, addItem, hotel, checkIn, checkOut, router]);
 
   if (pricingTable.length === 0) {

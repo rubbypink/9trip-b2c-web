@@ -91,8 +91,13 @@ function serializeDoc(snap) {
  * @returns {Promise<Object|null>} Document data with id, or null
  */
 export async function getDocById(colName, id) {
-	const snap = await getDoc(doc(db, colName, id));
-	return snap.exists() ? serializeDoc(snap) : null;
+	try {
+		const snap = await getDoc(doc(db, colName, id));
+		return snap.exists() ? serializeDoc(snap) : null;
+	} catch (error) {
+		console.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
+		return null;
+	}
 }
 
 /**
@@ -102,10 +107,15 @@ export async function getDocById(colName, id) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocBySlug(colName, slug) {
-	const q = query(collection(db, colName), where('slug', '==', slug), limit(1));
-	const snap = await getDocs(q);
-	if (snap.empty) return null;
-	return serializeDoc(snap.docs[0]);
+	try {
+		const q = query(collection(db, colName), where('slug', '==', slug), limit(1));
+		const snap = await getDocs(q);
+		if (snap.empty) return null;
+		return serializeDoc(snap.docs[0]);
+	} catch (error) {
+		console.error(`[getDocBySlug] Error fetching ${colName}/${slug}:`, error.message);
+		return null;
+	}
 }
 
 /**
@@ -146,11 +156,16 @@ export async function deleteDocById(colName, id) {
  * @returns {Promise<{tours: Object[], lastVisible: import("firebase/firestore").DocumentSnapshot|null}>}
  */
 export async function getTours({ pageSize = 12, cursor = null } = {}) {
-	let q = query(toursCol, orderBy('createdAt', 'desc'), limit(pageSize));
-	if (cursor) q = query(toursCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
-	const snap = await getDocs(q);
-	const tours = snap.docs.map((d) => serializeDoc(d));
-	return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	try {
+		let q = query(toursCol, orderBy('createdAt', 'desc'), limit(pageSize));
+		if (cursor) q = query(toursCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
+		const snap = await getDocs(q);
+		const tours = snap.docs.map((d) => serializeDoc(d));
+		return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[getTours] Error:', error.message);
+		return { tours: [], lastVisible: null };
+	}
 }
 
 /**
@@ -159,9 +174,14 @@ export async function getTours({ pageSize = 12, cursor = null } = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedTours(count = 8) {
-	const q = query(toursCol, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(count));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => serializeDoc(d));
+	try {
+		const q = query(toursCol, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(count));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getFeaturedTours] Error:', error.message);
+		return [];
+	}
 }
 
 /**
@@ -235,17 +255,22 @@ export async function searchTours(filters = {}) {
  * @returns {Promise<{tours: Object[]}>}
  */
 export async function getRelatedTours(slug, count = 4) {
-	const tour = await getDocBySlug('tours', slug);
-	if (!tour) return { tours: [] };
-	if (!tour.locationId) return { tours: [] };
+	try {
+		const tour = await getDocBySlug('tours', slug);
+		if (!tour) return { tours: [] };
+		if (!tour.locationId) return { tours: [] };
 
-	const q = query(toursCol, where('locationId', '==', tour.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
-	const snap = await getDocs(q);
-	const tours = snap.docs
-		.map((d) => serializeDoc(d))
-		.filter((t) => t.id !== tour.id)
-		.slice(0, count);
-	return { tours };
+		const q = query(toursCol, where('locationId', '==', tour.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
+		const snap = await getDocs(q);
+		const tours = snap.docs
+			.map((d) => serializeDoc(d))
+			.filter((t) => t.id !== tour.id)
+			.slice(0, count);
+		return { tours };
+	} catch (error) {
+		console.error('[getRelatedTours] Error:', error.message);
+		return { tours: [] };
+	}
 }
 
 /**
@@ -254,8 +279,13 @@ export async function getRelatedTours(slug, count = 4) {
  * @returns {Promise<{tour: Object|null}>}
  */
 export async function getTourBySlug(slug) {
-	const tour = await getDocBySlug('tours', slug);
-	return { tour };
+	try {
+		const tour = await getDocBySlug('tours', slug);
+		return { tour };
+	} catch (error) {
+		console.error('[getTourBySlug] Error:', error.message);
+		return { tour: null };
+	}
 }
 
 /**
@@ -282,14 +312,19 @@ export async function getTourPricing(tourId) {
  * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
  */
 export async function getTourReviews(slug) {
-	const tour = await getDocBySlug('tours', slug);
-	if (!tour) return { reviews: [], totalRating: 0, avgRating: 0 };
+	try {
+		const tour = await getDocBySlug('tours', slug);
+		if (!tour) return { reviews: [], totalRating: 0, avgRating: 0 };
 
-	const { reviews } = await getReviews('tour', tour.id);
-	const totalRating = reviews.length;
-	const avgRating = totalRating > 0 ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating : 0;
+		const { reviews } = await getReviews('tour', tour.id);
+		const totalRating = reviews.length;
+		const avgRating = totalRating > 0 ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating : 0;
 
-	return { reviews, totalRating, avgRating };
+		return { reviews, totalRating, avgRating };
+	} catch (error) {
+		console.error('[getTourReviews] Error:', error.message);
+		return { reviews: [], totalRating: 0, avgRating: 0 };
+	}
 }
 
 // ─── Hotels ───────────────────────────────────────────────────────────
@@ -299,11 +334,16 @@ export async function getTourReviews(slug) {
  * @returns {Promise<{hotels: Object[], lastVisible: *}>}
  */
 export async function getHotels({ pageSize = 12, cursor = null } = {}) {
-	let q = query(hotelsCol, orderBy('createdAt', 'desc'), limit(pageSize));
-	if (cursor) q = query(hotelsCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
-	const snap = await getDocs(q);
-	const hotels = snap.docs.map((d) => serializeDoc(d));
-	return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	try {
+		let q = query(hotelsCol, orderBy('createdAt', 'desc'), limit(pageSize));
+		if (cursor) q = query(hotelsCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
+		const snap = await getDocs(q);
+		const hotels = snap.docs.map((d) => serializeDoc(d));
+		return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[getHotels] Error:', error.message);
+		return { hotels: [], lastVisible: null };
+	}
 }
 
 /**
@@ -361,9 +401,14 @@ export async function searchHotels(filters = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedHotels(count = 6) {
-	const q = query(hotelsCol, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(count));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => serializeDoc(d));
+	try {
+		const q = query(hotelsCol, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(count));
+		const snap = await getDocs(q);
+		return snap.docs.map((d) => serializeDoc(d));
+	} catch (error) {
+		console.error('[getFeaturedHotels] Error:', error.message);
+		return [];
+	}
 }
 
 /**
@@ -693,11 +738,16 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
  * @returns {Promise<{activities: Object[], lastVisible: *}>}
  */
 export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
-	let q = query(activitiesCol, orderBy('createdAt', 'desc'), limit(pageSize));
-	if (cursor) q = query(activitiesCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
-	const snap = await getDocs(q);
-	const activities = snap.docs.map((d) => serializeDoc(d));
-	return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	try {
+		let q = query(activitiesCol, orderBy('createdAt', 'desc'), limit(pageSize));
+		if (cursor) q = query(activitiesCol, orderBy('createdAt', 'desc'), startAfter(cursor), limit(pageSize));
+		const snap = await getDocs(q);
+		const activities = snap.docs.map((d) => serializeDoc(d));
+		return { activities, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error('[getActivitiesList] Error:', error.message);
+		return { activities: [], lastVisible: null };
+	}
 }
 
 /**

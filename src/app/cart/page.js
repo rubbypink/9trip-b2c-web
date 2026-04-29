@@ -16,9 +16,15 @@ export default function CartPage() {
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
-    const result = await applyCoupon(couponInput.trim());
-    setCouponMsg(result.message);
-    setCouponSuccess(result.success);
+    try {
+      const result = await applyCoupon(couponInput.trim());
+      setCouponMsg(result.message);
+      setCouponSuccess(result.success);
+    } catch (error) {
+      console.error('[CartPage] Error applying coupon:', error.message);
+      setCouponMsg('Lỗi khi áp dụng mã giảm giá. Vui lòng thử lại.');
+      setCouponSuccess(false);
+    }
   };
 
   const handleRemoveCoupon = () => {
