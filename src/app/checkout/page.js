@@ -34,6 +34,10 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+  const [checkoutError, setCheckoutError] = useState(null);
+
+  // Merge error from hook + local error state
+  const displayError = checkoutError || bookingError;
 
   // Show empty state if cart is empty and not loading
   const showEmptyCart = items.length === 0 && !bookingLoading;
@@ -69,7 +73,7 @@ export default function CheckoutPage() {
     const data = await res.json();
 
     if (data.error) {
-      setBookingError(data.error);
+      setCheckoutError(data.error);
       return;
     }
 
@@ -93,7 +97,7 @@ export default function CheckoutPage() {
 
   const handleFinalizeBooking = async () => {
     setPaymentLoading(true);
-    setBookingError(null);
+    setCheckoutError(null);
 
     // Cash: use existing confirmBooking flow (creates booking + goes to confirmation)
     if (paymentMethod === "cash") {
@@ -208,9 +212,9 @@ export default function CheckoutPage() {
                   
                   <PaymentSelector selected={paymentMethod} onChange={setPaymentMethod} />
                   
-                  {bookingError && (
+                  {displayError && (
                     <div className="mt-4 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm">
-                      {bookingError}
+                      {displayError}
                     </div>
                   )}
 
