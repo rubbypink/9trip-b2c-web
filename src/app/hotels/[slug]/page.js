@@ -104,7 +104,7 @@ export default async function HotelDetailPage({ params }) {
     "@context": "https://schema.org",
     "@type": "Hotel",
     name: hotel.name,
-    description: hotel.excerpt || hotel.description?.replace(/<[^>]*>/g, "").slice(0, 200),
+    description: hotel.excerpt || (hotel.description ? hotel.description.replace(/<[^>]*>/g, "").slice(0, 200) : ""),
     image: hotel.featuredImage,
     url: `/hotels/${slug}`,
     ...(hotel.starRating && { starRating: { "@type": "Rating", ratingValue: hotel.starRating } }),
@@ -169,7 +169,15 @@ export default async function HotelDetailPage({ params }) {
                 <HotelBookingWidget
                   hotelId={hotel.id}
                   hotelName={hotel.name}
-                  pricingTable={pricingTable}
+                  rooms={pricingTable.map((r) => ({
+                    id: r.roomId,
+                    name: r.roomName,
+                    price: r.rateTypes[0]?.avgSellPrice || hotel.pricing?.basePrice || 0,
+                    currency: hotel.pricing?.currency || "VND",
+                    maxAdults: r.maxGuests,
+                    bedType: r.bedType,
+                    featuredImage: r.featuredImage || hotel.featuredImage || "",
+                  }))}
                   basePrice={hotel.pricing?.basePrice || 0}
                   currency={hotel.pricing?.currency || "VND"}
                 />

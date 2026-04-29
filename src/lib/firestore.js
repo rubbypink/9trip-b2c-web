@@ -391,10 +391,15 @@ export async function getRoomsByHotel(hotelId) {
  * @returns {Promise<{hotel: Object|null}>}
  */
 export async function getHotelBySlug(slug) {
-	const q = query(hotelsCol, where('slug', '==', slug), limit(1));
-	const snap = await getDocs(q);
-	if (snap.empty) return { hotel: null };
-	return { hotel: serializeDoc(snap.docs[0]) };
+	try {
+		const q = query(hotelsCol, where('slug', '==', slug), limit(1));
+		const snap = await getDocs(q);
+		if (snap.empty) return { hotel: null };
+		return { hotel: serializeDoc(snap.docs[0]) };
+	} catch (error) {
+		console.error('[getHotelBySlug] Error:', error.message);
+		return { hotel: null };
+	}
 }
 
 /**
@@ -408,18 +413,23 @@ export async function getHotelBySlug(slug) {
  */
 export async function getRelatedHotels(currentSlug, locationId, count = 3) {
 	if (!locationId) return { hotels: [] };
-	const q = query(
-		hotelsCol,
-		where('address.cityId', '==', locationId),
-		orderBy('rating', 'desc'),
-		limit(count + 1)
-	);
-	const snap = await getDocs(q);
-	const hotels = snap.docs
-		.map((d) => serializeDoc(d))
-		.filter((h) => h.slug !== currentSlug)
-		.slice(0, count);
-	return { hotels };
+	try {
+		const q = query(
+			hotelsCol,
+			where('address.cityId', '==', locationId),
+			orderBy('rating', 'desc'),
+			limit(count + 1)
+		);
+		const snap = await getDocs(q);
+		const hotels = snap.docs
+			.map((d) => serializeDoc(d))
+			.filter((h) => h.slug !== currentSlug)
+			.slice(0, count);
+		return { hotels };
+	} catch (error) {
+		console.error('[getRelatedHotels] Error:', error.message);
+		return { hotels: [] };
+	}
 }
 
 /**
