@@ -1,3 +1,8 @@
+import Link from "next/link";
+import Image from "next/image";
+import StarRating from "./StarRating";
+import PriceDisplay from "./PriceDisplay";
+
 /**
  * HotelCard - Card hiển thị khách sạn dạng grid.
  * Hiển thị giá thấp nhất nếu có pricing data, fallback về hotel.pricing.basePrice.
