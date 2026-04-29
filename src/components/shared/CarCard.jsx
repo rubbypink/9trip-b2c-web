@@ -10,7 +10,7 @@ export default function CarCard({ car, item }) {
   const data = car || item;
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
-      <Link href={`/cars/${data.slug}`} target="_blank" rel="noopener noreferrer" className="block relative aspect-[16/10] overflow-hidden" data-service-type="car" data-service-id={data.id}>
+      <Link href={`/cars/${data.slug}`} className="block relative aspect-[16/10] overflow-hidden" data-service-type="car" data-service-id={data.id}>
         <Image
           src={data.images?.[0] || "/placeholder-car.jpg"}
           alt={data.name}
@@ -23,7 +23,7 @@ export default function CarCard({ car, item }) {
         </span>
       </Link>
       <div className="p-4">
-        <Link href={`/cars/${data.slug}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-1 mb-1">
+        <Link href={`/cars/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-1 mb-1">
           {data.name}
         </Link>
         <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">

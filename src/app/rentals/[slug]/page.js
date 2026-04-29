@@ -11,18 +11,18 @@ export const revalidate = 3600;
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const { rental } = await getDocBySlug("rentals", resolvedParams.slug);
+  const rentalDoc = await getDocBySlug("rentals", resolvedParams.slug);
 
-  if (!rental) return { title: "Dịch vụ không tìm thấy — 9Trip" };
+  if (!rentalDoc) return { title: "Dịch vụ không tìm thấy — 9Trip" };
 
-  const title = rental.title || rental.name || "Dịch vụ cho thuê";
+  const title = rentalDoc.title || rentalDoc.name || "Dịch vụ cho thuê";
   return {
     title: `${title} — 9Trip`,
-    description: rental.excerpt || `${title} — giá tốt tại 9Trip.`,
+    description: rentalDoc.excerpt || `${title} — giá tốt tại 9Trip.`,
     openGraph: {
       title: `${title} — 9Trip`,
-      description: rental.excerpt || "",
-      images: rental.featuredImage ? [{ url: rental.featuredImage, width: 1200, height: 630 }] : [],
+      description: rentalDoc.excerpt || "",
+      images: rentalDoc.featuredImage ? [{ url: rentalDoc.featuredImage, width: 1200, height: 630 }] : [],
       type: "website",
       locale: "vi_VN",
     },
@@ -40,11 +40,12 @@ export async function generateStaticParams() {
 export default async function RentalDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
-  const { rental } = await getDocBySlug("rentals", slug);
+  const rentalDoc = await getDocBySlug("rentals", slug);
 
-  if (!rental) notFound();
+  if (!rentalDoc) notFound();
 
   const {
+    id,
     title,
     name,
     featuredImage,
@@ -56,7 +57,7 @@ export default async function RentalDetailPage({ params }) {
     location,
     features = [],
     pickupInfo,
-  } = rental;
+  } = rentalDoc;
 
   const displayName = title || name || "Dịch vụ";
   const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
@@ -167,7 +168,7 @@ export default async function RentalDetailPage({ params }) {
 
               <div className="p-5 space-y-4">
                 <a
-                  href={`/checkout?service=${rental.id}&type=rental`}
+                  href={`/checkout?service=${id}&type=rental`}
                   className="block w-full rounded-lg bg-primary text-white text-center font-semibold px-6 py-3 hover:bg-primary-dark transition-colors"
                 >
                   Đặt ngay

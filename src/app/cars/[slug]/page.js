@@ -11,18 +11,18 @@ export const revalidate = 3600;
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
-  const { car } = await getDocBySlug("cars", resolvedParams.slug);
+  const carDoc = await getDocBySlug("cars", resolvedParams.slug);
 
-  if (!car) return { title: "Xe không tìm thấy — 9Trip" };
+  if (!carDoc) return { title: "Xe không tìm thấy — 9Trip" };
 
-  const title = car.title || car.name || "Thuê xe";
+  const title = carDoc.title || carDoc.name || "Thuê xe";
   return {
     title: `${title} — 9Trip`,
-    description: car.excerpt || `Thuê ${title} — giá tốt tại 9Trip.`,
+    description: carDoc.excerpt || `Thuê ${title} — giá tốt tại 9Trip.`,
     openGraph: {
       title: `${title} — 9Trip`,
-      description: car.excerpt || "",
-      images: car.featuredImage ? [{ url: car.featuredImage, width: 1200, height: 630 }] : [],
+      description: carDoc.excerpt || "",
+      images: carDoc.featuredImage ? [{ url: carDoc.featuredImage, width: 1200, height: 630 }] : [],
       type: "website",
       locale: "vi_VN",
     },
@@ -40,11 +40,12 @@ export async function generateStaticParams() {
 export default async function CarDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
-  const { car } = await getDocBySlug("cars", slug);
+  const carDoc = await getDocBySlug("cars", slug);
 
-  if (!car) notFound();
+  if (!carDoc) notFound();
 
   const {
+    id,
     title,
     name,
     featuredImage,
@@ -59,7 +60,7 @@ export default async function CarDetailPage({ params }) {
     fuelType,
     features = [],
     pickupLocation,
-  } = car;
+  } = carDoc;
 
   const displayName = title || name || "Xe";
   const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
@@ -193,7 +194,7 @@ export default async function CarDetailPage({ params }) {
                 )}
 
                 <a
-                  href={`/checkout?service=${car.id}&type=car`}
+                  href={`/checkout?service=${id}&type=car`}
                   className="block w-full rounded-lg bg-primary text-white text-center font-semibold px-6 py-3 hover:bg-primary-dark transition-colors"
                 >
                   Đặt xe ngay

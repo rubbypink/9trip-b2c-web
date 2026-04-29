@@ -43,7 +43,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
           className
         )}
       >
-        <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer" className="relative h-48 sm:h-auto sm:w-64 flex-shrink-0 overflow-hidden rounded-lg" data-service-type="tour" data-service-id={id}>
+        <Link href={`/tours/${slug}`} className="relative h-48 sm:h-auto sm:w-64 flex-shrink-0 overflow-hidden rounded-lg" data-service-type="tour" data-service-id={id}>
           <Image
             src={featuredImage || "/placeholder.jpg"}
             alt={title}
@@ -63,7 +63,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
               {locationName && <span>{locationName}</span>}
               {durationText && <span>• {durationText}</span>}
             </div>
-            <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer">
+            <Link href={`/tours/${slug}`}>
               <h3 className="text-lg font-semibold text-gray-900 hover:text-primary line-clamp-2">
                 {title}
               </h3>
@@ -87,7 +87,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
         className
       )}
     >
-      <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer" className="relative block aspect-[4/3] overflow-hidden" data-service-type="tour" data-service-id={id}>
+      <Link href={`/tours/${slug}`} className="relative block aspect-[4/3] overflow-hidden" data-service-type="tour" data-service-id={id}>
         <Image
           src={featuredImage || "/placeholder.jpg"}
           alt={title}
@@ -111,7 +111,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
           {locationName && <span>{locationName}</span>}
           {durationText && <span>• {durationText}</span>}
         </div>
-        <Link href={`/tours/${slug}`} target="_blank" rel="noopener noreferrer">
+        <Link href={`/tours/${slug}`}>
           <h3 className="font-semibold text-gray-900 hover:text-primary line-clamp-2 mb-2 min-h-[2.5rem]">
             {title}
           </h3>
