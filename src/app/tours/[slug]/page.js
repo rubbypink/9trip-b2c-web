@@ -53,17 +53,18 @@ export default async function TourDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
-  // Fetch data từ Firestore
-  const [{ tour: rawTour }, { tours: rawRelatedTours }, { reviews, totalRating, avgRating }, pricingTiers] = await Promise.all([
-    getTourBySlug(slug),
-    getRelatedTours(slug),
-    getTourReviews(slug),
-    rawTour ? getTourPricing(rawTour.id) : Promise.resolve([]),
-  ]);
-
+  // Fetch tour trước (cần rawTour.id cho getTourPricing)
+  const { tour: rawTour } = await getTourBySlug(slug);
   if (!rawTour) {
     notFound();
   }
+
+  // Fetch các data còn lại song song (rawTour đã có — không còn TDZ)
+  const [{ tours: rawRelatedTours }, { reviews, totalRating, avgRating }, pricingTiers] = await Promise.all([
+    getRelatedTours(slug),
+    getTourReviews(slug),
+    getTourPricing(rawTour.id),
+  ]);
 
   // Resolve image URLs (gs:// → HTTPS)
   const [tour, relatedTours] = await Promise.all([

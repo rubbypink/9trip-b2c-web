@@ -237,6 +237,7 @@ export async function searchTours(filters = {}) {
 export async function getRelatedTours(slug, count = 4) {
 	const tour = await getDocBySlug('tours', slug);
 	if (!tour) return { tours: [] };
+	if (!tour.locationId) return { tours: [] };
 
 	const q = query(toursCol, where('locationId', '==', tour.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
 	const snap = await getDocs(q);
@@ -782,6 +783,7 @@ export async function getActivityPricing(activityId) {
 export async function getRelatedActivities(slug, count = 4) {
 	const activity = await getDocBySlug('activities', slug);
 	if (!activity) return { activities: [] };
+	if (!activity.locationId) return { activities: [] };
 
 	const q = query(activitiesCol, where('locationId', '==', activity.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
 	const snap = await getDocs(q);

@@ -95,13 +95,13 @@ export default function TourBookingWidget({
       children,
       infants,
       rooms: 1,
-      basePrice: activeTier?.adultPrice || basePrice,
+      basePrice: selectedTier?.adultPrice || basePrice,
       discount: 0,
       total: total,
-      currency: activeTier?.currency || currency,
+      currency: selectedTier?.currency || currency,
     });
     router.push("/checkout");
-  }, [router, tourId, tourTitle, selectedDate, selectedTierId, activeTier, adults, children, infants, total, basePrice, currency, addItem]);
+  }, [router, tourId, tourTitle, selectedDate, selectedTierId, selectedTier, adults, children, infants, total, basePrice, currency, addItem]);
 
   const handleConsult = useCallback(() => {
     const phone = "0886.068.886";
