@@ -122,11 +122,17 @@ export async function getDocBySlug(colName, slug) {
  * Create a document in a collection.
  * @param {string} colName - Firestore collection name
  * @param {Object} data - Document data
- * @returns {Promise<string>} New document ID
+ * @returns {Promise<string|null>} New document ID, or null on error
  */
 export async function createDoc(colName, data) {
-	const ref = await addDoc(collection(db, colName), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-	return ref.id;
+	try {
+		const ref = await addDoc(collection(db, colName), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+		console.log(`[createDoc] ✅ Created ${colName}/${ref.id}`);
+		return ref.id;
+	} catch (error) {
+		console.error(`[createDoc] Error creating ${colName}:`, error.message);
+		return null;
+	}
 }
 
 /**
@@ -136,7 +142,12 @@ export async function createDoc(colName, data) {
  * @param {Object} data - Fields to update
  */
 export async function updateDocById(colName, id, data) {
-	await updateDoc(doc(db, colName, id), { ...data, updatedAt: serverTimestamp() });
+	try {
+		await updateDoc(doc(db, colName, id), { ...data, updatedAt: serverTimestamp() });
+		console.log(`[updateDocById] ✅ Updated ${colName}/${id}`);
+	} catch (error) {
+		console.error(`[updateDocById] Error updating ${colName}/${id}:`, error.message);
+	}
 }
 
 /**
@@ -145,7 +156,12 @@ export async function updateDocById(colName, id, data) {
  * @param {string} id
  */
 export async function deleteDocById(colName, id) {
-	await deleteDoc(doc(db, colName, id));
+	try {
+		await deleteDoc(doc(db, colName, id));
+		console.log(`[deleteDocById] ✅ Deleted ${colName}/${id}`);
+	} catch (error) {
+		console.error(`[deleteDocById] Error deleting ${colName}/${id}:`, error.message);
+	}
 }
 
 // ─── Tours ────────────────────────────────────────────────────────────
@@ -857,8 +873,14 @@ export async function searchActivities(filters = {}) {
  * @returns {Promise<{activity: Object|null}>}
  */
 export async function getActivityBySlug(slug) {
-	const activity = await getDocBySlug('activities', slug);
-	return { activity };
+	try {
+		const activity = await getDocBySlug('activities', slug);
+		console.log(`[getActivityBySlug] ${activity ? '✅ Found' : '❌ Not found'} slug="${slug}"`);
+		return { activity };
+	} catch (error) {
+		console.error(`[getActivityBySlug] Error for slug="${slug}":`, error.message);
+		return { activity: null };
+	}
 }
 
 /**
@@ -887,17 +909,28 @@ export async function getActivityPricing(activityId) {
  * @returns {Promise<{activities: Object[]}>}
  */
 export async function getRelatedActivities(slug, count = 4) {
-	const activity = await getDocBySlug('activities', slug);
-	if (!activity) return { activities: [] };
-	if (!activity.locationId) return { activities: [] };
-
-	const q = query(activitiesCol, where('locationId', '==', activity.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
-	const snap = await getDocs(q);
-	const activities = snap.docs
-		.map((d) => serializeDoc(d))
-		.filter((a) => a.id !== activity.id)
-		.slice(0, count);
-	return { activities };
+	try {
+		const activity = await getDocBySlug('activities', slug);
+		if (!activity) {
+			console.log(`[getRelatedActivities] No activity found for slug="${slug}"`);
+			return { activities: [] };
+		}
+		if (!activity.locationId) {
+			console.log(`[getRelatedActivities] No locationId for activity="${slug}"`);
+			return { activities: [] };
+		}
+		const q = query(activitiesCol, where('locationId', '==', activity.locationId), orderBy('createdAt', 'desc'), limit(count * 2));
+		const snap = await getDocs(q);
+		const activities = snap.docs
+			.map((d) => serializeDoc(d))
+			.filter((a) => a.id !== activity.id)
+			.slice(0, count);
+		console.log(`[getRelatedActivities] ✅ Found ${activities.length} related for "${slug}"`);
+		return { activities };
+	} catch (error) {
+		console.error(`[getRelatedActivities] Error for slug="${slug}":`, error.message);
+		return { activities: [] };
+	}
 }
 
 // ─── Cars ─────────────────────────────────────────────────────────────
@@ -1001,8 +1034,15 @@ export async function searchRentals(filters = {}) {
  * @returns {Promise<Object[]>}
  */
 export const getLocations = cache(async () => {
-	const snap = await getDocs(query(locationsCol, orderBy('name', 'asc')));
-	return snap.docs.map((d) => serializeDoc(d));
+	try {
+		const snap = await getDocs(query(locationsCol, orderBy('name', 'asc')));
+		const locations = snap.docs.map((d) => serializeDoc(d));
+		console.log(`[getLocations] ✅ Found ${locations.length} locations`);
+		return locations;
+	} catch (error) {
+		console.error('[getLocations] Error:', error.message);
+		return [];
+	}
 });
 
 /**
@@ -1011,9 +1051,16 @@ export const getLocations = cache(async () => {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedLocations(count = 8) {
-	const q = query(locationsCol, where('isFeatured', '==', true), limit(count));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => serializeDoc(d));
+	try {
+		const q = query(locationsCol, where('isFeatured', '==', true), limit(count));
+		const snap = await getDocs(q);
+		const locations = snap.docs.map((d) => serializeDoc(d));
+		console.log(`[getFeaturedLocations] ✅ Found ${locations.length} featured locations`);
+		return locations;
+	} catch (error) {
+		console.error('[getFeaturedLocations] Error:', error.message);
+		return [];
+	}
 }
 
 /**
@@ -1022,7 +1069,13 @@ export async function getFeaturedLocations(count = 8) {
  * @returns {Promise<Object|null>}
  */
 export async function getLocationBySlug(slug) {
-	return getDocBySlug('locations', slug);
+	try {
+		const location = await getDocBySlug('locations', slug);
+		return location;
+	} catch (error) {
+		console.error(`[getLocationBySlug] Error for slug="${slug}":`, error.message);
+		return null;
+	}
 }
 
 // ─── Bookings ─────────────────────────────────────────────────────────
@@ -1030,11 +1083,18 @@ export async function getLocationBySlug(slug) {
 /**
  * Create a booking document.
  * @param {Object} bookingData
- * @returns {Promise<string>} Booking ID
+ * @returns {Promise<string|null>} Booking ID, or null on error
  */
 export async function createBooking(bookingData) {
-	const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
-	return createDoc('bookings', { bookingCode, ...bookingData, bookingStatus: 'pending', paymentStatus: 'pending', erpSyncStatus: 'pending' });
+	try {
+		const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
+		const id = await createDoc('bookings', { bookingCode, ...bookingData, bookingStatus: 'pending', paymentStatus: 'pending', erpSyncStatus: 'pending' });
+		console.log(`[createBooking] ✅ Created booking ${id}, code=${bookingCode}`);
+		return id;
+	} catch (error) {
+		console.error('[createBooking] Error:', error.message);
+		return null;
+	}
 }
 
 /**
@@ -1076,21 +1136,34 @@ export async function updateBooking(bookingId, updates) {
  * @returns {Promise<{reviews: Object[], lastVisible: *}>}
  */
 export async function getReviews(serviceType, serviceId, { pageSize = 10, cursor = null } = {}) {
-	const baseConstraints = [where('serviceType', '==', serviceType), where('serviceId', '==', serviceId), where('status', '==', 'approved'), orderBy('createdAt', 'desc')];
+	try {
+		const baseConstraints = [where('serviceType', '==', serviceType), where('serviceId', '==', serviceId), where('status', '==', 'approved'), orderBy('createdAt', 'desc')];
 
-	const q = cursor ? query(reviewsCol, ...baseConstraints, startAfter(cursor), limit(pageSize)) : query(reviewsCol, ...baseConstraints, limit(pageSize));
+		const q = cursor ? query(reviewsCol, ...baseConstraints, startAfter(cursor), limit(pageSize)) : query(reviewsCol, ...baseConstraints, limit(pageSize));
 
-	const snap = await getDocs(q);
-	return { reviews: snap.docs.map((d) => serializeDoc(d)), lastVisible: snap.docs[snap.docs.length - 1] || null };
+		const snap = await getDocs(q);
+		const reviews = snap.docs.map((d) => serializeDoc(d));
+		console.log(`[getReviews] ✅ Found ${reviews.length} reviews for ${serviceType}/${serviceId}`);
+		return { reviews, lastVisible: snap.docs[snap.docs.length - 1] || null };
+	} catch (error) {
+		console.error(`[getReviews] Error for ${serviceType}/${serviceId}:`, error.message);
+		return { reviews: [], lastVisible: null };
+	}
 }
 
 /**
  * Submit a review.
  * @param {Object} reviewData
- * @returns {Promise<string>}
+ * @returns {Promise<string|null>}
  */
 export async function createReview(reviewData) {
-	return createDoc('reviews', { ...reviewData, status: 'pending' });
+	try {
+		const id = await createDoc('reviews', { ...reviewData, status: 'pending' });
+		return id;
+	} catch (error) {
+		console.error('[createReview] Error:', error.message);
+		return null;
+	}
 }
 
 /**
@@ -1099,9 +1172,16 @@ export async function createReview(reviewData) {
  * @returns {Promise<Object[]>}
  */
 export async function getUserReviews(userId) {
-	const q = query(reviewsCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => serializeDoc(d));
+	try {
+		const q = query(reviewsCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+		const snap = await getDocs(q);
+		const reviews = snap.docs.map((d) => serializeDoc(d));
+		console.log(`[getUserReviews] ✅ Found ${reviews.length} reviews for user=${userId}`);
+		return reviews;
+	} catch (error) {
+		console.error(`[getUserReviews] Error for user=${userId}:`, error.message);
+		return [];
+	}
 }
 
 // ─── Users ────────────────────────────────────────────────────────────
