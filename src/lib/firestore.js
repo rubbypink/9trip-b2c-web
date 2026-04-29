@@ -366,8 +366,8 @@ export async function getFeaturedHotels(count = 6) {
 }
 
 /**
- * Fetch rooms for a specific hotel.
- * Sorts by price client-side to avoid composite index requirement.
+ * @deprecated Use rooms embedded field in hotel document (`hotel.rooms`) instead.
+ * Fetch rooms for a specific hotel from top-level rooms collection.
  * @param {string} hotelId
  * @returns {Promise<Object[]>}
  */
@@ -423,8 +423,8 @@ export async function getRelatedHotels(currentSlug, locationId, count = 3) {
 }
 
 /**
+ * @deprecated Use resolveRoomPricing() with hotel_price_schedules instead.
  * Fetch pricing tiers for a specific room (subcollection: rooms/{roomId}/roomPricing).
- * Sorted by sortOrder ascending. Tương tự getTourPricing pattern.
  * @param {string} roomId
  * @returns {Promise<Object[]>}
  */
@@ -441,8 +441,8 @@ export async function getRoomPricing(roomId) {
 }
 
 /**
+ * @deprecated Use getHotelPriceSchedule() + buildRoomPricingTable() instead.
  * Fetch tổng hợp pricing cho hotel: lấy tất cả rooms + pricing tiers.
- * Dùng cho view tổng hợp ở sidebar và room cards.
  * @param {string} hotelId
  * @returns {Promise<Object[]>} Array of rooms với pricingTiers embedded
  */
@@ -497,194 +497,182 @@ export async function getHotelReviews(slug) {
 	}
 }
 
-// ─── Hotels v3: Room Types, Physical Rooms, Inventory ─────────────────
+// ─── Hotels v4: Embedded Rooms + Hotel Price Schedules ────────────────
 
 /**
- * Fetch room types for a hotel (subcollection: hotels/{hotelId}/roomTypes).
- * Sorted by sortOrder ascending.
- * Hotels v3 schema — thay thế rooms/ flat collection cho UI.
+ * Fetch a hotel price schedule for a specific hotel and year.
+ * Queries the hotel_price_schedules collection.
  * @param {string} hotelId
- * @returns {Promise<Object[]>}
+ * @param {number} [year] - Mặc định năm hiện tại
+ * @returns {Promise<Object|null>} Schedule document hoặc null
  */
-export async function getRoomTypesByHotel(hotelId) {
-	try {
-		const roomTypesCol = collection(db, 'hotels', hotelId, 'roomTypes');
-		const q = query(roomTypesCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getRoomTypesByHotel] Error:', error.message);
-		// Fallback: dùng rooms/ top-level collection
-		return getRoomsByHotel(hotelId);
-	}
+export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYear()) {
+  try {
+    const schedulesCol = collection(db, 'hotel_price_schedules');
+    const q = query(
+      schedulesCol,
+      where('info.hotelId', '==', hotelId),
+      where('info.year', '==', year),
+      where('info.status', '==', 'actived'),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    return snap.empty ? null : serializeDoc(snap.docs[0]);
+  } catch (error) {
+    console.error('[getHotelPriceSchedule] Error:', error.message);
+    return null;
+  }
 }
 
 /**
- * Fetch pricing tiers for a room type (subcollection: hotels/{hotelId}/roomTypes/{roomTypeId}/roomPricing).
- * Hotels v3 schema — path mới thay cho rooms/{roomId}/roomPricing.
- * @param {string} hotelId
- * @param {string} roomTypeId
- * @returns {Promise<Object[]>}
+ * Resolve pricing for a specific room on a specific date from a price schedule.
+ * Parses the priceData map to find all rate types and periods matching the date.
+ * @param {Object} priceSchedule - Document từ hotel_price_schedules
+ * @param {string} roomId - ID của phòng (khớp với rooms[].id trong hotel doc)
+ * @param {string} date - Ngày cần tra (YYYY-MM-DD)
+ * @returns {Array<{rateType: string, costPrice: number, sellPrice: number, startDate: string, endDate: string, supplier: string, periodKey: string}>}
  */
-export async function getRoomTypePricing(hotelId, roomTypeId) {
-	try {
-		const pricingCol = collection(db, 'hotels', hotelId, 'roomTypes', roomTypeId, 'roomPricing');
-		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getRoomTypePricing] Error:', error.message);
-		// Fallback: dùng old path rooms/{roomId}/roomPricing
-		const oldPricing = await getRoomPricing(roomTypeId);
-		return oldPricing;
-	}
+export function resolveRoomPricing(priceSchedule, roomId, date) {
+  if (!priceSchedule?.priceData) return [];
+  const priceData = priceSchedule.priceData;
+  const result = [];
+  const prefix = roomId + '_';
+  for (const [key, periods] of Object.entries(priceData)) {
+    if (!key.startsWith(prefix)) continue;
+    const rateType = key.slice(prefix.length);
+    if (typeof periods !== 'object' || periods === null) continue;
+    for (const [periodKey, pricing] of Object.entries(periods)) {
+      if (!pricing || typeof pricing !== 'object') continue;
+      if (date >= pricing.startDate && date <= pricing.endDate) {
+        result.push({
+          rateType,
+          costPrice: pricing.costPrice || 0,
+          sellPrice: pricing.sellPrice || 0,
+          startDate: pricing.startDate,
+          endDate: pricing.endDate,
+          supplier: pricing.supplier || '',
+          periodKey,
+        });
+      }
+    }
+  }
+  // Sort by sellPrice ascending
+  result.sort((a, b) => a.sellPrice - b.sellPrice);
+  return result;
 }
 
 /**
- * Fetch tổng hợp pricing cho hotel từ roomTypes subcollection.
- * Hotels v3 — thay thế getHotelPricing (dùng rooms flat).
- * @param {string} hotelId
- * @returns {Promise<Object[]>} Array of roomTypes với pricingTiers embedded
- */
-export async function getHotelPricingV3(hotelId) {
-	try {
-		// Lấy tất cả room types
-		const roomTypes = await getRoomTypesByHotel(hotelId);
-		if (roomTypes.length === 0) return [];
-
-		// Lấy pricing tiers cho mỗi room type song song
-		const roomTypesWithPricing = await Promise.all(
-			roomTypes.map(async (rt) => {
-				const pricingTiers = await getRoomTypePricing(hotelId, rt.id);
-				return { ...rt, pricingTiers };
-			})
-		);
-		return roomTypesWithPricing;
-	} catch (error) {
-		console.error('[getHotelPricingV3] Error:', error.message);
-		return [];
-	}
-}
-
-/**
- * Fetch physical rooms for a hotel (subcollection: hotels/{hotelId}/rooms).
- * Dùng cho inventory tracking: mỗi document = 1 phòng vật lý.
- * @param {string} hotelId
- * @param {string} [roomTypeId] - Optional: filter by room type
- * @returns {Promise<Object[]>}
- */
-export async function getPhysicalRooms(hotelId, roomTypeId = null) {
-	try {
-		const roomsSubCol = collection(db, 'hotels', hotelId, 'rooms');
-		let q;
-		if (roomTypeId) {
-			q = query(roomsSubCol, where('roomTypeId', '==', roomTypeId), where('isActive', '==', true));
-		} else {
-			q = query(roomsSubCol, where('isActive', '==', true));
-		}
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getPhysicalRooms] Error:', error.message);
-		return [];
-	}
-}
-
-/**
- * Fetch daily inventory for a hotel (subcollection: hotels/{hotelId}/inventory).
- * Mỗi document = 1 ngày, chứa map roomType → availability.
- * @param {string} hotelId
- * @param {string} [startDate] - YYYY-MM-DD, mặc định hôm nay
- * @param {number} [days] - Số ngày, mặc định 30
- * @returns {Promise<Object[]>}
- */
-export async function getHotelInventory(hotelId, startDate = null, days = 30) {
-	try {
-		const today = startDate || new Date().toISOString().split('T')[0];
-		const endDate = new Date(today);
-		endDate.setDate(endDate.getDate() + days);
-		const endStr = endDate.toISOString().split('T')[0];
-
-		const inventoryCol = collection(db, 'hotels', hotelId, 'inventory');
-		const q = query(
-			inventoryCol,
-			where('date', '>=', today),
-			where('date', '<=', endStr),
-			orderBy('date', 'asc')
-		);
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getHotelInventory] Error:', error.message);
-		return [];
-	}
-}
-
-/**
- * Fetch inventory for a specific date.
- * @param {string} hotelId
+ * Get the lowest sell price for a room on a specific date.
+ * Used by HotelCard to display the best available price.
+ * @param {Object} priceSchedule - Document từ hotel_price_schedules
+ * @param {string} roomId
  * @param {string} date - YYYY-MM-DD
- * @returns {Promise<Object|null>}
+ * @returns {number} Lowest sellPrice, or 0 if not found
  */
-export async function getHotelInventoryByDate(hotelId, date) {
-	try {
-		const inventoryCol = collection(db, 'hotels', hotelId, 'inventory');
-		const q = query(inventoryCol, where('date', '==', date), limit(1));
-		const snap = await getDocs(q);
-		if (snap.empty) return null;
-		return serializeDoc(snap.docs[0]);
-	} catch (error) {
-		console.error('[getHotelInventoryByDate] Error:', error.message);
-		return null;
-	}
+export function getLowestRoomPrice(priceSchedule, roomId, date) {
+  const pricing = resolveRoomPricing(priceSchedule, roomId, date);
+  if (pricing.length === 0) return 0;
+  return pricing[0].sellPrice; // Already sorted ascending
 }
 
 /**
- * Tính số phòng còn trống thực tế cho 1 hotel vào 1 ngày cụ thể.
- * Kết hợp: inventory subcollection + bookings + holds.
- * Hotels v3 — thay thế getRealAvailability cho hotel.
- * @param {string} hotelId
+ * Get the lowest price across all rooms in a hotel for a given date.
+ * Used by HotelCard on listing pages.
+ * @param {Object} priceSchedule
+ * @param {Array<Object>} rooms - Array from hotel.rooms
  * @param {string} date - YYYY-MM-DD
- * @param {string} roomTypeId - Loại phòng cần kiểm tra
- * @param {number} totalRooms - Tổng số phòng loại này
- * @returns {Promise<number>}
+ * @returns {number}
  */
-export async function getHotelRoomAvailability(hotelId, date, roomTypeId, totalRooms) {
-	try {
-		// 1. Check inventory subcollection first
-		const inventory = await getHotelInventoryByDate(hotelId, date);
-		if (inventory && inventory.roomTypes?.[roomTypeId]?.available !== undefined) {
-			return inventory.roomTypes[roomTypeId].available;
-		}
+export function getHotelLowestPrice(priceSchedule, rooms, date) {
+  if (!rooms || rooms.length === 0) return 0;
+  let lowest = Infinity;
+  for (const room of rooms) {
+    if (!room.isActive) continue;
+    const price = getLowestRoomPrice(priceSchedule, room.id, date);
+    if (price > 0 && price < lowest) lowest = price;
+  }
+  return lowest === Infinity ? 0 : lowest;
+}
 
-		// 2. Calculate from bookings + holds
-		const confirmedBookings = await getDocs(
-			query(
-				bookingsCol,
-				where('serviceId', '==', hotelId),
-				where('serviceType', '==', 'hotel'),
-				where('startDate', '==', date),
-				where('bookingStatus', '==', 'confirmed')
-			)
-		);
-		const bookedCount = confirmedBookings.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+/**
+ * Build a pricing table data structure for hotel detail page display.
+ * For each room, returns all rate types with their prices for each day in the date range.
+ * @param {Object} priceSchedule - Document từ hotel_price_schedules
+ * @param {Array<Object>} rooms - Array from hotel.rooms (embedded)
+ * @param {string} checkIn - YYYY-MM-DD
+ * @param {string} checkOut - YYYY-MM-DD
+ * @returns {Array<Object>} Table rows:
+ *   [{ roomId, roomName, totalRooms, maxGuests, rateTypes: [{ rateType, dailyPrices: [{date, sellPrice, costPrice}], avgSellPrice }] }]
+ */
+export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
+  if (!rooms || rooms.length === 0) return [];
 
-		const now = new Date();
-		const activeHolds = await getDocs(
-			query(
-				collection(db, 'inventory_holds'),
-				where('serviceId', '==', hotelId),
-				where('startDate', '==', date),
-				where('expiresAt', '>', now)
-			)
-		);
-		const heldCount = activeHolds.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
+  const ci = new Date(checkIn);
+  const co = new Date(checkOut);
+  if (isNaN(ci.getTime()) || isNaN(co.getTime()) || co <= ci) {
+    // Invalid dates — use a single date fallback (today)
+    const today = new Date().toISOString().split('T')[0];
+    return rooms.filter(r => r.isActive).map(room => {
+      const allPricing = resolveRoomPricing(priceSchedule, room.id, today);
+      // Group by rateType
+      const rateTypeMap = {};
+      for (const p of allPricing) {
+        if (!rateTypeMap[p.rateType]) {
+          rateTypeMap[p.rateType] = { rateType: p.rateType, dailyPrices: [], avgSellPrice: 0 };
+        }
+        rateTypeMap[p.rateType].dailyPrices.push({ date: today, sellPrice: p.sellPrice, costPrice: p.costPrice });
+      }
+      const rateTypes = Object.values(rateTypeMap).map(rt => {
+        rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + d.sellPrice, 0) / rt.dailyPrices.length;
+        return rt;
+      });
+      return {
+        roomId: room.id,
+        roomName: room.name,
+        totalRooms: room.totalRooms || 0,
+        maxGuests: room.maxGuests || 0,
+        bedType: room.bedType || '',
+        amenities: room.amenities || [],
+        included: room.included || [],
+        rateTypes,
+      };
+    });
+  }
 
-		return Math.max(0, totalRooms - bookedCount - heldCount);
-	} catch (error) {
-		console.error('[getHotelRoomAvailability] Error:', error.message);
-		return totalRooms;
-	}
+  // Generate date array
+  const dates = [];
+  for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toISOString().split('T')[0]);
+  }
+  const nights = dates.length;
+
+  return rooms.filter(r => r.isActive).map(room => {
+    const rateTypeMap = {};
+    for (const date of dates) {
+      const pricing = resolveRoomPricing(priceSchedule, room.id, date);
+      for (const p of pricing) {
+        if (!rateTypeMap[p.rateType]) {
+          rateTypeMap[p.rateType] = { rateType: p.rateType, dailyPrices: [], avgSellPrice: 0 };
+        }
+        rateTypeMap[p.rateType].dailyPrices.push({ date, sellPrice: p.sellPrice, costPrice: p.costPrice });
+      }
+    }
+    const rateTypes = Object.values(rateTypeMap).map(rt => {
+      rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + d.sellPrice, 0) / (rt.dailyPrices.length || 1);
+      return rt;
+    });
+    return {
+      roomId: room.id,
+      roomName: room.name,
+      totalRooms: room.totalRooms || 0,
+      maxGuests: room.maxGuests || 0,
+      bedType: room.bedType || '',
+      amenities: room.amenities || [],
+      included: room.included || [],
+      featuredImage: room.featuredImage || '',
+      rateTypes,
+    };
+  });
 }
 
 // ─── Activities ───────────────────────────────────────────────────────

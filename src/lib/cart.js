@@ -79,6 +79,28 @@ export function CartProvider({ children }) {
   }, []);
 
   /**
+   * Update quantity for a cart item by index.
+   * Recalculates total based on unit price × new quantity.
+   * @param {number} index
+   * @param {number} newQuantity
+   */
+  const updateItemQuantity = useCallback((index, newQuantity) => {
+    setItems((prev) => {
+      const copy = [...prev];
+      if (copy[index]) {
+        const item = copy[index];
+        const qty = Math.max(1, Math.min(10, newQuantity));
+        const unitPrice = item.basePrice || 0;
+        copy[index] = { ...item, rooms: qty, total: unitPrice * qty };
+      }
+      return copy;
+    });
+    setCouponCode(null);
+    setCouponDiscount(0);
+    setCouponData(null);
+  }, []);
+
+  /**
    * Clear the entire cart.
    */
   const clearCart = useCallback(() => {
@@ -144,6 +166,7 @@ export function CartProvider({ children }) {
     grandTotal,
     addItem,
     removeItem,
+    updateItemQuantity,
     clearCart,
     applyCoupon,
     removeCoupon,

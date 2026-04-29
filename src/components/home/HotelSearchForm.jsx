@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 
 /**
  * HotelSearchForm — Form tìm kiếm khách sạn trên homepage.
- * Gồm: điểm đến, ngày nhận phòng, ngày trả phòng, số khách, nút tìm kiếm.
+ * Nhận `locations` prop từ Server Component, fallback về hardcode nếu không có.
+ * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
-export default function HotelSearchForm() {
+export default function HotelSearchForm({ locations = [] }) {
   const router = useRouter();
   const [location, setLocation] = useState("");
   const [checkin, setCheckin] = useState("");
@@ -15,24 +16,26 @@ export default function HotelSearchForm() {
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
 
-  /** Điểm đến phổ biến */
-  const destinations = [
-    { value: "", label: "Tất cả điểm đến" },
-    { value: "phu-quoc", label: "Phú Quốc" },
-    { value: "da-nang", label: "Đà Nẵng" },
-    { value: "nha-trang", label: "Nha Trang" },
-    { value: "hoi-an", label: "Hội An" },
-    { value: "ha-long", label: "Hạ Long" },
-    { value: "da-lat", label: "Đà Lạt" },
-    { value: "sapa", label: "Sapa" },
-    { value: "hue", label: "Huế" },
-    { value: "ho-chi-minh", label: "TP. Hồ Chí Minh" },
-  ];
+  /** Danh sách điểm đến: ưu tiên dữ liệu từ Firestore, fallback hardcode */
+  const destinations = locations && locations.length > 0
+    ? [{ value: "", label: "Tất cả điểm đến" }, ...locations.map((loc) => ({ value: loc.id, label: loc.name }))]
+    : [
+        { value: "", label: "Tất cả điểm đến" },
+        { value: "phu-quoc", label: "Phú Quốc" },
+        { value: "da-nang", label: "Đà Nẵng" },
+        { value: "nha-trang", label: "Nha Trang" },
+        { value: "hoi-an", label: "Hội An" },
+        { value: "ha-long", label: "Hạ Long" },
+        { value: "da-lat", label: "Đà Lạt" },
+        { value: "sapa", label: "Sapa" },
+        { value: "hue", label: "Huế" },
+        { value: "ho-chi-minh", label: "TP. Hồ Chí Minh" },
+      ];
 
   function handleSearch(e) {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (location) params.set("location", location);
+    if (location) params.set("locationId", location);
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);
     if (adults > 0) params.set("adults", String(adults));

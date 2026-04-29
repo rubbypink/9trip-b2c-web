@@ -29,36 +29,10 @@ npm run lint   # ESLint
 ```
 ERP (nội bộ) ──sync 1 chiều──→ Firestore (read-only) ──read──→ 9Trip Web
 ```
-
-- **Web NEVER writes** to: `tours`, `hotels`, `rooms`, `activities`, `cars`, `rentals`, `locations`, `settings`, `coupons`
-- **Web reads & creates own data**: `bookings`, `reviews` (own), `users` (own profile)
 - **No admin dashboard, no partner dashboard** — only 1 role: `customer`
 - See `memory-bank/projectbrief.md` and `memory-bank/techContext.md` for full details
 
 ## Critical Patterns
-
-### Server / Client Boundary
-
-```jsx
-// Pages are Server Components (default) — can be async, fetch directly
-export default async function ToursPage({ searchParams }) {
-  const { tours } = await searchTours(filters);
-  return <TourList tours={tours} />;
-}
-
-// Client Components MUST have 'use client' directive
-"use client";
-export default function BookingForm({ tourId }) { /* state, effects, handlers */ }
-```
-
-### Firestore Data Serialization
-
-Always use helpers before passing Firestore data to Client Components (avoids Next.js serialization errors with Timestamps):
-
-```js
-import { serializeDoc, serializeTimestamp } from "@/lib/firestore";
-const doc = serializeDoc(snapshot); // → { id, ...data }
-```
 
 ### Auth Wrapper Pattern
 
@@ -68,26 +42,9 @@ Root `layout.js` is a Server Component — wrap client context providers in a Cl
 layout.js (Server) → AuthWrapper (Client) → AuthProvider → CartProvider → Header/Footer
 ```
 
-### Component Documentation
-
-Every function and component must have a JSDoc block:
-
-```jsx
-/**
- * TourFilters — Sidebar filter panel for tour listing.
- * Supports filtering by location, type, price range, rating, and sort.
- * @param {{ filters: Object, locations: Array<{id:string, name:string}> }} props
- */
-export default function TourFilters({ filters, locations }) { ... }
-```
-
-### Cart State
-
-Zustand-based cart with persist middleware. See `src/lib/cart.js`.
-
 ### Route Conventions
 
-- Public: `/tours`, `/hotels`, `/activities`, `/cars`, `/rentals`
+- Public: `/tours`, `/hotels`, `/activities`, `/cars`
 - Auth-protected: `/checkout`, `/cart`, `/account/**`
 - API: `src/app/api/webhooks/payment/route.js`
 
@@ -96,7 +53,7 @@ Zustand-based cart with persist middleware. See `src/lib/cart.js`.
 - ❌ Admin Dashboard / CMS pages
 - ❌ Partner registration or partner portal
 - ❌ CRUD endpoints for service collections (tours, hotels, etc.)
-- ❌ Multi-language (phase 1: Vietnamese only)
+- ❌ Multi-language (Vietnamese and English)
 - ❌ Pages Router routes (`pages/` directory)
 - ❌ TypeScript files
 
@@ -113,4 +70,4 @@ Zustand-based cart with persist middleware. See `src/lib/cart.js`.
 | `src/app/globals.css` | Tailwind v4 + design tokens |
 | `next.config.mjs` | Next.js config (React Compiler enabled) |
 
-For full project context, see `memory-bank/` (projectbrief, techContext, systemPatterns, productContext, activeContext, progress).
+

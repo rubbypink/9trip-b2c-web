@@ -135,8 +135,7 @@ export default function CheckoutPage() {
 
   if (showEmptyCart) {
     return (
-      <AuthGuard>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center max-w-md px-4">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
@@ -155,13 +154,11 @@ export default function CheckoutPage() {
             </div>
           </div>
         </div>
-      </AuthGuard>
     );
   }
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50 py-10">
         <div className="container mx-auto px-4 max-w-6xl">
           <header className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-gray-900">Thanh toán</h1>
@@ -256,6 +253,5 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    </AuthGuard>
   );
 }

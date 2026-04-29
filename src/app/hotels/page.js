@@ -4,6 +4,7 @@ import { resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
+import SearchFormPopup from "@/components/shared/SearchFormPopup";
 
 export const metadata = {
   title: "Khách Sạn & Nghỉ Dưỡng — 9Trip",
@@ -53,6 +54,14 @@ export default async function HotelsPage({ searchParams }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
+        {/* Search Form Popup — quick change search */}
+        <div className="mb-6">
+          <SearchFormPopup
+            type="hotel"
+            locations={locations}
+            currentFilters={filters}
+          />
+        </div>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside>

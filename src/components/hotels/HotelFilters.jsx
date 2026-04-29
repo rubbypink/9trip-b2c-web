@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * HotelFilters — sidebar filter cho trang danh sách khách sạn.
- * Các filter: hạng sao, giá, tiện nghi, khu vực.
+ * Các filter: hạng sao, giá, tiện nghi, khu vực, sắp xếp.
+ * @param {{ locations?: Array<{id: string, name: string}>, className?: string }} props
  */
 export default function HotelFilters({ locations = [], className }) {
   const router = useRouter();
@@ -15,7 +16,24 @@ export default function HotelFilters({ locations = [], className }) {
   const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [starRating, setStarRating] = useState(searchParams.get("starRating") || "");
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "newest");
+  const [selectedAmenities, setSelectedAmenities] = useState(
+    searchParams.get("amenities") ? searchParams.get("amenities").split(",") : []
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const AMENITIES_LIST = [
+    "Wifi miễn phí", "Hồ bơi", "Spa", "Bãi biển riêng",
+    "Phòng gym", "Nhà hàng", "Bar", "Đưa đón sân bay",
+    "Điều hòa", "Bồn tắm", "Ban công", "View biển",
+  ];
+
+  const SORT_OPTIONS = [
+    { value: "newest", label: "Mới nhất" },
+    { value: "price_asc", label: "Giá thấp → cao" },
+    { value: "price_desc", label: "Giá cao → thấp" },
+    { value: "rating", label: "Đánh giá cao nhất" },
+  ];
 
   const applyFilter = (key, value) => {
     const params = new URLSearchParams(searchParams);
@@ -78,6 +96,23 @@ export default function HotelFilters({ locations = [], className }) {
         </div>
       </div>
 
+      {/* Sort */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-800 mb-3">Sắp xếp</h4>
+        <select
+          value={sortBy}
+          onChange={(e) => {
+            setSortBy(e.target.value);
+            applyFilter("sortBy", e.target.value);
+          }}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 cursor-pointer"
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+
       {/* Price Range */}
       <div>
         <h4 className="text-sm font-semibold text-gray-800 mb-3">Khoảng giá (đêm)</h4>
@@ -99,6 +134,41 @@ export default function HotelFilters({ locations = [], className }) {
             onBlur={() => applyFilter("maxPrice", maxPrice)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
           />
+        </div>
+      </div>
+
+      {/* Amenities */}
+      <div>
+        <h4 className="text-sm font-semibold text-gray-800 mb-3">Tiện nghi</h4>
+        <div className="space-y-1.5 max-h-52 overflow-y-auto pr-2">
+          {AMENITIES_LIST.map((amenity) => (
+            <label
+              key={amenity}
+              className={cn(
+                "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer",
+                selectedAmenities.includes(amenity)
+                  ? "bg-blue-50 text-blue-600 font-medium"
+                  : "text-gray-600 hover:bg-gray-50"
+              )}
+            >
+              <input
+                type="checkbox"
+                checked={selectedAmenities.includes(amenity)}
+                onChange={() => {
+                  const updated = selectedAmenities.includes(amenity)
+                    ? selectedAmenities.filter((a) => a !== amenity)
+                    : [...selectedAmenities, amenity];
+                  setSelectedAmenities(updated);
+                  applyFilter("amenities", updated.length > 0 ? updated.join(",") : "");
+                }}
+                className="sr-only"
+              />
+              <svg className={cn("h-4 w-4 flex-shrink-0", selectedAmenities.includes(amenity) ? "text-blue-600" : "text-gray-300")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {amenity}
+            </label>
+          ))}
         </div>
       </div>
 

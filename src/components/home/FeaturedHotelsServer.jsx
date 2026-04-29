@@ -41,8 +41,6 @@ export default async function FeaturedHotelsServer() {
             <Link
               key={hotel.id}
               href={`/hotels/${hotel.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
               data-service-type="hotel"
               data-service-id={hotel.id}
               className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"

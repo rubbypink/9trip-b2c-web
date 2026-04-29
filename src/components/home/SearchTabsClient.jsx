@@ -6,8 +6,9 @@ import HotelSearchForm from "./HotelSearchForm";
 /**
  * SearchTabsClient — Tab điều hướng giữa các loại tìm kiếm: Tour, Khách sạn, Vé máy bay.
  * Sử dụng 'use client' để xử lý state tab active.
+ * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
-export default function SearchTabsClient() {
+export default function SearchTabsClient({ locations }) {
   const [activeTab, setActiveTab] = useState("tour");
 
   const tabs = [
@@ -38,9 +39,9 @@ export default function SearchTabsClient() {
         ))}
       </div>
 
-      {/* Search Form theo tab */}
-      {activeTab === "tour" && <TourSearchForm />}
-      {activeTab === "hotel" && <HotelSearchForm />}
+      {/* Search Form theo tab — truyền locations xuống */}
+      {activeTab === "tour" && <TourSearchForm locations={locations} />}
+      {activeTab === "hotel" && <HotelSearchForm locations={locations} />}
       {activeTab === "flight" && <PlaceholderForm label="Tìm vé máy bay" />}
     </div>
   );
@@ -48,8 +49,23 @@ export default function SearchTabsClient() {
 
 /**
  * TourSearchForm — Form tìm kiếm tour với điểm đến, ngày đi, giá.
+ * Nhận `locations` prop, fallback về hardcode nếu không có.
+ * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
-function TourSearchForm() {
+function TourSearchForm({ locations }) {
+  const destinationList = locations && locations.length > 0
+    ? [{ value: "", label: "Chọn điểm đến" }, ...locations.map((loc) => ({ value: loc.id, label: loc.name }))]
+    : [
+        { value: "", label: "Chọn điểm đến" },
+        { value: "ha-long", label: "Hạ Long" },
+        { value: "da-nang", label: "Đà Nẵng" },
+        { value: "hoi-an", label: "Hội An" },
+        { value: "nha-trang", label: "Nha Trang" },
+        { value: "phu-quoc", label: "Phú Quốc" },
+        { value: "da-lat", label: "Đà Lạt" },
+        { value: "sapa", label: "Sapa" },
+      ];
+
   return (
     <form
       onSubmit={(e) => {
@@ -70,16 +86,17 @@ function TourSearchForm() {
               className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
               defaultValue=""
             >
-              <option value="" disabled>
-                Chọn điểm đến
-              </option>
-              <option value="ha-long">Hạ Long</option>
-              <option value="da-nang">Đà Nẵng</option>
-              <option value="hoi-an">Hội An</option>
-              <option value="nha-trang">Nha Trang</option>
-              <option value="phu-quoc">Phú Quốc</option>
-              <option value="da-lat">Đà Lạt</option>
-              <option value="sapa">Sapa</option>
+              {destinationList.map((d) =>
+                d.value === "" ? (
+                  <option key="" value="" disabled>
+                    {d.label}
+                  </option>
+                ) : (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                )
+              )}
             </select>
           </div>
         </div>

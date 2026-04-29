@@ -131,7 +131,7 @@ export default function ConfirmationPage({ params }) {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Link 
                 href="/account/bookings" 
                 className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-colors"
@@ -144,6 +144,36 @@ export default function ConfirmationPage({ params }) {
               >
                 Tiếp tục khám phá
               </Link>
+            </div>
+
+            {/* Upsells — Dịch vụ phổ biến cùng khu vực */}
+            <div className="pt-8 border-t border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">🎯 Khám phá thêm hoạt động hấp dẫn</h3>
+              <p className="text-sm text-gray-500 mb-5">Những hoạt động được yêu thích nhất gần khu vực của bạn</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { name: "Tour cáp treo Hòn Thơm", price: "600.000đ", img: "", desc: "Trải nghiệm cáp treo vượt biển dài nhất thế giới" },
+                  { name: "VinWonders Phú Quốc", price: "800.000đ", img: "", desc: "Công viên giải trí & vui chơi hàng đầu" },
+                  { name: "Tour lặn ngắm san hô", price: "500.000đ", img: "", desc: "Khám phá đại dương Nam đảo Phú Quốc" },
+                ].map((activity, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded-xl border border-gray-200 p-4 hover:border-primary-200 hover:shadow-sm transition-all group cursor-pointer">
+                    <div className="w-full h-24 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mb-3">
+                      <span className="text-2xl">{["🚡", "🎢", "🐠"][idx]}</span>
+                    </div>
+                    <h4 className="font-semibold text-gray-900 text-sm group-hover:text-primary transition-colors">{activity.name}</h4>
+                    <p className="text-xs text-gray-500 mt-1">{activity.desc}</p>
+                    <div className="flex items-center justify-between mt-3">
+                      <span className="text-sm font-bold text-primary">Từ {activity.price}</span>
+                      <Link
+                        href="/activities"
+                        className="text-xs text-blue-600 hover:underline font-medium"
+                      >
+                        Xem thêm →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
