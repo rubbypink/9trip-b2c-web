@@ -433,44 +433,57 @@ export async function getRoomsByHotel(hotelId) {
 
 /**
  * Fetch a single hotel by slug.
- * @param {string} slug
+ * @param {string} slug - Hotel URL slug
  * @returns {Promise<{hotel: Object|null}>}
  */
 export async function getHotelBySlug(slug) {
 	try {
 		const q = query(hotelsCol, where('slug', '==', slug), limit(1));
 		const snap = await getDocs(q);
-		if (snap.empty) return { hotel: null };
-		return { hotel: serializeDoc(snap.docs[0]) };
+		if (snap.empty) {
+			console.log(`[getHotelBySlug] No hotel found for slug: "${slug}"`);
+			return { hotel: null };
+		}
+		const hotel = serializeDoc(snap.docs[0]);
+		console.log(`[getHotelBySlug] ✅ Found hotel: id=${hotel.id}, name="${hotel.name}", rooms=${hotel.rooms?.length || 0}, slug="${slug}"`);
+		return { hotel };
 	} catch (error) {
-		console.error('[getHotelBySlug] Error:', error.message);
+		console.error(`[getHotelBySlug] Error for slug="${slug}":`, error.message);
 		return { hotel: null };
 	}
 }
 
 /**
  * Fetch related hotels by location.
- * Note: Firestore does not support '!=' in queries, so we fetch extra
- * and filter out the current hotel on the client side.
+ * Note: Sorts client-side by rating to avoid composite index requirement
+ * on `address.cityId` + `rating`.
  * @param {string} currentSlug - slug của hotel hiện tại để loại trừ
  * @param {string} locationId - ID của địa điểm
- * @param {number} count
+ * @param {number} count - Số lượng khách sạn liên quan cần lấy
  * @returns {Promise<{hotels: Object[]}>}
  */
 export async function getRelatedHotels(currentSlug, locationId, count = 3) {
-	if (!locationId) return { hotels: [] };
+	if (!locationId) {
+		console.log('[getRelatedHotels] No locationId provided, returning empty');
+		return { hotels: [] };
+	}
 	try {
+		// Fetch more hotels than needed to account for filtering + client-side sort
 		const q = query(
 			hotelsCol,
 			where('address.cityId', '==', locationId),
-			orderBy('rating', 'desc'),
-			limit(count + 1)
+			limit(count + 10)
 		);
 		const snap = await getDocs(q);
-		const hotels = snap.docs
+		let hotels = snap.docs
 			.map((d) => serializeDoc(d))
-			.filter((h) => h.slug !== currentSlug)
-			.slice(0, count);
+			.filter((h) => h.slug !== currentSlug);
+		
+		// Sort client-side by rating (desc) to avoid composite index requirement
+		hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
+		hotels = hotels.slice(0, count);
+		
+		console.log(`[getRelatedHotels] Found ${hotels.length} related hotels for locationId=${locationId}`);
 		return { hotels };
 	} catch (error) {
 		console.error('[getRelatedHotels] Error:', error.message);
@@ -531,7 +544,10 @@ export async function getHotelPricing(hotelId) {
 export async function getHotelReviews(slug) {
 	try {
 		const hotel = await getDocBySlug('hotels', slug);
-		if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
+		if (!hotel) {
+			console.log(`[getHotelReviews] No hotel found for slug="${slug}"`);
+			return { reviews: [], totalRating: 0, avgRating: 0 };
+		}
 
 		const { reviews } = await getReviews('hotel', hotel.id);
 		const totalRating = reviews.length;
@@ -539,17 +555,24 @@ export async function getHotelReviews(slug) {
 			? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating
 			: hotel.rating?.average || 0;
 
+		console.log(`[getHotelReviews] ✅ Found ${reviews.length} reviews for hotelId=${hotel.id}, avgRating=${avgRating.toFixed(1)}`);
 		return { reviews, totalRating, avgRating };
 	} catch (error) {
-		console.error('[getHotelReviews] Error:', error.message);
+		console.error('[getHotelReviews] ❌ Error:', error.message);
 		// Fallback: dùng rating từ hotel document
-		const hotel = await getDocBySlug('hotels', slug);
-		if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
-		return {
-			reviews: [],
-			totalRating: hotel.rating?.count || 0,
-			avgRating: hotel.rating?.average || 0,
-		};
+		try {
+			const hotel = await getDocBySlug('hotels', slug);
+			if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
+			console.log(`[getHotelReviews] Fallback: using hotel.rating for slug="${slug}"`);
+			return {
+				reviews: [],
+				totalRating: hotel.rating?.count || 0,
+				avgRating: hotel.rating?.average || 0,
+			};
+		} catch (fallbackError) {
+			console.error('[getHotelReviews] ❌ Fallback also failed:', fallbackError.message);
+			return { reviews: [], totalRating: 0, avgRating: 0 };
+		}
 	}
 }
 
@@ -557,25 +580,42 @@ export async function getHotelReviews(slug) {
 
 /**
  * Fetch a hotel price schedule for a specific hotel and year.
- * Queries the hotel_price_schedules collection.
- * @param {string} hotelId
+ * Uses direct document lookup with predictable doc ID: {hotelId}_base_{year}
+ * to avoid composite index requirements on multi-field queries.
+ * @param {string} hotelId - Firestore document ID of the hotel
  * @param {number} [year] - Mặc định năm hiện tại
  * @returns {Promise<Object|null>} Schedule document hoặc null
  */
 export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYear()) {
   try {
-    const schedulesCol = collection(db, 'hotel_price_schedules');
-    const q = query(
-      schedulesCol,
-      where('info.hotelId', '==', hotelId),
-      where('info.year', '==', year),
-      where('info.status', '==', 'actived'),
-      limit(1)
-    );
-    const snap = await getDocs(q);
-    return snap.empty ? null : serializeDoc(snap.docs[0]);
+    const docId = `${hotelId}_base_${year}`;
+    const snap = await getDoc(doc(db, 'hotel_price_schedules', docId));
+    
+    if (!snap.exists()) {
+      console.log(`[getHotelPriceSchedule] No schedule found for hotelId=${hotelId}, year=${year}, docId=${docId}`);
+      return null;
+    }
+    
+    const data = serializeDoc(snap);
+    
+    // Verify info matches (defense in depth — doc ID already encodes hotelId + year)
+    if (data.info?.hotelId !== hotelId) {
+      console.warn(`[getHotelPriceSchedule] info.hotelId mismatch: expected ${hotelId}, got ${data.info?.hotelId}`);
+      return null;
+    }
+    if (data.info?.year !== year) {
+      console.warn(`[getHotelPriceSchedule] info.year mismatch: expected ${year}, got ${data.info?.year}`);
+      return null;
+    }
+    if (data.info?.status !== 'actived') {
+      console.log(`[getHotelPriceSchedule] Schedule not active: status=${data.info?.status}, hotelId=${hotelId}`);
+      return null;
+    }
+    
+    console.log(`[getHotelPriceSchedule] ✅ Found schedule: docId=${docId}, priceData keys=${Object.keys(data.priceData || {}).length}`);
+    return data;
   } catch (error) {
-    console.error('[getHotelPriceSchedule] Error:', error.message);
+    console.error(`[getHotelPriceSchedule] Error for hotelId=${hotelId}, year=${year}:`, error.message);
     return null;
   }
 }
@@ -589,12 +629,18 @@ export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYe
  * @returns {Array<{rateType: string, costPrice: number, sellPrice: number, startDate: string, endDate: string, supplier: string, periodKey: string}>}
  */
 export function resolveRoomPricing(priceSchedule, roomId, date) {
-  if (!priceSchedule?.priceData) return [];
+  if (!priceSchedule?.priceData) {
+    console.log(`[resolveRoomPricing] No priceData in schedule for roomId=${roomId}`);
+    return [];
+  }
   const priceData = priceSchedule.priceData;
+  const priceDataKeys = Object.keys(priceData);
   const result = [];
   const prefix = roomId + '_';
+  let matchedKeys = 0;
   for (const [key, periods] of Object.entries(priceData)) {
     if (!key.startsWith(prefix)) continue;
+    matchedKeys++;
     const rateType = key.slice(prefix.length);
     if (typeof periods !== 'object' || periods === null) continue;
     for (const [periodKey, pricing] of Object.entries(periods)) {
@@ -611,6 +657,9 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
         });
       }
     }
+  }
+  if (matchedKeys === 0) {
+    console.log(`[resolveRoomPricing] ⚠️ No matching priceData keys for roomId="${roomId}" (prefix="${prefix}"). Available keys: ${priceDataKeys.slice(0, 10).join(', ')}${priceDataKeys.length > 10 ? '...' : ''}`);
   }
   // Sort by sellPrice ascending
   result.sort((a, b) => a.sellPrice - b.sellPrice);
@@ -661,14 +710,21 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
  *   [{ roomId, roomName, totalRooms, maxGuests, rateTypes: [{ rateType, dailyPrices: [{date, sellPrice, costPrice}], avgSellPrice }] }]
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
-  if (!rooms || rooms.length === 0) return [];
+  if (!rooms || rooms.length === 0) {
+    console.log('[buildRoomPricingTable] No rooms provided — returning empty table');
+    return [];
+  }
+
+  const activeRooms = rooms.filter(r => r.isActive);
+  console.log(`[buildRoomPricingTable] Processing ${activeRooms.length} active rooms (total: ${rooms.length}), hasPriceSchedule=${!!priceSchedule}, checkIn=${checkIn}, checkOut=${checkOut}`);
 
   const ci = new Date(checkIn);
   const co = new Date(checkOut);
   if (isNaN(ci.getTime()) || isNaN(co.getTime()) || co <= ci) {
     // Invalid dates — use a single date fallback (today)
     const today = new Date().toISOString().split('T')[0];
-    return rooms.filter(r => r.isActive).map(room => {
+    console.log(`[buildRoomPricingTable] Invalid dates, using fallback: today=${today}`);
+    return activeRooms.map(room => {
       const allPricing = resolveRoomPricing(priceSchedule, room.id, today);
       // Group by rateType
       const rateTypeMap = {};
@@ -702,7 +758,7 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
   }
   const nights = dates.length;
 
-  return rooms.filter(r => r.isActive).map(room => {
+  return activeRooms.map(room => {
     const rateTypeMap = {};
     for (const date of dates) {
       const pricing = resolveRoomPricing(priceSchedule, room.id, date);

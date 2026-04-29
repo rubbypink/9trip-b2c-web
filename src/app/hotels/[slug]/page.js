@@ -49,9 +49,16 @@ export default async function HotelDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
 
+  console.log(`[HotelDetailPage] 🏨 Loading hotel detail for slug: "${slug}"`);
+
   // Fetch hotel
   const { hotel: rawHotel } = await getHotelBySlug(slug);
-  if (!rawHotel) notFound();
+  if (!rawHotel) {
+    console.warn(`[HotelDetailPage] ❌ Hotel not found, triggering notFound() for slug: "${slug}"`);
+    notFound();
+  }
+
+  console.log(`[HotelDetailPage] Hotel loaded: id=${rawHotel.id}, rooms=${rawHotel.rooms?.length || 0}, hasRooms=${!!rawHotel.rooms}`);
 
   // Parallel: reviews, related hotels, price schedule — with fallback on individual failures
   let reviews = [], totalRating = 0, avgRating = 0;
@@ -72,8 +79,15 @@ export default async function HotelDetailPage({ params }) {
     totalRating = tr || 0;
     avgRating = ar || 0;
     rawRelatedHotels = rawRelated || [];
+
+    if (!priceSchedule) {
+      console.warn(`[HotelDetailPage] ⚠️ No price schedule found for hotelId=${rawHotel.id}. Pricing will be empty.`);
+    } else {
+      console.log(`[HotelDetailPage] ✅ Price schedule loaded: priceData keys=${Object.keys(priceSchedule.priceData || {}).length}`);
+    }
   } catch (error) {
-    console.error('[HotelDetailPage] Error fetching parallel data:', error.message);
+    console.error('[HotelDetailPage] ❌ Error fetching parallel data:', error.message);
+    console.error('[HotelDetailPage] Stack trace:', error.stack);
     // All fallbacks already set to empty/default above
   }
 
@@ -83,12 +97,24 @@ export default async function HotelDetailPage({ params }) {
   const checkIn = today;
   const checkOut = tomorrow;
   const nights = 1;
-  const pricingTable = buildRoomPricingTable(
-    priceSchedule,
-    rawHotel.rooms || [],
-    checkIn,
-    checkOut
-  );
+
+  let pricingTable = [];
+  try {
+    if (!rawHotel.rooms || rawHotel.rooms.length === 0) {
+      console.warn(`[HotelDetailPage] ⚠️ Hotel has no embedded rooms. Pricing table will be empty.`);
+    }
+    pricingTable = buildRoomPricingTable(
+      priceSchedule,
+      rawHotel.rooms || [],
+      checkIn,
+      checkOut
+    );
+    console.log(`[HotelDetailPage] Pricing table built: ${pricingTable.length} room(s), ${pricingTable.reduce((s, r) => s + r.rateTypes.length, 0)} rate type(s)`);
+  } catch (error) {
+    console.error('[HotelDetailPage] ❌ Error building pricing table:', error.message);
+    console.error('[HotelDetailPage] Stack trace:', error.stack);
+    pricingTable = [];
+  }
 
   // Resolve image URLs (gs:// → HTTPS) — with fallback
   let hotel = rawHotel;
@@ -98,8 +124,10 @@ export default async function HotelDetailPage({ params }) {
       resolveDocImages(rawHotel),
       resolveDocsImages(rawRelatedHotels),
     ]);
+    console.log(`[HotelDetailPage] ✅ Images resolved: hotel featuredImage=${hotel.featuredImage?.substring(0, 50)}..., relatedHotels=${relatedHotels.length}`);
   } catch (error) {
-    console.error('[HotelDetailPage] Error resolving images:', error.message);
+    console.error('[HotelDetailPage] ❌ Error resolving images:', error.message);
+    console.error('[HotelDetailPage] Stack trace:', error.stack);
     // hotel stays as rawHotel (may have gs:// URLs), relatedHotels stays empty
   }
 
