@@ -146,6 +146,54 @@ async function initStorageStructure() {
         errors++;
         console.error(`   ❌ ${galleryPath}: ${err.message}`);
       }
+
+      // ── Room image placeholders (hotels only) ─────────
+      if (serviceType === "hotels") {
+        const hotelData = doc.data();
+        const rooms = hotelData.rooms || [];
+        const roomsArr = Array.isArray(rooms) ? rooms : Object.values(rooms);
+
+        for (const room of roomsArr) {
+          if (!room.id) continue;
+          const roomBase = `${basePath}/rooms/${room.id}`;
+
+          // Room featured.webp
+          const roomFeaturedPath = `${roomBase}/featured.webp`;
+          try {
+            const rf = bucket.file(roomFeaturedPath);
+            const [rfExists] = await rf.exists();
+            if (!rfExists) {
+              await rf.save(TINY_WEBP_BUFFER, {
+                contentType: "image/webp",
+                metadata: { cacheControl: "public, max-age=31536000, immutable" },
+              });
+              uploaded++;
+              console.log(`   ✅ ${roomFeaturedPath}`);
+            }
+          } catch (err) {
+            errors++;
+            console.error(`   ❌ ${roomFeaturedPath}: ${err.message}`);
+          }
+
+          // Room gallery/01.webp
+          const roomGalleryPath = `${roomBase}/gallery/01.webp`;
+          try {
+            const rg = bucket.file(roomGalleryPath);
+            const [rgExists] = await rg.exists();
+            if (!rgExists) {
+              await rg.save(TINY_WEBP_BUFFER, {
+                contentType: "image/webp",
+                metadata: { cacheControl: "public, max-age=31536000, immutable" },
+              });
+              uploaded++;
+              console.log(`   ✅ ${roomGalleryPath}`);
+            }
+          } catch (err) {
+            errors++;
+            console.error(`   ❌ ${roomGalleryPath}: ${err.message}`);
+          }
+        }
+      }
     }
   }
 

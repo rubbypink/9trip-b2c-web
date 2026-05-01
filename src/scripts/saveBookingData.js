@@ -32,8 +32,8 @@
  *       {
  *         "name": "string",
  *         "description": "string",
- *         "featuredImage": "string (URL)",
- *         "gallery": ["string (URLs)"],
+ *         "featuredImage": "string (URL) — nếu có, sẽ dùng làm featured",
+ *         "gallery": ["string (URLs)"] — mảng URL ảnh của phòng,
  *         "bedType": "string",
  *         "maxAdults": "number",
  *         "maxChildren": "number",
@@ -175,11 +175,15 @@ function downloadFile(url) {
 
 /**
  * Convert an image buffer to WebP using sharp.
+ * Quality-optimized: uses high quality setting + smart subsample to avoid artifacts.
  * @param {Buffer} buffer
- * @param {number} [maxWidth=1920]
+ * @param {number} [maxWidth=2048] — Max width, increase to preserve details on larger screens
+ * @param {Object} [opts] — Optional overrides
+ * @param {number} [opts.quality=90] — WebP quality (82-95 recommended; 90 balances quality/size)
+ * @param {number} [opts.effort=6] — CPU effort 0-6 (6 = best compression, slower)
  * @returns {Promise<Buffer>}
  */
-async function toWebP(buffer, maxWidth = 1920) {
+async function toWebP(buffer, maxWidth = 2048, opts = {}) {
   let sharp;
   try {
     sharp = require("sharp");
@@ -190,12 +194,27 @@ async function toWebP(buffer, maxWidth = 1920) {
   const image = sharp(buffer);
   const metadata = await image.metadata();
 
-  // Resize if width exceeds maxWidth, maintaining aspect ratio
+  // Only resize if width exceeds maxWidth, preserving original detail otherwise
   if (metadata.width > maxWidth) {
-    image.resize({ width: maxWidth, withoutEnlargement: true });
+    image.resize({
+      width: maxWidth,
+      withoutEnlargement: true,
+      kernel: sharp.kernel.lanczos3, // Highest-quality downscale kernel
+    });
   }
 
-  return image.webp({ quality: 85, effort: 4 }).toBuffer();
+  const quality = opts.quality ?? 90;
+  const effort = opts.effort ?? 6;
+
+  return image
+    .webp({
+      quality,
+      effort,
+      alphaQuality: 100,       // Preserve transparency fully
+      smartSubsample: true,    // Better chroma handling → fewer color artifacts
+      nearLossless: quality >= 95, // Enable near-lossless at very high quality
+    })
+    .toBuffer();
 }
 
 /**
@@ -230,6 +249,7 @@ async function uploadToStorage(buffer, storagePath) {
  * @property {number} roomCount
  * @property {string|null} featuredImageUrl
  * @property {number} galleryCount
+ * @property {number} roomImageCount — Total room images processed
  * @property {string[]} errors
  * @property {string[]} warnings
  * @property {Object} timing - { start: string, end: string, durationMs: number }
@@ -274,6 +294,7 @@ function generateReport(result) {
   lines.push("### Storage");
   lines.push(`- **Featured image**: ${result.featuredImageUrl || "Không có"}`);
   lines.push(`- **Gallery images**: ${result.galleryCount} files → \`hotels/${result.hotelId}/gallery/\``);
+  lines.push(`- **Room images**: ${result.roomImageCount || 0} files → \`hotels/${result.hotelId}/rooms/{roomId}/\``);
   lines.push("");
 
   if (result.errors.length > 0) {
@@ -450,8 +471,94 @@ async function saveHotelDoc(hotelId, hotelData, featuredUrl, galleryUrls) {
 }
 
 /**
+ * Process room images: download → WebP → upload to Storage for each room.
+ * Each room gets images stored at: hotels/{hotelId}/rooms/{roomId}/
+ * Falls back: if no featuredImage but gallery exists, use gallery[0] as featured.
+ * @param {string} hotelId
+ * @param {Object} roomsMap - The rooms Map (key = roomId, value = roomData with raw image URLs)
+ * @returns {Promise<{ processedMap: Object, totalImages: number, errors: string[], warnings: string[] }>}
+ */
+async function processRoomImages(hotelId, roomsMap) {
+  const errors = [];
+  const warnings = [];
+  const /** @type {Object} */ processedMap = { ...roomsMap };
+  let totalImages = 0;
+
+  const roomIds = Object.keys(roomsMap);
+  for (let ri = 0; ri < roomIds.length; ri++) {
+    const roomId = roomIds[ri];
+    const room = roomsMap[roomId];
+    const roomName = room.name;
+    const gallerySrcs = Array.isArray(room._rawGallery) ? room._rawGallery : [];
+    let featuredSrc = room._rawFeatured || "";
+
+    if (!featuredSrc && gallerySrcs.length > 0) {
+      featuredSrc = gallerySrcs[0];
+      warnings.push(`Room "${roomName}": No featuredImage — using first gallery image as featured`);
+    }
+
+    // Process featured image for this room
+    let featuredUrl = "";
+    if (featuredSrc) {
+      try {
+        console.log(`   🖼️  Room "${roomName}": Downloading featured image...`);
+        const rawBuffer = await downloadFile(featuredSrc);
+        const webpBuffer = await toWebP(rawBuffer, 1600, { quality: 88, effort: 5 });
+        const storagePath = `hotels/${hotelId}/rooms/${roomId}/featured.webp`;
+        featuredUrl = await uploadToStorage(webpBuffer, storagePath);
+        console.log(`   ✅ Room "${roomName}": Featured uploaded → ${storagePath}`);
+        totalImages++;
+      } catch (err) {
+        errors.push(`Room "${roomName}" featured image failed: ${err.message}`);
+      }
+    } else {
+      warnings.push(`Room "${roomName}": No room images available`);
+    }
+
+    // Process gallery images for this room
+    const /** @type {string[]} */ galleryUrls = [];
+    for (let i = 0; i < gallerySrcs.length; i++) {
+      const src = gallerySrcs[i];
+      // Skip if this URL was already used as featured
+      if (src === featuredSrc && featuredUrl) {
+        galleryUrls.push(featuredUrl);
+        continue;
+      }
+
+      try {
+        console.log(`   🖼️  Room "${roomName}": Downloading gallery ${i + 1}/${gallerySrcs.length}...`);
+        const rawBuffer = await downloadFile(src);
+        const webpBuffer = await toWebP(rawBuffer, 1600, { quality: 88, effort: 5 });
+        const padIdx = String(i + 1).padStart(2, "0");
+        const storagePath = `hotels/${hotelId}/rooms/${roomId}/gallery/${padIdx}.webp`;
+        const url = await uploadToStorage(webpBuffer, storagePath);
+        galleryUrls.push(url);
+        console.log(`   ✅ Room "${roomName}": Gallery ${padIdx} uploaded → ${storagePath}`);
+        totalImages++;
+      } catch (err) {
+        errors.push(`Room "${roomName}" gallery ${i + 1} failed: ${err.message}`);
+        warnings.push(`Room "${roomName}": Skipped gallery ${i + 1}`);
+      }
+    }
+
+    // Update room with processed URLs — remove raw temporary fields
+    processedMap[roomId] = {
+      ...room,
+      featuredImage: featuredUrl,
+      gallery: galleryUrls,
+    };
+    delete processedMap[roomId]._rawFeatured;
+    delete processedMap[roomId]._rawGallery;
+  }
+
+  return { processedMap, totalImages, errors, warnings };
+}
+
+/**
  * Build rooms embedded Map from room array.
  * Each room becomes an entry in the Map with key = room.id.
+ * Room image URLs are stored temporarily as _rawFeatured / _rawGallery
+ * so they can be processed later by processRoomImages().
  * @param {Array} rooms - Array of room objects from input data
  * @returns {{ roomsMap: Object, count: number, errors: string[], warnings: string[] }}
  */
@@ -477,8 +584,10 @@ function buildRoomsMap(rooms) {
       name: room.name.trim(),
       slug: roomSlug,
       description: room.description || "",
-      featuredImage: "",
-      gallery: [],
+      featuredImage: "",          // Will be filled by processRoomImages()
+      gallery: [],                // Will be filled by processRoomImages()
+      _rawFeatured: room.featuredImage || "",   // Temporary — original URL before processing
+      _rawGallery: Array.isArray(room.gallery) ? room.gallery : [], // Temporary
       bedType: room.bedType || "",
       maxAdults: room.maxAdults || 2,
       maxChildren: room.maxChildren || 0,
@@ -536,7 +645,7 @@ async function main() {
   }
 
   // Validate & check slug
-  console.log("📋 Step 1/4: Validating data & checking for duplicates...");
+  console.log("📋 Step 1/5: Validating data & checking for duplicates...");
   const { hotelData, rooms, errors: validationErrors, warnings: validationWarnings } = await validateAndCheck(inputData);
 
   if (!hotelData) {
@@ -550,6 +659,7 @@ async function main() {
       roomCount: 0,
       featuredImageUrl: null,
       galleryCount: 0,
+      roomImageCount: 0,
       errors: validationErrors,
       warnings: validationWarnings,
       timing: { start: startISO, end: nowISO(), durationMs: Date.now() - startTime },
@@ -566,8 +676,8 @@ async function main() {
   console.log(`   ✅ Rooms: ${rooms.length}`);
   console.log("");
 
-  // Process images
-  console.log("🖼️  Step 2/4: Processing images (download → WebP → upload)...");
+  // Process hotel images
+  console.log("🖼️  Step 2/5: Processing hotel images (download → WebP → upload)...");
   const imgInput = {
     featuredImage: inputData.featuredImage || "",
     gallery: inputData.gallery || [],
@@ -578,23 +688,30 @@ async function main() {
   console.log("");
 
   // Build rooms Map
-  console.log("🛏️  Step 3b/4: Building rooms embedded Map...");
+  console.log("🛏️  Step 3/5: Building rooms embedded Map...");
   const { roomsMap, count: roomCount, errors: roomErrors, warnings: roomWarnings } = buildRoomsMap(rooms);
-  hotelData.rooms = roomsMap;
   console.log(`   ✅ ${roomCount} rooms built`);
   console.log("");
 
-  // Save hotel document (with rooms embedded)
-  console.log("💾 Step 3/4: Saving to Firestore...");
+  // Process room images
+  console.log("🖼️  Step 3b/5: Processing room images (download → WebP → upload)...");
+  const { processedMap, totalImages: roomImageCount, errors: roomImgErrors, warnings: roomImgWarnings } =
+    await processRoomImages(hotelId, roomsMap);
+  hotelData.rooms = processedMap;
+  console.log(`   ✅ ${roomImageCount} room images processed (${roomCount} rooms)`);
+  console.log("");
+
+  // Save hotel document (with rooms + images embedded)
+  console.log("💾 Step 4/5: Saving to Firestore...");
   await saveHotelDoc(hotelId, hotelData, featuredUrl, galleryUrls);
   console.log("");
 
   // Collect all errors & warnings
-  const allErrors = [...validationErrors, ...imgErrors, ...roomErrors];
-  const allWarnings = [...validationWarnings, ...imgWarnings, ...roomWarnings];
+  const allErrors = [...validationErrors, ...imgErrors, ...roomErrors, ...roomImgErrors];
+  const allWarnings = [...validationWarnings, ...imgWarnings, ...roomWarnings, ...roomImgWarnings];
 
   // Generate report
-  console.log("📄 Step 4/4: Generating report...");
+  console.log("📄 Step 5/5: Generating report...");
   const endTime = Date.now();
   const endISO = nowISO();
 
@@ -606,6 +723,7 @@ async function main() {
     roomCount,
     featuredImageUrl: featuredUrl,
     galleryCount: galleryUrls.length,
+    roomImageCount,
     errors: allErrors,
     warnings: allWarnings,
     timing: { start: startISO, end: endISO, durationMs: endTime - startTime },
@@ -625,6 +743,7 @@ async function main() {
   console.log(`  🏨 Hotel:  hotels/${hotelId}`);
   console.log(`  🛏️  Rooms:  ${roomCount}`);
   console.log(`  🖼️  Gallery: ${galleryUrls.length} images`);
+  console.log(`  🖼️  Room images: ${roomImageCount} images`);
   console.log(`  ⏱  Time:   ${result.timing.durationMs}ms`);
   console.log("=".repeat(60));
 
@@ -644,6 +763,7 @@ main().catch((err) => {
     roomCount: 0,
     featuredImageUrl: null,
     galleryCount: 0,
+    roomImageCount: 0,
     errors: [`Unhandled error: ${err.message}`],
     warnings: [],
     timing: { start: nowISO(), end: nowISO(), durationMs: 0 },

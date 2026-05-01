@@ -325,19 +325,11 @@ export default function HotelDetailClient({ slug }) {
           <aside className="w-full lg:w-[380px] flex-shrink-0">
             <div className="sticky top-24">
               <HotelBookingWidget
-                hotelId={hotel.id}
-                hotelName={hotel.name}
-                rooms={pricingTable.map((r) => ({
-                  id: r.roomId,
-                  name: r.roomName,
-                  price: r.rateTypes[0]?.avgSellPrice || hotel.pricing?.basePrice || 0,
-                  currency: hotel.pricing?.currency || "VND",
-                  maxAdults: r.maxGuests,
-                  bedType: r.bedType,
-                  featuredImage: r.featuredImage || hotel.featuredImage || "",
-                }))}
-                basePrice={hotel.pricing?.basePrice || 0}
-                currency={hotel.pricing?.currency || "VND"}
+                hotel={hotel}
+                pricingTable={pricingTable}
+                checkIn={new Date().toISOString().split("T")[0]}
+                checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                nights={1}
               />
             </div>
           </aside>

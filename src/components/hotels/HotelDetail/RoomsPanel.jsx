@@ -7,23 +7,176 @@ import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 
 /**
- * RoomsPanel — Bảng giá phòng với quantity selector, sync cart, confirm button.
- * Hiển thị tất cả room × rate types trong dạng table.
- * User chọn số lượng cho mỗi room/rate type, xem thành tiền real-time.
+ * RoomGalleryThumbnails — Mini thumbnail strip for room gallery images.
+ * Clicking opens GalleryWithLightbox.
+ * @param {{ images: string[], roomName: string }} props
+ */
+function RoomGalleryThumbnails({ images = [], roomName }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  if (!images || images.length === 0) return null;
+
+  const displayImages = images.slice(0, 3);
+
+  return (
+    <>
+      <div className="flex gap-1.5 mt-2">
+        {displayImages.map((img, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
+            className="relative w-14 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 hover:ring-2 hover:ring-blue-400 transition-all"
+          >
+            <Image src={img} alt={`${roomName} gallery ${idx + 1}`} fill className="object-cover" sizes="56px" />
+          </button>
+        ))}
+        {images.length > 3 && (
+          <button
+            type="button"
+            onClick={() => { setLightboxIndex(3); setLightboxOpen(true); }}
+            className="relative w-14 h-10 rounded-md overflow-hidden bg-gray-300 flex-shrink-0 flex items-center justify-center text-[10px] font-medium text-gray-600 hover:ring-2 hover:ring-blue-400 transition-all"
+          >
+            +{images.length - 3}
+          </button>
+        )}
+      </div>
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10"
+            onClick={() => setLightboxOpen(false)}
+          >
+            ✕
+          </button>
+          <button
+            type="button"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
+            }}
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex((lightboxIndex + 1) % images.length);
+            }}
+          >
+            ›
+          </button>
+          <div className="relative w-full max-w-4xl h-[80vh]" onClick={(e) => e.stopPropagation()}>
+            <Image src={images[lightboxIndex]} alt={`${roomName} gallery ${lightboxIndex + 1}`} fill className="object-contain" sizes="80vw" />
+          </div>
+          <div className="absolute bottom-4 text-white text-sm">
+            {lightboxIndex + 1} / {images.length}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * RoomCollapsibleInfo — Collapsible section showing room details.
+ * @param {{ room: Object }} props
+ */
+function RoomCollapsibleInfo({ room }) {
+  const [open, setOpen] = useState(false);
+
+  const hasExtraInfo = room.roomSize > 0 || room.description || (room.amenities && room.amenities.length > 0);
+
+  if (!hasExtraInfo) return null;
+
+  return (
+    <div className="border-t border-gray-100">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50/50 transition-colors"
+      >
+        <span className="font-medium text-gray-600">Chi tiết phòng</span>
+        <svg
+          className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-5 pb-4 space-y-3 text-sm animate-fadeIn">
+          {room.roomSize > 0 && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <span className="text-base">📐</span>
+              <span><strong>Diện tích:</strong> {room.roomSize} m²</span>
+            </div>
+          )}
+          {room.description && (
+            <div className="text-gray-600 text-xs leading-relaxed">
+              <strong className="text-gray-700">Mô tả:</strong>
+              <div className="mt-1" dangerouslySetInnerHTML={{ __html: room.description }} />
+            </div>
+          )}
+          {room.amenities && room.amenities.length > 0 && (
+            <div>
+              <strong className="text-gray-700 text-xs">Tiện nghi phòng:</strong>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {room.amenities.map((amenity, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center text-[11px] bg-blue-50 text-blue-700 rounded-full px-2.5 py-1"
+                  >
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {room.included && room.included.length > 0 && (
+            <div>
+              <strong className="text-gray-700 text-xs">Bao gồm:</strong>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {room.included.map((inc, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center text-[11px] bg-green-50 text-green-700 rounded-full px-2.5 py-1"
+                  >
+                    ✓ {inc}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * RoomsPanel — Bảng giá phòng với gallery, collapse info, quantity selector, sync cart.
+ * Hỗ trợ cả room active và inactive (isActive=false: mờ, block selection).
+ * Sắp xếp theo sortOrder từ pricingTable (đã sort trong buildRoomPricingTable).
  *
  * @param {{
  *   pricingTable: Array<{
- *     roomId: string,
- *     roomName: string,
- *     totalRooms: number,
- *     maxGuests: number,
- *     bedType: string,
- *     amenities: string[],
- *     included: string[],
- *     featuredImage: string,
+ *     roomId: string, roomName: string, totalRooms: number, maxGuests: number,
+ *     bedType: string, roomSize: number, description: string,
+ *     amenities: string[], included: string[], featuredImage: string,
+ *     gallery: string[], isActive: boolean, sortOrder: number,
  *     rateTypes: Array<{
- *       rateType: string,
- *       avgSellPrice: number,
+ *       rateType: string, avgSellPrice: number,
  *       dailyPrices: Array<{date: string, sellPrice: number, costPrice: number}>
  *     }>
  *   }>,
@@ -50,13 +203,13 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
     const key = `${roomId}_${rateType}`;
     setQuantities((prev) => {
       const current = prev[key] || 0;
-      const next = Math.max(0, Math.min(10, current + delta)); // max 10 phòng
+      const next = Math.max(0, Math.min(10, current + delta));
       return { ...prev, [key]: next };
     });
   }, []);
 
   /**
-   * Tổng tiền cho 1 room × rate type.
+   * Tổng tiền cho 1 room × rate type (chỉ tính active rooms).
    */
   const getLineTotal = useCallback((roomId, rateType, sellPrice) => {
     const key = `${roomId}_${rateType}`;
@@ -65,11 +218,12 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
   }, [quantities, nights]);
 
   /**
-   * Tổng tiền tất cả selections.
+   * Tổng tiền tất cả selections từ active rooms.
    */
   const grandTotal = useMemo(() => {
     let total = 0;
     for (const room of pricingTable) {
+      if (!room.isActive) continue;
       for (const rt of room.rateTypes) {
         total += getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
       }
@@ -78,19 +232,19 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
   }, [pricingTable, getLineTotal]);
 
   /**
-   * Có ít nhất 1 selection.
+   * Có ít nhất 1 selection từ active room.
    */
   const hasSelection = useMemo(() => {
-    return Object.values(quantities).some((q) => q > 0);
+    return Object.entries(quantities).some(([key, qty]) => qty > 0);
   }, [quantities]);
 
   /**
    * Restore quantities from existing cart items on mount.
-   * Syncs so returning from cart shows previously selected quantities.
    */
   useEffect(() => {
     const restored = { ...quantities };
     for (const room of pricingTable) {
+      if (!room.isActive) continue;
       for (const rt of room.rateTypes) {
         const cartItem = cartItems.find(
           (ci) =>
@@ -106,25 +260,22 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
       }
     }
     setQuantities(restored);
-    // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
    * Xác nhận chọn phòng — đồng bộ selections với cart.
-   * Chỉ update/sửa/xóa nếu khớp thông tin (serviceId + roomId + rateType + startDate).
-   * Không reset cart — các dịch vụ khác trong cart không bị ảnh hưởng.
    */
   const handleConfirmSelection = useCallback(() => {
     try {
       for (const room of pricingTable) {
+        if (!room.isActive) continue;
         for (const rt of room.rateTypes) {
           const key = `${room.roomId}_${rt.rateType}`;
           const qty = quantities[key] || 0;
           const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
           if (qty > 0) {
-            // Add or update item in cart
             updateCartItem({
               serviceId: hotel.id,
               roomId: room.roomId,
@@ -148,7 +299,6 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
               roomName: room.roomName,
             });
           } else {
-            // Remove item from cart if quantity = 0
             removeCartItemByKey({
               serviceId: hotel.id,
               roomId: room.roomId,
@@ -161,7 +311,6 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
       router.push("/cart");
     } catch (error) {
       console.error('[RoomsPanel] Error confirming selection:', error.message);
-      // Cart add failed — user can retry
     }
   }, [pricingTable, quantities, getLineTotal, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, router]);
 
@@ -179,111 +328,140 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
   return (
     <div className="space-y-6">
-      {/* Pricing Table */}
-      {pricingTable.map((room) => (
-        <div key={room.roomId} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          {/* Room Header */}
-          <div className="p-5 border-b border-gray-100 bg-gray-50/50">
-            <div className="flex items-start gap-4">
-              {room.featuredImage && (
-                <div className="w-20 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative">
-                  <Image src={room.featuredImage} alt={room.roomName} fill className="object-cover" sizes="80px" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-gray-900">{room.roomName}</h4>
-                <div className="flex flex-wrap gap-2 mt-1.5">
-                  {room.bedType && (
+      {pricingTable.map((room) => {
+        const isInactive = !room.isActive;
+
+        return (
+          <div
+            key={room.roomId}
+            className={`bg-white rounded-xl border overflow-hidden transition-all ${
+              isInactive
+                ? 'border-gray-200 opacity-60 grayscale-[0.3]'
+                : 'border-gray-200'
+            }`}
+          >
+            {/* Room Header */}
+            <div className={`p-5 border-b border-gray-100 ${isInactive ? 'bg-gray-100/50' : 'bg-gray-50/50'}`}>
+              <div className="flex items-start gap-4">
+                {/* Featured Image */}
+                {room.featuredImage && (
+                  <div className={`w-20 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative ${
+                    isInactive ? 'grayscale' : ''
+                  }`}>
+                    <Image src={room.featuredImage} alt={room.roomName} fill className="object-cover" sizes="80px" />
+                  </div>
+                )}
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h4 className={`font-semibold ${isInactive ? 'text-gray-500' : 'text-gray-900'}`}>
+                      {room.roomName}
+                    </h4>
+                    {isInactive && (
+                      <span className="inline-flex items-center text-[10px] font-medium bg-gray-200 text-gray-500 rounded-full px-2 py-0.5">
+                        🚫 Ngừng KD
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {room.bedType && (
+                      <span className="inline-flex items-center text-xs text-gray-500">
+                        🛏️ {room.bedType}
+                      </span>
+                    )}
+                    {room.maxGuests > 0 && (
+                      <span className="inline-flex items-center text-xs text-gray-500">
+                        👤 Tối đa {room.maxGuests} khách
+                      </span>
+                    )}
+                    {room.roomSize > 0 && (
+                      <span className="inline-flex items-center text-xs text-gray-500">
+                        📐 {room.roomSize}m²
+                      </span>
+                    )}
                     <span className="inline-flex items-center text-xs text-gray-500">
-                      🛏️ {room.bedType}
+                      📦 Còn {room.totalRooms} phòng
                     </span>
+                  </div>
+
+                  {/* Gallery Thumbnails */}
+                  {room.gallery && room.gallery.length > 0 && (
+                    <RoomGalleryThumbnails images={room.gallery} roomName={room.roomName} />
                   )}
-                  {room.maxGuests > 0 && (
-                    <span className="inline-flex items-center text-xs text-gray-500">
-                      👤 Tối đa {room.maxGuests} khách
-                    </span>
-                  )}
-                  <span className="inline-flex items-center text-xs text-gray-500">
-                    📦 Còn {room.totalRooms} phòng
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {room.included?.slice(0, 4).map((inc, i) => (
-                    <span key={i} className="inline-block text-[11px] bg-green-50 text-green-700 rounded-full px-2 py-0.5">
-                      ✓ {inc}
-                    </span>
-                  ))}
                 </div>
               </div>
             </div>
+
+            {/* Rate Type Rows */}
+            <div className="divide-y divide-gray-100">
+              {!isInactive && room.rateTypes.length > 0 ? (
+                room.rateTypes.map((rt) => {
+                  const key = `${room.roomId}_${rt.rateType}`;
+                  const qty = quantities[key] || 0;
+                  const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
+
+                  return (
+                    <div key={rt.rateType} className="flex items-center gap-3 p-4 hover:bg-gray-50/50 transition-colors">
+                      {/* Rate Type Name */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 capitalize">
+                          {rt.rateType.replace(/_/g, " ")}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {nights} đêm × {Math.round(rt.avgSellPrice).toLocaleString()}₫/đêm
+                        </p>
+                      </div>
+
+                      {/* Unit Price */}
+                      <div className="text-right w-28">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {formatCurrency(rt.avgSellPrice, "VND")}
+                        </p>
+                        <p className="text-xs text-gray-400">/đêm</p>
+                      </div>
+
+                      {/* Quantity Selector */}
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(room.roomId, rt.rateType, -1)}
+                          disabled={qty === 0}
+                          className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          −
+                        </button>
+                        <span className="w-10 text-center text-sm font-semibold text-gray-900">{qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(room.roomId, rt.rateType, 1)}
+                          disabled={qty >= room.totalRooms}
+                          className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Line Total */}
+                      <div className="text-right w-28">
+                        <p className={lineTotal > 0 ? "text-sm font-bold text-primary" : "text-sm text-gray-300"}>
+                          {lineTotal > 0 ? formatCurrency(lineTotal, "VND") : "—"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className={`p-4 text-sm text-center ${isInactive ? 'text-gray-400' : 'text-gray-400'}`}>
+                  {isInactive ? 'Phòng tạm ngừng kinh doanh' : 'Chưa có giá cho ngày đã chọn'}
+                </div>
+              )}
+            </div>
+
+            {/* Collapsible Info — chỉ hiển thị cho active rooms */}
+            {!isInactive && <RoomCollapsibleInfo room={room} />}
           </div>
-
-          {/* Rate Type Rows */}
-          <div className="divide-y divide-gray-100">
-            {room.rateTypes.length > 0 ? (
-              room.rateTypes.map((rt) => {
-                const key = `${room.roomId}_${rt.rateType}`;
-                const qty = quantities[key] || 0;
-                const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
-
-                return (
-                  <div key={rt.rateType} className="flex items-center gap-3 p-4 hover:bg-gray-50/50 transition-colors">
-                    {/* Rate Type Name */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 capitalize">
-                        {rt.rateType.replace(/_/g, " ")}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {nights} đêm × {Math.round(rt.avgSellPrice).toLocaleString()}đ/đêm
-                      </p>
-                    </div>
-
-                    {/* Unit Price */}
-                    <div className="text-right w-28">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(rt.avgSellPrice, "VND")}
-                      </p>
-                      <p className="text-xs text-gray-400">/đêm</p>
-                    </div>
-
-                    {/* Quantity Selector */}
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(room.roomId, rt.rateType, -1)}
-                        disabled={qty === 0}
-                        className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        −
-                      </button>
-                      <span className="w-10 text-center text-sm font-semibold text-gray-900">{qty}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateQuantity(room.roomId, rt.rateType, 1)}
-                        disabled={qty >= room.totalRooms}
-                        className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    {/* Line Total */}
-                    <div className="text-right w-28">
-                      <p className={lineTotal > 0 ? "text-sm font-bold text-primary" : "text-sm text-gray-300"}>
-                        {lineTotal > 0 ? formatCurrency(lineTotal, "VND") : "—"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="p-4 text-sm text-gray-400 text-center">
-                Chưa có giá cho ngày đã chọn
-              </div>
-            )}
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Sticky Bottom Bar — Confirm Selection */}
       {hasSelection && (

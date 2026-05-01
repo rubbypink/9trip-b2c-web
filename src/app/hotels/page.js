@@ -23,6 +23,7 @@ export default async function HotelsPage({ searchParams }) {
     starRating: params.starRating || "",
     minPrice: params.minPrice ? Number(params.minPrice) : null,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
+    amenities: params.amenities || "",
     sortBy: params.sortBy || "newest",
     pageSize: 12,
   };

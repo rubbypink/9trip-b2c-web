@@ -1,157 +1,189 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 
 /**
- * HotelBookingWidget — Booking form cho trang chi tiết khách sạn.
- * Tương tự TourBookingWidget pattern, thiết kế cho hotel.
+ * HotelBookingWidget — Booking form sidebar cho hotel detail.
+ * Tích hợp per-room increment/decrement, auto-calc total, auto-sync cart.
+ * Nhận pricingTable từ HotelDetailClient (giống RoomsPanel).
  *
  * Features:
- * - Date picker: Check-in / Check-out (2 input date)
- * - Guest selector: Người lớn (1-20), Trẻ em (0-10)
- * - Room selector: Chọn loại phòng (nếu có nhiều loại)
- * - Price breakdown: Tổng = giá × số đêm × số phòng
- * - Promo code input
+ * - Date picker: Check-in / Check-out (auto tính nights)
+ * - Per-room quantity với +/- buttons (chỉ hiển thị room có qty > 0, toggle show all)
+ * - Price breakdown per room: giá × số lượng × số đêm
+ * - Grand total real-time
+ * - Auto-sync cart với debounce (cập nhật khi quantity/date thay đổi)
  * - "Đặt ngay" CTA + "Gọi tư vấn" CTA
- * - Real-time total calculation
- * - Responsive: sticky desktop sidebar, collapsible mobile bottom bar
  *
  * @param {{
- *   hotelId: string,
- *   hotelName: string,
- *   rooms: Array<{
- *     id: string,
- *     name: string,
- *     price: number,
- *     promoPrice?: number,
- *     promoLabel?: string,
- *     currency?: string,
- *     maxAdults?: number,
- *     maxChildren?: number,
- *     pricingTiers?: Array<{
- *       id: string,
- *       name: string,
- *       adultPrice: number,
- *       childPrice?: number,
- *       promoPrice?: number,
- *       promoLabel?: string,
- *       included?: string[],
- *       currency?: string,
- *     }>,
- *   }>,
- *   basePrice?: number,
- *   currency?: string,
+ *   hotel: Object,              // Full hotel object (id, name, featuredImage...)
+ *   pricingTable: Array<Object>, // Từ buildRoomPricingTable (chứa rooms + rateTypes)
+ *   checkIn: string,            // YYYY-MM-DD
+ *   checkOut: string,           // YYYY-MM-DD
+ *   nights: number,
  * }} props
  */
-export default function HotelBookingWidget({
-  hotelId,
-  hotelName,
-  rooms = [],
-  basePrice = 0,
-  currency = "VND",
-}) {
+export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn: initCheckIn = "", checkOut: initCheckOut = "", nights: initNights = 1 }) {
   const router = useRouter();
-  const { addItem } = useCart();
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [selectedRoomId, setSelectedRoomId] = useState(
-    rooms.length > 0 ? rooms[0].id : null
-  );
-  const [roomQuantity, setRoomQuantity] = useState(1);
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
-  const [promoCode, setPromoCode] = useState("");
+  const { addItem, updateCartItem, removeCartItemByKey } = useCart();
+  const debounceRef = useRef(null);
 
-  const selectedRoom = useMemo(
-    () => rooms.find((r) => r.id === selectedRoomId) || rooms[0] || null,
-    [rooms, selectedRoomId]
-  );
+  // ── Date state ───────────────────────────────────────────
+  const [checkIn, setCheckIn] = useState(initCheckIn);
+  const [checkOut, setCheckOut] = useState(initCheckOut);
 
-  // Tính số đêm từ check-in/check-out
-  const nights = useMemo(() => {
-    if (!checkIn || !checkOut) return 1;
-    const ci = new Date(checkIn);
-    const co = new Date(checkOut);
-    return Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
-  }, [checkIn, checkOut]);
+  // ── Per-room quantity state ──────────────────────────────
+  // Key: roomId, value: quantity (chỉ 1 rate type đầu tiên)
+  const [quantities, setQuantities] = useState({});
 
-  // Room price: ưu tiên promoPrice, fallback price
-  const roomPrice = useMemo(() => {
-    if (!selectedRoom) return basePrice;
-    return selectedRoom.promoPrice || selectedRoom.price || basePrice;
-  }, [selectedRoom, basePrice]);
-
-  // Tính tổng (giá × đêm × số phòng)
-  const total = useMemo(() => {
-    return roomPrice * nights * roomQuantity;
-  }, [roomPrice, nights, roomQuantity]);
-
-  // Min date: today
+  // ── Min date ─────────────────────────────────────────────
   const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
 
-  // Handle check-in change (auto-set check-out nếu chưa có hoặc < check-in)
-  const handleCheckInChange = useCallback(
-    (e) => {
-      const val = e.target.value;
-      setCheckIn(val);
-      if (!checkOut || val >= checkOut) {
-        const ci = new Date(val);
-        ci.setDate(ci.getDate() + 1);
-        setCheckOut(ci.toISOString().split("T")[0]);
-      }
-    },
-    [checkOut]
-  );
+  // ── Computed nights ──────────────────────────────────────
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut) return initNights || 1;
+    const ci = new Date(checkIn);
+    const co = new Date(checkOut);
+    const diff = Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
+    return diff;
+  }, [checkIn, checkOut, initNights]);
 
-  const handleAdultsChange = useCallback((delta) => {
-    setAdults((prev) => Math.max(1, Math.min(20, prev + delta)));
-  }, []);
+  // ── Only show active rooms in widget ─────────────────────
+  const activeRooms = useMemo(() => pricingTable.filter((r) => r.isActive), [pricingTable]);
 
-  const handleChildrenChange = useCallback((delta) => {
-    setChildren((prev) => Math.max(0, Math.min(10, prev + delta)));
-  }, []);
+  // ── Per-room quantities helper ───────────────────────────
+  const getRoomQty = useCallback((roomId) => quantities[roomId] || 0, [quantities]);
 
-  const handleRoomQuantityChange = useCallback((delta) => {
-    const maxRooms = selectedRoom?.totalRooms || 10;
-    setRoomQuantity((prev) => Math.max(1, Math.min(maxRooms, prev + delta)));
-  }, [selectedRoom]);
+  const updateRoomQty = useCallback((roomId, delta) => {
+    setQuantities((prev) => {
+      const current = prev[roomId] || 0;
+      const room = pricingTable.find((r) => r.roomId === roomId);
+      const maxRooms = room?.totalRooms || 10;
+      const next = Math.max(0, Math.min(maxRooms, current + delta));
+      return { ...prev, [roomId]: next };
+    });
+  }, [pricingTable]);
 
-  const handleBookNow = useCallback(() => {
-    try {
-      // Add to cart first
-      if (selectedRoom) {
-        addItem({
-          serviceId: hotelId,
-          roomId: selectedRoom.id,
-          rateType: 'standard',
+  // ── Cart sync: quantity change → auto-update cart ────────
+  const syncCart = useCallback(() => {
+    if (!hotel.id) return;
+    for (const room of activeRooms) {
+      const qty = getRoomQty(room.roomId);
+      // Use the first rateType for pricing
+      const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+      const roomPrice = rt ? rt.avgSellPrice : 0;
+      const lineTotal = roomPrice * nights * qty;
+      const key = `${room.roomId}_${rt ? rt.rateType : 'standard'}`;
+
+      if (qty > 0 && rt) {
+        updateCartItem({
+          serviceId: hotel.id,
+          roomId: room.roomId,
+          rateType: rt.rateType,
           serviceType: "hotel_room",
-          serviceTitle: `${hotelName} - ${selectedRoom.name}`,
-          featuredImage: selectedRoom.featuredImage || "",
-          startDate: checkIn || new Date().toISOString(),
+          serviceTitle: `${hotel.name || ''} — ${room.roomName}`,
+          featuredImage: room.featuredImage || hotel.featuredImage || "",
+          startDate: checkIn || minDate,
           endDate: checkOut || "",
-          adults,
-          children,
+          adults: 2,
+          children: 0,
           infants: 0,
-          rooms: roomQuantity,
+          rooms: qty,
           basePrice: roomPrice,
-          discount: selectedRoom.promoPrice ? (selectedRoom.price - selectedRoom.promoPrice) * roomQuantity : 0,
-          total: total,
-          currency,
+          costPrice: rt.dailyPrices?.[0]?.costPrice || 0,
+          discount: 0,
+          total: lineTotal,
+          currency: "VND",
+          hotelId: hotel.id,
+          hotelName: hotel.name || '',
+          roomName: room.roomName,
+        });
+      } else {
+        // Remove from cart if qty = 0 and was previously added
+        removeCartItemByKey({
+          serviceId: hotel.id,
+          roomId: room.roomId,
+          rateType: rt ? rt.rateType : 'standard',
+          startDate: checkIn || minDate,
         });
       }
-      router.push("/checkout");
-    } catch (error) {
-      console.error('[HotelBookingWidget] Error booking:', error.message);
     }
-  }, [router, hotelId, hotelName, selectedRoom, checkIn, checkOut, adults, children, roomPrice, total, currency, addItem]);
+  }, [activeRooms, getRoomQty, nights, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, minDate]);
 
+  // Debounced cart sync (500ms)
+  const debouncedSync = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      syncCart();
+    }, 500);
+  }, [syncCart]);
+
+  // Sync when quantity or dates change
+  useEffect(() => {
+    debouncedSync();
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [quantities, checkIn, checkOut, nights, debouncedSync]);
+
+  // ── Grand total ──────────────────────────────────────────
+  const grandTotal = useMemo(() => {
+    let total = 0;
+    for (const room of activeRooms) {
+      const qty = getRoomQty(room.roomId);
+      if (qty === 0) continue;
+      const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+      if (rt) {
+        total += rt.avgSellPrice * nights * qty;
+      }
+    }
+    return total;
+  }, [activeRooms, getRoomQty, nights]);
+
+  // ── Has any selection ────────────────────────────────────
+  const hasSelection = useMemo(() => {
+    return Object.values(quantities).some((q) => q > 0);
+  }, [quantities]);
+
+  // ── Handle check-in change ───────────────────────────────
+  const handleCheckInChange = useCallback((e) => {
+    const val = e.target.value;
+    setCheckIn(val);
+    if (!checkOut || val >= checkOut) {
+      const ci = new Date(val);
+      ci.setDate(ci.getDate() + 1);
+      setCheckOut(ci.toISOString().split("T")[0]);
+    }
+  }, [checkOut]);
+
+  // ── Handle book now ──────────────────────────────────────
+  const handleBookNow = useCallback(() => {
+    // Ensure cart is up-to-date before navigating
+    syncCart();
+    // Small delay to let cart state update
+    setTimeout(() => {
+      router.push("/checkout");
+    }, 100);
+  }, [syncCart, router]);
+
+  // ── Handle consult ───────────────────────────────────────
   const handleConsult = useCallback(() => {
     const phone = "0886.068.886";
     window.open(`tel:${phone.replace(/[^0-9]/g, "")}`, "_self");
   }, []);
+
+  // ── Price header value ───────────────────────────────────
+  const lowestPrice = useMemo(() => {
+    if (activeRooms.length === 0) return 0;
+    const prices = activeRooms.flatMap((r) =>
+      (r.rateTypes || []).map((rt) => rt.avgSellPrice)
+    ).filter((p) => p > 0);
+    return prices.length > 0 ? Math.min(...prices) : 0;
+  }, [activeRooms]);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -160,29 +192,17 @@ export default function HotelBookingWidget({
         <div className="text-sm text-gray-500 mb-1">Giá từ</div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-gray-900">
-            {roomPrice > 0 ? formatCurrency(roomPrice, currency) : "Liên hệ"}
+            {lowestPrice > 0 ? formatCurrency(lowestPrice, "VND") : "Liên hệ"}
           </span>
           <span className="text-sm text-gray-500">/ đêm</span>
         </div>
-        {selectedRoom?.promoLabel && (
-          <span className="inline-block mt-1.5 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-            🏷️ {selectedRoom.promoLabel}
-          </span>
-        )}
-        {selectedRoom?.pricingTiers?.length > 0 && selectedRoom.pricingTiers[0]?.promoLabel && (
-          <span className="inline-block mt-1.5 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-            🏷️ {selectedRoom.pricingTiers[0].promoLabel}
-          </span>
-        )}
       </div>
 
       <div className="p-5 space-y-5">
         {/* Check-in / Check-out */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Nhận phòng
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Nhận phòng</label>
             <input
               type="date"
               value={checkIn}
@@ -192,9 +212,7 @@ export default function HotelBookingWidget({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Trả phòng
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">Trả phòng</label>
             <input
               type="date"
               value={checkOut}
@@ -205,205 +223,141 @@ export default function HotelBookingWidget({
           </div>
         </div>
 
-        {/* Room Selector */}
-        {rooms.length > 0 && (
-          <div>
+        {/* Room Quantity per room type */}
+        {activeRooms.length > 0 && (
+          <div className="space-y-2">
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Loại phòng
+              Chọn phòng <span className="text-gray-400 font-normal">(+ để thêm)</span>
             </label>
-            <div className="space-y-1">
-              {rooms.map((room) => (
-                <button
-                  key={room.id}
-                  onClick={() => setSelectedRoomId(room.id)}
-                  className={`w-full text-left rounded-lg px-3 py-2.5 text-sm border transition-all ${
-                    selectedRoomId === room.id
-                      ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
-                      : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{room.name}</span>
-                    <span className="font-semibold text-blue-600">
-                      {room.promoPrice
-                        ? formatCurrency(room.promoPrice, room.currency || currency)
-                        : room.price > 0
-                          ? formatCurrency(room.price, room.currency || currency)
-                          : "Liên hệ"}
-                    </span>
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {activeRooms.map((room) => {
+                const qty = getRoomQty(room.roomId);
+                const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+                const roomPrice = rt ? rt.avgSellPrice : 0;
+                const lineTotal = roomPrice * nights * qty;
+                const isSelected = qty > 0;
+
+                return (
+                  <div
+                    key={room.roomId}
+                    className={`rounded-lg border p-3 transition-all ${
+                      isSelected
+                        ? 'border-blue-300 bg-blue-50/50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      {/* Mini image */}
+                      {room.featuredImage && (
+                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+                          <Image src={room.featuredImage} alt={room.roomName} fill className="object-cover" sizes="40px" />
+                        </div>
+                      )}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <p className="text-sm font-medium text-gray-800 truncate">{room.roomName}</p>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => updateRoomQty(room.roomId, -1)}
+                              disabled={qty === 0}
+                              className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                            >
+                              −
+                            </button>
+                            <span className="w-7 text-center text-sm font-semibold text-gray-900 tabular-nums">
+                              {qty}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateRoomQty(room.roomId, 1)}
+                              disabled={qty >= (room.totalRooms || 10)}
+                              className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Price info */}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {roomPrice > 0 && (
+                            <span className="text-xs font-semibold text-blue-600">
+                              {formatCurrency(roomPrice, "VND")}
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-400">/đêm</span>
+                          {room.bedType && (
+                            <span className="text-xs text-gray-400">· {room.bedType}</span>
+                          )}
+                        </div>
+
+                        {/* Line total when selected */}
+                        {isSelected && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatCurrency(roomPrice, "VND")} × {qty} phòng × {nights} đêm
+                            <span className="text-primary font-semibold ml-1">
+                              = {formatCurrency(lineTotal, "VND")}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {room.maxAdults > 0 && (
-                      <span className="text-xs text-gray-400">
-                        👤 {room.maxAdults} người
-                      </span>
-                    )}
-                    {room.bedType && (
-                      <span className="text-xs text-gray-400">
-                        🛏️ {room.bedType}
-                      </span>
-                    )}
-                    {room.roomSize && (
-                      <span className="text-xs text-gray-400">
-                        📐 {room.roomSize}m²
-                      </span>
-                    )}
-                  </div>
-                  {room.promoLabel && (
-                    <span className="mt-1 inline-block text-xs font-medium text-red-600">
-                      🏷️ {room.promoLabel}
-                    </span>
-                  )}
-                </button>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Room Quantity Selector */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Số phòng
-          </label>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => handleRoomQuantityChange(-1)}
-              disabled={roomQuantity <= 1}
-              className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              aria-label="Giảm số phòng"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-              </svg>
-            </button>
-            <span className="w-10 text-center font-semibold text-gray-900 text-lg tabular-nums">
-              {String(roomQuantity).padStart(2, "0")}
-            </span>
-            <button
-              onClick={() => handleRoomQuantityChange(1)}
-              disabled={roomQuantity >= (selectedRoom?.totalRooms || 10)}
-              className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              aria-label="Tăng số phòng"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
+        {/* Empty state */}
+        {activeRooms.length === 0 && (
+          <div className="text-center py-4">
+            <p className="text-sm text-gray-400">Chưa có thông tin phòng</p>
           </div>
-        </div>
+        )}
 
-        {/* Guest Selectors */}
-        <div className="space-y-3">
-          {/* Adults */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Người lớn
-            </label>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleAdultsChange(-1)}
-                disabled={adults <= 1}
-                className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Giảm số người lớn"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
-              </button>
-              <span className="w-10 text-center font-semibold text-gray-900 text-lg tabular-nums">
-                {String(adults).padStart(2, "0")}
-              </span>
-              <button
-                onClick={() => handleAdultsChange(1)}
-                disabled={adults >= 20}
-                className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Tăng số người lớn"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Children */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Trẻ em
-            </label>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleChildrenChange(-1)}
-                disabled={children <= 0}
-                className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Giảm số trẻ em"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
-              </button>
-              <span className="w-10 text-center font-semibold text-gray-900 text-lg tabular-nums">
-                {String(children).padStart(2, "0")}
-              </span>
-              <button
-                onClick={() => handleChildrenChange(1)}
-                disabled={children >= 10}
-                className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                aria-label="Tăng số trẻ em"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Promo Code */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Mã giảm giá
-          </label>
-          <input
-            type="text"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            placeholder="Nhập mã ưu đãi (nếu có)"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-          />
-        </div>
-
-        {/* Total */}
-        <div className="border-t border-gray-100 pt-4">
-          <div className="space-y-1.5 text-sm">
-            <div className="flex items-center justify-between text-gray-500">
-              <span>
-                {formatCurrency(roomPrice, currency)} x {nights} đêm x {roomQuantity} phòng
-              </span>
-              <span>{formatCurrency(roomPrice * nights * roomQuantity, currency)}</span>
-            </div>
-            {roomPrice > 0 && selectedRoom?.price > roomPrice && (
-              <div className="flex items-center justify-between text-green-600">
-                <span>Tiết kiệm</span>
-                <span>-{formatCurrency((selectedRoom.price - roomPrice) * nights, currency)}</span>
+        {/* Price Breakdown */}
+        {hasSelection && (
+          <div className="border-t border-gray-100 pt-4">
+            <div className="space-y-2 text-sm">
+              {activeRooms.map((room) => {
+                const qty = getRoomQty(room.roomId);
+                if (qty === 0) return null;
+                const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+                const roomPrice = rt ? rt.avgSellPrice : 0;
+                const lineTotal = roomPrice * nights * qty;
+                return (
+                  <div key={room.roomId} className="flex items-center justify-between text-gray-600">
+                    <span className="text-xs truncate max-w-[180px]">
+                      {room.roomName} × {qty}
+                    </span>
+                    <span className="text-xs font-medium text-gray-800">
+                      {formatCurrency(lineTotal, "VND")}
+                    </span>
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-200">
+                <span className="font-semibold text-gray-900">Tổng cộng</span>
+                <span className="text-lg font-bold text-primary">
+                  {formatCurrency(grandTotal, "VND")}
+                </span>
               </div>
-            )}
-            <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-200">
-              <span className="font-semibold text-gray-900">Tổng cộng</span>
-              <span className="text-xl font-bold text-primary">
-                {formatCurrency(total, currency)}
-              </span>
+              <p className="text-xs text-gray-400 text-right">{nights} đêm</p>
             </div>
           </div>
-        </div>
+        )}
 
         {/* CTAs */}
         <div className="space-y-3">
           <button
             onClick={handleBookNow}
-            className="w-full rounded-xl bg-primary text-white font-semibold text-sm px-6 py-3.5 hover:bg-primary-dark transition-colors shadow-sm hover:shadow-md"
+            disabled={!hasSelection}
+            className="w-full rounded-xl bg-primary text-white font-semibold text-sm px-6 py-3.5 hover:bg-primary-dark transition-colors shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Đặt ngay
+            {hasSelection ? `Đặt ngay — ${formatCurrency(grandTotal, "VND")}` : 'Vui lòng chọn phòng'}
           </button>
           <button
             onClick={handleConsult}

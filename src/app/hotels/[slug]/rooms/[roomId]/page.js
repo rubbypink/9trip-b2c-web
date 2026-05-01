@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getDocById, getHotelBySlug, getRoomPricing } from "@/lib/firestore";
+import { getHotelBySlug } from "@/lib/firestore";
 import { resolveDocImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
@@ -9,16 +9,36 @@ import { formatCurrency } from "@/lib/utils";
 export const revalidate = 3600;
 
 /**
+ * Find a room by ID from a hotel's embedded rooms (Map or array).
+ * @param {Object} hotel
+ * @param {string} roomId
+ * @returns {Object|null}
+ */
+function findRoomInHotel(hotel, roomId) {
+  if (!hotel?.rooms) return null;
+
+  // Embedded Map (key = roomId, e.g. "room_deluxe-ocean-view": { ... })
+  if (typeof hotel.rooms === "object" && !Array.isArray(hotel.rooms)) {
+    return hotel.rooms[roomId] || null;
+  }
+
+  // Embedded array
+  if (Array.isArray(hotel.rooms)) {
+    return hotel.rooms.find((r) => r.id === roomId || r.slug === roomId) || null;
+  }
+
+  return null;
+}
+
+/**
  * generateMetadata — SEO metadata cho trang chi tiết phòng.
  */
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const { slug, roomId } = resolvedParams;
 
-  const [{ hotel }, room] = await Promise.all([
-    getHotelBySlug(slug),
-    getDocById("rooms", roomId),
-  ]);
+  const { hotel } = await getHotelBySlug(slug);
+  const room = hotel ? findRoomInHotel(hotel, roomId) : null;
 
   if (!room) return { title: "Phòng không tìm thấy — 9Trip" };
 
@@ -45,18 +65,16 @@ export default async function RoomDetailPage({ params }) {
   const resolvedParams = await params;
   const { slug, roomId } = resolvedParams;
 
-  const [{ hotel }, rawRoom] = await Promise.all([
-    getHotelBySlug(slug),
-    getDocById("rooms", roomId),
-  ]);
+  const { hotel } = await getHotelBySlug(slug);
+  const rawRoom = hotel ? findRoomInHotel(hotel, roomId) : null;
 
   if (!rawRoom) notFound();
 
-  // Fetch pricing tiers
-  const pricingTiers = await getRoomPricing(rawRoom.id);
-
-  // Resolve images
+  // Resolve room images (featuredImage + gallery in room, handled by resolveDocImages)
   const room = await resolveDocImages(rawRoom);
+
+  // Pricing is now managed via HotelDetailClient + hotel_price_schedules collection
+  const pricingTiers = [];
 
   const allImages = room.featuredImage
     ? [room.featuredImage, ...(room.gallery || [])]
@@ -323,7 +341,7 @@ export default async function RoomDetailPage({ params }) {
                 </div>
 
                 <a
-                  href={`/checkout?service=${room.id}&type=room&hotelId=${room.hotelId}`}
+                  href={`/checkout?service=${room.id}&type=room&hotelId=${hotel?.id || ""}`}
                   className="block w-full rounded-xl bg-primary text-white text-center font-semibold px-6 py-3.5 hover:bg-primary-dark transition-colors shadow-sm"
                 >
                   Đặt phòng ngay

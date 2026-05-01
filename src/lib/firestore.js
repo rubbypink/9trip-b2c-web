@@ -364,39 +364,93 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
 
 /**
  * Search hotels with filters.
+ * Chỉ dùng 1 Firestore `where` duy nhất (locationId) để tránh lỗi composite index.
+ * Tất cả filter còn lại (starRating, minPrice, maxPrice, sortBy) xử lý trên frontend.
+ *
  * @param {Object} filters
+ * @param {string} [filters.locationId]
+ * @param {string} [filters.starRating]
+ * @param {number} [filters.minPrice]
+ * @param {number} [filters.maxPrice]
+ * @param {string|string[]} [filters.amenities] - Comma-separated string or array of amenity names
+ * @param {string} [filters.sortBy] - 'newest' | 'price_asc' | 'price_desc' | 'rating'
+ * @param {number} [filters.pageSize]
+ * @param {*} [filters.cursor]
+ * @returns {Promise<{hotels: Object[], lastVisible: *}>}
  */
 export async function searchHotels(filters = {}) {
-	const { locationId, starRating, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
+	const {
+		locationId,
+		starRating,
+		minPrice,
+		maxPrice,
+		amenities,
+		sortBy = 'newest',
+		pageSize = 12,
+		cursor,
+	} = filters;
 
 	try {
+		// ── Chỉ dùng 1 Firestore where (locationId) ────────────
 		const constraints = [];
 		if (locationId) constraints.push(where('address.cityId', '==', locationId));
-		if (starRating) constraints.push(where('starRating', '>=', Number(starRating)));
-
-		switch (sortBy) {
-			case 'price_asc':
-				constraints.push(orderBy('pricing.basePrice', 'asc'));
-				break;
-			case 'price_desc':
-				constraints.push(orderBy('pricing.basePrice', 'desc'));
-				break;
-			case 'rating':
-				constraints.push(orderBy('rating', 'desc'));
-				break;
-			default:
-				constraints.push(orderBy('createdAt', 'desc'));
-		}
-
-		constraints.push(limit(pageSize));
+		// Mặc định orderBy createdAt để có thứ tự ổn định
+		constraints.push(orderBy('createdAt', 'desc'));
+		constraints.push(limit(pageSize * 2)); // Fetch nhiều hơn để frontend filter
 		if (cursor) constraints.push(startAfter(cursor));
 
 		const q = query(hotelsCol, ...constraints);
 		const snap = await getDocs(q);
 		let hotels = snap.docs.map((d) => serializeDoc(d));
 
-		if (minPrice != null && minPrice !== '') hotels = hotels.filter((h) => h.pricing?.basePrice >= minPrice);
-		if (maxPrice != null && maxPrice !== '') hotels = hotels.filter((h) => h.pricing?.basePrice <= maxPrice);
+		// ── Frontend filter: starRating ────────────────────────
+		if (starRating) {
+			const minStar = Number(starRating);
+			hotels = hotels.filter((h) => (h.starRating || 0) >= minStar);
+		}
+
+		// ── Frontend filter: amenities ─────────────────────────
+		if (amenities) {
+			const amenityList = Array.isArray(amenities)
+				? amenities
+				: amenities.split(',').map((a) => a.trim()).filter(Boolean);
+			if (amenityList.length > 0) {
+				hotels = hotels.filter((h) => {
+					const hotelAmenities = h.amenities || [];
+					return amenityList.some((a) =>
+						hotelAmenities.some((ha) => ha.toLowerCase().includes(a.toLowerCase()))
+					);
+				});
+			}
+		}
+
+		// ── Frontend filter: price range ───────────────────────
+		if (minPrice != null && minPrice !== '') {
+			const minP = Number(minPrice);
+			hotels = hotels.filter((h) => (h.pricing?.basePrice || 0) >= minP);
+		}
+		if (maxPrice != null && maxPrice !== '') {
+			const maxP = Number(maxPrice);
+			hotels = hotels.filter((h) => (h.pricing?.basePrice || 0) <= maxP);
+		}
+
+		// ── Frontend sort ──────────────────────────────────────
+		switch (sortBy) {
+			case 'price_asc':
+				hotels.sort((a, b) => (a.pricing?.basePrice || 0) - (b.pricing?.basePrice || 0));
+				break;
+			case 'price_desc':
+				hotels.sort((a, b) => (b.pricing?.basePrice || 0) - (a.pricing?.basePrice || 0));
+				break;
+			case 'rating':
+				hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
+				break;
+			default: // newest — already sorted by createdAt desc
+				break;
+		}
+
+		// ── Truncate về pageSize ───────────────────────────────
+		hotels = hotels.slice(0, pageSize);
 
 		return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
 	} catch (error) {
@@ -717,13 +771,17 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
 
 /**
  * Build a pricing table data structure for hotel detail page display.
- * For each room, returns all rate types with their prices for each day in the date range.
+ * For each room (active & inactive), returns all rate types with their prices for each day.
+ * Rooms are sorted by `sortOrder` (ascending), then by `roomName`.
+ * Inactive rooms return with empty `rateTypes` and `isActive: false`.
  * @param {Object} priceSchedule - Document từ hotel_price_schedules
  * @param {Array<Object>} rooms - Array from hotel.rooms (embedded)
  * @param {string} checkIn - YYYY-MM-DD
  * @param {string} checkOut - YYYY-MM-DD
  * @returns {Array<Object>} Table rows:
- *   [{ roomId, roomName, totalRooms, maxGuests, rateTypes: [{ rateType, dailyPrices: [{date, sellPrice, costPrice}], avgSellPrice }] }]
+ *   [{ roomId, roomName, totalRooms, maxGuests, bedType, roomSize, description,
+ *      amenities, included, featuredImage, gallery, isActive, sortOrder,
+ *      rateTypes: [{ rateType, dailyPrices: [{date, sellPrice, costPrice}], avgSellPrice }] }]
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
   // Handle rooms as Object (Map) or Array
@@ -733,50 +791,46 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
     return [];
   }
 
-  const activeRooms = roomsArr.filter(r => r.isActive);
-  console.log(`[buildRoomPricingTable] Processing ${activeRooms.length} active rooms (total: ${roomsArr.length}), hasPriceSchedule=${!!priceSchedule}, checkIn=${checkIn}, checkOut=${checkOut}`);
+  // Sort by sortOrder (ascending), null/undefined values go to end, then by roomName
+  const sortedRooms = [...roomsArr].sort((a, b) => {
+    const orderA = a.sortOrder ?? 999;
+    const orderB = b.sortOrder ?? 999;
+    if (orderA !== orderB) return orderA - orderB;
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  console.log(`[buildRoomPricingTable] Processing ${sortedRooms.length} rooms, hasPriceSchedule=${!!priceSchedule}, checkIn=${checkIn}, checkOut=${checkOut}`);
 
   const ci = new Date(checkIn);
   const co = new Date(checkOut);
-  if (isNaN(ci.getTime()) || isNaN(co.getTime()) || co <= ci) {
-    // Invalid dates — use a single date fallback (today)
-    const today = new Date().toISOString().split('T')[0];
-    console.log(`[buildRoomPricingTable] Invalid dates, using fallback: today=${today}`);
-    return activeRooms.map(room => {
-      const allPricing = resolveRoomPricing(priceSchedule, room.id, today);
-      // Group by rateType
-      const rateTypeMap = {};
-      for (const p of allPricing) {
-        if (!rateTypeMap[p.rateType]) {
-          rateTypeMap[p.rateType] = { rateType: p.rateType, dailyPrices: [], avgSellPrice: 0 };
-        }
-        rateTypeMap[p.rateType].dailyPrices.push({ date: today, sellPrice: p.sellPrice, costPrice: p.costPrice });
-      }
-      const rateTypes = Object.values(rateTypeMap).map(rt => {
-        rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + d.sellPrice, 0) / rt.dailyPrices.length;
-        return rt;
-      });
+
+  /**
+   * Build room output row from a room object with optional pricing per date.
+   * @param {Object} room
+   * @param {string[]} dates - Array of date strings
+   * @returns {Object}
+   */
+  function buildRoomRow(room, dates) {
+    if (!room.isActive) {
+      // Inactive rooms: no pricing processing, return minimal row
       return {
         roomId: room.id,
         roomName: room.name,
         totalRooms: room.totalRooms || 0,
         maxGuests: room.maxGuests || 0,
         bedType: room.bedType || '',
+        roomSize: room.roomSize || 0,
+        description: room.description || '',
         amenities: room.amenities || [],
         included: room.included || [],
-        rateTypes,
+        featuredImage: room.featuredImage || '',
+        gallery: room.gallery || [],
+        isActive: false,
+        sortOrder: room.sortOrder ?? 999,
+        rateTypes: [],
       };
-    });
-  }
+    }
 
-  // Generate date array
-  const dates = [];
-  for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
-    dates.push(d.toISOString().split('T')[0]);
-  }
-  const nights = dates.length;
-
-  return activeRooms.map(room => {
     const rateTypeMap = {};
     for (const date of dates) {
       const pricing = resolveRoomPricing(priceSchedule, room.id, date);
@@ -791,18 +845,39 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
       rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + d.sellPrice, 0) / (rt.dailyPrices.length || 1);
       return rt;
     });
+
     return {
       roomId: room.id,
       roomName: room.name,
       totalRooms: room.totalRooms || 0,
       maxGuests: room.maxGuests || 0,
       bedType: room.bedType || '',
+      roomSize: room.roomSize || 0,
+      description: room.description || '',
       amenities: room.amenities || [],
       included: room.included || [],
       featuredImage: room.featuredImage || '',
+      gallery: room.gallery || [],
+      isActive: true,
+      sortOrder: room.sortOrder ?? 999,
       rateTypes,
     };
-  });
+  }
+
+  if (isNaN(ci.getTime()) || isNaN(co.getTime()) || co <= ci) {
+    // Invalid dates — use a single date fallback (today)
+    const today = new Date().toISOString().split('T')[0];
+    console.log(`[buildRoomPricingTable] Invalid dates, using fallback: today=${today}`);
+    return sortedRooms.map(room => buildRoomRow(room, [today]));
+  }
+
+  // Generate date array
+  const dates = [];
+  for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toISOString().split('T')[0]);
+  }
+
+  return sortedRooms.map(room => buildRoomRow(room, dates));
 }
 
 /**

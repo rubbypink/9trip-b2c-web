@@ -8,6 +8,9 @@
  *   hotels/{hotelId}/
  *     featured.webp
  *     gallery/01.webp, 02.webp, ...
+ *     rooms/{roomId}/
+ *       featured.webp
+ *       gallery/01.webp, 02.webp, ...
  *   activities/{activityId}/
  *     featured.webp
  *     gallery/01.webp, 02.webp, ...
@@ -74,6 +77,43 @@ export function getGalleryImagePath(serviceType, serviceId, index) {
   return `${getStorageBasePath(serviceType, serviceId)}/gallery/${pad}.webp`;
 }
 
+// ─── Room Image Path Builders ─────────────────────────────────────────
+
+/**
+ * Build the base Storage path for a room within a service.
+ * @param {string} serviceType - "hotel" (rooms only apply to hotels)
+ * @param {string} serviceId - Firestore document ID of the hotel
+ * @param {string} roomId - Room ID e.g. "room_deluxe-ocean-view"
+ * @returns {string} e.g. "hotels/abc123/rooms/room_deluxe-ocean-view"
+ */
+export function getRoomStorageBasePath(serviceType, serviceId, roomId) {
+  return `${getStorageBasePath(serviceType, serviceId)}/rooms/${roomId}`;
+}
+
+/**
+ * Build path for a room's featured image.
+ * @param {string} serviceType
+ * @param {string} serviceId
+ * @param {string} roomId
+ * @returns {string} e.g. "hotels/abc123/rooms/room_deluxe-ocean-view/featured.webp"
+ */
+export function getRoomFeaturedImagePath(serviceType, serviceId, roomId) {
+  return `${getRoomStorageBasePath(serviceType, serviceId, roomId)}/featured.webp`;
+}
+
+/**
+ * Build path for a room's gallery image.
+ * @param {string} serviceType
+ * @param {string} serviceId
+ * @param {string} roomId
+ * @param {number} index - 0-based index
+ * @returns {string} e.g. "hotels/abc123/rooms/room_deluxe-ocean-view/gallery/01.webp"
+ */
+export function getRoomGalleryImagePath(serviceType, serviceId, roomId, index) {
+  const pad = String(index + 1).padStart(2, "0");
+  return `${getRoomStorageBasePath(serviceType, serviceId, roomId)}/gallery/${pad}.webp`;
+}
+
 // ─── Upload ───────────────────────────────────────────────────────────
 
 /**
@@ -129,6 +169,49 @@ export async function uploadGalleryImage(serviceType, serviceId, index, file) {
 export async function uploadGalleryImages(serviceType, serviceId, files) {
   return Promise.all(
     files.map((file, idx) => uploadGalleryImage(serviceType, serviceId, idx, file))
+  );
+}
+
+// ─── Room Image Upload ────────────────────────────────────────────────
+
+/**
+ * Upload a room's featured image to Storage.
+ * @param {string} serviceType - "hotel"
+ * @param {string} serviceId - Hotel Firestore document ID
+ * @param {string} roomId - Room ID
+ * @param {File|Blob|Uint8Array|ArrayBuffer} file
+ * @returns {Promise<string>} Download URL
+ */
+export async function uploadRoomFeaturedImage(serviceType, serviceId, roomId, file) {
+  const path = getRoomFeaturedImagePath(serviceType, serviceId, roomId);
+  return uploadImage(path, file);
+}
+
+/**
+ * Upload a room's gallery image at a specific index.
+ * @param {string} serviceType
+ * @param {string} serviceId
+ * @param {string} roomId
+ * @param {number} index
+ * @param {File|Blob|Uint8Array|ArrayBuffer} file
+ * @returns {Promise<string>} Download URL
+ */
+export async function uploadRoomGalleryImage(serviceType, serviceId, roomId, index, file) {
+  const path = getRoomGalleryImagePath(serviceType, serviceId, roomId, index);
+  return uploadImage(path, file);
+}
+
+/**
+ * Upload all gallery images for a room (batch).
+ * @param {string} serviceType
+ * @param {string} serviceId
+ * @param {string} roomId
+ * @param {Array<File|Blob|Uint8Array|ArrayBuffer>} files
+ * @returns {Promise<string[]>} Array of download URLs
+ */
+export async function uploadRoomGalleryImages(serviceType, serviceId, roomId, files) {
+  return Promise.all(
+    files.map((file, idx) => uploadRoomGalleryImage(serviceType, serviceId, roomId, idx, file))
   );
 }
 
@@ -219,6 +302,7 @@ export async function getGalleryImageUrls(serviceType, serviceId) {
 /**
  * Resolve all image fields in a Firestore document to full HTTPS download URLs.
  * Handles common image field names: featuredImage, gallery, images, media, logo.
+ * Also recursively resolves room images for hotel documents (rooms embedded Map/array).
  *
  * @param {Object} doc - Firestore document (already serialized)
  * @returns {Promise<Object>} Document with resolved image URLs
@@ -240,6 +324,25 @@ export async function resolveDocImages(doc) {
         const resolved = await getStorageImageUrl(result[field]);
         result[field] = resolved || result[field];
       }
+    }
+  }
+
+  // Recursively resolve room images for hotel documents
+  // rooms can be an embedded Map (object with roomId keys) or an Array
+  if (result.rooms) {
+    if (Array.isArray(result.rooms)) {
+      // Embedded array of room objects
+      result.rooms = await Promise.all(
+        result.rooms.map((room) => resolveDocImages(room))
+      );
+    } else if (typeof result.rooms === "object") {
+      // Embedded Map (key = roomId)
+      const resolvedRooms = {};
+      const roomKeys = Object.keys(result.rooms);
+      for (const key of roomKeys) {
+        resolvedRooms[key] = await resolveDocImages(result.rooms[key]);
+      }
+      result.rooms = resolvedRooms;
     }
   }
 
@@ -272,7 +375,29 @@ export async function deleteImage(path) {
 }
 
 /**
- * Delete all images for a service (featured + entire gallery folder).
+ * Delete all images for a room (featured + entire gallery folder).
+ * @param {string} serviceType - "hotel"
+ * @param {string} serviceId - Hotel Firestore document ID
+ * @param {string} roomId - Room ID
+ */
+export async function deleteRoomImages(serviceType, serviceId, roomId) {
+  const roomBase = getRoomStorageBasePath(serviceType, serviceId, roomId);
+
+  // Delete room featured
+  await deleteImage(`${roomBase}/featured.webp`);
+
+  // Delete all room gallery images
+  try {
+    const galleryRef = ref(storage, `${roomBase}/gallery`);
+    const result = await listAll(galleryRef);
+    await Promise.all(result.items.map((itemRef) => deleteObject(itemRef)));
+  } catch (error) {
+    console.error("[deleteRoomImages] Error listing gallery:", error.message);
+  }
+}
+
+/**
+ * Delete all images for a service (featured + entire gallery + room images for hotels).
  * @param {string} serviceType
  * @param {string} serviceId
  */
@@ -289,6 +414,24 @@ export async function deleteServiceImages(serviceType, serviceId) {
     await Promise.all(result.items.map((itemRef) => deleteObject(itemRef)));
   } catch (error) {
     console.error("[deleteServiceImages] Error listing gallery:", error.message);
+  }
+
+  // For hotels: also delete all room images
+  if (serviceType === "hotel") {
+    try {
+      const roomsRef = ref(storage, `${base}/rooms`);
+      const roomsResult = await listAll(roomsRef);
+      // Each sub-folder under rooms/ is a roomId
+      for (const roomFolder of roomsResult.prefixes) {
+        const roomId = roomFolder.name; // e.g. "room_deluxe-ocean-view"
+        await deleteRoomImages(serviceType, serviceId, roomId);
+      }
+    } catch (error) {
+      // rooms folder might not exist yet — not an error
+      if (error.code !== "storage/object-not-found" && error.code !== "storage/404") {
+        console.error("[deleteServiceImages] Error cleaning room images:", error.message);
+      }
+    }
   }
 }
 
