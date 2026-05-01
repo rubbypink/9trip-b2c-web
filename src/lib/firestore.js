@@ -726,13 +726,15 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
  *   [{ roomId, roomName, totalRooms, maxGuests, rateTypes: [{ rateType, dailyPrices: [{date, sellPrice, costPrice}], avgSellPrice }] }]
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
-  if (!rooms || rooms.length === 0) {
+  // Handle rooms as Object (Map) or Array
+  const roomsArr = Array.isArray(rooms) ? rooms : (rooms ? Object.values(rooms) : []);
+  if (roomsArr.length === 0) {
     console.log('[buildRoomPricingTable] No rooms provided — returning empty table');
     return [];
   }
 
-  const activeRooms = rooms.filter(r => r.isActive);
-  console.log(`[buildRoomPricingTable] Processing ${activeRooms.length} active rooms (total: ${rooms.length}), hasPriceSchedule=${!!priceSchedule}, checkIn=${checkIn}, checkOut=${checkOut}`);
+  const activeRooms = roomsArr.filter(r => r.isActive);
+  console.log(`[buildRoomPricingTable] Processing ${activeRooms.length} active rooms (total: ${roomsArr.length}), hasPriceSchedule=${!!priceSchedule}, checkIn=${checkIn}, checkOut=${checkOut}`);
 
   const ci = new Date(checkIn);
   const co = new Date(checkOut);

@@ -97,7 +97,8 @@ export default function HotelDetailClient({ slug }) {
         // ── 6. Build pricing table ───────────────────────────
         const today = new Date().toISOString().split("T")[0];
         const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-        const rooms = hotelWithImages.rooms || [];
+        const roomsMap = hotelWithImages.rooms || [];
+        const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
         if (rooms.length === 0) {
           console.warn(`[HotelDetailClient] ⚠️ Hotel "${rawHotel.id}" has NO embedded rooms`);
         } else {
