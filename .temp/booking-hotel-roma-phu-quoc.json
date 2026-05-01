@@ -1,0 +1,270 @@
+{
+  "_firecrawlCredits": 5,
+  "name": "Roma Hotel Phu Quoc - Free Airport Shuttle & Sunset Town Tour",
+  "starRating": 4,
+  "address": {
+    "street": "Số 312-316 Sorrento, Khu Sun Premier Village Primavera",
+    "city": "Phú Quốc",
+    "country": "Vietnam"
+  },
+  "description": "<b>Comfortable Accommodations:</b> Roma Hotel Phu Quoc in Phu Quoc offers family rooms with sea or city views. Each room includes air-conditioning, a private bathroom, and free WiFi.<br><br><b>Dining Experience:</b> The hotel features a family-friendly restaurant serving American, Vietnamese, Asian, and European cuisines. Guests can enjoy brunch, lunch, dinner, and high tea in a traditional, modern, or romantic ambiance.<br><br><b>Leisure Facilities:</b> Spa facilities, a bar, and a hot tub provide relaxation. Additional amenities include a steam room, wellness packages, and a fitness center.<br><br><b>Convenient Location:</b> Located 11 mi from Phu Quoc International Airport, the hotel is near attractions such as Phu Quoc Prison (9.3 mi) and Sung Hung Pagoda (15 mi). Couples in particular like the location – they rated it 9.7 for a two-person trip.",
+  "excerpt": "Comfortable Accommodations: Roma Hotel Phu Quoc in Phu Quoc offers family rooms with sea or city views.",
+  "featuredImage": "https://cf.bstatic.com/xdata/images/hotel/max1024x768/462170988.jpg?k=fec8b07c5450a7928f9206a8d712d21c5e9804d68806d096c0aaa6946c82b0dc&o=",
+  "gallery": [
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/462170988.jpg?k=fec8b07c5450a7928f9206a8d712d21c5e9804d68806d096c0aaa6946c82b0dc&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/462174711.jpg?k=210b65f8551003a30159d4da3de1fe3a047add18c03a36bfe1bd7c0feaa3e6ed&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/591862616.jpg?k=ce284090602b8c3ff247cb6d3e62904d11a872aa868a799481ca573956191458&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/497521119.jpg?k=982991af70c2d405988b745fe07cf2dd4bfe6c22d1cfdb9a0164875170337b7f&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/592005292.jpg?k=816ac1f47c52e24f411cbc4e03628402f22fbef9797454df3c3144408b2be8ec&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/462170974.jpg?k=a4c5176cf61e52c47c8aeeec969a1203ce4927cca279a468a26bc8db6b1ef36f&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/459680525.jpg?k=28449e9312b3fd468a57d76e68fbb63dac76bd92760d2e1508d92399c87107e3&o=",
+    "https://cf.bstatic.com/xdata/images/hotel/max1024x768/459684095.jpg?k=67531f11d724ad0eebad3aac9979e415592e46208f3cfb38237bd6cf62c9243b&o="
+  ],
+  "amenities": [
+    "Free Wifi",
+    "Airport shuttle",
+    "Family rooms",
+    "Spa",
+    "Restaurant",
+    "Non-smoking rooms",
+    "Free parking",
+    "Room service",
+    "Bar",
+    "Very Good Breakfast"
+  ],
+  "highlights": [
+    "Top Location: Highly rated by recent guests (9.6)",
+    "Free Airport Shuttle",
+    "Sunset Town Tour included",
+    "Sea view rooms available"
+  ],
+  "rating": {
+    "average": 9.6,
+    "count": 453
+  },
+  "policies": {
+    "checkIn": "14:00",
+    "checkOut": "12:00"
+  },
+  "map": {
+    "lat": 10.270332,
+    "lng": 103.92699
+  },
+  "phone": "",
+  "email": "",
+  "website": "",
+  "tags": [
+    "resort",
+    "sea-view",
+    "sunset-town",
+    "free-shuttle",
+    "family-friendly",
+    "spa",
+    "4-star"
+  ],
+  "rooms": [
+    {
+      "name": "Riva, Ocean View, 1 King Bed with Balcony",
+      "bedType": "1 king bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Sea view", "Balcony"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Rosetta, Ocean View, 2 Twin Beds with Balcony",
+      "bedType": "2 twin beds",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Sea view", "Balcony"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Rubia, City View, 1 King Bed with Window",
+      "bedType": "1 king bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "City view"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Renata, City View, 2 Twin Beds with Window",
+      "bedType": "2 twin beds",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "City view"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Saphira, Ocean View, 2 Queen Beds with Balcony",
+      "bedType": "2 queen beds",
+      "maxAdults": 4,
+      "maxChildren": 0,
+      "maxGuests": 4,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Sea view", "Balcony"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Sabia, Yard View, 2 Queen Beds",
+      "bedType": "2 queen beds",
+      "maxAdults": 4,
+      "maxChildren": 0,
+      "maxGuests": 4,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Yard view"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Raya, 1 King Bed without Window",
+      "bedType": "1 king bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Signa, Ocean View, 1 Bedroom with Bathtub",
+      "bedType": "1 king bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Bathtub", "Sea view"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Felice, City View, 1 Queen Bed with Window",
+      "bedType": "1 queen bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "City view"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Fortuna, Ocean View, 1 King Bed with Window / Balcony",
+      "bedType": "1 king bed",
+      "maxAdults": 2,
+      "maxChildren": 0,
+      "maxGuests": 2,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "Sea view", "Balcony/Window"],
+      "included": [],
+      "totalRooms": 0
+    },
+    {
+      "name": "Fratello, City View, 1 Queen Bed & 2 Twin Beds with Window",
+      "bedType": "1 queen bed and 2 twin beds",
+      "maxAdults": 4,
+      "maxChildren": 0,
+      "maxGuests": 4,
+      "roomSize": 0,
+      "amenities": ["Air conditioning", "Free WiFi", "Private bathroom", "City view"],
+      "included": [],
+      "totalRooms": 0
+    }
+  ],
+  "reviews": [
+    {
+      "reviewerName": "Harshad",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "Best location of sunworld phu quoc Excellent staff guide us arrange free buggy service for us without asking Also arrange pick and drop for airport They provide everything they can without asking anything Best place and best location to stay in...",
+      "date": "",
+      "country": "India"
+    },
+    {
+      "reviewerName": "Chalalai",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a-/AOh14Gj8tlqRC8IAQkBm_GwbLPmc10Sff-XkBup2ttfb=s96-c",
+      "rating": 9,
+      "text": "Staffs were really accommodating. We booked 3 rooms and wanted to stay in the same building so they helped to change it for us. The location is close to everywhere we wanted to go plus they have a free buggy service to Sunset town area. Breakfast...",
+      "date": "",
+      "country": "Thailand"
+    },
+    {
+      "reviewerName": "Francis",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "Close to Sunset bazaar. Walk 5 minutes to Kissing Bridge to see shows.",
+      "date": "",
+      "country": "United States"
+    },
+    {
+      "reviewerName": "Dian",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "Our room with sea view and can see the sunset as well. Birthday decorations so lovely and staff are very helpful. The location in sunset town is easy to explore the place around and many places good for feed social media.",
+      "date": "",
+      "country": "Indonesia"
+    },
+    {
+      "reviewerName": "Karl",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "We loved our stay at Roma! The service, location, room, view, and food was excellent! Our Signature Ocean View room overlooked the cable cars, sea, and firework displays….a dream location!",
+      "date": "",
+      "country": "United States"
+    },
+    {
+      "reviewerName": "Vu",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 5,
+      "text": "Our room was too small with no room for luggage. The room had NO window except one in the bathroom that can be viewed by adjacent building.",
+      "date": "",
+      "country": "United States"
+    },
+    {
+      "reviewerName": "Megha",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 7,
+      "text": "I was able to whtsapp and talk to hotel to accommodate my req of airport pickup on the go. My VietJet schedule changed a lot and even though free shuttle needed 24 hour prior notice, I was able to talk to them through whtsapps and they picked us...",
+      "date": "",
+      "country": "Australia"
+    },
+    {
+      "reviewerName": "Laura",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 8,
+      "text": "room are beautiful spacious and Clea, great service at the hotel they help and arraganed anything you need!",
+      "date": "",
+      "country": "United States"
+    },
+    {
+      "reviewerName": "Siti",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "To be honest, I would love to say a very Big THANK YOU for preparing me the room that is so clean, tidy, spacious, it is super stunning seaview and we are able to see cable cars on our head, sea shows with musical water fountains and fireworks.....",
+      "date": "",
+      "country": "Malaysia"
+    },
+    {
+      "reviewerName": "Alexey",
+      "reviewerAvatar": "https://lh3.googleusercontent.com/a/AATXAJwqSEX5iCuLY0IzMMBWPYtlmsKF6a5fAI4qZhnh=s96-c",
+      "rating": 9,
+      "text": "Location is terrific. Take a room with sea view, preferably 4th floor (that's what we had)! You'll love it! Staff is ready to fulfill any of your wishes if it is possible and will go an extra mile. Service is top notch. Our stay was very pleasant...",
+      "date": "",
+      "country": "United States"
+    }
+  ]
+}

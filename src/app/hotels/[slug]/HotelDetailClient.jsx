@@ -15,8 +15,6 @@ import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
 import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
-import LocationPanel from "@/components/hotels/HotelDetail/LocationPanel";
-import ReviewsPanel from "@/components/hotels/HotelDetail/ReviewsPanel";
 import PoliciesPanel from "@/components/hotels/HotelDetail/PoliciesPanel";
 import HotelHeader from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
@@ -25,8 +23,6 @@ const HOTEL_TABS = [
   { id: "overview", label: "Tổng quan" },
   { id: "rooms", label: "Phòng & Giá" },
   { id: "amenities", label: "Tiện ích" },
-  { id: "location", label: "Vị trí" },
-  { id: "reviews", label: "Đánh giá" },
   { id: "policies", label: "Chính sách" },
 ];
 
@@ -215,7 +211,13 @@ export default function HotelDetailClient({ slug }) {
         }}
       />
 
-      <HotelHeader hotel={hotel} />
+      <HotelHeader
+        hotel={hotel}
+        reviews={reviews}
+        avgRating={avgRating}
+        totalRating={totalRating}
+        onBookNow={() => setActiveTab("rooms")}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -246,7 +248,7 @@ export default function HotelDetailClient({ slug }) {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200 overflow-x-auto [scrollbar-width:none] mb-6">
+            <div data-tab-nav className="flex border-b border-gray-200 overflow-x-auto [scrollbar-width:none] mb-6">
               {HOTEL_TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -266,19 +268,17 @@ export default function HotelDetailClient({ slug }) {
             <div className="min-h-[300px]">
               {activeTab === "overview" && <OverviewPanel hotel={hotel} />}
               {activeTab === "rooms" && (
-                <RoomsPanel
-                  pricingTable={pricingTable}
-                  hotel={hotel}
-                  checkIn={new Date().toISOString().split("T")[0]}
-                  checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-                  nights={1}
-                />
+                <div data-section="rooms">
+                  <RoomsPanel
+                    pricingTable={pricingTable}
+                    hotel={hotel}
+                    checkIn={new Date().toISOString().split("T")[0]}
+                    checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+                    nights={1}
+                  />
+                </div>
               )}
               {activeTab === "amenities" && <AmenitiesPanel hotel={hotel} />}
-              {activeTab === "location" && <LocationPanel hotel={hotel} />}
-              {activeTab === "reviews" && (
-                <ReviewsPanel reviews={reviews} avgRating={avgRating} totalRating={totalRating} />
-              )}
               {activeTab === "policies" && <PoliciesPanel hotel={hotel} />}
             </div>
 

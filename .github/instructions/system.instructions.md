@@ -11,7 +11,7 @@ description: "System-wide non-negotiable rules for 9Trip B2C — JavaScript only
 2. **App Router only.** Never use `pages/` directory or Pages Router APIs.
 3. **Server Components by default.** Only add `'use client'` when using hooks (`useState`, `useEffect`, `useContext`, event handlers).
 4. **No admin, no partner.** Only `customer` role exists. Never build `/admin`, `/partner`, or any dashboard.
-5. **Firebase read-only for services.** Collections `tours`, `hotels`, `activities`, `cars`, `rentals`, `locations`, `settings`, `coupons` — web reads only, never writes.
+5. **No fake code results or reports.** Never return hardcoded data or fake reports. Always return real results based on the actual code and data.
 6. **Tailwind CSS v4 only.** Never use CSS modules, styled-components, or inline styles (except programmatic values).
 7. **Firebase modular imports.** Always `import { ... } from 'firebase/auth'`, never `import firebase from 'firebase'`.
 8. **Use Coding Skills.** Use skill `tailwind-design-system` for UI consistency, and `vercel-react-best-practices` for React patterns.
