@@ -33,11 +33,11 @@ export default function HotelHeader({ hotel }) {
   return (
     <div className="bg-white">
       {/* Image Carousel Gallery */}
-      <div className="relative mx-4 mt-4 rounded-xl overflow-hidden">
+      <div className="relative mx-4 mt-4 rounded-xl overflow-hidden max-h-[420px]">
         <ImageCarousel
           images={allImages}
           alt={name}
-          aspectRatio="aspect-[4/3] md:aspect-[21/9]"
+          aspectRatio="aspect-[16/9] md:aspect-[21/9]"
           showOverlay={true}
           serviceId={hotel.id}
           serviceType="hotel"

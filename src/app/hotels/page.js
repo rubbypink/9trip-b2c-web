@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { searchHotels, getLocations } from "@/lib/firestore";
+import { searchHotels, getLocations, enrichHotelsWithLowestPrices } from "@/lib/firestore";
 import { resolveDocsImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
@@ -33,7 +33,10 @@ export default async function HotelsPage({ searchParams }) {
   ]);
 
   // Resolve image URLs (gs:// → HTTPS)
-  const hotels = await resolveDocsImages(rawHotels);
+  let hotels = await resolveDocsImages(rawHotels);
+
+  // Enrich with lowest prices from hotel_price_schedules
+  hotels = await enrichHotelsWithLowestPrices(hotels);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">

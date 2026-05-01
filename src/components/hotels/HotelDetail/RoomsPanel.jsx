@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
@@ -35,7 +35,7 @@ import { useCart } from "@/lib/cart";
  */
 export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = "", checkOut = "", nights = 1 }) {
   const router = useRouter();
-  const { addItem } = useCart();
+  const { addItem, updateCartItem, removeCartItemByKey, items: cartItems } = useCart();
 
   // State: quantity cho mỗi room × rateType (key: "roomId_rateType")
   const [quantities, setQuantities] = useState({});
@@ -85,7 +85,35 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
   }, [quantities]);
 
   /**
-   * Xác nhận chọn phòng — thêm tất cả selected rooms vào cart.
+   * Restore quantities from existing cart items on mount.
+   * Syncs so returning from cart shows previously selected quantities.
+   */
+  useEffect(() => {
+    const restored = { ...quantities };
+    for (const room of pricingTable) {
+      for (const rt of room.rateTypes) {
+        const cartItem = cartItems.find(
+          (ci) =>
+            ci.serviceId === hotel.id &&
+            ci.roomId === room.roomId &&
+            ci.rateType === rt.rateType &&
+            ci.startDate === checkIn
+        );
+        if (cartItem) {
+          const key = `${room.roomId}_${rt.rateType}`;
+          restored[key] = cartItem.rooms || 0;
+        }
+      }
+    }
+    setQuantities(restored);
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Xác nhận chọn phòng — đồng bộ selections với cart.
+   * Chỉ update/sửa/xóa nếu khớp thông tin (serviceId + roomId + rateType + startDate).
+   * Không reset cart — các dịch vụ khác trong cart không bị ảnh hưởng.
    */
   const handleConfirmSelection = useCallback(() => {
     try {
@@ -93,32 +121,41 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
         for (const rt of room.rateTypes) {
           const key = `${room.roomId}_${rt.rateType}`;
           const qty = quantities[key] || 0;
-          if (qty === 0) continue;
-
           const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
-          addItem({
-            serviceId: hotel.id,
-            roomId: room.roomId,
-            serviceType: "hotel_room",
-            serviceTitle: `${hotel.name} — ${room.roomName}`,
-            featuredImage: room.featuredImage || hotel.featuredImage || "",
-            startDate: checkIn || new Date().toISOString(),
-            endDate: checkOut || "",
-            adults: 2,
-            children: 0,
-            infants: 0,
-            rooms: qty,
-            rateType: rt.rateType,
-            basePrice: rt.avgSellPrice,
-            costPrice: rt.dailyPrices[0]?.costPrice || 0,
-            discount: 0,
-            total: lineTotal,
-            currency: "VND",
-            hotelId: hotel.id,
-            hotelName: hotel.name,
-            roomName: room.roomName,
-          });
+          if (qty > 0) {
+            // Add or update item in cart
+            updateCartItem({
+              serviceId: hotel.id,
+              roomId: room.roomId,
+              rateType: rt.rateType,
+              serviceType: "hotel_room",
+              serviceTitle: `${hotel.name} — ${room.roomName}`,
+              featuredImage: room.featuredImage || hotel.featuredImage || "",
+              startDate: checkIn || new Date().toISOString(),
+              endDate: checkOut || "",
+              adults: 2,
+              children: 0,
+              infants: 0,
+              rooms: qty,
+              basePrice: rt.avgSellPrice,
+              costPrice: rt.dailyPrices[0]?.costPrice || 0,
+              discount: 0,
+              total: lineTotal,
+              currency: "VND",
+              hotelId: hotel.id,
+              hotelName: hotel.name,
+              roomName: room.roomName,
+            });
+          } else {
+            // Remove item from cart if quantity = 0
+            removeCartItemByKey({
+              serviceId: hotel.id,
+              roomId: room.roomId,
+              rateType: rt.rateType,
+              startDate: checkIn || new Date().toISOString(),
+            });
+          }
         }
       }
       router.push("/cart");
@@ -126,7 +163,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
       console.error('[RoomsPanel] Error confirming selection:', error.message);
       // Cart add failed — user can retry
     }
-  }, [pricingTable, quantities, getLineTotal, addItem, hotel, checkIn, checkOut, router]);
+  }, [pricingTable, quantities, getLineTotal, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, router]);
 
   if (pricingTable.length === 0) {
     return (

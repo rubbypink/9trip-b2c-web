@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getFeaturedHotels } from "@/lib/firestore";
+import { getFeaturedHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore";
 import { resolveDocsImages } from "@/lib/storage";
 import { formatCurrency } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ export default async function FeaturedHotelsServer() {
   try {
     const rawHotels = await getFeaturedHotels(6);
     hotels = await resolveDocsImages(rawHotels);
+    hotels = await enrichHotelsWithLowestPrices(hotels);
   } catch {
     // Firestore unavailable — render empty gracefully
   }
@@ -86,11 +87,11 @@ export default async function FeaturedHotelsServer() {
                 </h3>
                 <div className="flex items-baseline gap-1 mt-2">
                   <span className="text-lg font-bold text-blue-600">
-                    {hotel.pricing?.basePrice > 0
-                      ? formatCurrency(hotel.pricing.basePrice, hotel.pricing.currency || "VND")
+                    {hotel.lowestPrice > 0
+                      ? formatCurrency(hotel.lowestPrice, hotel.pricing?.currency || "VND")
                       : "Liên hệ"}
                   </span>
-                  {hotel.pricing?.basePrice > 0 && (
+                  {hotel.lowestPrice > 0 && (
                     <span className="text-xs text-gray-500">/ đêm</span>
                   )}
                 </div>

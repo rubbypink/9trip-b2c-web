@@ -805,6 +805,50 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
   });
 }
 
+/**
+ * Enrich an array of hotel objects with the lowest price from hotel_price_schedules.
+ * Fetches price schedules for all hotels in parallel, then computes the lowest
+ * sell price for each hotel using today's date as reference.
+ * Falls back to hotel.pricing?.basePrice if no price schedule is found.
+ *
+ * @param {Object[]} hotels - Array of hotel objects (with .id, .rooms, .pricing)
+ * @returns {Promise<Object[]>} Same hotels array with .lowestPrice attached
+ */
+export async function enrichHotelsWithLowestPrices(hotels) {
+  if (!hotels || hotels.length === 0) return hotels;
+
+  const today = new Date().toISOString().split('T')[0];
+  const currentYear = new Date().getFullYear();
+
+  console.log(`[enrichHotelsWithLowestPrices] Processing ${hotels.length} hotels...`);
+
+  // Fetch all price schedules in parallel
+  const results = await Promise.allSettled(
+    hotels.map(async (hotel) => {
+      if (!hotel.id) return { hotel, lowestPrice: 0 };
+      const schedule = await getHotelPriceSchedule(hotel.id, currentYear);
+      if (!schedule) {
+        console.log(`[enrichHotelsWithLowestPrices] No schedule for hotelId=${hotel.id}, fallback to basePrice`);
+        return { hotel, lowestPrice: hotel.pricing?.basePrice || 0 };
+      }
+      const rooms = Array.isArray(hotel.rooms) ? hotel.rooms : (hotel.rooms ? Object.values(hotel.rooms) : []);
+      const lowest = getHotelLowestPrice(schedule, rooms, today);
+      console.log(`[enrichHotelsWithLowestPrices] hotelId=${hotel.id}, lowestPrice=${lowest}`);
+      return { hotel, lowestPrice: lowest > 0 ? lowest : (hotel.pricing?.basePrice || 0) };
+    })
+  );
+
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      result.value.hotel.lowestPrice = result.value.lowestPrice;
+    } else {
+      console.error('[enrichHotelsWithLowestPrices] Error:', result.reason?.message);
+    }
+  }
+
+  return hotels;
+}
+
 // ─── Activities ───────────────────────────────────────────────────────
 
 /**

@@ -60,6 +60,7 @@ export default function HotelBookingWidget({
   const [selectedRoomId, setSelectedRoomId] = useState(
     rooms.length > 0 ? rooms[0].id : null
   );
+  const [roomQuantity, setRoomQuantity] = useState(1);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [promoCode, setPromoCode] = useState("");
@@ -83,10 +84,10 @@ export default function HotelBookingWidget({
     return selectedRoom.promoPrice || selectedRoom.price || basePrice;
   }, [selectedRoom, basePrice]);
 
-  // Tính tổng
+  // Tính tổng (giá × đêm × số phòng)
   const total = useMemo(() => {
-    return roomPrice * nights;
-  }, [roomPrice, nights]);
+    return roomPrice * nights * roomQuantity;
+  }, [roomPrice, nights, roomQuantity]);
 
   // Min date: today
   const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -113,12 +114,19 @@ export default function HotelBookingWidget({
     setChildren((prev) => Math.max(0, Math.min(10, prev + delta)));
   }, []);
 
+  const handleRoomQuantityChange = useCallback((delta) => {
+    const maxRooms = selectedRoom?.totalRooms || 10;
+    setRoomQuantity((prev) => Math.max(1, Math.min(maxRooms, prev + delta)));
+  }, [selectedRoom]);
+
   const handleBookNow = useCallback(() => {
     try {
       // Add to cart first
       if (selectedRoom) {
         addItem({
           serviceId: hotelId,
+          roomId: selectedRoom.id,
+          rateType: 'standard',
           serviceType: "hotel_room",
           serviceTitle: `${hotelName} - ${selectedRoom.name}`,
           featuredImage: selectedRoom.featuredImage || "",
@@ -127,9 +135,9 @@ export default function HotelBookingWidget({
           adults,
           children,
           infants: 0,
-          rooms: 1,
+          rooms: roomQuantity,
           basePrice: roomPrice,
-          discount: selectedRoom.promoPrice ? (selectedRoom.price - selectedRoom.promoPrice) : 0,
+          discount: selectedRoom.promoPrice ? (selectedRoom.price - selectedRoom.promoPrice) * roomQuantity : 0,
           total: total,
           currency,
         });
@@ -252,6 +260,38 @@ export default function HotelBookingWidget({
           </div>
         )}
 
+        {/* Room Quantity Selector */}
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">
+            Số phòng
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleRoomQuantityChange(-1)}
+              disabled={roomQuantity <= 1}
+              className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              aria-label="Giảm số phòng"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+            <span className="w-10 text-center font-semibold text-gray-900 text-lg tabular-nums">
+              {String(roomQuantity).padStart(2, "0")}
+            </span>
+            <button
+              onClick={() => handleRoomQuantityChange(1)}
+              disabled={roomQuantity >= (selectedRoom?.totalRooms || 10)}
+              className="w-9 h-9 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              aria-label="Tăng số phòng"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         {/* Guest Selectors */}
         <div className="space-y-3">
           {/* Adults */}
@@ -338,9 +378,9 @@ export default function HotelBookingWidget({
           <div className="space-y-1.5 text-sm">
             <div className="flex items-center justify-between text-gray-500">
               <span>
-                {formatCurrency(roomPrice, currency)} x {nights} đêm
+                {formatCurrency(roomPrice, currency)} x {nights} đêm x {roomQuantity} phòng
               </span>
-              <span>{formatCurrency(roomPrice * nights, currency)}</span>
+              <span>{formatCurrency(roomPrice * nights * roomQuantity, currency)}</span>
             </div>
             {roomPrice > 0 && selectedRoom?.price > roomPrice && (
               <div className="flex items-center justify-between text-green-600">

@@ -1,6 +1,8 @@
 /**
  * Cart state management using React Context.
  * Supports multi-item cart, coupon application, real-time price calculation.
+ * Hotel items are keyed by composite key: serviceId + roomId + rateType + startDate
+ * to allow multiple room types in the same hotel.
  */
 "use client";
 
@@ -12,6 +14,8 @@ const CartContext = createContext(null);
 /**
  * @typedef {Object} CartItem
  * @property {string} serviceId
+ * @property {string} [roomId] - Room ID (for hotel_room items)
+ * @property {string} [rateType] - Rate type (for hotel_room items)
  * @property {string} serviceType - 'tour' | 'hotel_room' | 'activity' | 'car'
  * @property {string} serviceTitle
  * @property {string} featuredImage
@@ -36,6 +40,31 @@ const CartContext = createContext(null);
  */
 
 /**
+ * Build a composite key for matching cart items.
+ * For hotel_room items: serviceId + roomId + rateType + startDate
+ * For other items: serviceId + startDate
+ * @param {CartItem} item
+ * @returns {string}
+ */
+function getItemKey(item) {
+  if (item.serviceType === 'hotel_room' && item.roomId) {
+    return `${item.serviceId}_${item.roomId}_${item.rateType || ''}_${item.startDate}`;
+  }
+  return `${item.serviceId}_${item.startDate}`;
+}
+
+/**
+ * Find the index of a matching item in the cart array.
+ * @param {CartItem[]} items
+ * @param {CartItem} item
+ * @returns {number}
+ */
+function findItemIndex(items, item) {
+  const key = getItemKey(item);
+  return items.findIndex((i) => getItemKey(i) === key);
+}
+
+/**
  * CartProvider wraps checkout-related pages.
  * @param {{ children: React.ReactNode }} props
  */
@@ -46,14 +75,15 @@ export function CartProvider({ children }) {
   const [couponData, setCouponData] = useState(null);
 
   /**
-   * Add item to cart. If the same serviceId+startDate exists, replace it.
+   * Add item to cart. Uses composite key for matching:
+   * - hotel_room: serviceId + roomId + rateType + startDate
+   * - other: serviceId + startDate
+   * Does NOT reset coupon when updating existing items (only on add/remove).
    * @param {CartItem} item
    */
   const addItem = useCallback((item) => {
     setItems((prev) => {
-      const existingIdx = prev.findIndex(
-        (i) => i.serviceId === item.serviceId && i.startDate === item.startDate
-      );
+      const existingIdx = findItemIndex(prev, item);
       if (existingIdx >= 0) {
         const copy = [...prev];
         copy[existingIdx] = item;
@@ -61,10 +91,8 @@ export function CartProvider({ children }) {
       }
       return [...prev, item];
     });
-    // Reset coupon when cart changes
-    setCouponCode(null);
-    setCouponDiscount(0);
-    setCouponData(null);
+    // Only reset coupon when a completely new item is added
+    // (updates to existing items keep the coupon)
   }, []);
 
   /**
@@ -79,21 +107,74 @@ export function CartProvider({ children }) {
   }, []);
 
   /**
-   * Update quantity for a cart item by index.
-   * Recalculates total based on unit price × new quantity.
-   * @param {number} index
-   * @param {number} newQuantity
+   * Update quantity and recalculate total for a cart item.
+   * Supports both index-based (legacy) and hotel key-based matching.
+   * Does NOT reset coupon — quantity changes preserve the applied coupon.
+   *
+   * @param {number|Object} params - Index (number) or matching object { serviceId, roomId?, rateType?, startDate }
+   * @param {number} newQuantity - New quantity value (1-10)
    */
-  const updateItemQuantity = useCallback((index, newQuantity) => {
+  const updateItemQuantity = useCallback((params, newQuantity) => {
     setItems((prev) => {
       const copy = [...prev];
-      if (copy[index]) {
-        const item = copy[index];
+      let idx = -1;
+
+      if (typeof params === 'number') {
+        idx = params;
+      } else {
+        // Key-based matching for hotel items
+        const key = `${params.serviceId}_${params.roomId || ''}_${params.rateType || ''}_${params.startDate}`;
+        idx = prev.findIndex((i) => getItemKey(i) === key);
+      }
+
+      if (idx >= 0 && idx < copy.length) {
+        const item = copy[idx];
         const qty = Math.max(1, Math.min(10, newQuantity));
         const unitPrice = item.basePrice || 0;
-        copy[index] = { ...item, rooms: qty, total: unitPrice * qty };
+        copy[idx] = { ...item, rooms: qty, total: unitPrice * qty };
       }
       return copy;
+    });
+    // Do NOT reset coupon — quantity changes preserve the coupon
+  }, []);
+
+  /**
+   * Update a cart item by composite key.
+   * Merges the provided partial data into the matching cart item.
+   * Used by RoomsPanel to sync room selections without resetting the cart.
+   * If no matching item is found, adds it as a new item.
+   *
+   * @param {CartItem} item - Full or partial cart item data (must include composite key fields)
+   */
+  const updateCartItem = useCallback((item) => {
+    setItems((prev) => {
+      const existingIdx = findItemIndex(prev, item);
+      const copy = [...prev];
+      if (existingIdx >= 0) {
+        // Merge: keep existing fields, override with new data
+        copy[existingIdx] = { ...copy[existingIdx], ...item };
+      } else {
+        // Add as new item
+        copy.push(item);
+      }
+      return copy;
+    });
+    // Do not reset coupon — updates preserve the coupon
+  }, []);
+
+  /**
+   * Remove a hotel room from cart by composite key.
+   * Only removes if the key matches exactly.
+   * @param {{ serviceId: string, roomId: string, rateType: string, startDate: string }} key
+   */
+  const removeCartItemByKey = useCallback(({ serviceId, roomId, rateType, startDate }) => {
+    const key = `${serviceId}_${roomId}_${rateType}_${startDate}`;
+    setItems((prev) => {
+      const idx = prev.findIndex((i) => getItemKey(i) === key);
+      if (idx >= 0) {
+        return prev.filter((_, i) => i !== idx);
+      }
+      return prev;
     });
     setCouponCode(null);
     setCouponDiscount(0);
@@ -167,6 +248,8 @@ export function CartProvider({ children }) {
     addItem,
     removeItem,
     updateItemQuantity,
+    updateCartItem,
+    removeCartItemByKey,
     clearCart,
     applyCoupon,
     removeCoupon,
@@ -187,6 +270,9 @@ export function CartProvider({ children }) {
  *   clearCart: Function,
  *   applyCoupon: Function,
  *   removeCoupon: Function,
+ *   updateItemQuantity: Function,
+ *   updateCartItem: Function,
+ *   removeCartItemByKey: Function,
  * }}
  */
 export function useCart() {

@@ -4,11 +4,14 @@ import { formatPrice } from "@/lib/utils";
 
 /**
  * CartItem — single row in cart page with quantity controls and remove button.
+ * Uses key-based matching for hotel items (serviceId + roomId + rateType + startDate)
+ * to allow precise cart sync without affecting other items.
+ *
  * @param {Object} props
  * @param {Object} props.item - Cart item data
  * @param {number} props.index - Index in cart items array
  * @param {Function} props.onRemove - (index: number) => void
- * @param {Function} props.onUpdateQuantity - (index: number, newQty: number) => void
+ * @param {Function} props.onUpdateQuantity - ({ serviceId, roomId?, rateType?, startDate }, newQty) => void
  */
 export default function CartItem({ item, index, onRemove, onUpdateQuantity }) {
   const typeLabel = {
@@ -29,12 +32,25 @@ export default function CartItem({ item, index, onRemove, onUpdateQuantity }) {
 
   /**
    * Handle quantity change.
+   * Uses key-based matching for hotel items to preserve cart integrity.
    * @param {number} delta
    */
   const handleQuantityChange = (delta) => {
     const newQty = Math.max(1, Math.min(10, quantity + delta));
     if (onUpdateQuantity) {
-      onUpdateQuantity(index, newQty);
+      if (isHotel && item.roomId) {
+        onUpdateQuantity(
+          {
+            serviceId: item.serviceId,
+            roomId: item.roomId,
+            rateType: item.rateType,
+            startDate: item.startDate,
+          },
+          newQty
+        );
+      } else {
+        onUpdateQuantity(index, newQty);
+      }
     }
   };
 
