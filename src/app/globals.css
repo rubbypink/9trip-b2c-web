@@ -3,6 +3,16 @@
 /* ─── 9Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
 @theme {
   --color-primary: oklch(62% 0.19 255);
+  --color-primary-50: oklch(97% 0.02 255);
+  --color-primary-100: oklch(93% 0.06 255);
+  --color-primary-200: oklch(86% 0.10 255);
+  --color-primary-300: oklch(78% 0.14 255);
+  --color-primary-400: oklch(70% 0.17 255);
+  --color-primary-500: oklch(62% 0.19 255);
+  --color-primary-600: oklch(55% 0.19 255);
+  --color-primary-700: oklch(47% 0.18 255);
+  --color-primary-800: oklch(39% 0.16 255);
+  --color-primary-900: oklch(31% 0.13 255);
   --color-primary-dark: oklch(55% 0.19 255);
   --color-primary-light: oklch(70% 0.15 250);
   --color-primary-foreground: oklch(98% 0.01 255);
