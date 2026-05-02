@@ -9,6 +9,7 @@ import CustomerForm from "@/components/checkout/CustomerForm";
 import CartSummary from "@/components/checkout/CartSummary";
 import CouponInput from "@/components/checkout/CouponInput";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import { useEffect } from "react";
 
 export default function CheckoutPage() {
   const router = useRouter();
