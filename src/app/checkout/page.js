@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={handleFinalizeBooking}
                       disabled={bookingLoading || paymentLoading}
-                      className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 disabled:bg-gray-300 flex items-center gap-2"
+                      className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none flex items-center gap-2"
                     >
                       {(bookingLoading || paymentLoading) && <LoadingSpinner className="w-4 h-4 border-white" />}
                       {paymentMethod === "cash" ? "Hoàn tất đặt chỗ" : "Thanh toán ngay"}

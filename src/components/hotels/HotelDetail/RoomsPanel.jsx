@@ -7,44 +7,56 @@ import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
 
 /**
- * RoomGalleryThumbnails — Mini thumbnail strip for room gallery images.
- * Clicking opens GalleryWithLightbox.
- * @param {{ images: string[], roomName: string }} props
+ * RoomImageWithLightbox — Main thumbnail that opens GalleryWithLightbox on click.
+ * @param {{ images: string[], roomName: string, featuredImage: string }} props
  */
-function RoomGalleryThumbnails({ images = [], roomName }) {
+function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  if (!images || images.length === 0) return null;
-
-  const displayImages = images.slice(0, 3);
+  const allImages = featuredImage ? [featuredImage, ...images] : images;
+  const displayImage = allImages.length > 0 ? allImages[0] : null;
 
   return (
     <>
-      <div className="flex gap-1.5 mt-2">
-        {displayImages.map((img, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => { setLightboxIndex(idx); setLightboxOpen(true); }}
-            className="relative w-14 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 hover:ring-2 hover:ring-blue-400 transition-all"
-          >
-            <Image src={img} alt={`${roomName} gallery ${idx + 1}`} fill className="object-cover" sizes="56px" />
-          </button>
-        ))}
-        {images.length > 3 && (
-          <button
-            type="button"
-            onClick={() => { setLightboxIndex(3); setLightboxOpen(true); }}
-            className="relative w-14 h-10 rounded-md overflow-hidden bg-gray-300 flex-shrink-0 flex items-center justify-center text-[10px] font-medium text-gray-600 hover:ring-2 hover:ring-blue-400 transition-all"
-          >
-            +{images.length - 3}
-          </button>
+      <div 
+        className="relative w-full aspect-video md:aspect-[4/3] bg-gray-200 cursor-pointer group"
+        onClick={() => {
+          if (allImages.length > 0) {
+            setLightboxIndex(0);
+            setLightboxOpen(true);
+          }
+        }}
+      >
+        {displayImage ? (
+          <>
+            <Image
+              src={displayImage}
+              alt={roomName}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, 300px"
+            />
+            {allImages.length > 1 && (
+              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                1/{allImages.length}
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+              <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+              </svg>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+            Chưa có ảnh
+          </div>
         )}
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && (
+      {lightboxOpen && allImages.length > 0 && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxOpen(false)}
@@ -56,32 +68,38 @@ function RoomGalleryThumbnails({ images = [], roomName }) {
           >
             ✕
           </button>
-          <button
-            type="button"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
-            }}
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightboxIndex((lightboxIndex + 1) % images.length);
-            }}
-          >
-            ›
-          </button>
+          {allImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((lightboxIndex - 1 + allImages.length) % allImages.length);
+                }}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIndex((lightboxIndex + 1) % allImages.length);
+                }}
+              >
+                ›
+              </button>
+            </>
+          )}
           <div className="relative w-full max-w-4xl h-[80vh]" onClick={(e) => e.stopPropagation()}>
-            <Image src={images[lightboxIndex]} alt={`${roomName} gallery ${lightboxIndex + 1}`} fill className="object-contain" sizes="80vw" />
+            <Image src={allImages[lightboxIndex]} alt={`${roomName} gallery ${lightboxIndex + 1}`} fill className="object-contain" sizes="80vw" />
           </div>
-          <div className="absolute bottom-4 text-white text-sm">
-            {lightboxIndex + 1} / {images.length}
-          </div>
+          {allImages.length > 1 && (
+            <div className="absolute bottom-4 text-white text-sm">
+              {lightboxIndex + 1} / {allImages.length}
+            </div>
+          )}
         </div>
       )}
     </>
@@ -343,14 +361,16 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
             {/* Room Header */}
             <div className={`p-5 border-b border-gray-100 ${isInactive ? 'bg-gray-100/50' : 'bg-gray-50/50'}`}>
               <div className="flex items-start gap-4">
-                {/* Featured Image */}
-                {room.featuredImage && (
-                  <div className={`w-20 h-16 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 relative ${
-                    isInactive ? 'grayscale' : ''
-                  }`}>
-                    <Image src={room.featuredImage} alt={room.roomName} fill className="object-cover" sizes="80px" />
-                  </div>
-                )}
+                {/* Featured Image & Lightbox */}
+                <div className={`w-24 h-16 rounded-lg overflow-hidden flex-shrink-0 relative ${
+                  isInactive ? 'grayscale opacity-60' : ''
+                }`}>
+                  <RoomImageWithLightbox
+                    featuredImage={room.featuredImage}
+                    images={room.gallery}
+                    roomName={room.roomName}
+                  />
+                </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -383,11 +403,6 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                       📦 Còn {room.totalRooms} phòng
                     </span>
                   </div>
-
-                  {/* Gallery Thumbnails */}
-                  {room.gallery && room.gallery.length > 0 && (
-                    <RoomGalleryThumbnails images={room.gallery} roomName={room.roomName} />
-                  )}
                 </div>
               </div>
             </div>

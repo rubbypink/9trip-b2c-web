@@ -3,6 +3,8 @@
 import { useState } from "react";
 import HotelSearchForm from "./HotelSearchForm";
 
+import { useRouter } from "next/navigation";
+
 /**
  * SearchTabsClient — Tab điều hướng giữa các loại tìm kiếm: Tour, Khách sạn, Vé máy bay.
  * Sử dụng 'use client' để xử lý state tab active.
@@ -53,6 +55,11 @@ export default function SearchTabsClient({ locations }) {
  * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
 function TourSearchForm({ locations }) {
+  const router = useRouter();
+  const [location, setLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+
   const destinationList = locations && locations.length > 0
     ? [{ value: "", label: "Chọn điểm đến" }, ...locations.map((loc) => ({ value: loc.id, label: loc.name }))]
     : [
@@ -66,12 +73,23 @@ function TourSearchForm({ locations }) {
         { value: "sapa", label: "Sapa" },
       ];
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (location) params.append("locationId", location);
+    if (date) params.append("date", date);
+    if (priceRange) {
+      const [min, max] = priceRange.split("-");
+      if (min) params.append("minPrice", min);
+      if (max && max !== "999999999") params.append("maxPrice", max);
+    }
+    
+    router.push(`/tours?${params.toString()}`);
+  };
+
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Navigate to /hotels listing page
-      }}
+      onSubmit={handleSearch}
       className="space-y-4"
     >
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -84,7 +102,8 @@ function TourSearchForm({ locations }) {
             </svg>
             <select
               className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
-              defaultValue=""
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             >
               {destinationList.map((d) =>
                 d.value === "" ? (
@@ -106,6 +125,8 @@ function TourSearchForm({ locations }) {
           <label className="block text-xs font-medium text-gray-500 mb-1">Ngày đi</label>
           <input
             type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -115,7 +136,8 @@ function TourSearchForm({ locations }) {
           <label className="block text-xs font-medium text-gray-500 mb-1">Khoảng giá</label>
           <select
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
-            defaultValue=""
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
           >
             <option value="">Tất cả mức giá</option>
             <option value="0-3000000">Dưới 3 triệu</option>

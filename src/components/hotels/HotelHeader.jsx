@@ -227,18 +227,17 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
 
 /**
  * HotelHeader — header cho trang chi tiết khách sạn.
- * Bao gồm: gallery photos full-width, star/score badges overlay,
- * tên khách sạn, sao, địa chỉ, excerpt.
- * (Gallery tabs and action buttons removed — map/reviews moved to sidebar,
- * action buttons moved to HotelDetailClient)
+ * Bao gồm: gallery photos, star/score badges overlay,
+ * tên khách sạn, sao, địa chỉ, excerpt và action buttons.
  *
  * @param {{
  *   hotel: object,
  *   avgRating?: number,
  *   totalRating?: number,
+ *   onBookNow?: Function
  * }} props
  */
-const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0 }) {
+const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0, onBookNow }) {
   const {
     name,
     featuredImage,
@@ -264,9 +263,9 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
 
   return (
     <div className="bg-white">
-      {/* ── Gallery Section (full-width photos) ────────────── */}
-      <div className="w-full">
-        <div className="relative w-full bg-gray-100">
+      {/* ── Gallery Section (70% width) ────────────── */}
+      <div className="w-full px-4 pt-4">
+        <div className="relative w-full max-w-4xl mx-auto bg-gray-100 rounded-2xl overflow-hidden shadow-sm">
           {/* ── Gallery Content ─────────────────────────────── */}
           <div className="aspect-[16/9] md:aspect-[21/9] max-h-[60vh] relative">
             <ImageCarousel
@@ -310,7 +309,7 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
 
       {/* ── Title & Meta ────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-8">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{name}</h1>
 
@@ -334,6 +333,22 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
 
             {excerpt && (
               <p className="text-gray-600 mt-3 line-clamp-2 max-w-2xl">{excerpt}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+            <div className="flex items-center gap-2">
+              <WishlistButton hotelId={hotel.id} />
+              <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={hotel.name} />
+            </div>
+            {onBookNow && (
+              <button
+                type="button"
+                onClick={onBookNow}
+                className="w-full sm:w-auto rounded-xl bg-primary text-white text-sm font-semibold px-6 py-2.5 shadow-sm hover:bg-primary-dark transition-colors"
+              >
+                Đặt ngay
+              </button>
             )}
           </div>
         </div>

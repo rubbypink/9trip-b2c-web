@@ -1,21 +1,30 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { loginWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase/auth';
+import { useAuth } from '@/lib/auth';
 import FirebaseErrorHandler from '@/components/common/FirebaseErrorHandler';
 
 function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const redirect = searchParams.get('redirect') || '/';
+	const { user, loading: authLoading } = useAuth();
 
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [socialLoading, setSocialLoading] = useState(null); // "google" | "facebook"
+
+	// Nếu đã đăng nhập thì tự động chuyển hướng
+	useEffect(() => {
+		if (!authLoading && user) {
+			router.replace(redirect);
+		}
+	}, [user, authLoading, router, redirect]);
 
 	async function handleEmailLogin(e) {
 		e.preventDefault();

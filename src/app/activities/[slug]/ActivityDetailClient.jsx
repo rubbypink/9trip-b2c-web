@@ -7,6 +7,8 @@ import Link from "next/link";
 import StarRating from "@/components/shared/StarRating";
 import ActivityCard from "@/components/shared/ActivityCard";
 import ActivityBookingWidget from "@/components/activities/ActivityBookingWidget";
+import ImageCarousel from "@/components/shared/ImageCarousel";
+import WriteReviewForm from "@/components/reviews/WriteReviewForm";
 import { formatCurrency } from "@/lib/utils";
 
 const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
@@ -93,36 +95,14 @@ export default function ActivityDetailClient({
           {/* Image Gallery — Banner style with carousel */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
             {allImages.length > 0 ? (
-              <div className="relative">
-                <div className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth custom-scrollbar-hide">
-                  {allImages.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className="min-w-full snap-start aspect-[21/9] relative flex-shrink-0"
-                    >
-                      <Image
-                        src={img}
-                        alt={`${title} - ${idx + 1}`}
-                        fill
-                        className="object-cover"
-                        priority={idx === 0}
-                        sizes="(max-width: 1024px) 100vw, 70vw"
-                      />
-                    </div>
-                  ))}
-                </div>
-                {/* Dots indicator */}
-                {allImages.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {allImages.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="w-2 h-2 rounded-full bg-white/70 shadow-sm"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <ImageCarousel
+                images={allImages}
+                alt={title}
+                aspectRatio="aspect-[21/9]"
+                showOverlay={false}
+                serviceId={activity.id}
+                serviceType="activity"
+              />
             ) : (
               <div className="aspect-[21/9] bg-gray-200 flex items-center justify-center text-gray-400">
                 Chưa có ảnh
@@ -472,7 +452,7 @@ export default function ActivityDetailClient({
 
               {/* ─── Reviews ─── */}
               {activeTab === "reviews" && (
-                <div>
+                <div className="space-y-8">
                   {reviews.length > 0 ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 mb-6">
@@ -496,6 +476,7 @@ export default function ActivityDetailClient({
                       <p className="text-xs text-gray-400 mt-1">Hãy là người đầu tiên đánh giá hoạt động này.</p>
                     </div>
                   )}
+                  <WriteReviewForm serviceId={activity.id} serviceType="activity" />
                 </div>
               )}
 
@@ -544,6 +525,7 @@ export default function ActivityDetailClient({
               pricingTiers={pricingTiers}
               activityTitle={title}
               activityId={activity.id}
+              featuredImage={featuredImage}
               basePrice={price}
               currency={currency}
             />

@@ -229,12 +229,12 @@ export function CartProvider({ children }) {
     setCouponData(null);
   }, []);
 
-  // Derived values
-  const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.total, 0), [items]);
+  // Derived values (rounded to avoid floating point errors)
+  const subtotal = useMemo(() => Math.round(items.reduce((sum, item) => sum + item.total, 0)), [items]);
   const itemCount = items.length;
   const taxRate = 0.1; // 10% default, can be overridden from settings
-  const tax = useMemo(() => (subtotal - couponDiscount) * taxRate, [subtotal, couponDiscount]);
-  const grandTotal = useMemo(() => subtotal - couponDiscount + tax, [subtotal, couponDiscount, tax]);
+  const tax = useMemo(() => Math.round((subtotal - couponDiscount) * taxRate), [subtotal, couponDiscount]);
+  const grandTotal = useMemo(() => Math.round(subtotal - couponDiscount + tax), [subtotal, couponDiscount, tax]);
 
   const value = {
     items,

@@ -16,16 +16,18 @@ const PoliciesPanel = dynamic(() => import("@/components/hotels/HotelDetail/Poli
 const LocationPanel = dynamic(() => import("@/components/hotels/HotelDetail/LocationPanel"));
 
 import HotelHeader, {
-  WishlistButton,
-  ShareButton,
   ReviewSummaryCompact,
 } from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
+
+const ReviewsPanel = dynamic(() => import("@/components/hotels/HotelDetail/ReviewsPanel"));
+const WriteReviewForm = dynamic(() => import("@/components/reviews/WriteReviewForm"));
 
 const HOTEL_TABS = [
   { id: "overview", label: "Tổng quan" },
   { id: "rooms", label: "Phòng & Giá" },
   { id: "amenities", label: "Tiện ích" },
+  { id: "reviews", label: "Đánh giá" },
   { id: "policies", label: "Chính sách" },
   { id: "location", label: "Vị trí" },
 ];
@@ -145,27 +147,11 @@ export default function HotelDetailClient({
         }}
       />
 
-      {/* ── Action Bar (Wishlist, Share, Đặt ngay) ──────────── */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <WishlistButton hotelId={hotel.id} />
-            <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={hotel.name} />
-          </div>
-          <button
-            type="button"
-            onClick={handleBookNow}
-            className="rounded-xl bg-primary text-white text-sm font-semibold px-5 py-2.5 shadow-sm hover:bg-primary-dark transition-colors"
-          >
-            Đặt ngay
-          </button>
-        </div>
-      </div>
-
       <HotelHeader
         hotel={hotel}
         avgRating={avgRating}
         totalRating={totalRating}
+        onBookNow={handleBookNow}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -258,6 +244,12 @@ export default function HotelDetailClient({
                 </div>
               )}
               {activeTab === "amenities" && <AmenitiesPanel hotel={hotel} />}
+              {activeTab === "reviews" && (
+                <div className="space-y-8">
+                  <ReviewsPanel reviews={reviews} avgRating={avgRating} totalRating={totalRating} />
+                  <WriteReviewForm serviceId={hotel.id} serviceType="hotel" />
+                </div>
+              )}
               {activeTab === "policies" && <PoliciesPanel hotel={hotel} />}
               {activeTab === "location" && <LocationPanel hotel={hotel} />}
             </div>

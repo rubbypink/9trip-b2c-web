@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
+import { useCart } from "@/lib/cart";
 
 /**
  * ActivityBookingWidget — Booking form for activity detail page.
@@ -27,6 +28,7 @@ import { formatCurrency } from "@/lib/utils";
  *   }>,
  *   activityTitle: string,
  *   activityId: string,
+ *   featuredImage?: string,
  *   basePrice?: number,
  *   currency?: string
  * }} props
@@ -35,10 +37,12 @@ export default function ActivityBookingWidget({
   pricingTiers = [],
   activityTitle,
   activityId,
+  featuredImage = "",
   basePrice = 0,
   currency = "VND",
 }) {
   const router = useRouter();
+  const { addItem } = useCart();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTierId, setSelectedTierId] = useState(
     pricingTiers.length > 0 ? pricingTiers[0].id : null
@@ -85,16 +89,30 @@ export default function ActivityBookingWidget({
   }, []);
 
   const handleBookNow = useCallback(() => {
-    const params = new URLSearchParams({
-      service: activityId,
-      type: "activity",
-    });
-    if (selectedDate) params.set("date", selectedDate);
-    if (selectedTierId) params.set("pricingTierId", selectedTierId);
-    if (adults > 0) params.set("adults", String(adults));
-    if (children > 0) params.set("children", String(children));
-    router.push(`/checkout?${params.toString()}`);
-  }, [router, activityId, selectedDate, selectedTierId, adults, children]);
+    if (!selectedDate || adults + children === 0) return;
+
+    const adultTotal = (selectedTier?.adultPrice || basePrice) * adults;
+    const childTotal = (selectedTier?.childPrice || 0) * children;
+    const totalAmount = adultTotal + childTotal;
+
+    const cartItem = {
+      serviceId: activityId,
+      serviceType: "activity",
+      serviceTitle: activityTitle,
+      featuredImage: featuredImage,
+      startDate: selectedDate,
+      adults: adults,
+      children: children,
+      infants: 0,
+      basePrice: selectedTier?.adultPrice || basePrice,
+      total: totalAmount,
+      currency: tierCurrency,
+      rateType: selectedTier?.name || "Vé tiêu chuẩn"
+    };
+
+    addItem(cartItem);
+    router.push(`/checkout`);
+  }, [router, addItem, activityId, activityTitle, featuredImage, selectedDate, selectedTier, adults, children, basePrice, tierCurrency]);
 
   const handleConsult = useCallback(() => {
     const phone = "0886.068.886";

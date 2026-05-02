@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import TourTabs from "@/components/tours/TourDetail/TourTabs";
 import BookingSidebar from "@/components/tours/TourDetail/BookingSidebar";
 import TourCard from "@/components/tours/TourCard";
+import WriteReviewForm from "@/components/reviews/WriteReviewForm";
 import { formatCurrency } from "@/lib/utils";
 
 const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
@@ -221,11 +222,14 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
         )}
 
         {activeTab === "reviews" && (
-          <ReviewsPanel
-            ratingAverage={avgRating}
-            ratingCount={totalRating}
-            reviews={reviews}
-          />
+          <div className="space-y-8">
+            <ReviewsPanel
+              ratingAverage={avgRating}
+              ratingCount={totalRating}
+              reviews={reviews}
+            />
+            <WriteReviewForm serviceId={tour.id} serviceType="tour" />
+          </div>
         )}
 
         {activeTab === "faq" && (

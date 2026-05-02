@@ -190,11 +190,22 @@ export async function getTours({ pageSize = 12, cursor = null } = {}) {
  */
 export async function getFeaturedTours(count = 8) {
 	try {
+		// Try featured tours query (requires composite index: isFeatured + createdAt)
 		const q = query(toursCol, where('isFeatured', '==', true), orderBy('createdAt', 'desc'), limit(count));
 		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
+		if (!snap.empty) {
+			return snap.docs.map((d) => serializeDoc(d));
+		}
 	} catch (error) {
-		console.error('[getFeaturedTours] Error:', error.message);
+		console.error('[getFeaturedTours] Index not ready, falling back to recent tours:', error.message);
+	}
+	// Fallback: get recent tours without isFeatured filter
+	try {
+		const fallbackQ = query(toursCol, orderBy('createdAt', 'desc'), limit(count));
+		const fallbackSnap = await getDocs(fallbackQ);
+		return fallbackSnap.docs.map((d) => serializeDoc(d));
+	} catch (fallbackError) {
+		console.error('[getFeaturedTours] Fallback error:', fallbackError.message);
 		return [];
 	}
 }
