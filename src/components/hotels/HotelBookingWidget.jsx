@@ -25,9 +25,10 @@ import { useCart } from "@/lib/cart";
  *   checkIn: string,            // YYYY-MM-DD
  *   checkOut: string,           // YYYY-MM-DD
  *   nights: number,
+ *   onDateChange: (checkIn: string, checkOut: string) => void,
  * }} props
  */
-export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn: initCheckIn = "", checkOut: initCheckOut = "", nights: initNights = 1 }) {
+export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn: initCheckIn = "", checkOut: initCheckOut = "", nights: initNights = 1, onDateChange }) {
   const router = useRouter();
   const { addItem, updateCartItem, removeCartItemByKey } = useCart();
   const debounceRef = useRef(null);
@@ -149,16 +150,33 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
     return Object.values(quantities).some((q) => q > 0);
   }, [quantities]);
 
+  // ── Sync local dates to parent when they change ──────────
+  const syncDatesToParent = useCallback((newCheckIn, newCheckOut) => {
+    if (onDateChange) {
+      onDateChange(newCheckIn || checkIn, newCheckOut || checkOut);
+    }
+  }, [onDateChange, checkIn, checkOut]);
+
   // ── Handle check-in change ───────────────────────────────
   const handleCheckInChange = useCallback((e) => {
     const val = e.target.value;
     setCheckIn(val);
+    let newCheckOut = checkOut;
     if (!checkOut || val >= checkOut) {
       const ci = new Date(val);
       ci.setDate(ci.getDate() + 1);
-      setCheckOut(ci.toISOString().split("T")[0]);
+      newCheckOut = ci.toISOString().split("T")[0];
+      setCheckOut(newCheckOut);
     }
-  }, [checkOut]);
+    syncDatesToParent(val, newCheckOut);
+  }, [checkOut, syncDatesToParent]);
+
+  // ── Handle check-out change ──────────────────────────────
+  const handleCheckOutChange = useCallback((e) => {
+    const val = e.target.value;
+    setCheckOut(val);
+    syncDatesToParent(checkIn, val);
+  }, [checkIn, syncDatesToParent]);
 
   // ── Handle book now ──────────────────────────────────────
   const handleBookNow = useCallback(() => {
@@ -216,7 +234,7 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
             <input
               type="date"
               value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
+              onChange={handleCheckOutChange}
               min={checkIn || minDate}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />

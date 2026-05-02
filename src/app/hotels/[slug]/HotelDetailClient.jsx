@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, calcNights } from "@/lib/utils";
 import {
   getHotelBySlug,
   getRelatedHotels,
@@ -29,12 +29,13 @@ const HOTEL_TABS = [
 /**
  * HotelDetailClient — Client component tự fetch mọi dữ liệu từ Firestore.
  * Tránh lỗi composite index bằng cách fetch toàn bộ data rồi xử lý ở client.
+ * Pricing table được recompute tự động khi checkIn/checkOut thay đổi.
  *
  * @param {{ slug: string }} props
  */
 export default function HotelDetailClient({ slug }) {
   const [hotel, setHotel] = useState(null);
-  const [pricingTable, setPricingTable] = useState([]);
+  const [priceSchedule, setPriceSchedule] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
@@ -43,6 +44,24 @@ export default function HotelDetailClient({ slug }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // ── Date state (reactive — pricing table recomputes when these change) ─
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  }, []);
+
+  const [checkIn, setCheckIn] = useState(todayStr);
+  const [checkOut, setCheckOut] = useState(tomorrowStr);
+
+  // ── Computed nights ──────────────────────────────────────
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut) return 1;
+    return calcNights(checkIn, checkOut);
+  }, [checkIn, checkOut]);
+
+  // ── Fetch all data on mount ──────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -62,9 +81,9 @@ export default function HotelDetailClient({ slug }) {
 
         // ── 2. Fetch price schedule ──────────────────────────
         console.log(`[HotelDetailClient] ⏳ Fetching priceSchedule for hotelId=${rawHotel.id}...`);
-        const priceSchedule = await getHotelPriceSchedule(rawHotel.id);
-        if (priceSchedule) {
-          const priceKeys = Object.keys(priceSchedule.priceData || {});
+        const ps = await getHotelPriceSchedule(rawHotel.id);
+        if (ps) {
+          const priceKeys = Object.keys(ps.priceData || {});
           console.log(`[HotelDetailClient] ✅ Price schedule loaded: docId=${rawHotel.id}_base_2026, priceData keys=${priceKeys.length}`);
           console.log(`[HotelDetailClient] 📊 priceData sample keys: ${priceKeys.slice(0, 5).join(", ")}`);
         } else {
@@ -90,24 +109,10 @@ export default function HotelDetailClient({ slug }) {
         ]);
         console.log(`[HotelDetailClient] ✅ Images resolved: featured=${!!hotelWithImages.featuredImage}`);
 
-        // ── 6. Build pricing table ───────────────────────────
-        const today = new Date().toISOString().split("T")[0];
-        const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-        const roomsMap = hotelWithImages.rooms || [];
-        const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
-        if (rooms.length === 0) {
-          console.warn(`[HotelDetailClient] ⚠️ Hotel "${rawHotel.id}" has NO embedded rooms`);
-        } else {
-          console.log(`[HotelDetailClient] 🛏️ Rooms data: count=${rooms.length}, IDs: ${rooms.map(r => r.id).join(", ")}`);
-        }
-
-        const pt = buildRoomPricingTable(priceSchedule, rooms, today, tomorrow);
-        console.log(`[HotelDetailClient] 📊 Pricing table: ${pt.length} rooms, ${pt.reduce((s, r) => s + r.rateTypes.length, 0)} rate types`);
-
-        // ── 7. Set state ─────────────────────────────────────
+        // ── 6. Set state ─────────────────────────────────────
         if (!cancelled) {
           setHotel(hotelWithImages);
-          setPricingTable(pt);
+          setPriceSchedule(ps);
           setReviews(r || []);
           setAvgRating(ar || hotelWithImages.rating?.average || 0);
           setTotalRating(tr || hotelWithImages.rating?.count || 0);
@@ -129,9 +134,39 @@ export default function HotelDetailClient({ slug }) {
     return () => { cancelled = true; };
   }, [slug]);
 
+  // ── Reactive pricing table — recompute when dates change ───
+  const pricingTable = useMemo(() => {
+    if (!hotel || !checkIn || !checkOut) return [];
+    const roomsMap = hotel.rooms || [];
+    const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
+    if (rooms.length === 0) {
+      console.warn(`[HotelDetailClient] ⚠️ Hotel "${hotel.id}" has NO embedded rooms`);
+      return [];
+    }
+    const pt = buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut);
+    console.log(`[HotelDetailClient] 📊 Pricing table rebuilt: ${pt.length} rooms, ${pt.reduce((s, r) => s + r.rateTypes.length, 0)} rate types (checkIn=${checkIn}, checkOut=${checkOut})`);
+    return pt;
+  }, [hotel, priceSchedule, checkIn, checkOut]);
+
+  // ── Handle date changes ──────────────────────────────────
+  const handleDateChange = useCallback((newCheckIn, newCheckOut) => {
+    if (newCheckIn) setCheckIn(newCheckIn);
+    if (newCheckOut) setCheckOut(newCheckOut);
+  }, []);
+
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
   }, []);
+
+  // ── Lowest price across all rooms (safely handles empty rateTypes) ──
+  const lowestPrice = useMemo(() => {
+    const allPrices = pricingTable.flatMap((r) =>
+      (r.rateTypes || []).map((rt) => rt.avgSellPrice)
+    ).filter((p) => p > 0);
+    if (allPrices.length > 0) return Math.min(...allPrices);
+    // Fallback to hotel basePrice
+    return hotel?.pricing?.basePrice || 0;
+  }, [pricingTable, hotel]);
 
   // ── Loading state ────────────────────────────────────────
   if (loading) {
@@ -182,10 +217,6 @@ export default function HotelDetailClient({ slug }) {
   }
 
   // ── Normal render ────────────────────────────────────────
-  const lowestPrice = pricingTable.length > 0
-    ? Math.min(...pricingTable.flatMap((r) => r.rateTypes.map((rt) => rt.avgSellPrice)))
-    : hotel.pricing?.basePrice || 0;
-
   return (
     <>
       {/* JSON-LD structured data */}
@@ -272,9 +303,9 @@ export default function HotelDetailClient({ slug }) {
                   <RoomsPanel
                     pricingTable={pricingTable}
                     hotel={hotel}
-                    checkIn={new Date().toISOString().split("T")[0]}
-                    checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-                    nights={1}
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    nights={nights}
                   />
                 </div>
               )}
@@ -327,9 +358,10 @@ export default function HotelDetailClient({ slug }) {
               <HotelBookingWidget
                 hotel={hotel}
                 pricingTable={pricingTable}
-                checkIn={new Date().toISOString().split("T")[0]}
-                checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-                nights={1}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                nights={nights}
+                onDateChange={handleDateChange}
               />
             </div>
           </aside>
