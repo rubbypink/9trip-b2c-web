@@ -22,7 +22,7 @@ export const COMPANY = {
   /** Địa chỉ trụ sở */
   address: "17 Chu Văn An, Khu Phố 5, đặc khu Phú Quốc, An Giang",
   /** Mã số thuế (để trống nếu chưa có) */
-  taxCode: "",
+  taxCode: "1702261981",
 };
 
 export const SOCIAL = {
@@ -39,4 +39,4 @@ export const SITE_DESCRIPTION =
 
 /** Từ khóa SEO */
 export const SITE_KEYWORDS =
-  "tour du lịch, đặt khách sạn, travel, booking, việt nam, phú quốc, 9trip";
+  "tour du lịch, đặt khách sạn, travel, booking, vinpearl, phú quốc, 9trip";

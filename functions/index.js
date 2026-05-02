@@ -17,7 +17,10 @@ const { handlePaymentWebhook } = require("./src/webhooks/payment");
 
 /**
  * Payment webhook — receives callbacks from payment gateways.
- * Trigger: HTTP POST /paymentWebhook?gateway=<stripe|vnpay|momo|paypal>
+ * Trigger: HTTP GET/POST /paymentWebhook?gateway=<vnpay|momo|paypal>
+ *   - VNPay: GET with query params (IPN)
+ *   - MoMo: POST with JSON body (IPN)
+ *   - PayPal: POST with JSON body + headers (webhook)
  */
 exports.paymentWebhook = onRequest(
   { cors: true, region: "asia-southeast1" },
@@ -28,6 +31,41 @@ exports.paymentWebhook = onRequest(
     } catch (error) {
       console.error("Payment webhook error:", error);
       res.status(400).json({ error: error.message });
+    }
+  }
+);
+
+// ─── MoMo Payment Creation ────────────────────────────────────────────
+
+const { createMomoPayment } = require("./src/payments/momo");
+
+/**
+ * Create MoMo payment — proxy for Next.js API route.
+ * Trigger: HTTP POST /createMomoPayment
+ *
+ * MoMo API requires 30s timeout (exceeds Vercel Hobby 10s limit),
+ * so this runs on Cloud Functions (9 min timeout).
+ */
+exports.createMomoPayment = onRequest(
+  { cors: true, region: "asia-southeast1" },
+  async (req, res) => {
+    try {
+      const { bookingId, amount, bookingCode, orderInfo } = req.body;
+
+      if (!bookingId || !amount) {
+        return res.status(400).json({ error: "Missing bookingId or amount" });
+      }
+
+      const result = await createMomoPayment({ bookingId, amount, bookingCode, orderInfo });
+
+      if (result.success) {
+        res.status(200).json(result);
+      } else {
+        res.status(502).json({ error: result.message });
+      }
+    } catch (error) {
+      console.error("MoMo creation error:", error);
+      res.status(500).json({ error: "Không thể tạo thanh toán MoMo. Vui lòng thử lại." });
     }
   }
 );

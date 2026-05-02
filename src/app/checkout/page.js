@@ -58,41 +58,81 @@ export default function CheckoutPage() {
   /**
    * Send booking data to the payment gateway API route.
    * The API creates the booking (pending) and returns the gateway URL.
+   * Includes timeout handling and gateway-specific error messages.
    * @param {Object} bookingData
    */
   const redirectToGateway = async (bookingData) => {
     const endpoint = GATEWAY_ENDPOINTS[paymentMethod];
-    if (!endpoint) return;
-
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingData }),
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      setCheckoutError(data.error);
+    if (!endpoint) {
+      setCheckoutError("Phương thức thanh toán không được hỗ trợ.");
       return;
     }
 
-    // Store bookingId for return page (API creates booking + returns the ID)
-    if (data.bookingId) {
-      localStorage.setItem("9trip_last_booking_id", data.bookingId);
-    }
-    if (paymentMethod === "paypal" && data.orderId) {
-      localStorage.setItem("9trip_paypal_order_id", data.orderId);
-    }
+    try {
+      // Timeout: 35s for MoMo (proxied to CF with 30s), 15s for others
+      const timeoutMs = paymentMethod === "momo" ? 35000 : 15000;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    // Clear cart before redirect (booking is created by the API)
-    clearCart();
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingData }),
+        signal: controller.signal,
+      });
 
-    // Redirect to gateway payment page
-    const redirectUrl = data.paymentUrl || data.approvalUrl;
-    if (redirectUrl) {
-      window.location.href = redirectUrl;
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        // Gateway-specific error messages
+        const errorMsg = data.error || getGatewayErrorMessage(paymentMethod, res.status);
+        setCheckoutError(errorMsg);
+        return;
+      }
+
+      // Store bookingId for return page (API creates booking + returns the ID)
+      if (data.bookingId) {
+        localStorage.setItem("9trip_last_booking_id", data.bookingId);
+      }
+      if (paymentMethod === "paypal" && data.orderId) {
+        localStorage.setItem("9trip_paypal_order_id", data.orderId);
+      }
+
+      // Clear cart before redirect (booking is created by the API)
+      clearCart();
+
+      // Redirect to gateway payment page
+      const redirectUrl = data.paymentUrl || data.approvalUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      } else {
+        setCheckoutError("Không nhận được URL thanh toán từ cổng thanh toán.");
+      }
+    } catch (err) {
+      if (err.name === "AbortError") {
+        setCheckoutError("Yêu cầu thanh toán quá thời gian chờ. Vui lòng thử lại.");
+      } else if (err.name === "TypeError" && err.message.includes("fetch")) {
+        setCheckoutError("Không thể kết nối đến máy chủ thanh toán. Vui lòng kiểm tra kết nối mạng.");
+      } else {
+        setCheckoutError(`Lỗi kết nối: ${err.message}`);
+      }
     }
+  };
+
+  /**
+   * Get human-readable error message for each gateway based on HTTP status.
+   * @param {string} gateway
+   * @param {number} status
+   * @returns {string}
+   */
+  const getGatewayErrorMessage = (gateway, status) => {
+    if (status === 502 || status === 503) {
+      const names = { vnpay: "VNPay", momo: "Ví MoMo", paypal: "PayPal" };
+      return `Cổng thanh toán ${names[gateway] || gateway} đang bảo trì. Vui lòng thử phương thức khác hoặc quay lại sau.`;
+    }
+    return "Không thể tạo thanh toán. Vui lòng thử lại hoặc chọn phương thức khác.";
   };
 
   const handleFinalizeBooking = async () => {

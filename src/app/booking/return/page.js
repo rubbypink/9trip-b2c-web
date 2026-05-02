@@ -30,7 +30,37 @@ export default function PaymentReturnPage() {
   const [bookingId, setBookingId] = useState(null);
 
   /**
+   * Poll booking status from Firestore when IPN may not have arrived yet.
+   * This covers cases where the user is redirected back before the IPN is processed.
+   * @param {string} id - Booking ID
+   * @param {number} maxAttempts
+   * @returns {Promise<boolean>} true if payment confirmed
+   */
+  const pollBookingStatus = async (id, maxAttempts = 6) => {
+    for (let i = 0; i < maxAttempts; i++) {
+      try {
+        const res = await fetch(`/api/bookings/${id}/status`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.paymentStatus === "paid") {
+            return true;
+          }
+          if (data.paymentStatus === "failed") {
+            return false;
+          }
+        }
+      } catch {
+        // API may not be ready yet, continue polling
+      }
+      // Wait 2 seconds between polls
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    return null; // inconclusive
+  };
+
+  /**
    * Process the return based on gateway type.
+   * Includes fallback: if return params are inconclusive, poll booking status.
    */
   const processReturn = useCallback(async () => {
     // Recover bookingId from localStorage (stored before redirect)
@@ -45,6 +75,19 @@ export default function PaymentReturnPage() {
           if (responseCode === "00" && txnRef) {
             setBookingId(txnRef);
             setStatus("success");
+          } else if (txnRef || storedBookingId) {
+            // Return params are inconclusive — poll for IPN result
+            const pollResult = await pollBookingStatus(txnRef || storedBookingId);
+            if (pollResult === true) {
+              setBookingId(txnRef || storedBookingId);
+              setStatus("success");
+            } else if (pollResult === false) {
+              setMessage("Thanh toán VNPay không thành công.");
+              setStatus("failed");
+            } else {
+              setMessage("Đang chờ xác nhận từ VNPay. Vui lòng kiểm tra email hoặc liên hệ hỗ trợ.");
+              setStatus("failed");
+            }
           } else {
             setMessage("Thanh toán VNPay không thành công hoặc bị hủy.");
             setStatus("failed");
@@ -59,6 +102,18 @@ export default function PaymentReturnPage() {
           if (resultCode === "0" && orderId) {
             setBookingId(orderId);
             setStatus("success");
+          } else if (orderId || storedBookingId) {
+            const pollResult = await pollBookingStatus(orderId || storedBookingId);
+            if (pollResult === true) {
+              setBookingId(orderId || storedBookingId);
+              setStatus("success");
+            } else if (pollResult === false) {
+              setMessage(searchParams.get("message") || "Thanh toán MoMo không thành công.");
+              setStatus("failed");
+            } else {
+              setMessage("Đang chờ xác nhận từ MoMo. Vui lòng kiểm tra email hoặc liên hệ hỗ trợ.");
+              setStatus("failed");
+            }
           } else {
             setMessage(searchParams.get("message") || "Thanh toán MoMo không thành công hoặc bị hủy.");
             setStatus("failed");
@@ -70,11 +125,9 @@ export default function PaymentReturnPage() {
           const token = searchParams.get("token");
           const storedOrderId = searchParams.get("orderId");
 
-          // We need the PayPal order ID; try from URL or localStorage
           const orderId = storedOrderId || (typeof window !== "undefined" ? localStorage.getItem("9trip_paypal_order_id") : null);
 
           if (token && orderId && storedBookingId) {
-            // Call capture endpoint
             const res = await fetch("/api/payments/paypal/capture", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -88,6 +141,16 @@ export default function PaymentReturnPage() {
               setStatus("success");
             } else {
               setMessage(data.error || "Không thể xác nhận thanh toán PayPal.");
+              setStatus("failed");
+            }
+          } else if (storedBookingId) {
+            // Try polling
+            const pollResult = await pollBookingStatus(storedBookingId);
+            if (pollResult === true) {
+              setBookingId(storedBookingId);
+              setStatus("success");
+            } else {
+              setMessage("Thanh toán PayPal bị hủy hoặc thiếu thông tin.");
               setStatus("failed");
             }
           } else {

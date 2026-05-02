@@ -1,120 +1,66 @@
 /**
- * Payment Utilities — Payload normalization and webhook signature verification.
- * Centralizes multi-gateway payment handling logic.
+ * Payment Utilities — Shared helpers across all payment modules.
  */
-
-import { computeVNPayHash, verifyVNPayIPN } from "./vnpay";
-import { verifyMomoIPN } from "./momo";
 
 /**
- * Normalize payment notification payloads from various gateways.
- * @param {string} gateway - 'vnpay' | 'momo' | 'paypal'
- * @param {Object} rawData - Original payload from gateway
- * @returns {Object|null} Normalized notification data
+ * Retry an async function with exponential backoff.
+ * @param {Function} fn - Async function to retry
+ * @param {{ maxRetries?: number, baseDelayMs?: number, timeoutMs?: number }} [options]
+ * @returns {Promise<any>}
  */
-export function normalizePaymentPayload(gateway, rawData) {
-  switch (gateway) {
-    case "vnpay":
-      return {
-        bookingId: rawData.vnp_TxnRef,
-        transactionId: rawData.vnp_TransactionNo,
-        status: rawData.vnp_ResponseCode === "00" ? "paid" : "failed",
-        amount: rawData.vnp_Amount ? Number(rawData.vnp_Amount) / 100 : null,
-        currency: "VND",
-        rawData,
-      };
-    case "momo":
-      return {
-        bookingId: rawData.orderId,
-        transactionId: rawData.transId,
-        status: rawData.resultCode === 0 ? "paid" : "failed",
-        amount: rawData.amount,
-        currency: "VND",
-        rawData,
-      };
-    case "paypal":
-      return {
-        bookingId: rawData.resource?.custom_id || rawData.custom_id,
-        transactionId: rawData.resource?.id || rawData.id,
-        status:
-          rawData.event_type === "CHECKOUT.ORDER.APPROVED" || rawData.status === "COMPLETED"
-            ? "paid"
-            : "failed",
-        amount:
-          rawData.resource?.purchase_units?.[0]?.amount?.value || rawData.amount,
-        currency:
-          rawData.resource?.purchase_units?.[0]?.amount?.currency_code || rawData.currency || "USD",
-        rawData,
-      };
-    default:
-      return null;
+export async function withRetry(fn, { maxRetries = 3, baseDelayMs = 1000, timeoutMs = 30000 } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const result = await fn({ signal: controller.signal });
+      clearTimeout(timeoutId);
+      return result;
+    } catch (err) {
+      lastError = err;
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        console.warn(`[Retry] Attempt ${attempt + 1} failed, retrying in ${delay}ms:`, err.message);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
+  throw lastError;
 }
 
 /**
- * Verify webhook signature for each payment gateway.
- * @param {string} gateway - 'vnpay' | 'momo' | 'paypal'
- * @param {Request} request - Next.js Request object
- * @param {string} rawBody - Raw request body as string
- * @returns {Promise<boolean>}
+ * Log a payment event to the server for debugging.
+ * @param {Object} event
+ * @param {string} event.gateway
+ * @param {string} event.bookingId
+ * @param {string} event.event - 'create' | 'ipn' | 'return' | 'capture' | 'error'
+ * @param {Object} [event.request]
+ * @param {Object} [event.response]
+ * @param {string} [event.error]
  */
-export async function verifyWebhookSignature(gateway, request, rawBody) {
-  switch (gateway) {
-    case "vnpay": {
-      const url = new URL(request.url);
-      const params = {};
-      url.searchParams.forEach((val, key) => { params[key] = val; });
-      const result = verifyVNPayIPN(params);
-      return result.valid;
-    }
-    case "momo": {
-      try {
-        const payload = JSON.parse(rawBody);
-        const result = verifyMomoIPN(payload);
-        return result.valid;
-      } catch {
-        return false;
-      }
-    }
-    case "paypal": {
-      try {
-        const { getPayPalAccessToken } = await import("./paypal");
-        const token = await getPayPalAccessToken();
+export function logPaymentEvent({ gateway, bookingId, event, request, response, error }) {
+  const logEntry = {
+    gateway,
+    bookingId,
+    event,
+    request: request ? JSON.stringify(request) : null,
+    response: response ? JSON.stringify(response) : null,
+    error: error || null,
+    timestamp: new Date().toISOString(),
+    duration: 0,
+  };
 
-        const PAYPAL_API_BASE =
-          process.env.PAYPAL_MODE === "live"
-            ? "https://api-m.paypal.com"
-            : "https://api-m.sandbox.paypal.com";
+  // Fire-and-forget to avoid blocking the main flow
+  fetch("/api/payments/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(logEntry),
+  }).catch((e) => console.warn("[PaymentLog] Failed to send log:", e.message));
 
-        const verifyResponse = await fetch(
-          `${PAYPAL_API_BASE}/v1/notifications/verify-webhook-signature`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              auth_algo: request.headers.get("paypal-auth-algo") || "",
-              cert_url: request.headers.get("paypal-cert-url") || "",
-              transmission_id: request.headers.get("paypal-transmission-id") || "",
-              transmission_sig: request.headers.get("paypal-transmission-sig") || "",
-              transmission_time: request.headers.get("paypal-transmission-time") || "",
-              webhook_id: process.env.PAYPAL_WEBHOOK_ID || "",
-              webhook_event: JSON.parse(rawBody),
-            }),
-            signal: AbortSignal.timeout(10000),
-          }
-        );
-
-        const result = await verifyResponse.json();
-        return result.verification_status === "SUCCESS";
-      } catch (err) {
-        console.error("[PayPal] Webhook verification failed:", err.message);
-        return process.env.PAYPAL_MODE !== "live";
-      }
-    }
-    default:
-      return false;
+  if (error) {
+    console.error(`[Payment:${gateway}:${event}] ERROR:`, error, logEntry);
+  } else {
+    console.log(`[Payment:${gateway}:${event}]`, logEntry);
   }
 }

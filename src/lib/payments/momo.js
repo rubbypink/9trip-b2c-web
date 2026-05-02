@@ -13,6 +13,7 @@ const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE || "";
 const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY || "";
 const MOMO_SECRET_KEY = process.env.MOMO_SECRET_KEY || "";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com";
+const CLOUD_FUNCTION_URL = process.env.CLOUD_FUNCTION_URL || "https://asia-southeast1-tripphuquoc-db-fs.cloudfunctions.net";
 
 /**
  * Create a MoMo payment request and return the payment URL.
@@ -33,7 +34,7 @@ export async function createMomoPayment({ bookingId, amount, bookingCode, orderI
     `accessKey=${MOMO_ACCESS_KEY}`,
     `amount=${amountRounded}`,
     `extraData=`,
-    `ipnUrl=${SITE_URL}/api/webhooks/payment?gateway=momo`,
+    `ipnUrl=${CLOUD_FUNCTION_URL}/paymentWebhook?gateway=momo`,
     `orderId=${orderId}`,
     `orderInfo=${info}`,
     `partnerCode=${MOMO_PARTNER_CODE}`,
@@ -52,7 +53,7 @@ export async function createMomoPayment({ bookingId, amount, bookingCode, orderI
     orderId,
     orderInfo: info,
     redirectUrl: `${SITE_URL}/booking/return?gateway=momo`,
-    ipnUrl: `${SITE_URL}/api/webhooks/payment?gateway=momo`,
+    ipnUrl: `${CLOUD_FUNCTION_URL}/paymentWebhook?gateway=momo`,
     extraData: "",
     requestType: "captureWallet",
     signature,
@@ -64,7 +65,7 @@ export async function createMomoPayment({ bookingId, amount, bookingCode, orderI
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(30000),
     });
 
     const data = await response.json();
