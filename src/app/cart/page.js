@@ -136,7 +136,7 @@ export default function CartPage() {
                   )}
 
                   <div className="flex justify-between text-slate-600">
-                    <span>Thuế (10%)</span>
+                    <span>Thuế (8%)</span>
                     <span className="font-semibold">{tax.toLocaleString()}đ</span>
                   </div>
 

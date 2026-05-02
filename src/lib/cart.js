@@ -229,10 +229,17 @@ export function CartProvider({ children }) {
     setCouponData(null);
   }, []);
 
+  // Hàm hồi sinh giỏ hàng từ mảng items backup
+  const restoreCart = (backupItems) => {
+    if (backupItems && backupItems.length > 0) {
+      setItems(backupItems); // Thay setItems bằng hàm cập nhật state giỏ hàng của bro
+    }
+  };
+
   // Derived values (rounded to avoid floating point errors)
   const subtotal = useMemo(() => Math.round(items.reduce((sum, item) => sum + item.total, 0)), [items]);
   const itemCount = items.length;
-  const taxRate = 0.1; // 10% default, can be overridden from settings
+  const taxRate = 0.08; // 8% default, can be overridden from settings
   const tax = useMemo(() => Math.round((subtotal - couponDiscount) * taxRate), [subtotal, couponDiscount]);
   const grandTotal = useMemo(() => Math.round(subtotal - couponDiscount + tax), [subtotal, couponDiscount, tax]);
 
@@ -253,6 +260,7 @@ export function CartProvider({ children }) {
     clearCart,
     applyCoupon,
     removeCoupon,
+    restoreCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
@@ -270,6 +278,7 @@ export function CartProvider({ children }) {
  *   clearCart: Function,
  *   applyCoupon: Function,
  *   removeCoupon: Function,
+ *   restoreCart: Function,
  *   updateItemQuantity: Function,
  *   updateCartItem: Function,
  *   removeCartItemByKey: Function,

@@ -108,7 +108,7 @@ export default function TourBookingWidget({
   }, [router, tourId, tourTitle, selectedDate, selectedTierId, selectedTier, adults, children, infants, total, basePrice, currency, addItem]);
 
   const handleConsult = useCallback(() => {
-    const phone = "0886.068.886";
+    const phone = "0877.901.901";
     window.open(`tel:${phone.replace(/[^0-9]/g, "")}`, "_self");
   }, []);
 

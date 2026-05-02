@@ -190,7 +190,7 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
 
   // ── Handle consult ───────────────────────────────────────
   const handleConsult = useCallback(() => {
-    const phone = "0886.068.886";
+    const phone = "0877.901.901";
     window.open(`tel:${phone.replace(/[^0-9]/g, "")}`, "_self");
   }, []);
 
@@ -381,7 +381,7 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
             onClick={handleConsult}
             className="w-full rounded-xl border-2 border-gray-200 text-gray-700 font-medium text-sm px-6 py-3 hover:border-primary hover:text-primary transition-colors"
           >
-            📞 Gọi tư vấn: 0886.068.886
+            📞 Gọi tư vấn: 0877.901.901
           </button>
         </div>
 

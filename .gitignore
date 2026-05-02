@@ -50,3 +50,4 @@ tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local

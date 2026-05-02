@@ -1,183 +1,114 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useSearchParams, useRouter } from "next/navigation"; // Thêm useRouter
 import Link from "next/link";
-import { getBookingById } from "@/lib/firestore";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { useState } from "react";
+import { useCart } from "@/lib/cart"; // Import useCart của bro vào
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
-import Image from "next/image";
 
-/**
- * Booking Confirmation Page.
- */
-export default function ConfirmationPage({ params }) {
-  const { id } = use(params);
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function BookingConfirmationPage({ params }) {
+    const { bookingId } = params; 
+    const searchParams = useSearchParams();
+    const router = useRouter(); // Khởi tạo router
+    
+    // Gọi hàm restoreCart ra
+    const { restoreCart } = useCart(); 
 
-  useEffect(() => {
-    async function fetchBooking() {
-      try {
-        const data = await getBookingById(id);
-        setBooking(data);
-      } catch (err) {
-        console.error("Error fetching booking:", err);
-      } finally {
-        setLoading(false);
-      }
+    const status = searchParams.get("status");
+    const message = searchParams.get("message");
+
+    const [isRestoring, setIsRestoring] = useState(false);
+
+    // ==========================================
+    // HÀM HỒI SINH GIỎ HÀNG VÀ QUAY LẠI CHECKOUT
+    // ==========================================
+    const handleRestoreCartAndRetry = () => {
+        setIsRestoring(true);
+        try {
+            // 1. Lôi backup từ LocalStorage ra
+            const backupStr = localStorage.getItem("9trip_cart_backup");
+            if (backupStr) {
+                const backupItems = JSON.parse(backupStr);
+                // 2. Nhét lại vào React Context
+                restoreCart(backupItems);
+            }
+            // 3. Chuyển hướng về trang checkout để khách thấy lại giỏ hàng và thanh toán
+            router.push("/checkout");
+        } catch (error) {
+            console.error("Lỗi khi khôi phục giỏ hàng:", error);
+            router.push("/cart"); // Lỗi thì cứ đá về cart cho an toàn
+        }
+    };
+
+    // 1. NẾU ĐANG LOAD HOẶC KHÔNG CÓ STATUS
+    if (!status) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <LoadingSpinner className="w-10 h-10 text-primary-600" />
+            </div>
+        );
     }
-    fetchBooking();
-  }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!booking) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy đơn hàng</h1>
-        <p className="text-gray-500 mb-6">Có lỗi xảy ra hoặc đơn hàng không tồn tại.</p>
-        <Link href="/" className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold">
-          Quay lại trang chủ
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {/* Success Header */}
-          <div className="bg-green-600 p-8 text-center text-white">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">Đặt chỗ thành công!</h1>
-            <p className="opacity-90">Mã đơn hàng: <span className="font-mono font-bold">{booking.bookingCode}</span></p>
-          </div>
-
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-100">
-              <div>
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Thông tin khách hàng</h3>
-                <p className="font-bold text-gray-900">{booking.contactInfo?.fullName}</p>
-                <p className="text-gray-600">{booking.contactInfo?.email}</p>
-                <p className="text-gray-600">{booking.contactInfo?.phone}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Trạng thái thanh toán</h3>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                  booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                }`}>
-                  {booking.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chờ thanh toán'}
-                </span>
-                <p className="text-xs text-gray-500 mt-2">Phương thức: <span className="uppercase">{booking.paymentGateway}</span></p>
-              </div>
-            </div>
-
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Chi tiết dịch vụ</h3>
-            <div className="bg-gray-50 rounded-xl p-4 mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-bold text-gray-900">Dịch vụ ID: {booking.serviceId}</span>
-                <span className="text-sm text-gray-500 uppercase">{booking.serviceType}</span>
-              </div>
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Ngày bắt đầu:</span>
-                  <span className="font-medium text-gray-900">{formatDate(booking.startDate)}</span>
-                </div>
-                {booking.endDate && (
-                  <div className="flex justify-between">
-                    <span>Ngày kết thúc:</span>
-                    <span className="font-medium text-gray-900">{formatDate(booking.endDate)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>Số lượng khách:</span>
-                  <span className="font-medium text-gray-900">
-                    {booking.guests?.adults} người lớn
-                    {booking.guests?.children > 0 && `, ${booking.guests?.children} trẻ em`}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3 mb-8">
-              <div className="flex justify-between text-gray-600">
-                <span>Tạm tính</span>
-                <span>{formatCurrency(booking.pricing?.subtotal)}</span>
-              </div>
-              {booking.pricing?.discount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Giảm giá</span>
-                  <span>-{formatCurrency(booking.pricing?.discount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-gray-600">
-                <span>Thuế (10%)</span>
-                <span>{formatCurrency(booking.pricing?.tax)}</span>
-              </div>
-              <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
-                <span className="text-2xl font-bold text-primary-600">{formatCurrency(booking.pricing?.total)}</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <Link 
-                href="/account/bookings" 
-                className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold text-center hover:bg-gray-200 transition-colors"
-              >
-                Quản lý đơn hàng
-              </Link>
-              <Link 
-                href="/" 
-                className="flex-1 px-6 py-3 bg-primary-600 text-white rounded-xl font-bold text-center hover:bg-primary-700 transition-all shadow-lg shadow-primary-100"
-              >
-                Tiếp tục khám phá
-              </Link>
-            </div>
-
-            {/* Upsells — Dịch vụ phổ biến cùng khu vực */}
-            <div className="pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">🎯 Khám phá thêm hoạt động hấp dẫn</h3>
-              <p className="text-sm text-gray-500 mb-5">Những hoạt động được yêu thích nhất gần khu vực của bạn</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { name: "Tour cáp treo Hòn Thơm", price: "600.000đ", img: "", desc: "Trải nghiệm cáp treo vượt biển dài nhất thế giới" },
-                  { name: "VinWonders Phú Quốc", price: "800.000đ", img: "", desc: "Công viên giải trí & vui chơi hàng đầu" },
-                  { name: "Tour lặn ngắm san hô", price: "500.000đ", img: "", desc: "Khám phá đại dương Nam đảo Phú Quốc" },
-                ].map((activity, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded-xl border border-gray-200 p-4 hover:border-primary-200 hover:shadow-sm transition-all group cursor-pointer">
-                    <div className="w-full h-24 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mb-3">
-                      <span className="text-2xl">{["🚡", "🎢", "🐠"][idx]}</span>
+    // 2. NẾU THANH TOÁN THÀNH CÔNG
+    if (status === "success") {
+        return (
+            <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-green-100">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
                     </div>
-                    <h4 className="font-semibold text-gray-900 text-sm group-hover:text-primary transition-colors">{activity.name}</h4>
-                    <p className="text-xs text-gray-500 mt-1">{activity.desc}</p>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-sm font-bold text-primary">Từ {activity.price}</span>
-                      <Link
-                        href="/activities"
-                        className="text-xs text-blue-600 hover:underline font-medium"
-                      >
-                        Xem thêm →
-                      </Link>
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Thanh toán thành công!</h2>
+                    <p className="text-gray-600 mb-6">Cảm ơn bạn đã tin tưởng 9TRIP. Vé điện tử đã được gửi vào email của bạn.</p>
+                    
+                    <div className="bg-gray-50 rounded-xl p-4 mb-8 text-left border border-gray-100">
+                        <p className="text-sm text-gray-500 mb-1">Mã đơn hàng của bạn:</p>
+                        <p className="font-mono font-bold text-lg text-gray-800">{bookingId}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+
+                    <Link href="/" className="w-full block py-3 px-4 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-200">
+                        Về trang chủ
+                    </Link>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+        );
+    }
+    if (status === "failed") {
+        return (
+            <div className="min-h-screen bg-gray-50 py-12 px-4 flex items-center justify-center">
+                <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-red-100">
+                    {/* ... (Phần icon X đỏ và text báo lỗi giữ nguyên) ... */}
+                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Giao dịch chưa hoàn tất</h2>
+                    <p className="text-gray-600 mb-6">
+                        {message ? decodeURIComponent(message) : "Có lỗi xảy ra hoặc bạn đã hủy giao dịch."}
+                    </p>
+                    
+                    <div className="flex flex-col gap-3">
+                        {/* THAY NÚT NÀY */}
+                        <button 
+                            onClick={handleRestoreCartAndRetry}
+                            disabled={isRestoring}
+                            className="w-full flex justify-center items-center py-3 px-4 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-200"
+                        >
+                            {isRestoring ? (
+                                <span className="flex items-center gap-2">
+                                    <LoadingSpinner className="w-5 h-5" /> Đang khôi phục đơn...
+                                </span>
+                            ) : "Sửa đơn & Thanh toán lại"}
+                        </button>
+
+                        <Link href="/contact" className="w-full py-3 px-4 bg-white text-gray-700 border border-gray-300 rounded-xl font-bold hover:bg-gray-50 transition-colors">
+                            Liên hệ hỗ trợ
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }

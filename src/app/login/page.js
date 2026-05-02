@@ -22,7 +22,7 @@ function LoginForm() {
 	// Nếu đã đăng nhập thì tự động chuyển hướng
 	useEffect(() => {
 		if (!authLoading && user) {
-			router.replace(redirect);
+			router.replace('/');
 		}
 	}, [user, authLoading, router, redirect]);
 
@@ -32,7 +32,7 @@ function LoginForm() {
 		setLoading(true);
 		try {
 			await loginWithEmail(email, password);
-			router.replace(redirect);
+			router.replace('/');
 		} catch (err) {
 			setError(err);
 		} finally {
@@ -46,7 +46,7 @@ function LoginForm() {
 		try {
 			const loginFn = provider === 'google' ? loginWithGoogle : loginWithFacebook;
 			await loginFn();
-			router.replace(redirect);
+			router.replace('/');
 		} catch (err) {
 			setError(err);
 		} finally {

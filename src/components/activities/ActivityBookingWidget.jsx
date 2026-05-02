@@ -115,7 +115,7 @@ export default function ActivityBookingWidget({
   }, [router, addItem, activityId, activityTitle, featuredImage, selectedDate, selectedTier, adults, children, basePrice, tierCurrency]);
 
   const handleConsult = useCallback(() => {
-    const phone = "0886.068.886";
+    const phone = "0877.901.901";
     window.open(`tel:${phone.replace(/[^0-9]/g, "")}`, "_self");
   }, []);
 

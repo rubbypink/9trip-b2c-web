@@ -13,64 +13,127 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner";
 export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { items, grandTotal, clearCart } = useCart();
+  const { items, subtotal, tax, grandTotal, couponDiscount, couponData, clearCart } = useCart();
   
   const [step, setStep] = useState(1);
   const [contactInfo, setContactInfo] = useState(null);
-  const [gateway, setGateway] = useState("VNPAY"); // Cổng thanh toán mặc định
+  const [gateway, setGateway] = useState("VNPAY"); 
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // 1. THÊM 2 STATE NÀY VÀO ĐỂ KHÓA NÚT VÀ CHỨA GIÁ THẬT
+  const [isValidatingPrice, setIsValidatingPrice] = useState(true);
+  const [realGrandTotal, setRealGrandTotal] = useState(grandTotal);
 
   const showEmptyCart = items.length === 0;
 
-  // Bước 1: Lưu thông tin liên lạc và chuyển sang Bước 2
+  // 2. DÁN CỤC USEEFFECT NÀY VÀO ĐÂY (Ngay trước các hàm xử lý click)
+  useEffect(() => {
+    const validateCartPrice = async () => {
+      if (items.length === 0) {
+        setIsValidatingPrice(false);
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/cart/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+              items: items,
+              couponCode: couponData?.code || null
+          })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          setRealGrandTotal(data.pricing.grandTotal); 
+        } else {
+          setErrorMsg(data.message); 
+        }
+      } catch (err) {
+        setErrorMsg('Không thể xác thực giá gốc. Vui lòng tải lại trang.');
+      } finally {
+        setIsValidatingPrice(false);
+      }
+    };
+
+    validateCartPrice();
+  }, [items, couponData]);
+
   const handleInfoSubmit = (data) => {
     setContactInfo(data);
     setStep(2);
     window.scrollTo(0, 0);
   };
 
-  // Bước 2: Bấm thanh toán, gọi API của chúng ta và Redirect
   const handleFinalizeBooking = async () => {
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Tạo một Mã đơn hàng tạm thời (Ở thực tế bro có thể gọi API tạo db order trước để lấy ID)
-    const orderId = `9TRIP-${Date.now()}`;
+    // Đóng gói data: Thay vì bóc tách item[0], ta nhét thẳng toàn bộ mảng items vào
+    const bookingData = {
+      userId: user?.uid || null,
+      items: items, // <--- Nước đi "mastermind" ở đây =)))
+      pricing: {
+        subtotal,
+        tax,
+        discount: couponDiscount,
+        total: grandTotal,
+        currency: items[0]?.currency || "VND", // Lấy loại tiền tệ của item đầu làm chuẩn
+      },
+      contactInfo,
+      couponCode: couponData?.code || null,
+    };
 
     try {
-      // GỌI THẲNG VÀO API ĐÃ VIẾT
       const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           gateway: gateway,
           amount: grandTotal,
-          orderId: orderId,
+          bookingData: bookingData 
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success && data.url) {
-        // Clear giỏ hàng và lưu mã đơn để check kết quả
-        clearCart();
-        localStorage.setItem("9trip_last_booking_id", orderId);
+        setIsRedirecting(true); 
+        localStorage.setItem("9trip_last_booking_id", data.bookingId);
         
-        // BẾ USER SANG CỔNG THANH TOÁN
+        // Backup lại nguyên cái giỏ hàng (items) vào LocalStorage để phòng hờ thanh toán xịt
+        localStorage.setItem("9trip_cart_backup", JSON.stringify(items)); 
+        
         window.location.href = data.url;
+
+        setTimeout(() => {
+            clearCart();
+        }, 500);
       } else {
         setErrorMsg(data.message || "Có lỗi xảy ra khi tạo link thanh toán.");
         setIsLoading(false);
+        setIsRedirecting(false);
       }
     } catch (error) {
       console.error("Lỗi khi gọi API thanh toán:", error);
       setErrorMsg("Mất kết nối đến máy chủ. Vui lòng thử lại!");
       setIsLoading(false);
+      setIsRedirecting(false);
     }
   };
-
-  // Render UI nếu giỏ hàng trống
+  // Khóa toàn bộ màn hình khi đang chuẩn bị bay sang cổng thanh toán
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+        <LoadingSpinner className="w-12 h-12 text-primary-600 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Đang kết nối cổng thanh toán...</h2>
+        <p className="text-gray-500">Vui lòng không đóng trình duyệt trong lúc này.</p>
+      </div>
+    );
+  }
   if (showEmptyCart) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -90,7 +153,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="container mx-auto px-4 max-w-6xl">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Thanh toán 9TRIP</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Thanh toán 9 TRIP</h1>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -154,11 +217,11 @@ export default function CheckoutPage() {
                   </button>
                   <button
                     onClick={handleFinalizeBooking}
-                    disabled={isLoading}
+                    disabled={isLoading || isValidatingPrice}
                     className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:bg-gray-400 flex items-center gap-2"
                   >
                     {isLoading && <LoadingSpinner className="w-5 h-5 border-white" />}
-                    {isLoading ? "Đang xử lý..." : `Thanh toán ${grandTotal.toLocaleString('vi-VN')} đ`}
+                    {isLoading ? "Đang xử lý..." : `Thanh toán ${realGrandTotal.toLocaleString('vi-VN')} đ`}
                   </button>
                 </div>
               </div>

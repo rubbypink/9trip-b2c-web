@@ -1,5 +1,5 @@
 import { Geist_Mono, Roboto } from 'next/font/google';
-import './globals.css';
+import '../styles/globals.css';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import { CartProvider } from '@/lib/cart';
 import Header from '@/components/layout/Header';

@@ -84,27 +84,40 @@ export default function CheckoutPayment({ orderId, amount }) {
                 </label>
             </div>
 
-            {/* Nút Submit */}
             <button
-                onClick={handlePaymentSubmit}
-                disabled={isLoading}
-                className={`w-full py-3 px-4 rounded font-bold text-white transition-all ${
-                    isLoading 
-                    ? "bg-gray-400 cursor-not-allowed" 
-                    : "bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl"
-                }`}
+            onClick={handleFinalizeBooking}
+            disabled={isLoading}
+            // Ép cố định chiều cao, overflow-hidden để không cho thành phần con tràn ra ngoài
+            className={`w-full flex items-center justify-center py-3 px-4 min-h-[52px] max-h-[52px] rounded-xl font-bold transition-all duration-300 overflow-hidden ${
+                isLoading 
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none" 
+                : "bg-primary-600 text-white hover:bg-primary-700 shadow-lg"
+            }`}
             >
-                {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                    </span>
-                ) : (
-                    `Thanh toán ${amount.toLocaleString('vi-VN')} đ`
-                )}
+            {isLoading ? (
+                // Ép nằm trên 1 hàng ngang (flex-row), cấm rớt dòng (whitespace-nowrap)
+                <span className="flex flex-row items-center justify-center gap-2 whitespace-nowrap">
+                
+                {/* Cố định cứng kích thước bằng style inline, vô hiệu hóa mọi CSS bên ngoài */}
+                <svg 
+                    className="animate-spin shrink-0" 
+                    style={{ width: '20px', height: '20px', minWidth: '20px' }} 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24"
+                >
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                
+                Đang xử lý...
+                </span>
+            ) : (
+                // Cấm rớt dòng cho chữ "Thanh toán"
+                <span className="whitespace-nowrap">
+                Thanh toán {grandTotal?.toLocaleString('vi-VN')} đ
+                </span>
+            )}
             </button>
         </div>
     );
