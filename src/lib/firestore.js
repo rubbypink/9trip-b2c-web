@@ -482,8 +482,10 @@ export async function getFeaturedHotels(count = 6) {
 }
 
 /**
- * @deprecated Use rooms embedded field in hotel document (`hotel.rooms`) instead.
- * Fetch rooms for a specific hotel from top-level rooms collection.
+ * @deprecated v4 — rooms là embedded field trong hotel document (`hotel.rooms`).
+ *   Không còn collection `rooms/` riêng biệt. Dùng hotel.rooms thay thế.
+ *   Xem: memory-bank/schemas/hotels.schema.md (v4.0.0)
+ * Fetch rooms for a specific hotel from top-level rooms collection (DEPRECATED, use hotel.rooms).
  * @param {string} hotelId
  * @returns {Promise<Object[]>}
  */
@@ -562,8 +564,10 @@ export async function getRelatedHotels(currentSlug, locationId, count = 3) {
 }
 
 /**
- * @deprecated Use resolveRoomPricing() with hotel_price_schedules instead.
- * Fetch pricing tiers for a specific room (subcollection: rooms/{roomId}/roomPricing).
+ * @deprecated v4 — Dùng getHotelPriceSchedule() + resolveRoomPricing() thay thế.
+ *   Pricing đã tách sang collection `hotel_price_schedules`.
+ *   Xem: memory-bank/schemas/hotel_price_schedules.schema.md
+ * Fetch pricing tiers for a specific room (subcollection: rooms/{roomId}/roomPricing, DEPRECATED).
  * @param {string} roomId
  * @returns {Promise<Object[]>}
  */
@@ -580,8 +584,10 @@ export async function getRoomPricing(roomId) {
 }
 
 /**
- * @deprecated Use getHotelPriceSchedule() + buildRoomPricingTable() instead.
- * Fetch tổng hợp pricing cho hotel: lấy tất cả rooms + pricing tiers.
+ * @deprecated v4 — Dùng getHotelPriceSchedule() + buildRoomPricingTable() thay thế.
+ *   Pricing đã tách sang collection `hotel_price_schedules`.
+ *   Xem: memory-bank/schemas/hotel_price_schedules.schema.md
+ * Fetch tổng hợp pricing cho hotel từ rooms/roomPricing (DEPRECATED, use hotel_price_schedules).
  * @param {string} hotelId
  * @returns {Promise<Object[]>} Array of rooms với pricingTiers embedded
  */

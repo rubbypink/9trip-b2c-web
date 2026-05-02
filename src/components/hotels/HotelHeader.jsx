@@ -2,17 +2,9 @@
 
 import { useState, useCallback, useEffect } from "react";
 import ImageCarousel from "@/components/shared/ImageCarousel";
-import GoogleMap from "@/components/shared/GoogleMap";
 import LoginPopup from "@/components/auth/LoginPopup";
 import { useAuth } from "@/lib/auth";
 import { toggleWishlist } from "@/lib/firestore";
-
-/** Các tab trong gallery section */
-const GALLERY_TABS = [
-  { id: "photos", label: "Ảnh" },
-  { id: "map", label: "Bản đồ" },
-  { id: "reviews", label: "Đánh giá" },
-];
 
 /**
  * StarRatingInline — Hiển thị sao đánh giá nhỏ gọn.
@@ -34,7 +26,7 @@ function StarRatingInline({ rating = 0, count = 0 }) {
  * ShareButton — Share URL qua Web Share API hoặc copy clipboard.
  * @param {{ url: string, title: string }} props
  */
-function ShareButton({ url, title }) {
+export function ShareButton({ url, title }) {
   const [copied, setCopied] = useState(false);
 
   /**
@@ -100,7 +92,7 @@ function ShareButton({ url, title }) {
  * Nếu chưa login → hiện LoginPopup.
  * @param {{ hotelId: string }} props
  */
-function WishlistButton({ hotelId }) {
+export function WishlistButton({ hotelId }) {
   const { user, profile } = useAuth();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -168,10 +160,10 @@ function WishlistButton({ hotelId }) {
 }
 
 /**
- * ReviewSummaryCompact — Tổng quan đánh giá nhỏ gọn cho gallery tab.
+ * ReviewSummaryCompact — Tổng quan đánh giá nhỏ gọn.
  * @param {{ reviews: Array<Object>, avgRating: number, totalRating: number }} props
  */
-function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating = 0 }) {
+export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating = 0 }) {
   if (totalRating === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400 py-12">
@@ -235,19 +227,18 @@ function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating = 0 }) 
 
 /**
  * HotelHeader — header cho trang chi tiết khách sạn.
- * Bao gồm: gallery có tab (Ảnh | Bản đồ | Đánh giá),
- * action buttons (yêu thích, chia sẻ, đặt ngay),
+ * Bao gồm: gallery photos full-width, star/score badges overlay,
  * tên khách sạn, sao, địa chỉ, excerpt.
+ * (Gallery tabs and action buttons removed — map/reviews moved to sidebar,
+ * action buttons moved to HotelDetailClient)
  *
  * @param {{
  *   hotel: object,
- *   reviews?: Array<Object>,
  *   avgRating?: number,
  *   totalRating?: number,
- *   onBookNow?: () => void,
  * }} props
  */
-export default function HotelHeader({ hotel, reviews = [], avgRating = 0, totalRating = 0, onBookNow }) {
+export default function HotelHeader({ hotel, avgRating = 0, totalRating = 0 }) {
   const {
     name,
     featuredImage,
@@ -258,13 +249,9 @@ export default function HotelHeader({ hotel, reviews = [], avgRating = 0, totalR
     rating,
   } = hotel;
 
-  const [activeTab, setActiveTab] = useState("photos");
-
   const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
   const displayRating = avgRating || rating?.average || 0;
   const displayTotal = totalRating || rating?.count || 0;
-  const hasMap = hotel.map?.lat && hotel.map?.lng;
-  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
 
   // Score label helper
   const getScoreLabel = (score) => {
@@ -275,73 +262,24 @@ export default function HotelHeader({ hotel, reviews = [], avgRating = 0, totalR
     return "Trung bình";
   };
 
-  /**
-   * Scroll tới RoomsPanel khi click "Đặt Ngay".
-   * Gọi onBookNow callback nếu có (để chuyển tab sang rooms),
-   * sau đó scroll tới phần rooms.
-   */
-  const handleBookNow = useCallback(() => {
-    // Gọi callback để chuyển tab sang rooms nếu được cung cấp
-    if (onBookNow) {
-      onBookNow();
-    }
-    // Scroll tới RoomsPanel sau một tick để DOM kịp render
-    setTimeout(() => {
-      const roomsSection = document.querySelector('[data-section="rooms"]');
-      if (roomsSection) {
-        roomsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        const tabNav = document.querySelector('[data-tab-nav]');
-        if (tabNav) {
-          tabNav.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
-    }, 100);
-  }, [onBookNow]);
-
   return (
     <div className="bg-white">
-      {/* ── Gallery Section ────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 pt-4">
-        <div className="relative rounded-xl overflow-hidden bg-gray-100">
+      {/* ── Gallery Section (full-width photos) ────────────── */}
+      <div className="w-full">
+        <div className="relative w-full bg-gray-100">
           {/* ── Gallery Content ─────────────────────────────── */}
-          <div className="aspect-[16/9] md:aspect-[21/9] max-h-[420px] relative">
-            {/* Tab: Ảnh */}
-            {activeTab === "photos" && (
-              <ImageCarousel
-                images={allImages}
-                alt={name}
-                aspectRatio="aspect-[16/9] md:aspect-[21/9]"
-                showOverlay={false}
-                serviceId={hotel.id}
-                serviceType="hotel"
-              />
-            )}
+          <div className="aspect-[16/9] md:aspect-[21/9] max-h-[60vh] relative">
+            <ImageCarousel
+              images={allImages}
+              alt={name}
+              aspectRatio="aspect-[16/9] md:aspect-[21/9]"
+              showOverlay={false}
+              serviceId={hotel.id}
+              serviceType="hotel"
+            />
 
-            {/* Tab: Bản đồ */}
-            {activeTab === "map" && (
-              hasMap ? (
-                <GoogleMap lat={hotel.map.lat} lng={hotel.map.lng} zoom={hotel.map.zoom || 15} />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
-                  <div className="text-center">
-                    <svg className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p className="text-sm">Chưa có bản đồ</p>
-                  </div>
-                </div>
-              )
-            )}
-
-            {/* Tab: Đánh giá */}
-            {activeTab === "reviews" && (
-              <ReviewSummaryCompact reviews={reviews} avgRating={displayRating} totalRating={displayTotal} />
-            )}
-
-            {/* ── Overlay: Star badge top-left ──────────────── */}
-            {starRating > 0 && activeTab === "photos" && (
+            {/* ── Star badge top-left ──────────────────────── */}
+            {starRating > 0 && (
               <span className="absolute top-3 left-3 z-10 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-yellow-600 shadow-sm flex items-center gap-1">
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -350,8 +288,8 @@ export default function HotelHeader({ hotel, reviews = [], avgRating = 0, totalR
               </span>
             )}
 
-            {/* ── Overlay: Score badge top-right ─────────────── */}
-            {displayRating > 0 && activeTab === "photos" && (
+            {/* ── Score badge top-right ─────────────────────── */}
+            {displayRating > 0 && (
               <div className="absolute top-3 right-3 z-10 flex flex-col items-center rounded-xl bg-white/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
                 <span className="text-lg font-bold text-primary">{displayRating.toFixed(1)}</span>
                 <span className="text-[10px] font-medium text-gray-600 whitespace-nowrap">
@@ -360,44 +298,13 @@ export default function HotelHeader({ hotel, reviews = [], avgRating = 0, totalR
               </div>
             )}
 
-            {/* ── Overlay: Action buttons top-right ──────────── */}
-            <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-              <WishlistButton hotelId={hotel.id} />
-              <ShareButton url={pageUrl} title={name} />
-              <button
-                type="button"
-                onClick={handleBookNow}
-                className="rounded-xl bg-primary text-white text-sm font-semibold px-4 py-1.5 shadow-md hover:bg-primary-dark transition-colors"
-              >
-                Đặt ngay
-              </button>
-            </div>
+            {/* ── Photo count indicator ──────────────────────── */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 right-4 z-20 rounded-lg bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5">
+                {allImages.length} ảnh
+              </div>
+            )}
           </div>
-
-          {/* ── Gallery Tab Navigation ──────────────────────── */}
-          <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-xl p-1 shadow-sm">
-            {GALLERY_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === tab.id
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* ── Photo count indicator (only on photos tab) ──── */}
-          {activeTab === "photos" && allImages.length > 1 && (
-            <div className="absolute bottom-4 right-4 z-20 rounded-lg bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5">
-              {allImages.length} ảnh
-            </div>
-          )}
         </div>
       </div>
 

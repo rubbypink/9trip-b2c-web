@@ -16,8 +16,13 @@ import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
 import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
 import PoliciesPanel from "@/components/hotels/HotelDetail/PoliciesPanel";
-import HotelHeader from "@/components/hotels/HotelHeader";
+import HotelHeader, {
+  WishlistButton,
+  ShareButton,
+  ReviewSummaryCompact,
+} from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
+import GoogleMap from "@/components/shared/GoogleMap";
 
 const HOTEL_TABS = [
   { id: "overview", label: "Tổng quan" },
@@ -33,8 +38,9 @@ const HOTEL_TABS = [
  * @param {{ slug: string }} props
  */
 export default function HotelDetailClient({ slug }) {
+  // ── State: fetched data ──────────────────────────────────
   const [hotel, setHotel] = useState(null);
-  const [pricingTable, setPricingTable] = useState([]);
+  const [priceSchedule, setPriceSchedule] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
@@ -43,6 +49,41 @@ export default function HotelDetailClient({ slug }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // ── State: date filter (reactive pricing) ────────────────
+  const [checkIn, setCheckIn] = useState(() => new Date().toISOString().split("T")[0]);
+  const [checkOut, setCheckOut] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  });
+
+  const nights = useMemo(() => {
+    const ci = new Date(checkIn);
+    const co = new Date(checkOut);
+    return Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
+  }, [checkIn, checkOut]);
+
+  // ── Reactive pricing table (auto-recompute on date change) ─
+  const pricingTable = useMemo(() => {
+    if (!hotel || !priceSchedule) return [];
+    const roomsMap = hotel.rooms || [];
+    const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
+    if (rooms.length === 0) return [];
+    return buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut);
+  }, [priceSchedule, hotel?.rooms, checkIn, checkOut]);
+
+  // ── Lowest price with safe fallback ──────────────────────
+  const lowestPrice = useMemo(() => {
+    if (!pricingTable || pricingTable.length === 0) {
+      return hotel?.pricing?.basePrice || 0;
+    }
+    const prices = pricingTable
+      .flatMap((r) => r.rateTypes.map((rt) => rt.avgSellPrice))
+      .filter((p) => p > 0);
+    return prices.length > 0 ? Math.min(...prices) : (hotel?.pricing?.basePrice || 0);
+  }, [pricingTable, hotel]);
+
+  // ── Initial data fetch ───────────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -62,13 +103,13 @@ export default function HotelDetailClient({ slug }) {
 
         // ── 2. Fetch price schedule ──────────────────────────
         console.log(`[HotelDetailClient] ⏳ Fetching priceSchedule for hotelId=${rawHotel.id}...`);
-        const priceSchedule = await getHotelPriceSchedule(rawHotel.id);
-        if (priceSchedule) {
-          const priceKeys = Object.keys(priceSchedule.priceData || {});
+        const ps = await getHotelPriceSchedule(rawHotel.id);
+        if (ps) {
+          const priceKeys = Object.keys(ps.priceData || {});
           console.log(`[HotelDetailClient] ✅ Price schedule loaded: docId=${rawHotel.id}_base_2026, priceData keys=${priceKeys.length}`);
           console.log(`[HotelDetailClient] 📊 priceData sample keys: ${priceKeys.slice(0, 5).join(", ")}`);
         } else {
-          console.warn(`[HotelDetailClient] ⚠️ No price schedule found for hotelId=${rawHotel.id}. Pricing will be empty.`);
+          console.warn(`[HotelDetailClient] ⚠️ No price schedule found for hotelId=${rawHotel.id}. Pricing will use fallback.`);
         }
 
         // ── 3. Fetch reviews ─────────────────────────────────
@@ -90,24 +131,10 @@ export default function HotelDetailClient({ slug }) {
         ]);
         console.log(`[HotelDetailClient] ✅ Images resolved: featured=${!!hotelWithImages.featuredImage}`);
 
-        // ── 6. Build pricing table ───────────────────────────
-        const today = new Date().toISOString().split("T")[0];
-        const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
-        const roomsMap = hotelWithImages.rooms || [];
-        const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
-        if (rooms.length === 0) {
-          console.warn(`[HotelDetailClient] ⚠️ Hotel "${rawHotel.id}" has NO embedded rooms`);
-        } else {
-          console.log(`[HotelDetailClient] 🛏️ Rooms data: count=${rooms.length}, IDs: ${rooms.map(r => r.id).join(", ")}`);
-        }
-
-        const pt = buildRoomPricingTable(priceSchedule, rooms, today, tomorrow);
-        console.log(`[HotelDetailClient] 📊 Pricing table: ${pt.length} rooms, ${pt.reduce((s, r) => s + r.rateTypes.length, 0)} rate types`);
-
-        // ── 7. Set state ─────────────────────────────────────
+        // ── 6. Set state ─────────────────────────────────────
         if (!cancelled) {
           setHotel(hotelWithImages);
-          setPricingTable(pt);
+          setPriceSchedule(ps);
           setReviews(r || []);
           setAvgRating(ar || hotelWithImages.rating?.average || 0);
           setTotalRating(tr || hotelWithImages.rating?.count || 0);
@@ -131,6 +158,29 @@ export default function HotelDetailClient({ slug }) {
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
+  }, []);
+
+  /**
+   * Handle date changes — update checkIn/checkOut, pricing auto-recomputes via useMemo.
+   */
+  const handleDateChange = useCallback((newCheckIn, newCheckOut) => {
+    if (newCheckIn) setCheckIn(newCheckIn);
+    if (newCheckOut) setCheckOut(newCheckOut);
+  }, []);
+
+  const handleBookNow = useCallback(() => {
+    setActiveTab("rooms");
+    setTimeout(() => {
+      const roomsSection = document.querySelector('[data-section="rooms"]');
+      if (roomsSection) {
+        roomsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        const tabNav = document.querySelector('[data-tab-nav]');
+        if (tabNav) {
+          tabNav.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }, 100);
   }, []);
 
   // ── Loading state ────────────────────────────────────────
@@ -182,9 +232,7 @@ export default function HotelDetailClient({ slug }) {
   }
 
   // ── Normal render ────────────────────────────────────────
-  const lowestPrice = pricingTable.length > 0
-    ? Math.min(...pricingTable.flatMap((r) => r.rateTypes.map((rt) => rt.avgSellPrice)))
-    : hotel.pricing?.basePrice || 0;
+  const hasMap = hotel.map?.lat && hotel.map?.lng;
 
   return (
     <>
@@ -211,12 +259,27 @@ export default function HotelDetailClient({ slug }) {
         }}
       />
 
+      {/* ── Action Bar (Wishlist, Share, Đặt ngay) ──────────── */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <WishlistButton hotelId={hotel.id} />
+            <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={hotel.name} />
+          </div>
+          <button
+            type="button"
+            onClick={handleBookNow}
+            className="rounded-xl bg-primary text-white text-sm font-semibold px-5 py-2.5 shadow-sm hover:bg-primary-dark transition-colors"
+          >
+            Đặt ngay
+          </button>
+        </div>
+      </div>
+
       <HotelHeader
         hotel={hotel}
-        reviews={reviews}
         avgRating={avgRating}
         totalRating={totalRating}
-        onBookNow={() => setActiveTab("rooms")}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -247,6 +310,44 @@ export default function HotelDetailClient({ slug }) {
               )}
             </div>
 
+            {/* Date Filter — Check-in / Check-out (reactive pricing) */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Nhận phòng:</label>
+                  <input
+                    type="date"
+                    value={checkIn}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCheckIn(val);
+                      // Auto-advance checkOut if needed
+                      if (val >= checkOut) {
+                        const ci = new Date(val);
+                        ci.setDate(ci.getDate() + 1);
+                        setCheckOut(ci.toISOString().split("T")[0]);
+                      }
+                    }}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Trả phòng:</label>
+                  <input
+                    type="date"
+                    value={checkOut}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    min={checkIn}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <span className="text-sm text-gray-500">
+                  {nights} đêm
+                </span>
+              </div>
+            </div>
+
             {/* Tab Navigation */}
             <div data-tab-nav className="flex border-b border-gray-200 overflow-x-auto [scrollbar-width:none] mb-6">
               {HOTEL_TABS.map((tab) => (
@@ -272,9 +373,9 @@ export default function HotelDetailClient({ slug }) {
                   <RoomsPanel
                     pricingTable={pricingTable}
                     hotel={hotel}
-                    checkIn={new Date().toISOString().split("T")[0]}
-                    checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-                    nights={1}
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    nights={nights}
                   />
                 </div>
               )}
@@ -323,14 +424,38 @@ export default function HotelDetailClient({ slug }) {
 
           {/* Booking Sidebar (1/3) */}
           <aside className="w-full lg:w-[380px] flex-shrink-0">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-6">
               <HotelBookingWidget
                 hotel={hotel}
                 pricingTable={pricingTable}
-                checkIn={new Date().toISOString().split("T")[0]}
-                checkOut={new Date(Date.now() + 86400000).toISOString().split("T")[0]}
-                nights={1}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                nights={nights}
+                onDateChange={handleDateChange}
               />
+
+              {/* Map Box */}
+              {hasMap && (
+                <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+                  <div className="p-4 border-b border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <svg className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Bản đồ
+                    </h3>
+                  </div>
+                  <div className="h-[200px]">
+                    <GoogleMap lat={hotel.map.lat} lng={hotel.map.lng} zoom={hotel.map.zoom || 15} />
+                  </div>
+                </div>
+              )}
+
+              {/* Reviews Box (compact) */}
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <ReviewSummaryCompact reviews={reviews} avgRating={avgRating} totalRating={totalRating} />
+              </div>
             </div>
           </aside>
         </div>
