@@ -5,7 +5,7 @@
  * 1. Kiểm tra tất cả collections có tồn tại không, có documents không
  * 2. Kiểm tra slug fields có trong documents không
  * 3. Lấy mẫu documents để xem cấu trúc field + phân loại ảnh
- * 4. Kiểm tra 3 collection bảng giá mới (hotel_price_schedules, service_price_schedules, tour_prices)
+ * 4. Kiểm tra 2 collection bảng giá mới (hotel_price_schedules, tour_prices)
  * 5. Báo cáo TRUNG THỰC — ghi nhận mọi lỗi, không báo cáo gian dối
  *
  * Chạy: node src/scripts/diagnoseFirestore.js
@@ -36,7 +36,7 @@ const COLLECTIONS = [
   // Core service collections (ERP sync — read only)
   "tours", "hotels", "rooms", "activities", "cars", "rentals", "locations",
   // Pricing collections (MỚI — cần seed data)
-  "hotel_price_schedules", "service_price_schedules", "tour_prices",
+  "hotel_price_schedules", "tour_prices",
   // System collections
   "settings", "coupons", "reviews", "users", "bookings", "inventory_holds", "notifications",
 ];
@@ -44,7 +44,7 @@ const COLLECTIONS = [
 /** Core service collections to show detailed sample output for. */
 const MAIN_COLLECTIONS = [
   "tours", "hotels", "activities", "cars", "rentals",
-  "hotel_price_schedules", "service_price_schedules", "tour_prices",
+  "hotel_price_schedules", "tour_prices",
 ];
 
 /** Known image fields to scan per document. */
@@ -222,7 +222,7 @@ async function main() {
 
   // ── Analyze results ──────────────────────────────────────────────
 
-  const NEW_PRICE_COLLECTIONS = ["hotel_price_schedules", "service_price_schedules", "tour_prices"];
+  const NEW_PRICE_COLLECTIONS = ["hotel_price_schedules", "tour_prices"];
 
   for (const [col, result] of Object.entries(report.collections)) {
     const isNewPriceCol = NEW_PRICE_COLLECTIONS.includes(col);

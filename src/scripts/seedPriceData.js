@@ -1,10 +1,9 @@
 /**
- * Seed Price Data Script — Khởi tạo mock data cho 3 collection mới.
+ * Seed Price Data Script — Khởi tạo mock data cho 2 collection mới.
  *
  * Tạo dữ liệu mẫu cho:
  * 1. hotel_price_schedules  — bảng giá phòng khách sạn
- * 2. service_price_schedules — bảng giá dịch vụ bổ trợ
- * 3. tour_prices            — bảng giá tour
+ * 2. tour_prices            — bảng giá tour
  *
  * Chạy: node src/scripts/seedPriceData.js
  */
@@ -203,93 +202,6 @@ async function seedHotelPriceSchedules() {
   return { created, skipped };
 }
 
-// ─── 2. Seed service_price_schedules ──────────────────────────────────
-
-/**
- * Generate sample service price schedules for common suppliers.
- * Creates 3-5 supplier docs with various service types.
- */
-async function seedServicePriceSchedules() {
-  console.log("\n🎫 Seeding service_price_schedules...");
-
-  const suppliers = [
-    {
-      supplierId: "sup_vinwonders",
-      supplierName: "VinWonders",
-      items: [
-        { id: "item_vw_cable", type: "vé_tham_quan", name: "Vé cáp treo Hòn Thơm", from: "01/01", to: "31/12", adl: 500000, chd: 350000, sell_adl: 600000, sell_chd: 400000, note: "Đã bao gồm vé vào cổng" },
-        { id: "item_vw_buffet", type: "ăn_uống", name: "Buffet trưa VinWonders", from: "01/01", to: "31/12", adl: 250000, chd: 150000, sell_adl: 300000, sell_chd: 180000, note: "" },
-        { id: "item_vw_safari", type: "vé_tham_quan", name: "Vé Vinpearl Safari", from: "01/01", to: "31/12", adl: 550000, chd: 400000, sell_adl: 650000, sell_chd: 450000, note: "" },
-      ],
-    },
-    {
-      supplierId: "sup_vinpearl",
-      supplierName: "Vinpearl",
-      items: [
-        { id: "item_vp_spa", type: "spa", name: "Gói Spa 90 phút", from: "01/01", to: "31/12", adl: 800000, chd: 0, sell_adl: 950000, sell_chd: 0, note: "Massage Thái + xông hơi" },
-        { id: "item_vp_gym", type: "thể_thao", name: "Gym & Yoga", from: "01/01", to: "31/12", adl: 200000, chd: 0, sell_adl: 250000, sell_chd: 0, note: "Miễn phí cho khách lưu trú" },
-        { id: "item_vp_dinner", type: "ăn_uống", name: "Buffet tối hải sản", from: "01/01", to: "31/12", adl: 450000, chd: 300000, sell_adl: 550000, sell_chd: 350000, note: "Thứ 6-CN hàng tuần" },
-      ],
-    },
-    {
-      supplierId: "sup_local_transport",
-      supplierName: "Vận chuyển Nội địa",
-      items: [
-        { id: "item_tr_airport", type: "xe_đưa_đón", name: "Xe đưa đón sân bay (4 chỗ)", from: "01/01", to: "31/12", adl: 300000, chd: 0, sell_adl: 350000, chd: 0, note: "1 chiều" },
-        { id: "item_tr_airport7", type: "xe_đưa_đón", name: "Xe đưa đón sân bay (7 chỗ)", from: "01/01", to: "31/12", adl: 450000, chd: 0, sell_adl: 500000, chd: 0, note: "1 chiều" },
-        { id: "item_tr_daytour", type: "xe_tham_quan", name: "Xe tham quan 1 ngày (4 chỗ)", from: "01/01", to: "31/12", adl: 800000, chd: 0, sell_adl: 950000, chd: 0, note: "Đã bao gồm tài xế + xăng" },
-        { id: "item_tr_daytour7", type: "xe_tham_quan", name: "Xe tham quan 1 ngày (7 chỗ)", from: "01/01", to: "31/12", adl: 1100000, chd: 0, sell_adl: 1300000, chd: 0, note: "Đã bao gồm tài xế + xăng" },
-        { id: "item_tr_speedboat", type: "tàu_thuyền", name: "Tàu cao tốc ra đảo", from: "01/01", to: "31/12", adl: 250000, chd: 150000, sell_adl: 300000, chd: 180000, note: "Khứ hồi" },
-      ],
-    },
-    {
-      supplierId: "sup_local_guide",
-      supplierName: "Hướng dẫn viên",
-      items: [
-        { id: "item_gd_vn", type: "hướng_dẫn", name: "HDV tiếng Việt (ngày)", from: "01/01", to: "31/12", adl: 600000, chd: 0, sell_adl: 700000, chd: 0, note: "" },
-        { id: "item_gd_en", type: "hướng_dẫn", name: "HDV tiếng Anh (ngày)", from: "01/01", to: "31/12", adl: 900000, chd: 0, sell_adl: 1100000, chd: 0, note: "" },
-        { id: "item_gd_cn", type: "hướng_dẫn", name: "HDV tiếng Trung (ngày)", from: "01/01", to: "31/12", adl: 1000000, chd: 0, sell_adl: 1200000, chd: 0, note: "" },
-      ],
-    },
-  ];
-
-  let created = 0;
-  let skipped = 0;
-
-  for (const supplier of suppliers) {
-    const docId = `${supplier.supplierId}_${CURRENT_YEAR}`;
-
-    const existing = await db.collection("service_price_schedules").doc(docId).get();
-    if (existing.exists) {
-      console.log(`   ⏭️  ${docId} — already exists, skipping`);
-      skipped++;
-      continue;
-    }
-
-    const doc = {
-      id: docId,
-      supplier_id: supplier.supplierId,
-      supplier_name: supplier.supplierName,
-      year: CURRENT_YEAR,
-      status: "actived",
-      items: supplier.items,
-      created_at: admin.firestore.Timestamp.now(),
-      updated_at: admin.firestore.Timestamp.now(),
-    };
-
-    if (DRY_RUN) {
-      console.log(`   🧪 [DRY RUN] Would create: ${docId} (${supplier.items.length} items)`);
-      created++;
-    } else {
-      await db.collection("service_price_schedules").doc(docId).set(doc);
-      console.log(`   ✅ Created: ${docId} (${supplier.items.length} items)`);
-      created++;
-    }
-  }
-
-  return { created, skipped };
-}
-
 // ─── 3. Seed tour_prices ─────────────────────────────────────────────
 
 /**
@@ -328,7 +240,7 @@ function generateTourPricingInfo(tour, baseAdultPrice) {
 
 /**
  * Generate sample bundled services for a tour.
- * References the service_price_schedules suppliers created above.
+ * References suppliers.
  * @returns {Array<Object>}
  */
 function generateTourServices() {
@@ -420,7 +332,7 @@ async function main() {
   try {
     // Seed all 3 collections
     results.hotel_price_schedules = await seedHotelPriceSchedules();
-    results.service_price_schedules = await seedServicePriceSchedules();
+
     results.tour_prices = await seedTourPrices();
   } catch (error) {
     console.error("\n❌ Fatal error:", error.message);

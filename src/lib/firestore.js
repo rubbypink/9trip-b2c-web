@@ -938,25 +938,6 @@ export async function getActivityBySlug(slug) {
 }
 
 /**
- * Fetch pricing tiers for a specific activity.
- * Subcollection: activities/{activityId}/activityPricing/{priceId}
- * Sorted by sortOrder ascending.
- * @param {string} activityId
- * @returns {Promise<Object[]>}
- */
-export async function getActivityPricing(activityId) {
-	try {
-		const pricingCol = collection(db, 'activities', activityId, 'activityPricing');
-		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getActivityPricing] Error:', error.message);
-		return [];
-	}
-}
-
-/**
  * Fetch related activities (same location, excluding current).
  * @param {string} slug - Current activity slug
  * @param {number} [count=4]

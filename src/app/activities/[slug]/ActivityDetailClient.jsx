@@ -251,17 +251,16 @@ export default function ActivityDetailClient({
                           <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
                               <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói dịch vụ</th>
-                              <th className="text-left px-4 py-3 font-semibold text-gray-900">Khu vực</th>
+                              <th className="text-left px-4 py-3 font-semibold text-gray-900">Mô tả</th>
                               <th className="text-right px-4 py-3 font-semibold text-gray-900">Người lớn</th>
                               <th className="text-right px-4 py-3 font-semibold text-gray-900">Trẻ em</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Sức chứa</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-100">
                             {pricingTiers.map((tier) => (
                               <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
-                                <td className="px-4 py-3 text-gray-500">{tier.zone || "—"}</td>
+                                <td className="px-4 py-3 text-gray-500 max-w-[200px] truncate" title={tier.description}>{tier.description || "—"}</td>
                                 <td className="px-4 py-3 text-right font-semibold text-blue-600">
                                   {formatCurrency(tier.adultPrice, tier.currency || currency)}
                                 </td>
@@ -269,9 +268,6 @@ export default function ActivityDetailClient({
                                   {tier.childPrice != null
                                     ? formatCurrency(tier.childPrice, tier.currency || currency)
                                     : "—"}
-                                </td>
-                                <td className="px-4 py-3 text-right text-gray-500">
-                                  {tier.capacity ? `${tier.capacity.toLocaleString()}` : "—"}
                                 </td>
                               </tr>
                             ))}

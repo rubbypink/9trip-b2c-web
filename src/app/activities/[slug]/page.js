@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getActivityBySlug, getReviews, getActivityPricing, getRelatedActivities } from "@/lib/firestore";
+import { getActivityBySlug, getReviews, getRelatedActivities } from "@/lib/firestore";
 import { resolveDocImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "./ActivityDetailClient";
@@ -50,9 +50,8 @@ export default async function ActivityDetailPage({ params }) {
   // Resolve image URLs (gs:// → HTTPS)
   const activity = await resolveDocImages(rawActivity);
 
-  // Fetch pricing tiers, reviews, and related activities in parallel
-  const [pricingTiers, { reviews }, { activities: relatedActivities }] = await Promise.all([
-    getActivityPricing(activity.id),
+  // Fetch reviews and related activities in parallel
+  const [{ reviews }, { activities: relatedActivities }] = await Promise.all([
     getReviews("activity", activity.id),
     getRelatedActivities(slug, 3),
   ]);
@@ -76,6 +75,9 @@ export default async function ActivityDetailPage({ params }) {
   }));
 
   const clientReviews = reviews.slice(0, 5); // Pass few newest reviews for summary
+
+  // Lấy danh sách pricing tiers từ document
+  const pricingTiers = activity.pricing?.tiers || [];
 
   // JSON-LD schema
   const jsonLd = {
