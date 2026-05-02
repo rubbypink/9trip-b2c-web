@@ -68,9 +68,11 @@ export default async function ToursPage({ searchParams }) {
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <Suspense fallback={<div className="h-96 bg-gray-100 rounded-xl animate-pulse" />}>
-              <TourFilters locations={locations} currentFilters={filters} />
-            </Suspense>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
+              <Suspense fallback={<div className="h-96 bg-gray-100 rounded-xl animate-pulse" />}>
+                <TourFilters locations={locations} currentFilters={filters} />
+              </Suspense>
+            </div>
           </aside>
 
           {/* Main Content */}

@@ -63,8 +63,10 @@ export default async function ActivitiesPage({ searchParams }) {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside>
-            <ActivityFilters locations={locations} categories={categories} />
+          <aside className="w-64 flex-shrink-0 hidden lg:block">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
+              <ActivityFilters locations={locations} categories={categories} />
+            </div>
           </aside>
 
           <div className="flex-1">

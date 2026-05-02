@@ -63,14 +63,14 @@ export default function LoginPopup({ open, onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 p-8 animate-scaleIn"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 p-8 animate-scaleIn"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           aria-label="Đóng"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
