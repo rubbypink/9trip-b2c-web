@@ -47,7 +47,7 @@ export class PaymentService {
         const apiUrl = process.env.MOMO_ENDPOINT;
         
         const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/payment/momo-return`;
-        const ipnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/webhook/momo`; // Cấu hình webhook sau
+        const ipnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/webhook/momo`; // Cấu hình webhook sau
 
         const requestId = orderData.orderId + new Date().getTime(); // Chống trùng lặp
         const requestType = "captureWallet";
