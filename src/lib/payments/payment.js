@@ -38,41 +38,43 @@ export class PaymentService {
     }
 
     // ==========================================
-    // 2. MOMO (PRODUCTION)
+    // MOMO DEBUG MODE
     // ==========================================
     static async createMoMoUrl(orderData) {
         const partnerCode = process.env.MOMO_PARTNER_CODE;
         const accessKey = process.env.MOMO_ACCESS_KEY;
         const secretKey = process.env.MOMO_SECRET_KEY;
-        const apiUrl = process.env.MOMO_ENDPOINT;
+        const apiUrl = process.env.MOMO_API_URL;
         
-        const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/payment/momo-return`;
-        const ipnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/webhook/momo`; // Cấu hình webhook sau
+        const redirectUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/payment/momo-return`;
+        const ipnUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/payment/webhook/momo`;
 
-        const requestId = orderData.orderId + new Date().getTime(); // Chống trùng lặp
+        const requestId = orderData.orderId + "_" + new Date().getTime(); // Thêm dấu _ cho chắc cốp
         const requestType = "captureWallet";
-        const extraData = ""; // Dữ liệu mã hóa base64 nếu cần truyền thêm
+        const extraData = ""; 
+        const orderInfo = `Thanh toan don hang ${orderData.orderId}`;
+        const amountStr = orderData.amount.toString(); // Ép kiểu chuỗi để tránh lỗi signature
 
-        // MoMo bắt buộc nối chuỗi đúng thứ tự này, sai 1 ký tự là lỗi Signature
-        const rawSignature = `accessKey=${accessKey}&amount=${orderData.amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderData.orderId}&orderInfo=Thanh toan don hang ${orderData.orderId}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
+        // MoMo bắt buộc nối chuỗi chuẩn xác 100%
+        const rawSignature = `accessKey=${accessKey}&amount=${amountStr}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderData.orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
         
         const signature = PaymentHelper.generateHmac(rawSignature, secretKey, 'sha256');
 
         const requestBody = JSON.stringify({
-            partnerCode,
-            partnerName: "9TRIP B2C",
+            partnerCode: partnerCode,
+            partnerName: "9TRIP",
             storeId: "9TRIP_STORE",
-            requestId,
-            amount: orderData.amount,
+            requestId: requestId,
+            amount: Number(orderData.amount), // Gửi lên bắt buộc là Number
             orderId: orderData.orderId,
-            orderInfo: `Thanh toan don hang ${orderData.orderId}`,
-            redirectUrl,
-            ipnUrl,
+            orderInfo: orderInfo,
+            redirectUrl: redirectUrl,
+            ipnUrl: ipnUrl,
             lang: "vi",
-            requestType,
+            requestType: requestType,
             autoCapture: true,
-            extraData,
-            signature
+            extraData: extraData,
+            signature: signature
         });
 
         const response = await fetch(apiUrl, {
@@ -83,22 +85,28 @@ export class PaymentService {
 
         const data = await response.json();
         
+        // DEBUG LỖI MOMO Ở ĐÂY
         if (data.resultCode !== 0) {
-            throw new Error(`MoMo Error: ${data.message}`);
+            console.error("\n=== LỖI MOMO CHI TIẾT ===");
+            console.error("Result Code:", data.resultCode);
+            console.error("Message:", data.message);
+            console.error("Local Message:", data.localMessage);
+            console.error("Raw Signature đã nối:", rawSignature);
+            console.error("=========================\n");
+            throw new Error(`Lỗi MoMo [${data.resultCode}]: ${data.localMessage || data.message}`);
         }
 
         return data.payUrl;
     }
 
     // ==========================================
-    // 3. PAYPAL (PRODUCTION)
+    // PAYPAL DEBUG MODE
     // ==========================================
     static async createPayPalUrl(orderData) {
         const clientId = process.env.PAYPAL_CLIENT_ID;
         const secretKey = process.env.PAYPAL_SECRET_KEY;
         const apiUrl = process.env.PAYPAL_API_URL;
 
-        // B1: Lấy Access Token từ PayPal
         const auth = Buffer.from(`${clientId}:${secretKey}`).toString('base64');
         const tokenResponse = await fetch(`${apiUrl}/v1/oauth2/token`, {
             method: 'POST',
@@ -110,13 +118,19 @@ export class PaymentService {
         });
 
         const tokenData = await tokenResponse.json();
-        if (!tokenData.access_token) throw new Error('Không thể xác thực PayPal');
+        
+        // DEBUG LỖI PAYPAL Ở ĐÂY
+        if (!tokenResponse.ok) {
+            console.error("\n=== LỖI PAYPAL AUTH ===");
+            console.error(tokenData);
+            console.error("=======================\n");
+            throw new Error(`PayPal auth failed: ${tokenData.error_description || tokenData.error}`);
+        }
 
-        // B2: Chuyển đổi VND sang USD (Tỉ giá tạm tính 25000, bro tự update tỉ giá động nếu cần)
+        // ... phần dưới giữ nguyên ...
         const exchangeRate = 25000;
         const amountUSD = (orderData.amount / exchangeRate).toFixed(2);
 
-        // B3: Tạo Order
         const orderResponse = await fetch(`${apiUrl}/v2/checkout/orders`, {
             method: 'POST',
             headers: {
@@ -127,25 +141,26 @@ export class PaymentService {
                 intent: "CAPTURE",
                 purchase_units: [{
                     reference_id: orderData.orderId,
-                    amount: {
-                        currency_code: "USD",
-                        value: amountUSD
-                    },
+                    amount: { currency_code: "USD", value: amountUSD },
                     description: `Don hang ${orderData.orderId}`
                 }],
                 application_context: {
-                    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/paypal-return`,
-                    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/paypal-cancel`
+                    return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/paypal-return`,
+                    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/paypal-cancel`
                 }
             })
         });
 
         const orderResult = await orderResponse.json();
         
-        // PayPal trả về một mảng các links, ta cần tìm link 'approve'
-        const approveLink = orderResult.links.find(link => link.rel === 'approve');
-        if (!approveLink) throw new Error('Không thể tạo link thanh toán PayPal');
+        if (!orderResponse.ok) {
+            console.error("\n=== LỖI TẠO ĐƠN PAYPAL ===");
+            console.error(orderResult);
+            console.error("==========================\n");
+            throw new Error('Lỗi tạo đơn PayPal');
+        }
 
+        const approveLink = orderResult.links.find(link => link.rel === 'approve');
         return approveLink.href;
     }
 }
