@@ -634,27 +634,28 @@ export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYe
  * @returns {Array<{rateType: string, costPrice: number, sellPrice: number, startDate: string, endDate: string, supplier: string, periodKey: string}>}
  */
 export function resolveRoomPricing(priceSchedule, roomId, date) {
-  if (!priceSchedule?.priceData) {
-    console.log(`[resolveRoomPricing] No priceData in schedule for roomId=${roomId}`);
+  if (!priceSchedule?.priceData || !roomId) {
+    console.log(`[resolveRoomPricing] Missing priceData or roomId=${roomId}`);
     return [];
   }
   const priceData = priceSchedule.priceData;
-  const priceDataKeys = Object.keys(priceData);
   const result = [];
   const prefix = roomId + '_';
-  let matchedKeys = 0;
+  
   for (const [key, periods] of Object.entries(priceData)) {
     if (!key.startsWith(prefix)) continue;
-    matchedKeys++;
+    
     const rateType = key.slice(prefix.length);
     if (typeof periods !== 'object' || periods === null) continue;
+    
     for (const [periodKey, pricing] of Object.entries(periods)) {
       if (!pricing || typeof pricing !== 'object') continue;
-      if (date >= pricing.startDate && date <= pricing.endDate) {
+      // Đảm bảo so sánh ngày chính xác
+      if (pricing.startDate && pricing.endDate && date >= pricing.startDate && date <= pricing.endDate) {
         result.push({
           rateType,
-          costPrice: pricing.costPrice || 0,
-          sellPrice: pricing.sellPrice || 0,
+          costPrice: Number(pricing.costPrice) || 0,
+          sellPrice: Number(pricing.sellPrice) || 0,
           startDate: pricing.startDate,
           endDate: pricing.endDate,
           supplier: pricing.supplier || '',
@@ -663,10 +664,7 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
       }
     }
   }
-  if (matchedKeys === 0) {
-    console.log(`[resolveRoomPricing] ⚠️ No matching priceData keys for roomId="${roomId}" (prefix="${prefix}"). Available keys: ${priceDataKeys.slice(0, 10).join(', ')}${priceDataKeys.length > 10 ? '...' : ''}`);
-  }
-  // Sort by sellPrice ascending
+  // Sắp xếp giá bán thấp nhất lên đầu
   result.sort((a, b) => a.sellPrice - b.sellPrice);
   return result;
 }

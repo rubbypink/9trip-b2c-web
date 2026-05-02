@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { buildRoomPricingTable } from "@/lib/firestore";
+import GoogleMap from "@/components/shared/GoogleMap";
 import Badge from "@/components/shared/Badge";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
@@ -68,7 +69,8 @@ export default function HotelDetailClient({
   const pricingTable = useMemo(() => {
     if (!hotel || !priceSchedule) return [];
     const roomsMap = hotel.rooms || [];
-    const rooms = Array.isArray(roomsMap) ? roomsMap : Object.values(roomsMap);
+    // Đảm bảo mỗi room đều có ID nếu rooms được lưu dạng Map
+    const rooms = (Array.isArray(roomsMap) ? roomsMap : Object.entries(roomsMap).map(([id, r]) => ({ ...r, id: r.id || id }))).filter(r => r.isActive);
     if (rooms.length === 0) return [];
     return buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut);
   }, [priceSchedule, hotel?.rooms, checkIn, checkOut]);
