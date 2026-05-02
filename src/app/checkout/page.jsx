@@ -40,7 +40,7 @@ export default function CheckoutPage() {
 
     try {
       // GỌI THẲNG VÀO API ĐÃ VIẾT
-      const response = await fetch("/api/payment/create", {
+      const response = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -11,7 +11,7 @@ export default function CheckoutPayment({ orderId, amount }) {
 
         try {
             // Gọi lên Backend (Next.js API Route)
-            const response = await fetch("/api/payment/create", {
+            const response = await fetch("/api/payments/create", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
