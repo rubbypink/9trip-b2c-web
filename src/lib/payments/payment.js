@@ -61,7 +61,7 @@ export class PaymentService {
         const requestBody = JSON.stringify({
             partnerCode,
             partnerName: "TRẦN THỪA ANH",
-            storeId: "",
+            storeId: "9TRIP_STORE_001",
             requestId,
             amount: orderData.amount,
             orderId: orderData.orderId,
@@ -96,7 +96,7 @@ export class PaymentService {
     static async createPayPalUrl(orderData) {
         const clientId = process.env.PAYPAL_CLIENT_ID;
         const secretKey = process.env.PAYPAL_SECRET_KEY;
-        const apiUrl = process.env.PAYPAL_API_URL;
+        const apiUrl = process.env.PAYPAL_API_URL || (process.env.PAYPAL_MODE === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com');
 
         // B1: Lấy Access Token từ PayPal
         const auth = Buffer.from(`${clientId}:${secretKey}`).toString('base64');
