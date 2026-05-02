@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import LoginPopup from "@/components/auth/LoginPopup";
 import { useAuth } from "@/lib/auth";
@@ -238,7 +238,7 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
  *   totalRating?: number,
  * }} props
  */
-export default function HotelHeader({ hotel, avgRating = 0, totalRating = 0 }) {
+const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0 }) {
   const {
     name,
     featuredImage,
@@ -341,3 +341,5 @@ export default function HotelHeader({ hotel, avgRating = 0, totalRating = 0 }) {
     </div>
   );
 }
+
+export default React.memo(HotelHeader);

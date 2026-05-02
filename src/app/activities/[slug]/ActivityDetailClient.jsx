@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import GoogleMap from "@/components/shared/GoogleMap";
 import StarRating from "@/components/shared/StarRating";
 import ActivityCard from "@/components/shared/ActivityCard";
 import ActivityBookingWidget from "@/components/activities/ActivityBookingWidget";
 import { formatCurrency } from "@/lib/utils";
+
+const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
 
 const TABS = [
   { id: "overview", label: "Tổng quan" },

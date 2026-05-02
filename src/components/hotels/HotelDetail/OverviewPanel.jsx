@@ -1,8 +1,10 @@
+import React from 'react';
+
 /**
  * OverviewPanel — Mô tả, điểm nổi bật, tiện nghi sơ lược, check-in/out.
  * @param {{ hotel: Object }} props
  */
-export default function OverviewPanel({ hotel }) {
+function OverviewPanel({ hotel }) {
   return (
     <div className="space-y-6">
       {/* Description */}
@@ -88,3 +90,5 @@ export default function OverviewPanel({ hotel }) {
     </div>
   );
 }
+
+export default React.memo(OverviewPanel);

@@ -4,8 +4,9 @@
  */
 import Card from "@/components/shared/Card";
 import SectionHeading from "@/components/shared/SectionHeading";
+import React from "react";
 
-export default function PoliciesPanel({ hotel }) {
+function PoliciesPanel({ hotel }) {
   const policies = hotel.policies || {};
   const sections = [
     { key: "checkIn", label: "Nhận phòng", icon: "🕐" },
@@ -48,3 +49,5 @@ export default function PoliciesPanel({ hotel }) {
     </div>
   );
 }
+
+export default React.memo(PoliciesPanel);

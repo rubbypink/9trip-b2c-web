@@ -92,6 +92,20 @@ export default async function HotelDetailPage({ params }) {
     resolveDocsImages(rawRelated),
   ]);
 
+  // Lược bỏ bớt payload gửi xuống Client để tối ưu (Phase 1)
+  const clientRelatedHotels = relatedHotels.map(h => ({
+    id: h.id,
+    slug: h.slug,
+    name: h.name,
+    featuredImage: h.featuredImage,
+    address: { city: h.address?.city },
+    rating: { average: h.rating?.average || 0 },
+    pricing: { basePrice: h.pricing?.basePrice || 0 },
+    lowestPrice: h.lowestPrice || 0,
+  }));
+
+  const clientReviews = reviews.slice(0, 5); // Chỉ pass vài review mới nhất để làm summary
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Breadcrumb
@@ -105,10 +119,10 @@ export default async function HotelDetailPage({ params }) {
         slug={slug}
         hotel={hotel}
         priceSchedule={priceSchedule}
-        reviews={reviews}
+        reviews={clientReviews}
         avgRating={avgRating}
         totalRating={totalRating}
-        relatedHotels={relatedHotels}
+        relatedHotels={clientRelatedHotels}
       />
     </div>
   );

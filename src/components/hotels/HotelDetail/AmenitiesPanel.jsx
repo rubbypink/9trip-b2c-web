@@ -1,11 +1,12 @@
 /**
- * AmenitiesPanel — Hiển thị toàn bộ tiện nghi khách sạn dạng grid.
+ * AmenitiesPanel — Phân loại tiện nghi thành các nhóm (Facility categories).
  * @param {{ hotel: Object }} props
  */
 import Card from "@/components/shared/Card";
 import SectionHeading from "@/components/shared/SectionHeading";
+import React from "react";
 
-export default function AmenitiesPanel({ hotel }) {
+function AmenitiesPanel({ hotel }) {
   const amenities = hotel.amenities || [];
 
   if (amenities.length === 0) {
@@ -70,3 +71,5 @@ export default function AmenitiesPanel({ hotel }) {
     </div>
   );
 }
+
+export default React.memo(AmenitiesPanel);

@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import TourTabs from "@/components/tours/TourDetail/TourTabs";
-import ItineraryPanel from "@/components/tours/TourDetail/ItineraryPanel";
-import ReviewsPanel from "@/components/tours/TourDetail/ReviewsPanel";
 import BookingSidebar from "@/components/tours/TourDetail/BookingSidebar";
 import TourCard from "@/components/tours/TourCard";
-import GoogleMap from "@/components/shared/GoogleMap";
 import { formatCurrency } from "@/lib/utils";
+
+const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
+const ItineraryPanel = dynamic(() => import("@/components/tours/TourDetail/ItineraryPanel"));
+const ReviewsPanel = dynamic(() => import("@/components/tours/TourDetail/ReviewsPanel"));
 
 const TABS = [
   { id: "overview", label: "Tổng quan" },

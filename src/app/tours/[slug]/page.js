@@ -93,6 +93,20 @@ export default async function TourDetailPage({ params }) {
     // tour stays as rawTour, relatedTours stays empty
   }
 
+  // Lược bỏ bớt payload gửi xuống Client để tối ưu (Phase 1)
+  const clientRelatedTours = relatedTours.map(t => ({
+    id: t.id,
+    slug: t.slug,
+    title: t.title,
+    featuredImage: t.featuredImage,
+    locationName: t.locationName,
+    ratingAverage: t.ratingAverage || 0,
+    pricing: { adultPrice: t.pricing?.adultPrice || 0 },
+    duration: t.duration,
+  }));
+
+  const clientReviews = reviews.slice(0, 5); // Pass few newest reviews for summary
+
   // JSON-LD structured data for SEO (TouristTrip schema)
   const jsonLd = {
     "@context": "https://schema.org",
@@ -158,8 +172,8 @@ export default async function TourDetailPage({ params }) {
             <TourDetailClient
               tour={tour}
               pricingTiers={pricingTiers || []}
-              relatedTours={relatedTours || []}
-              reviews={reviews || []}
+              relatedTours={clientRelatedTours || []}
+              reviews={clientReviews || []}
               avgRating={avgRating || tour.ratingAverage || 0}
               totalRating={totalRating || tour.ratingCount || 0}
             />

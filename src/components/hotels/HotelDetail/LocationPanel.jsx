@@ -3,12 +3,13 @@
 import GoogleMap from "@/components/shared/GoogleMap";
 import Card from "@/components/shared/Card";
 import SectionHeading from "@/components/shared/SectionHeading";
+import { memo } from "react";
 
 /**
  * LocationPanel — Hiển thị bản đồ + địa chỉ khách sạn.
  * @param {{ hotel: Object }} props
  */
-export default function LocationPanel({ hotel }) {
+function LocationPanel({ hotel }) {
   const hasMap = hotel.map?.lat && hotel.map?.lng;
 
   return (
@@ -50,3 +51,5 @@ export default function LocationPanel({ hotel }) {
     </div>
   );
 }
+
+export default memo(LocationPanel);

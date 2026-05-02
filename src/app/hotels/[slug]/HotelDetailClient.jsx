@@ -1,20 +1,24 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { buildRoomPricingTable } from "@/lib/firestore";
-import GoogleMap from "@/components/shared/GoogleMap";
 import Badge from "@/components/shared/Badge";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
-import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
-import PoliciesPanel from "@/components/hotels/HotelDetail/PoliciesPanel";
-import LocationPanel from "@/components/hotels/HotelDetail/LocationPanel";
+
+const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
+const AmenitiesPanel = dynamic(() => import("@/components/hotels/HotelDetail/AmenitiesPanel"));
+const PoliciesPanel = dynamic(() => import("@/components/hotels/HotelDetail/PoliciesPanel"));
+const LocationPanel = dynamic(() => import("@/components/hotels/HotelDetail/LocationPanel"));
+
 import HotelHeader, {
   WishlistButton,
   ShareButton,
+  ReviewSummaryCompact,
 } from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
 

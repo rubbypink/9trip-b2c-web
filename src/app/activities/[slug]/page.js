@@ -63,6 +63,20 @@ export default async function ActivityDetailPage({ params }) {
       ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating
       : 0;
 
+  // Lược bỏ bớt payload gửi xuống Client để tối ưu (Phase 1)
+  const clientRelatedActivities = relatedActivities.map(a => ({
+    id: a.id,
+    slug: a.slug,
+    title: a.title,
+    featuredImage: a.featuredImage,
+    locationName: a.locationName,
+    ratingAverage: a.ratingAverage || 0,
+    pricing: { basePrice: a.pricing?.basePrice || 0 },
+    duration: a.duration,
+  }));
+
+  const clientReviews = reviews.slice(0, 5); // Pass few newest reviews for summary
+
   // JSON-LD schema
   const jsonLd = {
     "@context": "https://schema.org",
@@ -112,8 +126,8 @@ export default async function ActivityDetailPage({ params }) {
         <ActivityDetailClient
           activity={activity}
           pricingTiers={pricingTiers}
-          relatedActivities={relatedActivities}
-          reviews={reviews}
+          relatedActivities={clientRelatedActivities}
+          reviews={clientReviews}
           avgRating={avgRating}
           totalRating={totalRating}
         />
