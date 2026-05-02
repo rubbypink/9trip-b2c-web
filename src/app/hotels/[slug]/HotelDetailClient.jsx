@@ -1,55 +1,56 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
-import {
-  getHotelBySlug,
-  getRelatedHotels,
-  getHotelReviews,
-  getHotelPriceSchedule,
-  buildRoomPricingTable,
-} from "@/lib/firestore";
-import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
+import { buildRoomPricingTable } from "@/lib/firestore";
+import Badge from "@/components/shared/Badge";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
 import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
 import PoliciesPanel from "@/components/hotels/HotelDetail/PoliciesPanel";
+import LocationPanel from "@/components/hotels/HotelDetail/LocationPanel";
 import HotelHeader, {
   WishlistButton,
   ShareButton,
-  ReviewSummaryCompact,
 } from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
-import GoogleMap from "@/components/shared/GoogleMap";
 
 const HOTEL_TABS = [
   { id: "overview", label: "Tổng quan" },
   { id: "rooms", label: "Phòng & Giá" },
   { id: "amenities", label: "Tiện ích" },
   { id: "policies", label: "Chính sách" },
+  { id: "location", label: "Vị trí" },
 ];
 
 /**
- * HotelDetailClient — Client component tự fetch mọi dữ liệu từ Firestore.
- * Tránh lỗi composite index bằng cách fetch toàn bộ data rồi xử lý ở client.
+ * HotelDetailClient — Client component for interactivity (tabs, date picker, cart).
+ * Receives all data pre-fetched from the Server Component (page.js).
  *
- * @param {{ slug: string }} props
+ * @param {{
+ *   slug: string,
+ *   hotel: Object,
+ *   priceSchedule: Object|null,
+ *   reviews: Array<Object>,
+ *   avgRating: number,
+ *   totalRating: number,
+ *   relatedHotels: Array<Object>,
+ * }} props
  */
-export default function HotelDetailClient({ slug }) {
-  // ── State: fetched data ──────────────────────────────────
-  const [hotel, setHotel] = useState(null);
-  const [priceSchedule, setPriceSchedule] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [avgRating, setAvgRating] = useState(0);
-  const [totalRating, setTotalRating] = useState(0);
-  const [relatedHotels, setRelatedHotels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function HotelDetailClient({
+  slug,
+  hotel,
+  priceSchedule,
+  reviews,
+  avgRating,
+  totalRating,
+  relatedHotels,
+}) {
   const [activeTab, setActiveTab] = useState("overview");
 
-  // ── State: date filter (reactive pricing) ────────────────
+  // ── Date state (reactive pricing) ────────────────────────
   const [checkIn, setCheckIn] = useState(() => new Date().toISOString().split("T")[0]);
   const [checkOut, setCheckOut] = useState(() => {
     const d = new Date();
@@ -83,79 +84,6 @@ export default function HotelDetailClient({ slug }) {
     return prices.length > 0 ? Math.min(...prices) : (hotel?.pricing?.basePrice || 0);
   }, [pricingTable, hotel]);
 
-  // ── Initial data fetch ───────────────────────────────────
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchAll() {
-      console.log(`[HotelDetailClient] 🏨 Bắt đầu fetch cho slug="${slug}"`);
-
-      try {
-        // ── 1. Fetch hotel ──────────────────────────────────
-        console.log(`[HotelDetailClient] ⏳ Fetching hotel by slug="${slug}"...`);
-        const { hotel: rawHotel } = await getHotelBySlug(slug);
-        if (!rawHotel) {
-          console.error(`[HotelDetailClient] ❌ Hotel not found for slug="${slug}"`);
-          if (!cancelled) setError("Khách sạn không tồn tại.");
-          return;
-        }
-        console.log(`[HotelDetailClient] ✅ Hotel loaded: id=${rawHotel.id}, name="${rawHotel.name}", rooms=${rawHotel.rooms?.length || 0}`);
-
-        // ── 2. Fetch price schedule ──────────────────────────
-        console.log(`[HotelDetailClient] ⏳ Fetching priceSchedule for hotelId=${rawHotel.id}...`);
-        const ps = await getHotelPriceSchedule(rawHotel.id);
-        if (ps) {
-          const priceKeys = Object.keys(ps.priceData || {});
-          console.log(`[HotelDetailClient] ✅ Price schedule loaded: docId=${rawHotel.id}_base_2026, priceData keys=${priceKeys.length}`);
-          console.log(`[HotelDetailClient] 📊 priceData sample keys: ${priceKeys.slice(0, 5).join(", ")}`);
-        } else {
-          console.warn(`[HotelDetailClient] ⚠️ No price schedule found for hotelId=${rawHotel.id}. Pricing will use fallback.`);
-        }
-
-        // ── 3. Fetch reviews ─────────────────────────────────
-        console.log(`[HotelDetailClient] ⏳ Fetching reviews for slug="${slug}"...`);
-        const { reviews: r, totalRating: tr, avgRating: ar } = await getHotelReviews(slug);
-        console.log(`[HotelDetailClient] ✅ Reviews: count=${r.length}, avgRating=${ar.toFixed(1)}`);
-
-        // ── 4. Fetch related hotels ──────────────────────────
-        const cityId = rawHotel.address?.cityId;
-        console.log(`[HotelDetailClient] ⏳ Fetching related hotels for locationId=${cityId}...`);
-        const { hotels: rawRelated } = await getRelatedHotels(slug, cityId, 3);
-        console.log(`[HotelDetailClient] ✅ Related hotels: count=${rawRelated.length}`);
-
-        // ── 5. Resolve images ────────────────────────────────
-        console.log(`[HotelDetailClient] ⏳ Resolving images...`);
-        const [hotelWithImages, relatedWithImages] = await Promise.all([
-          resolveDocImages(rawHotel),
-          resolveDocsImages(rawRelated),
-        ]);
-        console.log(`[HotelDetailClient] ✅ Images resolved: featured=${!!hotelWithImages.featuredImage}`);
-
-        // ── 6. Set state ─────────────────────────────────────
-        if (!cancelled) {
-          setHotel(hotelWithImages);
-          setPriceSchedule(ps);
-          setReviews(r || []);
-          setAvgRating(ar || hotelWithImages.rating?.average || 0);
-          setTotalRating(tr || hotelWithImages.rating?.count || 0);
-          setRelatedHotels(relatedWithImages);
-          setLoading(false);
-          console.log(`[HotelDetailClient] ✅ All data loaded successfully for slug="${slug}"`);
-        }
-      } catch (err) {
-        console.error(`[HotelDetailClient] ❌ Fatal error for slug="${slug}":`, err.message);
-        console.error(`[HotelDetailClient] Stack:`, err.stack);
-        if (!cancelled) {
-          setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.");
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchAll();
-    return () => { cancelled = true; };
-  }, [slug]);
-
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
   }, []);
@@ -183,55 +111,7 @@ export default function HotelDetailClient({ slug }) {
     }, 100);
   }, []);
 
-  // ── Loading state ────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="bg-gray-200 rounded-xl h-[300px] md:h-[400px]" />
-          <div className="space-y-3">
-            <div className="h-8 bg-gray-200 rounded w-1/2" />
-            <div className="h-4 bg-gray-200 rounded w-3/4" />
-            <div className="h-4 bg-gray-200 rounded w-1/4" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-xl" />
-              ))}
-            </div>
-            <div className="h-96 bg-gray-200 rounded-xl" />
-          </div>
-        </div>
-        <p className="text-center text-gray-400 text-sm mt-4">Đang tải thông tin khách sạn...</p>
-      </div>
-    );
-  }
-
-  // ── Error state ──────────────────────────────────────────
-  if (error || !hotel) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-            <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Không thể tải dữ liệu</h2>
-          <p className="text-gray-500 text-sm mb-6">{error || "Khách sạn không tồn tại."}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="rounded-lg bg-primary text-white font-medium px-6 py-2.5 hover:bg-primary-dark transition-colors"
-          >
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Normal render ────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────
   const hasMap = hotel.map?.lat && hotel.map?.lng;
 
   return (
@@ -289,24 +169,16 @@ export default function HotelDetailClient({ slug }) {
             {/* Info Badges */}
             <div className="flex flex-wrap gap-2 mb-6">
               {hotel.starRating > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-yellow-50 border border-yellow-200 px-3 py-1.5 text-xs font-medium text-yellow-700">
-                  ⭐ {hotel.starRating} sao
-                </span>
+                <Badge variant="warning">⭐ {hotel.starRating} sao</Badge>
               )}
               {hotel.address?.city && (
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
-                  📍 {hotel.address.city}
-                </span>
+                <Badge variant="default">📍 {hotel.address.city}</Badge>
               )}
               {avgRating > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700">
-                  🏆 {avgRating.toFixed(1)} ({totalRating} đánh giá)
-                </span>
+                <Badge variant="info">🏆 {avgRating.toFixed(1)} ({totalRating} đánh giá)</Badge>
               )}
               {lowestPrice > 0 && (
-                <span className="inline-flex items-center gap-1.5 rounded-xl bg-green-50 border border-green-200 px-3 py-1.5 text-xs font-medium text-green-700">
-                  💰 Từ {formatCurrency(lowestPrice, "VND")}/đêm
-                </span>
+                <Badge variant="success">💰 Từ {formatCurrency(lowestPrice, "VND")}/đêm</Badge>
               )}
             </div>
 
@@ -381,6 +253,7 @@ export default function HotelDetailClient({ slug }) {
               )}
               {activeTab === "amenities" && <AmenitiesPanel hotel={hotel} />}
               {activeTab === "policies" && <PoliciesPanel hotel={hotel} />}
+              {activeTab === "location" && <LocationPanel hotel={hotel} />}
             </div>
 
             {/* Related Hotels */}
@@ -409,9 +282,9 @@ export default function HotelDetailClient({ slug }) {
                       <div className="p-4">
                         <h4 className="font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">{h.name}</h4>
                         <p className="text-sm text-gray-500 mt-1 line-clamp-1">{h.address?.city || ""}</p>
-                        {h.pricing?.basePrice && (
+                        {(h.lowestPrice || h.pricing?.basePrice) > 0 && (
                           <p className="mt-2 text-sm font-semibold text-primary">
-                            Từ {formatCurrency(h.pricing.basePrice, h.pricing.currency || "VND")}/đêm
+                            Từ {formatCurrency(h.lowestPrice || h.pricing.basePrice, "VND")}/đêm
                           </p>
                         )}
                       </div>

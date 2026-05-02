@@ -2,18 +2,20 @@
  * AmenitiesPanel — Hiển thị toàn bộ tiện nghi khách sạn dạng grid.
  * @param {{ hotel: Object }} props
  */
+import Card from "@/components/shared/Card";
+import SectionHeading from "@/components/shared/SectionHeading";
+
 export default function AmenitiesPanel({ hotel }) {
   const amenities = hotel.amenities || [];
 
   if (amenities.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
+      <Card className="p-10 text-center text-muted">
         <p>Chưa có thông tin tiện nghi.</p>
-      </div>
+      </Card>
     );
   }
 
-  // Group amenities by category (simple heuristic)
   const categories = {
     "Tiện nghi chung": [],
     "Giải trí": [],
@@ -44,14 +46,14 @@ export default function AmenitiesPanel({ hotel }) {
     <div className="space-y-6">
       {Object.entries(categories).map(([cat, items]) =>
         items.length > 0 ? (
-          <div key={cat} className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              {cat === "Tiện nghi chung" && "🏠"}
-              {cat === "Giải trí" && "🎯"}
-              {cat === "Dịch vụ" && "🛎️"}
-              {cat === "Khác" && "📋"}
+          <Card key={cat}>
+            <SectionHeading>
+              {cat === "Tiện nghi chung" && "🏠 "}
+              {cat === "Giải trí" && "🎯 "}
+              {cat === "Dịch vụ" && "🛎️ "}
+              {cat === "Khác" && "📋 "}
               {cat}
-            </h3>
+            </SectionHeading>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {items.map((amenity, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm text-gray-700 p-2 rounded-lg bg-gray-50">
@@ -62,7 +64,7 @@ export default function AmenitiesPanel({ hotel }) {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         ) : null
       )}
     </div>

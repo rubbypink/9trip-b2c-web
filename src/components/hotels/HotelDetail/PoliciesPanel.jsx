@@ -2,6 +2,9 @@
  * PoliciesPanel — Chính sách khách sạn: check-in/out, hủy phòng, trẻ em, thú cưng, thuế.
  * @param {{ hotel: Object }} props
  */
+import Card from "@/components/shared/Card";
+import SectionHeading from "@/components/shared/SectionHeading";
+
 export default function PoliciesPanel({ hotel }) {
   const policies = hotel.policies || {};
   const sections = [
@@ -18,9 +21,9 @@ export default function PoliciesPanel({ hotel }) {
 
   if (!hasAnyPolicy) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
+      <Card className="p-10 text-center text-muted">
         <p>Chưa có thông tin chính sách.</p>
-      </div>
+      </Card>
     );
   }
 
@@ -30,16 +33,16 @@ export default function PoliciesPanel({ hotel }) {
         const content = policies[section.key];
         if (!content) return null;
         return (
-          <div key={section.key} className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <Card key={section.key}>
+            <SectionHeading>
               <span>{section.icon}</span>
               {section.label}
-            </h3>
+            </SectionHeading>
             <div
               className="prose max-w-none text-gray-700 text-sm"
               dangerouslySetInnerHTML={{ __html: content }}
             />
-          </div>
+          </Card>
         );
       })}
     </div>

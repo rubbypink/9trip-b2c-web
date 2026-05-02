@@ -1,4 +1,5 @@
 import ReviewCard from "@/components/shared/ReviewCard";
+import Card from "@/components/shared/Card";
 
 /**
  * ReviewsPanel — Danh sách đánh giá + breakdown.
@@ -7,20 +8,20 @@ import ReviewCard from "@/components/shared/ReviewCard";
 export default function ReviewsPanel({ reviews = [], avgRating = 0, totalRating = 0 }) {
   if (reviews.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
+      <Card className="p-10 text-center text-muted">
         <svg className="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        <p className="font-medium text-gray-700">Chưa có đánh giá</p>
-        <p className="text-sm text-gray-400 mt-1">Hãy là người đầu tiên đánh giá khách sạn này.</p>
-      </div>
+        <p className="font-medium text-foreground">Chưa có đánh giá</p>
+        <p className="text-sm text-muted-foreground mt-1">Hãy là người đầu tiên đánh giá khách sạn này.</p>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Rating Summary */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <Card>
         <div className="flex items-center gap-6">
           <div className="text-center">
             <div className="text-4xl font-bold text-primary">{avgRating.toFixed(1)}</div>
@@ -42,7 +43,7 @@ export default function ReviewsPanel({ reviews = [], avgRating = 0, totalRating 
             })}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Review List */}
       <div className="space-y-4">

@@ -70,7 +70,7 @@ function TourSearchForm({ locations }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        // TODO: Navigate to /search page with params
+        // Navigate to /hotels listing page
       }}
       className="space-y-4"
     >

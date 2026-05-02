@@ -1,117 +1,82 @@
 @import 'tailwindcss';
 
-/* ─── 9Trip Design Tokens ─────────────────────────────────────────── */
-@theme inline {
-	--color-primary: #3b82f6;
-	--color-primary-dark: #2563eb;
-	--color-primary-light: #60a5fa;
-	--color-secondary: #f59e0b;
-	--color-secondary-dark: #d97706;
-	--color-accent: #10b981;
-	--color-background: #ffffff;
-	--color-foreground: #111827;
-	--color-muted: #6b7280;
-	--color-border: #e5e7eb;
-	--font-sans: var(--font-roboto), Roboto, Arial, sans-serif;
-	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+/* ─── 9Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
+@theme {
+  --color-primary: oklch(62% 0.19 255);
+  --color-primary-dark: oklch(55% 0.19 255);
+  --color-primary-light: oklch(70% 0.15 250);
+  --color-primary-foreground: oklch(98% 0.01 255);
+  --color-secondary: oklch(78% 0.16 82);
+  --color-secondary-dark: oklch(70% 0.16 72);
+  --color-secondary-foreground: oklch(98% 0.01 82);
+  --color-accent: oklch(62% 0.15 160);
+  --color-accent-foreground: oklch(98% 0.01 160);
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(20% 0.02 264);
+  --color-muted: oklch(55% 0.02 264);
+  --color-muted-foreground: oklch(46% 0.02 264);
+  --color-border: oklch(91% 0.01 264);
+  --color-ring: oklch(62% 0.19 255);
+  --color-ring-offset: oklch(100% 0 0);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(20% 0.02 264);
+  --color-destructive: oklch(53% 0.22 27);
+  --color-destructive-foreground: oklch(98% 0.01 264);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --font-sans: var(--font-roboto), Roboto, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-in-up: fade-in-up 0.4s ease-out;
+  --animate-scale-in: scale-in 0.3s ease-out;
+  --animate-slide-in-left: slide-in-left 0.4s ease-out;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
 }
 
-/* ─── Base Styles ─────────────────────────────────────────────────── */
-body {
-	background: var(--color-background);
-	color: var(--color-foreground);
-	font-family: var(--font-sans);
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
-/* ─── Scrollbar ───────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-	width: 8px;
-}
-::-webkit-scrollbar-track {
-	background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-	background: #94a3b8;
-	border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-	background: #64748b;
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-/* ─── Animations ──────────────────────────────────────────────────── */
-@keyframes fade-in {
-	from { opacity: 0; }
-	to { opacity: 1; }
-}
-
-@keyframes fade-in-up {
-	from {
-		opacity: 0;
-		transform: translateY(16px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes scale-in {
-	from {
-		opacity: 0;
-		transform: scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
-}
-
-@keyframes slide-in-left {
-	from {
-		opacity: 0;
-		transform: translateX(-20px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-@keyframes slide-in-right {
-	from {
-		opacity: 0;
-		transform: translateX(20px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-.animate-fade-in {
-	animation: fade-in 0.5s ease-out;
-}
-
-.animate-fade-in-up {
-	animation: fade-in-up 0.5s ease-out;
-}
-
-.animate-scale-in {
-	animation: scale-in 0.5s ease-out;
-}
-
-.animate-slide-in-left {
-	animation: slide-in-left 0.5s ease-out;
-}
-
-.animate-slide-in-right {
-	animation: slide-in-right 0.5s ease-out;
-}
-
-/* ─── Focus Ring ──────────────────────────────────────────────────── */
 *:focus-visible {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 2px;
+  outline: 2px solid oklch(62% 0.19 255);
+  outline-offset: 2px;
 }

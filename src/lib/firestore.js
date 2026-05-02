@@ -6,7 +6,6 @@ import { db } from './firebase';
 
 const toursCol = collection(db, 'tours');
 const hotelsCol = collection(db, 'hotels');
-const roomsCol = collection(db, 'rooms');
 const activitiesCol = collection(db, 'activities');
 const carsCol = collection(db, 'cars');
 const locationsCol = collection(db, 'locations');
@@ -482,28 +481,6 @@ export async function getFeaturedHotels(count = 6) {
 }
 
 /**
- * @deprecated v4 — rooms là embedded field trong hotel document (`hotel.rooms`).
- *   Không còn collection `rooms/` riêng biệt. Dùng hotel.rooms thay thế.
- *   Xem: memory-bank/schemas/hotels.schema.md (v4.0.0)
- * Fetch rooms for a specific hotel from top-level rooms collection (DEPRECATED, use hotel.rooms).
- * @param {string} hotelId
- * @returns {Promise<Object[]>}
- */
-export async function getRoomsByHotel(hotelId) {
-  try {
-    const q = query(roomsCol, where('hotelId', '==', hotelId));
-    const snap = await getDocs(q);
-    const rooms = snap.docs.map((d) => serializeDoc(d));
-    // Sort client-side by price ascending (avoids composite index)
-    rooms.sort((a, b) => (a.price || 0) - (b.price || 0));
-    return rooms;
-  } catch (error) {
-    console.error('[getRoomsByHotel] Error:', error.message);
-    return [];
-  }
-}
-
-/**
  * Fetch a single hotel by slug.
  * @param {string} slug - Hotel URL slug
  * @returns {Promise<{hotel: Object|null}>}
@@ -560,54 +537,6 @@ export async function getRelatedHotels(currentSlug, locationId, count = 3) {
 	} catch (error) {
 		console.error('[getRelatedHotels] Error:', error.message);
 		return { hotels: [] };
-	}
-}
-
-/**
- * @deprecated v4 — Dùng getHotelPriceSchedule() + resolveRoomPricing() thay thế.
- *   Pricing đã tách sang collection `hotel_price_schedules`.
- *   Xem: memory-bank/schemas/hotel_price_schedules.schema.md
- * Fetch pricing tiers for a specific room (subcollection: rooms/{roomId}/roomPricing, DEPRECATED).
- * @param {string} roomId
- * @returns {Promise<Object[]>}
- */
-export async function getRoomPricing(roomId) {
-	try {
-		const pricingCol = collection(db, 'rooms', roomId, 'roomPricing');
-		const q = query(pricingCol, where('isActive', '==', true), orderBy('sortOrder', 'asc'));
-		const snap = await getDocs(q);
-		return snap.docs.map((d) => serializeDoc(d));
-	} catch (error) {
-		console.error('[getRoomPricing] Error:', error.message);
-		return [];
-	}
-}
-
-/**
- * @deprecated v4 — Dùng getHotelPriceSchedule() + buildRoomPricingTable() thay thế.
- *   Pricing đã tách sang collection `hotel_price_schedules`.
- *   Xem: memory-bank/schemas/hotel_price_schedules.schema.md
- * Fetch tổng hợp pricing cho hotel từ rooms/roomPricing (DEPRECATED, use hotel_price_schedules).
- * @param {string} hotelId
- * @returns {Promise<Object[]>} Array of rooms với pricingTiers embedded
- */
-export async function getHotelPricing(hotelId) {
-	try {
-		// Lấy tất cả rooms
-		const rooms = await getRoomsByHotel(hotelId);
-		if (rooms.length === 0) return [];
-
-		// Lấy pricing tiers cho mỗi room song song
-		const roomsWithPricing = await Promise.all(
-			rooms.map(async (room) => {
-				const pricingTiers = await getRoomPricing(room.id);
-				return { ...room, pricingTiers };
-			})
-		);
-		return roomsWithPricing;
-	} catch (error) {
-		console.error('[getHotelPricing] Error:', error.message);
-		return [];
 	}
 }
 

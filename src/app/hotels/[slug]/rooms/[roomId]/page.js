@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getHotelBySlug } from "@/lib/firestore";
+import { getHotelBySlug, getHotelPriceSchedule, resolveRoomPricing } from "@/lib/firestore";
 import { resolveDocImages } from "@/lib/storage";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
@@ -73,17 +73,33 @@ export default async function RoomDetailPage({ params }) {
   // Resolve room images (featuredImage + gallery in room, handled by resolveDocImages)
   const room = await resolveDocImages(rawRoom);
 
-  // Pricing is now managed via HotelDetailClient + hotel_price_schedules collection
-  const pricingTiers = [];
+  // v4: Fetch pricing from hotel_price_schedules
+  const priceSchedule = await getHotelPriceSchedule(hotel.id);
+  const today = new Date().toISOString().split("T")[0];
+  const pricingEntries = priceSchedule
+    ? resolveRoomPricing(priceSchedule, rawRoom.id, today)
+    : [];
+
+  const pricingTiers = pricingEntries.map((entry) => ({
+    id: entry.periodKey,
+    rateType: entry.rateType,
+    name: entry.rateType,
+    sellPrice: entry.sellPrice,
+    costPrice: entry.costPrice,
+    supplier: entry.supplier,
+    startDate: entry.startDate,
+    endDate: entry.endDate,
+  }));
+
+  const lowestSchedulePrice = pricingEntries.length > 0
+    ? pricingEntries[0].sellPrice
+    : 0;
+  const displayPrice = lowestSchedulePrice || hotel?.pricing?.basePrice || 0;
 
   const allImages = room.featuredImage
     ? [room.featuredImage, ...(room.gallery || [])]
     : (room.gallery || []);
-  const displayPrice = room.promoPrice || room.price || 0;
-  const originalPrice = room.price || 0;
-  const hasDiscount = room.promoPrice && room.promoPrice < originalPrice;
-  const discountPercent = hasDiscount ? Math.round((1 - room.promoPrice / originalPrice) * 100) : 0;
-  const currency = room.currency || "VND";
+  const currency = "VND";
 
   // JSON-LD schema
   const jsonLd = {
@@ -155,16 +171,6 @@ export default async function RoomDetailPage({ params }) {
 
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
-              {room.promoLabel && (
-                <span className="inline-flex items-center rounded-lg bg-red-50 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600">
-                  🏷️ {room.promoLabel}
-                </span>
-              )}
-              {discountPercent > 0 && !room.promoLabel && (
-                <span className="inline-flex items-center rounded-lg bg-red-50 border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600">
-                  🔥 Giảm {discountPercent}%
-                </span>
-              )}
               {room.maxAdults > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
                   👤 {room.maxAdults} người lớn{room.maxChildren > 0 ? ` + ${room.maxChildren} trẻ em` : ""}
@@ -210,59 +216,29 @@ export default async function RoomDetailPage({ params }) {
             {/* Pricing Tiers */}
             {pricingTiers.length > 0 && (
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Bảng giá chi tiết</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Bảng giá ({today})</h3>
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
                         <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói giá</th>
-                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Người lớn</th>
-                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Trẻ em</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Giá bán</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Nhà cung cấp</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {pricingTiers.map((tier) => (
                         <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">
-                            {tier.name}
-                            {tier.promoLabel && (
-                              <span className="ml-2 text-xs font-semibold text-red-500">{tier.promoLabel}</span>
-                            )}
-                          </td>
+                          <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
                           <td className="px-4 py-3 text-right font-semibold text-blue-600">
-                            {tier.promoPrice > 0 ? (
-                              <>
-                                <span className="line-through text-gray-400 mr-1">
-                                  {formatCurrency(tier.adultPrice, tier.currency || currency)}
-                                </span>
-                                {formatCurrency(tier.promoPrice, tier.currency || currency)}
-                              </>
-                            ) : (
-                              tier.adultPrice > 0 ? formatCurrency(tier.adultPrice, tier.currency || currency) : "Liên hệ"
-                            )}
+                            {tier.sellPrice > 0 ? formatCurrency(tier.sellPrice, currency) : "Liên hệ"}
                           </td>
-                          <td className="px-4 py-3 text-right text-gray-500">
-                            {tier.childPrice != null
-                              ? formatCurrency(tier.childPrice, tier.currency || currency)
-                              : "—"}
-                          </td>
+                          <td className="px-4 py-3 text-right text-gray-500 text-xs">{tier.supplier || "—"}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-                {pricingTiers[0]?.included?.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-xs font-medium text-gray-500 mb-1">Lợi ích gói giá:</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {pricingTiers[0].included.map((item, idx) => (
-                        <span key={idx} className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
-                          ✅ {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -290,33 +266,15 @@ export default async function RoomDetailPage({ params }) {
               <div className="p-5 border-b border-gray-100">
                 <div className="text-sm text-gray-500 mb-1">Giá từ</div>
                 <div className="flex items-baseline gap-2">
-                  {displayPrice > 0 && (
-                    <>
-                      {hasDiscount && (
-                        <span className="text-sm text-gray-400 line-through">
-                          {formatCurrency(originalPrice, currency)}
-                        </span>
-                      )}
-                      <span className="text-2xl font-bold text-gray-900">
-                        {formatCurrency(displayPrice, currency)}
-                      </span>
-                      <span className="text-sm text-gray-500">/ đêm</span>
-                    </>
-                  )}
-                  {displayPrice === 0 && (
+                  {displayPrice > 0 ? (
+                    <span className="text-2xl font-bold text-gray-900">
+                      {formatCurrency(displayPrice, currency)}
+                    </span>
+                  ) : (
                     <span className="text-2xl font-bold text-gray-900">Liên hệ</span>
                   )}
+                  <span className="text-sm text-gray-500">/ đêm</span>
                 </div>
-                {room.promoLabel && (
-                  <span className="inline-block mt-1.5 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                    🏷️ {room.promoLabel}
-                  </span>
-                )}
-                {discountPercent > 0 && !room.promoLabel && (
-                  <span className="inline-block mt-1.5 text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                    Tiết kiệm {formatCurrency(originalPrice - displayPrice, currency)}
-                  </span>
-                )}
               </div>
 
               <div className="p-5 space-y-4">

@@ -39,6 +39,21 @@ export default async function HotelsPage({ searchParams }) {
   // Enrich with lowest prices from hotel_price_schedules
   hotels = await enrichHotelsWithLowestPrices(hotels);
 
+  // Post-enrichment price filtering (v4: uses lowestPrice)
+  if (filters.minPrice != null) {
+    hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) >= filters.minPrice);
+  }
+  if (filters.maxPrice != null) {
+    hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) <= filters.maxPrice);
+  }
+
+  // Post-enrichment price sorting (v4: uses lowestPrice)
+  if (filters.sortBy === 'price_asc') {
+    hotels.sort((a, b) => (a.lowestPrice || a.pricing?.basePrice || 0) - (b.lowestPrice || b.pricing?.basePrice || 0));
+  } else if (filters.sortBy === 'price_desc') {
+    hotels.sort((a, b) => (b.lowestPrice || b.pricing?.basePrice || 0) - (a.lowestPrice || a.pricing?.basePrice || 0));
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
       <Breadcrumb
