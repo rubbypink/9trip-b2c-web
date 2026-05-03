@@ -29,7 +29,7 @@ export default function TourTabs({ tabs = [], activeTab, onTabChange, className 
               className={cn(
                 "flex-shrink-0 inline-flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-all",
                 isActive
-                  ? "border-primary text-primary"
+                  ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               )}
             >

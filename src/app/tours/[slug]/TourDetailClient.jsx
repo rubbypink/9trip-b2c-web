@@ -55,31 +55,30 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
   return (
     <div className="space-y-6">
       {/* Product Info Badges */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {tour.duration?.days > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
-            🕐 {tour.duration.days} ngày {tour.duration.nights || tour.duration.days - 1 || 0} đêm
-          </span>
+          <Badge
+            icon="/icons/time.svg"
+            label="Thời gian"
+            value={`${tour.duration.days} ngày ${tour.duration.nights || tour.duration.days - 1 || 0} đêm`}
+          />
         )}
         {tour.locationName && (
-          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
-            📍 {tour.locationName}
-          </span>
+          <Badge icon="/icons/location.svg" label="Địa điểm" value={tour.locationName} />
         )}
         {tour.departurePoint && (
-          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
-            🚩 Xuất phát: {tour.departurePoint}
-          </span>
+          <Badge icon="/icons/flag.svg" label="Xuất phát" value={tour.departurePoint} />
         )}
         {tour.transport && (
-          <span className="inline-flex items-center gap-1.5 rounded-xl bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">
-            🚌 {tour.transport}
-          </span>
+          <Badge icon="/icons/truck.svg" label="Phương tiện" value={tour.transport} />
         )}
         {(tour.pricing?.discountPercent || tour.discountPercent) > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">
-            🏷️ Giảm {tour.pricing?.discountPercent || tour.discountPercent}%
-          </span>
+          <Badge
+            icon="/icons/ticket.svg"
+            label="Ưu đãi"
+            value={`Giảm ${tour.pricing?.discountPercent || tour.discountPercent}%`}
+            highlight
+          />
         )}
       </div>
 
@@ -87,7 +86,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
       <TourTabs tabs={TABS} activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Tab Content */}
-      <div className="min-h-[300px]">
+      <div className="min-h-[300px] pt-6">
         {activeTab === "overview" && (
           <div className="space-y-6">
             {/* Description */}
@@ -301,6 +300,35 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Internal Sub-components ──────────────────────────────────────────
+
+/**
+ * Badge — Info badge with icon for product meta.
+ * @param {{ icon?: string, label: string, value: string, highlight?: boolean }} props
+ */
+function Badge({ icon, label, value, highlight }) {
+  return (
+    <div
+      className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium ${
+        highlight
+          ? "bg-red-50 text-red-600 border border-red-200"
+          : "bg-gray-50 text-gray-600 border border-gray-200"
+      }`}
+    >
+      {icon && (
+        <span className="flex-shrink-0 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px]">
+          {label === "Thời gian" && "🕐"}
+          {label === "Địa điểm" && "📍"}
+          {label === "Xuất phát" && "🚩"}
+          {label === "Phương tiện" && "🚌"}
+          {label === "Ưu đãi" && "🏷️"}
+        </span>
+      )}
+      <span>{value}</span>
     </div>
   );
 }
