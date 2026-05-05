@@ -3,6 +3,7 @@ import Image from "next/image";
 import StarRating from "./StarRating";
 import PriceDisplay from "./PriceDisplay";
 import Badge from "@/components/shared/Badge";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 /**
  * HotelCard - Card hiển thị khách sạn dạng grid.
@@ -27,6 +28,8 @@ export default function HotelCard({ hotel, item }) {
           alt={data.name || data.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {data.isFeatured && (

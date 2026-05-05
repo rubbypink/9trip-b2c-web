@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import StarRating from "./StarRating";
 import PriceDisplay from "./PriceDisplay";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 export default function ActivityCard({ activity, item }) {
   const data = activity || item;
@@ -17,6 +18,8 @@ export default function ActivityCard({ activity, item }) {
           alt={data.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {data.pricing?.discountPercent > 0 && (

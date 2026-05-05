@@ -4,6 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import PriceDisplay from "./PriceDisplay";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 export default function RentalCard({ rental, item }) {
   const data = rental || item;
@@ -15,6 +16,8 @@ export default function RentalCard({ rental, item }) {
           alt={data.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] font-bold px-2 py-1 rounded">

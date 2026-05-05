@@ -40,3 +40,10 @@ export const SITE_DESCRIPTION =
 /** Từ khóa SEO */
 export const SITE_KEYWORDS =
   "tour du lịch, đặt khách sạn, travel, booking, vinpearl, phú quốc, 9trip";
+
+/** Số lượng item mỗi trang cho listing */
+export const PAGE_SIZE = 20;
+
+/** Blur placeholder cho next/image (gray-200 SVG) */
+export const BLUR_DATA_URL =
+  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMzAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PC9zdmc+";

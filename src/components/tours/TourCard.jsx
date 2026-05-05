@@ -3,6 +3,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import StarRating from "@/components/shared/StarRating";
 import PriceDisplay from "@/components/shared/PriceDisplay";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 /**
  * TourCard — card tour cho grid/list view.
@@ -49,6 +50,8 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
             alt={title}
             fill
             className="object-cover"
+            placeholder="blur"
+            blurDataURL={BLUR_DATA_URL}
             sizes="256px"
           />
           {isFeatured && (
@@ -93,6 +96,8 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
           alt={title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {isFeatured && (

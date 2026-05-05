@@ -311,11 +311,12 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
  * @returns {Promise<{hotels: Object[], lastVisible: Object|null}>}
  */
 export async function searchHotels(filters = {}) {
-  const { locationId, starRating, minPrice, maxPrice, amenities, sortBy = 'newest', pageSize = 12, cursor } = filters;
+  const { locationId, starRating, minPrice, maxPrice, amenities, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
+    const fetchLimit = page > 1 ? (page + 1) * pageSize : pageSize * 2;
     let q = hotelsCol();
     if (locationId) q = q.where('address.cityId', '==', locationId);
-    q = q.orderBy('createdAt', 'desc').limit(pageSize * 2);
+    q = q.orderBy('createdAt', 'desc').limit(fetchLimit);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
     let hotels = serializeDocs(snap);
@@ -346,7 +347,8 @@ export async function searchHotels(filters = {}) {
       case 'rating': hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0)); break;
     }
 
-    hotels = hotels.slice(0, pageSize);
+    const startIdx = (page - 1) * pageSize;
+    hotels = hotels.slice(startIdx, startIdx + pageSize);
     return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchHotels] Error:', error.message);
@@ -356,6 +358,24 @@ export async function searchHotels(filters = {}) {
     } catch {
       return { hotels: [], lastVisible: null };
     }
+  }
+}
+
+/**
+ * Count hotels (by locationId only — in-memory filters not applied).
+ * @param {{ locationId?: string }} filters
+ * @returns {Promise<number>}
+ */
+export async function countHotels(filters = {}) {
+  const { locationId } = filters;
+  try {
+    let q = hotelsCol();
+    if (locationId) q = q.where('address.cityId', '==', locationId);
+    const snap = await q.count().get();
+    return snap.data().count;
+  } catch (error) {
+    console.error('[countHotels] Error:', error.message);
+    return 0;
   }
 }
 
@@ -717,8 +737,9 @@ export async function getRelatedActivities(slug, count = 4) {
  * @returns {Promise<{cars: Object[], lastVisible: Object|null}>}
  */
 export async function searchCars(filters = {}) {
-  const { carType, transmission, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
+  const { carType, transmission, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
+    const limitVal = page > 1 ? page * pageSize : pageSize;
     let q = carsCol();
     if (carType) q = q.where('carType', '==', carType);
     if (transmission) q = q.where('transmission', '==', transmission);
@@ -727,12 +748,14 @@ export async function searchCars(filters = {}) {
       case 'price_desc': q = q.orderBy('pricing.basePrice', 'desc'); break;
       default: q = q.orderBy('createdAt', 'desc');
     }
-    q = q.limit(pageSize);
+    q = q.limit(limitVal);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
     let cars = serializeDocs(snap);
     if (minPrice != null && minPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice <= Number(maxPrice));
+    const startIdx = (page - 1) * pageSize;
+    cars = cars.slice(startIdx, startIdx + pageSize);
     return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchCars] Error:', error.message);
@@ -745,6 +768,25 @@ export async function searchCars(filters = {}) {
   }
 }
 
+/**
+ * Count cars (by carType/transmission only).
+ * @param {{ carType?: string, transmission?: string }} filters
+ * @returns {Promise<number>}
+ */
+export async function countCars(filters = {}) {
+  const { carType, transmission } = filters;
+  try {
+    let q = carsCol();
+    if (carType) q = q.where('carType', '==', carType);
+    if (transmission) q = q.where('transmission', '==', transmission);
+    const snap = await q.count().get();
+    return snap.data().count;
+  } catch (error) {
+    console.error('[countCars] Error:', error.message);
+    return 0;
+  }
+}
+
 // ─── Rentals ─────────────────────────────────────────────────────────
 
 /**
@@ -753,8 +795,9 @@ export async function searchCars(filters = {}) {
  * @returns {Promise<{rentals: Object[], lastVisible: Object|null}>}
  */
 export async function searchRentals(filters = {}) {
-  const { type, locationId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, cursor } = filters;
+  const { type, locationId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
+    const limitVal = page > 1 ? page * pageSize : pageSize;
     let q = rentalsCol();
     if (type) q = q.where('type', '==', type);
     if (locationId) q = q.where('locationId', '==', locationId);
@@ -763,12 +806,14 @@ export async function searchRentals(filters = {}) {
       case 'price_desc': q = q.orderBy('pricing.basePrice', 'desc'); break;
       default: q = q.orderBy('createdAt', 'desc');
     }
-    q = q.limit(pageSize);
+    q = q.limit(limitVal);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
     let rentals = serializeDocs(snap);
     if (minPrice != null && minPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice <= Number(maxPrice));
+    const startIdx = (page - 1) * pageSize;
+    rentals = rentals.slice(startIdx, startIdx + pageSize);
     return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchRentals] Error:', error.message);
@@ -778,6 +823,25 @@ export async function searchRentals(filters = {}) {
     } catch {
       return { rentals: [], lastVisible: null };
     }
+  }
+}
+
+/**
+ * Count rentals (by type/locationId only).
+ * @param {{ type?: string, locationId?: string }} filters
+ * @returns {Promise<number>}
+ */
+export async function countRentals(filters = {}) {
+  const { type, locationId } = filters;
+  try {
+    let q = rentalsCol();
+    if (type) q = q.where('type', '==', type);
+    if (locationId) q = q.where('locationId', '==', locationId);
+    const snap = await q.count().get();
+    return snap.data().count;
+  } catch (error) {
+    console.error('[countRentals] Error:', error.message);
+    return 0;
   }
 }
 

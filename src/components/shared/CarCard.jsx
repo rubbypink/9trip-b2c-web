@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import PriceDisplay from "./PriceDisplay";
 import StarRating from "./StarRating";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 export default function CarCard({ car, item }) {
   const data = car || item;
@@ -16,6 +17,8 @@ export default function CarCard({ car, item }) {
           alt={data.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          placeholder="blur"
+          blurDataURL={BLUR_DATA_URL}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold px-2 py-1 rounded">

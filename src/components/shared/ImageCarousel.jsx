@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
+import { BLUR_DATA_URL } from "@/lib/constants";
 
 /**
  * ImageCarousel — Horizontal snap-scroll carousel with dot indicators,
@@ -118,7 +119,11 @@ export default function ImageCarousel({
                 alt={`${alt} ${idx + 1}`}
                 fill
                 className="object-cover"
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
                 priority={idx === 0}
+                fetchPriority={idx === 0 ? "high" : "auto"}
+                loading={idx === 0 ? undefined : "lazy"}
                 sizes="(max-width: 768px) 100vw, 90vw"
               />
             </button>
@@ -229,6 +234,8 @@ export default function ImageCarousel({
               alt={`${alt} ${currentIndex + 1}`}
               fill
               className="object-contain"
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
               sizes="90vw"
               priority
             />

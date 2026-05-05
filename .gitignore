@@ -9,7 +9,11 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+/.github/
+/.opencode/
+/.agents/
+.report/
+/.temp/
 # testing
 /coverage
 
@@ -38,7 +42,6 @@ yarn-error.log*
 /_reference_wp
 /.vscode
 /memory-bank
-/.agents
 /.clinerules
 firebase-debug.log
 9trip-b2c-web.code-workspace
@@ -50,4 +53,3 @@ tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env*.local

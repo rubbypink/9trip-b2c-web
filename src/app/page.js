@@ -1,4 +1,4 @@
-import { SITE, SITE_DESCRIPTION } from "@/lib/constants";
+import { SITE, SITE_DESCRIPTION, PAGE_SIZE } from "@/lib/constants";
 import { searchTours, countTours, searchHotels, searchActivities } from "@/lib/firestore-admin";
 import { getStorageImageUrl } from "@/lib/storage-admin";
 import HeroBanner from "@/components/home/HeroBanner";
@@ -23,73 +23,6 @@ export const metadata = {
   },
   alternates: { canonical: "/" },
 };
-
-const PAGE_SIZE = 20;
-
-/**
- * Resolve only the featuredImage field to a HTTPS URL.
- * Skips full gallery/rooms resolution for preload data.
- */
-async function resolveFeaturedImage(doc) {
-  if (!doc) return doc;
-  const img = doc.featuredImage;
-  if (typeof img === 'string') {
-    doc.featuredImage = (await getStorageImageUrl(img)) || img;
-  }
-  return doc;
-}
-
-/**
- * Strip a tour doc to essential fields for preload cache.
- */
-function stripTour(t) {
-  return {
-    id: t.id,
-    slug: t.slug,
-    title: t.title,
-    featuredImage: t.featuredImage,
-    locationName: t.locationName,
-    excerpt: t.excerpt || '',
-    duration: t.duration || {},
-    pricing: { adultPrice: t.pricing?.adultPrice || 0, childPrice: t.pricing?.childPrice || 0, currency: t.pricing?.currency || 'VND' },
-    ratingAverage: t.ratingAverage || 0,
-    ratingCount: t.ratingCount || 0,
-  };
-}
-
-/**
- * Strip a hotel doc to essential fields for preload cache.
- */
-function stripHotel(h) {
-  return {
-    id: h.id,
-    slug: h.slug,
-    name: h.name || h.title,
-    featuredImage: h.featuredImage,
-    locationName: h.locationName || h.address?.city || '',
-    starRating: h.starRating || 0,
-    pricing: { basePrice: h.lowestPrice || h.pricing?.basePrice || 0, currency: 'VND' },
-    ratingAverage: h.ratingAverage || h.rating?.average || 0,
-    ratingCount: h.ratingCount || h.rating?.count || 0,
-  };
-}
-
-/**
- * Strip an activity doc to essential fields for preload cache.
- */
-function stripActivity(a) {
-  return {
-    id: a.id,
-    slug: a.slug,
-    title: a.title,
-    featuredImage: a.featuredImage,
-    locationName: a.locationName || '',
-    excerpt: a.excerpt || '',
-    pricing: { basePrice: a.pricing?.basePrice || 0, currency: a.pricing?.currency || 'VND' },
-    ratingAverage: a.ratingAverage || a.rating?.average || 0,
-    ratingCount: a.ratingCount || a.rating?.count || 0,
-  };
-}
 
 async function fetchPage1Data() {
   const emptyFilters = { pageSize: PAGE_SIZE, page: 1, sortBy: 'newest' };
