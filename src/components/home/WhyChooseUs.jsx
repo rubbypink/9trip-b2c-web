@@ -1,5 +1,5 @@
 /**
- * WhyChooseUs / TrustBadges — Section hiển thị các lý do nên chọn 9Trip.
+ * WhyChooseUs / TrustBadges — Section hiển thị các lý do nên chọn 9 Trip.
  * Hiển thị dạng grid với icon, title và description.
  */
 
@@ -53,7 +53,7 @@ export default function WhyChooseUs() {
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Vì sao nên chọn 9Trip?
+            Vì sao nên chọn 9 Trip?
           </h2>
           <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
             Chúng tôi cam kết mang đến trải nghiệm du lịch tốt nhất với dịch vụ chuyên nghiệp

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getTours } from "@/lib/firestore";
+import { getTours } from "@/lib/firestore-admin";
 import { formatCurrency } from "@/lib/utils";
 
 /**

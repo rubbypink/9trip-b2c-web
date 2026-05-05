@@ -1,23 +1,22 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import Badge from "@/components/shared/Badge";
 import { formatCurrency } from "@/lib/utils";
 import { buildRoomPricingTable } from "@/lib/firestore";
 import ImageCarousel from "@/components/shared/ImageCarousel";
+import GoogleMap from "@/components/shared/GoogleMap";
 import { ReviewSummaryCompact, WishlistButton, ShareButton } from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
-
-const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
-const AmenitiesPanel = dynamic(() => import("@/components/hotels/HotelDetail/AmenitiesPanel"));
-const PoliciesPanel = dynamic(() => import("@/components/hotels/HotelDetail/PoliciesPanel"));
-const LocationPanel = dynamic(() => import("@/components/hotels/HotelDetail/LocationPanel"));
-const ReviewsPanel = dynamic(() => import("@/components/hotels/HotelDetail/ReviewsPanel"));
-const WriteReviewForm = dynamic(() => import("@/components/reviews/WriteReviewForm"));
+import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
+import PoliciesPanel from "@/components/hotels/HotelDetail/PoliciesPanel";
+import LocationPanel from "@/components/hotels/HotelDetail/LocationPanel";
+import ReviewsPanel from "@/components/hotels/HotelDetail/ReviewsPanel";
+import WriteReviewForm from "@/components/reviews/WriteReviewForm";
 
 const HOTEL_TABS = [
   { id: "overview", label: "Tổng quan" },
@@ -68,6 +67,7 @@ export default function HotelDetailClient({
 
   const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
   const hasMap = hotelMap?.lat && hotelMap?.lng;
+  const hasAnyBadge = starRating > 0 || !!address?.city || avgRating > 0 || lowestPrice > 0;
 
   // ── Date state (reactive pricing) ────────────────────────
   const [checkIn, setCheckIn] = useState(() => new Date().toISOString().split("T")[0]);
@@ -134,29 +134,6 @@ export default function HotelDetailClient({
   // ── Render ──────────────────────────────────────────────
   return (
     <>
-      {/* JSON-LD structured data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Hotel",
-            name: name,
-            description: excerpt || "",
-            image: featuredImage,
-            url: `/hotels/${slug}`,
-            ...(starRating > 0 && { starRating: { "@type": "Rating", ratingValue: starRating } }),
-            ...(avgRating > 0 && {
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: avgRating,
-                reviewCount: totalRating,
-              },
-            }),
-          })
-        }}
-      />
-
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
@@ -180,7 +157,7 @@ export default function HotelDetailClient({
             </div>
 
             {/* 2. Info Badges */}
-            <div className="flex flex-wrap gap-3">
+            <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
               {starRating > 0 && (
                 <Badge icon="/icons/star.svg" label="Xếp hạng" value={`${starRating} sao`} />
               )}
@@ -294,8 +271,10 @@ export default function HotelDetailClient({
               </div>
 
               <div className="min-h-[300px] pt-6">
-                {activeTab === "overview" && <OverviewPanel hotel={hotel} />}
-                {activeTab === "rooms" && (
+                <div data-tab-panel="overview" className={activeTab === "overview" ? "" : "hidden"}>
+                  <OverviewPanel hotel={hotel} />
+                </div>
+                <div data-tab-panel="rooms" className={activeTab === "rooms" ? "" : "hidden"}>
                   <div data-section="rooms">
                     <RoomsPanel
                       pricingTable={pricingTable}
@@ -305,16 +284,22 @@ export default function HotelDetailClient({
                       nights={nights}
                     />
                   </div>
-                )}
-                {activeTab === "amenities" && <AmenitiesPanel hotel={hotel} />}
-                {activeTab === "reviews" && (
+                </div>
+                <div data-tab-panel="amenities" className={activeTab === "amenities" ? "" : "hidden"}>
+                  <AmenitiesPanel hotel={hotel} />
+                </div>
+                <div data-tab-panel="reviews" className={activeTab === "reviews" ? "" : "hidden"}>
                   <div className="space-y-8">
                     <ReviewsPanel reviews={reviews} avgRating={avgRating} totalRating={totalRating} />
                     <WriteReviewForm serviceId={hotel.id} serviceType="hotel" />
                   </div>
-                )}
-                {activeTab === "policies" && <PoliciesPanel hotel={hotel} />}
-                {activeTab === "location" && <LocationPanel hotel={hotel} />}
+                </div>
+                <div data-tab-panel="policies" className={activeTab === "policies" ? "" : "hidden"}>
+                  <PoliciesPanel hotel={hotel} />
+                </div>
+                <div data-tab-panel="location" className={activeTab === "location" ? "" : "hidden"}>
+                  <LocationPanel hotel={hotel} />
+                </div>
               </div>
             </div>
 
@@ -420,30 +405,4 @@ export default function HotelDetailClient({
   );
 }
 
-// ─── Internal Sub-components ──────────────────────────────────────────
 
-/**
- * Badge — Info badge with icon for product meta.
- * @param {{ icon?: string, label: string, value: string, highlight?: boolean }} props
- */
-function Badge({ icon, label, value, highlight }) {
-  return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium ${
-        highlight
-          ? "bg-red-50 text-red-600 border border-red-200"
-          : "bg-gray-50 text-gray-600 border border-gray-200"
-      }`}
-    >
-      {icon && (
-        <span className="flex-shrink-0 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px]">
-          {label === "Xếp hạng" && "⭐"}
-          {label === "Địa điểm" && "📍"}
-          {label === "Đánh giá" && "🏆"}
-          {label === "Giá" && "💰"}
-        </span>
-      )}
-      <span>{value}</span>
-    </div>
-  );
-}

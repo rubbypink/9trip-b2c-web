@@ -1,0 +1,3 @@
+https://www.booking.com/searchresults.html?ss=Ph%C3%BA+Qu%E1%BB%91c&ssne=Ph%C3%BA+Qu%E1%BB%91c&ssne_untouched=Ph%C3%BA+Qu%E1%BB%91c&checkin=2026-06-11&checkout=2026-06-12&dest_id=-3726177&dest_type=city&order=bayesian_review_score&group_adults=2&req_adults=2&no_rooms=1&group_children=0&req_children=0&age=&req_age=&slp_r_match_to=0&shw_aparth=1&nflt=price%3DVND-900000-4100000-1%3Bpopular_activities%3D302%3Bht_id%3D206%3Breview_score%3D90%3Bht_id%3D204%3Breview_score%3D80%3Bclass%3D4%3Bclass%3D5%3Bdi%3D15809%3Bdi%3D15808%3Bdi%3D15803%3Bdi%3D15807%3Bhotelfacility%3D433
+
+data-testid="title-link"

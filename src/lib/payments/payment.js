@@ -10,7 +10,7 @@ export class PaymentService {
         const tmnCode = process.env.VNPAY_TMN_CODE;
         const secretKey = process.env.VNPAY_HASH_SECRET;
         const vnpUrl = process.env.VNPAY_URL;
-        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/return?gateway=vnpay`;
+        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/webhooks/payment?gateway=vnpay`;
 
         let ipAddr = req.headers.get('x-forwarded-for') || '127.0.0.1';
         let createDate = PaymentHelper.formatVNPayDate(new Date());
@@ -47,8 +47,8 @@ export class PaymentService {
         const secretKey = process.env.MOMO_SECRET_KEY;
         const apiUrl = process.env.MOMO_ENDPOINT;
         
-        const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/return?gateway=momo`;
-        const ipnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/payments/webhook/momo`; // Cấu hình webhook sau
+        const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/webhooks/payment?gateway=momo`;
+        const ipnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/webhooks/payment`;
 
         const requestId = orderData.orderId + new Date().getTime(); // Chống trùng lặp
         const requestType = "captureWallet";
@@ -156,8 +156,8 @@ export class PaymentService {
                 }],
                 application_context: {
                     // Cấu hình trang trả về khi khách thanh toán xong hoặc hủy
-                    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/return?gateway=paypal`,
-                    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/return?gateway=paypal&status=cancel`
+                    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/webhooks/payment?gateway=paypal`,
+                    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/webhooks/payment?gateway=paypal&status=cancel`
                 }
             })
         });

@@ -7,7 +7,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { getBookingById } from "@/lib/firestore";
+import { getBookingById } from "@/lib/firestore-admin";
 
 /**
  * @param {Request} request

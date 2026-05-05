@@ -320,7 +320,7 @@ async function seedTourPrices() {
 
 async function main() {
   console.log("=".repeat(70));
-  console.log("🌱 9Trip — Seed Price Data Script");
+  console.log("🌱 9 Trip — Seed Price Data Script");
   console.log("=".repeat(70));
   console.log(`Mode: ${DRY_RUN ? "🧪 DRY RUN (no writes)" : "✍️  LIVE (will write to Firestore)"}`);
   console.log(`Year: ${CURRENT_YEAR}`);

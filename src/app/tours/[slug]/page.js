@@ -1,11 +1,8 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getTourBySlug, getRelatedTours, getTourReviews, getTourPricing } from "@/lib/firestore";
-import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
+import { getTourBySlug, getRelatedTours, getTourReviews, getTourPricing } from "@/lib/firestore-admin";
+import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
-import TourHeader from "@/components/tours/TourDetail/TourHeader";
-import TourBookingWidget from "@/components/tours/TourBookingWidget";
-import TourDetailClient from "./TourDetailClient";
+import TourDetailClient from "@/components/tours/TourDetailClient";
 
 export const revalidate = 3600; // ISR: revalidate sau 1h
 
@@ -18,18 +15,25 @@ export async function generateMetadata({ params }) {
   const { tour } = await getTourBySlug(resolvedParams.slug);
 
   if (!tour) {
-    return { title: "Tour không tìm thấy — 9Trip" };
+    return { title: "Tour không tìm thấy — 9 Trip" };
   }
 
   return {
-    title: `${tour.title} — 9Trip`,
-    description: tour.excerpt || `Đặt tour ${tour.title} giá tốt nhất tại 9Trip.`,
+    title: `${tour.title} — 9 Trip`,
+    description: tour.excerpt || `Đặt tour ${tour.title} giá tốt nhất tại 9 Trip.`,
+    alternates: { canonical: `/tours/${resolvedParams.slug}` },
     openGraph: {
-      title: `${tour.title} — 9Trip`,
+      title: `${tour.title} — 9 Trip`,
       description: tour.excerpt || "",
       images: tour.featuredImage ? [{ url: tour.featuredImage, width: 1200, height: 630 }] : [],
       type: "article",
       locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${tour.title} — 9 Trip`,
+      description: tour.excerpt || "",
+      images: tour.featuredImage ? [tour.featuredImage] : [],
     },
   };
 }
@@ -145,7 +149,7 @@ export default async function TourDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50 pb-16">
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
@@ -161,38 +165,14 @@ export default async function TourDetailPage({ params }) {
         ]}
       />
 
-      {/* Tour Header (Gallery, Title, Rating, Location, Duration) */}
-      <TourHeader tour={tour} />
-
-      {/* Main Layout: Content + Sidebar */}
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Main Content (2/3) */}
-          <div className="flex-1 min-w-0">
-            <TourDetailClient
-              tour={tour}
-              pricingTiers={pricingTiers || []}
-              relatedTours={clientRelatedTours || []}
-              reviews={clientReviews || []}
-              avgRating={avgRating || tour.ratingAverage || 0}
-              totalRating={totalRating || tour.ratingCount || 0}
-            />
-          </div>
-
-          {/* Sidebar Booking Form (1/3) */}
-          <div className="w-full lg:w-[380px] flex-shrink-0">
-            <TourBookingWidget
-              pricingTiers={pricingTiers || []}
-              tourTitle={tour.title}
-              tourId={tour.id}
-              basePrice={tour.pricing?.adultPrice || 0}
-              baseChildPrice={tour.pricing?.childPrice || 0}
-              baseInfantPrice={tour.pricing?.infantPrice || 0}
-              currency={tour.pricing?.currency || "VND"}
-            />
-          </div>
-        </div>
-      </div>
+      <TourDetailClient
+        tour={tour}
+        pricingTiers={pricingTiers || []}
+        relatedTours={clientRelatedTours || []}
+        reviews={clientReviews || []}
+        avgRating={avgRating || tour.ratingAverage || 0}
+        totalRating={totalRating || tour.ratingCount || 0}
+      />
     </div>
   );
 }

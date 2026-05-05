@@ -20,10 +20,20 @@ const PROTECTED_PATHS = ['/checkout', '/cart', '/account', '/booking/confirmatio
  * @param {import('next/server').NextRequest} request
  * @returns {NextResponse}
  */
-export default function proxy(request) {
-  const { pathname } = request.nextUrl;
-  const authCookie = request.cookies.get('auth-session');
+export default function middleware(request) {
+  const { pathname, protocol, host } = request.nextUrl;
 
+  if (protocol === 'http:') {
+    const httpsUrl = new URL(`https://${host}${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(httpsUrl, 301);
+  }
+
+  if (pathname.startsWith('/flights')) {
+    const homeUrl = new URL('/', request.url);
+    return NextResponse.redirect(homeUrl, 301);
+  }
+
+  const authCookie = request.cookies.get('auth-session');
   const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 
   if (isProtected && !authCookie?.value) {

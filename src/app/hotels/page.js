@@ -1,23 +1,31 @@
-import { Suspense } from "react";
-import { searchHotels, getLocations, enrichHotelsWithLowestPrices } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
+import { searchHotels, getLocations, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
+import { resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
 import SearchFormPopup from "@/components/shared/SearchFormPopup";
 
 export const metadata = {
-  title: "Khách Sạn & Nghỉ Dưỡng — 9Trip",
+  title: "Khách Sạn & Nghỉ Dưỡng — 9 Trip",
   description: "Đặt phòng khách sạn, resort giá tốt nhất. Hỗ trợ đặt phòng 24/7.",
+  openGraph: {
+    title: "Khách Sạn & Nghỉ Dưỡng — 9 Trip",
+    description: "Đặt phòng khách sạn, resort giá tốt nhất. Hỗ trợ đặt phòng 24/7.",
+    images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+    type: "website",
+    locale: "vi_VN",
+  },
+  alternates: { canonical: "/hotels" },
 };
 
 export const revalidate = 3600;
 
-/**
- * Hotels Page — Listing khách sạn.
- */
+const PAGE_SIZE = 12;
+
 export default async function HotelsPage({ searchParams }) {
   const params = await searchParams;
+  const currentPage = Math.max(1, Number(params.page) || 1);
+
   const filters = {
     locationId: params.locationId || "",
     starRating: params.starRating || "",
@@ -25,7 +33,7 @@ export default async function HotelsPage({ searchParams }) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
     amenities: params.amenities || "",
     sortBy: params.sortBy || "newest",
-    pageSize: 12,
+    pageSize: 120,
   };
 
   const [{ hotels: rawHotels }, locations] = await Promise.all([
@@ -33,13 +41,9 @@ export default async function HotelsPage({ searchParams }) {
     getLocations(),
   ]);
 
-  // Resolve image URLs (gs:// → HTTPS)
   let hotels = await resolveDocsImages(rawHotels);
-
-  // Enrich with lowest prices from hotel_price_schedules
   hotels = await enrichHotelsWithLowestPrices(hotels);
 
-  // Post-enrichment price filtering (v4: uses lowestPrice)
   if (filters.minPrice != null) {
     hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) >= filters.minPrice);
   }
@@ -47,15 +51,33 @@ export default async function HotelsPage({ searchParams }) {
     hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) <= filters.maxPrice);
   }
 
-  // Post-enrichment price sorting (v4: uses lowestPrice)
-  if (filters.sortBy === 'price_asc') {
+  if (filters.sortBy === "price_asc") {
     hotels.sort((a, b) => (a.lowestPrice || a.pricing?.basePrice || 0) - (b.lowestPrice || b.pricing?.basePrice || 0));
-  } else if (filters.sortBy === 'price_desc') {
+  } else if (filters.sortBy === "price_desc") {
     hotels.sort((a, b) => (b.lowestPrice || b.pricing?.basePrice || 0) - (a.lowestPrice || a.pricing?.basePrice || 0));
   }
 
+  const totalCount = hotels.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const pageHotels = hotels.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Khách sạn",
+    description: "Danh sách khách sạn và resort.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/hotels`,
+    numberOfItems: totalCount,
+    itemListElement: pageHotels.slice(0, 10).map((h, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `/hotels/${h.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -73,7 +95,6 @@ export default async function HotelsPage({ searchParams }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
-        {/* Search Form Popup — quick change search */}
         <div className="mb-6">
           <SearchFormPopup
             type="hotel"
@@ -82,27 +103,21 @@ export default async function HotelsPage({ searchParams }) {
           />
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
+            <div className="bg-white rounded-xl border border-gray-200 sticky top-24">
               <HotelFilters locations={locations} />
             </div>
           </aside>
 
-          {/* Main Content */}
           <div className="flex-1">
-            <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-xl aspect-[4/5] animate-pulse" />
-              ))}
-            </div>}>
-              <ServiceList 
-                items={hotels}
-                type="hotel"
-                emptyTitle="Không tìm thấy khách sạn nào"
-                emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở khu vực khác nhé."
-              />
-            </Suspense>
+            <ServiceList
+              items={pageHotels}
+              totalCount={totalCount}
+              totalPages={totalPages}
+              type="hotel"
+              emptyTitle="Không tìm thấy khách sạn nào"
+              emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở khu vực khác nhé."
+            />
           </div>
         </div>
       </div>

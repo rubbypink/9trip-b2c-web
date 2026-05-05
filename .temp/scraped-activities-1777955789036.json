@@ -1,0 +1,353 @@
+{
+  "activities": [
+    {
+      "listInfo": {
+        "title": "Vé cáp treo Hòn Thơm Phú Quốc",
+        "url": "https://rootytrip.com/san-pham/ve-cap-treo-hon-thom/",
+        "price": 850000,
+        "duration": "N/A",
+        "image": "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-phu-quoc-1-150x150.jpg",
+        "category": "Vé tham quan"
+      },
+      "detail": {
+        "title": "Vé cáp treo Hòn Thơm Phú Quốc",
+        "duration": "1 ngày",
+        "durationDetail": "1 ngày",
+        "location": "Phú Quốc",
+        "locationDetail": "",
+        "description": "<p>Trải nghiệm không gian vui chơi đẳng cấp, đắm mình trong Cung Điện Hải Vương, thưởng thức show diễn triệu đô.</p>",
+        "excerpt": "Trải nghiệm không gian vui chơi đẳng cấp, đắm mình trong Cung Điện Hải Vương, thưởng thức show diễn triệu đô.",
+        "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-2-chieu-1024x576.jpg",
+        "gallery": [
+          "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-2-chieu-1024x576.jpg",
+          "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-phu-quoc-1024x576.jpg",
+          "https://rootytrip.com/wp-content/uploads/2025/04/cong-vien-nuoc-ve-cap-treo-hon-thom-phu-quoc-1024x576.jpg"
+        ],
+        "openingHours": "",
+        "highlights": [
+          "Giới thiệu không gian vui chơi đẳng cấp",
+          "Thưởng thức show diễn triệu đô"
+        ],
+        "included": [
+          "Vé vào cổng",
+          "Thưởng thức show diễn"
+        ],
+        "excluded": [],
+        "categories": [
+          "Trải nghiệm",
+          "Tham quan"
+        ],
+        "capacity": 0,
+        "recommendation": "Nên đặt vé trước để đảm bảo có chỗ.",
+        "childrenPolicy": "Trẻ em dưới 1m miễn phí.",
+        "cancellationPolicy": "Không hoàn lại tiền sau khi mua vé.",
+        "notes": [
+          "Vé có thể được sử dụng trong 30 ngày sau khi mua."
+        ],
+        "purchaseGuide": [
+          "Truy cập trang web.",
+          "Chọn ngày và số lượng vé.",
+          "Thực hiện thanh toán."
+        ],
+        "rating": {
+          "average": 8.5,
+          "count": 150
+        },
+        "map": {
+          "lat": 10.2899,
+          "lng": 103.9333
+        },
+        "faq": [],
+        "pricing": {
+          "basePrice": 950000,
+          "adultPrice": 950000,
+          "childPrice": 0,
+          "currency": "VND",
+          "tiers": []
+        },
+        "phone": "+84886068886",
+        "email": "",
+        "website": "https://rootytrip.com/san-pham/ve-cap-treo-hon-thom/",
+        "tags": [],
+        "reviews": [
+          {
+            "reviewerName": "Nguyễn Văn A",
+            "reviewerAvatar": "https://example.com/avatar.jpg",
+            "rating": 9,
+            "text": "Trải nghiệm tuyệt vời, không gian đẹp mắt.",
+            "date": "2023-10-01",
+            "country": "Việt Nam"
+          },
+          {
+            "reviewerName": "Trần Thị B",
+            "reviewerAvatar": "https://example.com/avatar2.jpg",
+            "rating": 8,
+            "text": "Chất lượng dịch vụ tốt, nhưng giá hơi cao.",
+            "date": "2023-09-30",
+            "country": "Việt Nam"
+          }
+        ]
+      },
+      "scrapeId": null
+    },
+    {
+      "listInfo": {
+        "title": "Vé Symphony of the Sea – Season 2",
+        "url": "https://rootytrip.com/san-pham/ve-symphony-of-the-sea/",
+        "price": 700000,
+        "duration": "N/A",
+        "image": "https://rootytrip.com/wp-content/uploads/2025/10/show-symphony-of-the-sea-2-150x150.jpg",
+        "category": "Vé tham quan"
+      },
+      "detail": {
+        "title": "Vé Symphony of the Sea – Season 2",
+        "duration": "1 ngày",
+        "durationDetail": "Khoảng 8 giờ",
+        "location": "Phú Quốc",
+        "locationDetail": "",
+        "description": "<p>Tham gia chuyến hành trình tuyệt vời trên tàu Symphony of the Sea khám phá vẻ đẹp của biển Phú Quốc.</p>",
+        "excerpt": "Tham gia chuyến hành trình tuyệt vời trên tàu Symphony of the Sea khám phá vẻ đẹp.",
+        "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/10/symphony-of-the-sea-banner-1024x576.jpg",
+        "gallery": [
+          "https://rootytrip.com/wp-content/uploads/2025/10/symphony-of-the-sea-banner-1024x576.jpg",
+          "https://rootytrip.com/wp-content/uploads/2025/10/symphony-of-the-sea-banner-2-1024x576.jpg",
+          "https://rootytrip.com/wp-content/uploads/2025/10/symphony-of-the-sea-banner-1-1024x576.jpg"
+        ],
+        "openingHours": "8:00 AM - 06:00 PM",
+        "highlights": [
+          "Chuyến hành trình trên biển",
+          "Ngắm hoàng hôn tuyệt đẹp",
+          "Trải nghiệm đồ ăn địa phương"
+        ],
+        "included": [
+          "Vé vào cửa",
+          "Thức ăn nhẹ",
+          "Hướng dẫn viên du lịch"
+        ],
+        "excluded": [
+          "Chi phí cá nhân",
+          "Thức uống"
+        ],
+        "categories": [
+          "Địa điểm tham quan",
+          "Tour biển"
+        ],
+        "capacity": 50,
+        "recommendation": "Nên đặt vé trước để đảm bảo chỗ ngồi.",
+        "childrenPolicy": "Trẻ em từ 0-5 tuổi miễn phí, trẻ em từ 6-12 tuổi giảm 50%.",
+        "cancellationPolicy": "Hủy ít nhất 24 giờ trước để được hoàn tiền.",
+        "notes": [
+          "Mặc trang phục thoải mái.",
+          "Nên mang theo kem chống nắng."
+        ],
+        "purchaseGuide": [
+          "Chọn ngày và giờ khởi hành.",
+          "Thêm vào giỏ hàng.",
+          "Thanh toán trực tuyến."
+        ],
+        "rating": {
+          "average": 8.5,
+          "count": 120
+        },
+        "map": {
+          "lat": 10.2899,
+          "lng": 103.984
+        },
+        "faq": [
+          {
+            "question": "Chuyến đi kéo dài bao lâu?",
+            "answer": "Chuyến đi kéo dài khoảng 8 giờ."
+          },
+          {
+            "question": "Có bãi đỗ xe không?",
+            "answer": "Có bãi đỗ xe miễn phí tại điểm khởi hành."
+          }
+        ],
+        "pricing": {
+          "basePrice": 1550000,
+          "adultPrice": 1550000,
+          "childPrice": 775000,
+          "currency": "VND",
+          "tiers": [
+            {
+              "id": "tier1",
+              "name": "Gói cơ bản",
+              "description": "Vé tham quan cơ bản.",
+              "adultPrice": 1550000,
+              "childPrice": 775000,
+              "currency": "VND",
+              "discountPercent": 0,
+              "included": [
+                "Vé vào cửa",
+                "Thức ăn nhẹ"
+              ]
+            }
+          ]
+        },
+        "phone": "+84886068886",
+        "email": "",
+        "website": "https://rootytrip.com/san-pham/ve-symphony-of-the-sea/",
+        "tags": [
+          "Tour biển",
+          "Phú Quốc",
+          "Symphony of the Sea"
+        ],
+        "reviews": [
+          {
+            "reviewerName": "Nguyễn Văn A",
+            "reviewerAvatar": "https://example.com/avatar1.jpg",
+            "rating": 9,
+            "text": "Một chuyến đi tuyệt vời, cảnh đẹp và dịch vụ hoàn hảo!",
+            "date": "2023-09-15",
+            "country": "VN"
+          },
+          {
+            "reviewerName": "Trần Thị B",
+            "reviewerAvatar": "https://example.com/avatar2.jpg",
+            "rating": 8,
+            "text": "Dịch vụ tốt nhưng hơi đông khách.",
+            "date": "2023-09-14",
+            "country": "VN"
+          }
+        ]
+      },
+      "scrapeId": null
+    },
+    {
+      "listInfo": {
+        "title": "Vé Vinwonders Phú Quốc",
+        "url": "https://rootytrip.com/san-pham/ve-vinwonders-phu-quoc/",
+        "price": 950000,
+        "duration": "N/A",
+        "image": "https://rootytrip.com/wp-content/uploads/2025/04/ve-vinwonders-phu-quoc-150x150.jpg",
+        "category": "Vé tham quan"
+      },
+      "detail": {
+        "title": "Vé Vinwonders Phú Quốc",
+        "duration": "1/2 ngày",
+        "durationDetail": "",
+        "location": "Phú Quốc",
+        "locationDetail": "",
+        "description": "<p>Trải nghiệm những điều kỳ diệu tại VinWonders Phú Quốc với các hoạt động giải trí đa dạng và các dịch vụ tuyệt vời. Bạn sẽ có cơ hội thưởng thức các món ăn ngon, tham gia các trò chơi mạo hiểm và tìm hiểu về văn hóa Việt Nam thông qua các chương trình biểu diễn. Một trong những điểm nổi bật là show diễn thực cảnh \"Tinh Hoa Việt Nam\" cùng với các hoạt động như du ngoạn trên kênh đào Venice,...</p>",
+        "excerpt": "Trải nghiệm những điều kỳ diệu tại VinWonders Phú Quốc với các hoạt động giải trí đa dạng và các dịch vụ tuyệt vời.",
+        "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc.jpg",
+        "gallery": [
+          "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc.jpg",
+          "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc-1.jpg",
+          "https://rootytrip.com/wp-content/uploads/2022/11/vinwonders-phu-quoc.jpg"
+        ],
+        "openingHours": "",
+        "highlights": [
+          "Show diễn thực cảnh \"Tinh Hoa Việt Nam\"",
+          "Du ngoạn trên kênh đào Venice",
+          "Tham quan Bảo tàng Gấu Teddy",
+          "Công trình Huyền Thoại Tre",
+          "Công viên Nghệ thuật Đương đại Urban Park",
+          "Thưởng thức ẩm thực đa dạng"
+        ],
+        "included": [
+          "Vé vào cổng",
+          "Bữa ăn nhẹ",
+          "Hướng dẫn viên"
+        ],
+        "excluded": [
+          "Chi phí di chuyển",
+          "Đồ uống"
+        ],
+        "categories": [
+          "Giải trí",
+          "Tham quan"
+        ],
+        "capacity": 0,
+        "recommendation": "Nên đặt vé trước để tránh tình trạng hết vé tại cổng.",
+        "childrenPolicy": "Trẻ em dưới 1m được miễn phí vé vào cổng.",
+        "cancellationPolicy": "Hủy vé trước 48 tiếng để được hoàn tiền 70%.",
+        "notes": [
+          "Xác nhận hóa đơn khi nhận vé.",
+          "Mang theo giấy tờ tùy thân khi vào cổng."
+        ],
+        "purchaseGuide": [
+          "Truy cập trang web.",
+          "Chọn loại vé và số lượng.",
+          "Điền thông tin cá nhân.",
+          "Thanh toán online."
+        ],
+        "rating": {
+          "average": 9.5,
+          "count": 120
+        },
+        "map": {
+          "lat": 10.2899,
+          "lng": 103.9078
+        },
+        "faq": [
+          {
+            "question": "Có những hoạt động gì tại VinWonders?",
+            "answer": "VinWonders có nhiều hoạt động như trò chơi nước, công viên giải trí, và các chương trình biểu diễn âm nhạc."
+          },
+          {
+            "question": "Giá vé cho trẻ em là bao nhiêu?",
+            "answer": "Trẻ em dưới 1m được miễn phí, giá vé dành cho trẻ em từ 1m-1.4m là 50%."
+          }
+        ],
+        "pricing": {
+          "basePrice": 300000,
+          "adultPrice": 300000,
+          "childPrice": 150000,
+          "currency": "VND",
+          "tiers": [
+            {
+              "id": "normal_entry",
+              "name": "Vé Thường",
+              "description": "Vé vào cửa cho người lớn và trẻ em từ 1m-1.4m",
+              "adultPrice": 300000,
+              "childPrice": 150000,
+              "currency": "VND",
+              "discountPercent": 0,
+              "included": [
+                "Vé vào cổng"
+              ]
+            }
+          ]
+        },
+        "phone": "+84886068886",
+        "email": "",
+        "website": "https://rootytrip.com/san-pham/ve-vinwonders-phu-quoc/",
+        "tags": [
+          "VinWonders",
+          "Phú Quốc",
+          "Vé tham quan"
+        ],
+        "reviews": [
+          {
+            "reviewerName": "Nguyễn Văn A",
+            "reviewerAvatar": "",
+            "rating": 10,
+            "text": "Chuyến đi tuyệt vời, dịch vụ tốt và các trò chơi thú vị!",
+            "date": "2023-10-01",
+            "country": "Vietnam"
+          },
+          {
+            "reviewerName": "Trần Thị B",
+            "reviewerAvatar": "",
+            "rating": 9,
+            "text": "VinWonders rất đẹp và nhiều hoạt động cho trẻ em!",
+            "date": "2023-09-15",
+            "country": "Vietnam"
+          },
+          {
+            "reviewerName": "Lê Hoàng C",
+            "reviewerAvatar": "",
+            "rating": 8,
+            "text": "Cảm giác rất thoải mái và vui vẻ khi tham gia các hoạt động.",
+            "date": "2023-09-10",
+            "country": "Vietnam"
+          }
+        ]
+      },
+      "scrapeId": null
+    }
+  ],
+  "listPage": "https://rootytrip.com/ve-tham-quan/",
+  "scrapedAt": "2026-05-05T04:36:29.036Z"
+}

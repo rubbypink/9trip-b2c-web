@@ -273,6 +273,6 @@ export function isValidVNPhone(phone) {
  * @returns {string}
  */
 export function imageUrl(url, width = 400, height = 300) {
-  if (!url) return `https://placehold.co/${width}x${height}?text=9Trip`;
+  if (!url) return `https://placehold.co/${width}x${height}?text=9 Trip`;
   return url;
 }

@@ -1,8 +1,8 @@
-import AuthGuard from "@/components/auth/AuthGuard.js";
+import AuthGuard from "@/components/auth/AuthGuard";
 import AccountSidebar from "@/components/account/AccountSidebar.jsx";
 
 export const metadata = {
-  title: "Tài khoản của tôi - 9Trip",
+  title: "Tài khoản của tôi - 9 Trip",
   description: "Quản lý thông tin cá nhân, đơn hàng và đánh giá của bạn",
 };
 

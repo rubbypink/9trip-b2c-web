@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getFeaturedHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
+import { getFeaturedHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
+import { resolveDocsImages } from "@/lib/storage-admin";
 import { formatCurrency } from "@/lib/utils";
 
 /**

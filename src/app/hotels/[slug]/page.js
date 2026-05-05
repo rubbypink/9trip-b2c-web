@@ -1,15 +1,15 @@
 import { cache } from "react";
 import Breadcrumb from "@/components/layout/Breadcrumb";
-import HotelDetailClient from "./HotelDetailClient";
+import HotelDetailClient from "@/components/hotels/HotelDetailClient";
 import {
   getHotelBySlug,
   getHotelPriceSchedule,
   getHotelReviews,
   getRelatedHotels,
-} from "@/lib/firestore";
-import { resolveDocImages, resolveDocsImages } from "@/lib/storage";
+} from "@/lib/firestore-admin";
+import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 /**
  * generateStaticParams — no pre-build, render on-demand.
@@ -31,16 +31,23 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
   const { hotel } = await cachedGetHotelBySlug(slug);
-  if (!hotel) return { title: "Khách sạn không tìm thấy — 9Trip" };
+  if (!hotel) return { title: "Khách sạn không tìm thấy — 9 Trip" };
   return {
-    title: `${hotel.name} — 9Trip`,
+    title: `${hotel.name} — 9 Trip`,
     description: hotel.excerpt || `Đặt phòng tại ${hotel.name} với giá tốt nhất.`,
+    alternates: { canonical: `/hotels/${slug}` },
     openGraph: {
-      title: `${hotel.name} — 9Trip`,
+      title: `${hotel.name} — 9 Trip`,
       description: hotel.excerpt || "",
       images: hotel.featuredImage ? [{ url: hotel.featuredImage, width: 1200, height: 630 }] : [],
       type: "website",
       locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${hotel.name} — 9 Trip`,
+      description: hotel.excerpt || "",
+      images: hotel.featuredImage ? [hotel.featuredImage] : [],
     },
   };
 }
@@ -106,8 +113,26 @@ export default async function HotelDetailPage({ params }) {
 
   const clientReviews = reviews.slice(0, 5); // Chỉ pass vài review mới nhất để làm summary
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Hotel",
+    name: hotel.name,
+    description: hotel.excerpt || "",
+    image: hotel.featuredImage,
+    url: `/hotels/${slug}`,
+    ...(hotel.starRating > 0 && { starRating: { "@type": "Rating", ratingValue: hotel.starRating } }),
+    ...(avgRating > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: avgRating,
+        reviewCount: totalRating,
+      },
+    }),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },

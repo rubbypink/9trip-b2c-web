@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import FirebaseErrorHandler from "@/components/common/FirebaseErrorHandler";
+import FirebaseErrorHandler from "@/components/shared/FirebaseErrorHandler";
 
 /**
  * LoginPopup — Modal đăng nhập hiển thị khi user chưa login mà click wishlist.

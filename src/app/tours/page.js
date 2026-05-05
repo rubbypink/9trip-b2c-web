@@ -1,26 +1,28 @@
-import { Suspense } from "react";
-import { searchTours, getLocations } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
+import { searchTours, getLocations, countTours } from "@/lib/firestore-admin";
+import { resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
 import ServiceList from "@/components/shared/ServiceList";
 import SearchFormPopup from "@/components/shared/SearchFormPopup";
 
 export const metadata = {
-  title: "Tìm Tour Du Lịch — 9Trip",
+  title: "Tìm Tour Du Lịch — 9 Trip",
   description: "Tìm kiếm và đặt tour du lịch trong nước và quốc tế với giá tốt nhất.",
+  openGraph: {
+    title: "Tìm Tour Du Lịch — 9 Trip",
+    description: "Tìm kiếm và đặt tour du lịch trong nước và quốc tế với giá tốt nhất.",
+    images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+    type: "website",
+    locale: "vi_VN",
+  },
+  alternates: { canonical: "/tours" },
 };
 
-export const revalidate = 3600; // ISR: revalidate sau 1h
+export const revalidate = 3600;
 
-/**
- * Tours Search Page — Server Component (SSR with ISR).
- * Hiển thị danh sách tour với bộ lọc, sắp xếp, phân trang.
- *
- * Search params: locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy
- */
 export default async function ToursPage({ searchParams }) {
   const params = await searchParams;
+  const page = Number(params.page) || 1;
   const filters = {
     locationId: params.locationId || "",
     tourTypeId: params.tourTypeId || "",
@@ -28,19 +30,36 @@ export default async function ToursPage({ searchParams }) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : "",
     minRating: params.minRating ? Number(params.minRating) : "",
     sortBy: params.sortBy || "newest",
+    pageSize: 12,
+    page,
   };
 
-  // Fetch initial data
-  const [{ tours: rawTours }, locations] = await Promise.all([
+  const [{ tours: rawTours }, locations, totalCount] = await Promise.all([
     searchTours(filters),
     getLocations(),
+    countTours(filters),
   ]);
 
-  // Resolve image URLs (gs:// → HTTPS)
   const tours = await resolveDocsImages(rawTours);
+  const totalPages = Math.max(1, Math.ceil(totalCount / 12));
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Tour du lịch",
+    description: "Danh sách tour du lịch trong nước và quốc tế.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/tours`,
+    numberOfItems: totalCount,
+    itemListElement: tours.slice(0, 10).map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `/tours/${t.slug}`,
+    })),
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -48,7 +67,6 @@ export default async function ToursPage({ searchParams }) {
         ]}
       />
 
-      {/* Page Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
@@ -58,41 +76,27 @@ export default async function ToursPage({ searchParams }) {
         </div>
       </div>
 
-      {/* Search Form (Quick change search) */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <SearchFormPopup type="tour" locations={locations} currentFilters={filters} />
       </div>
 
-      {/* Layout */}
       <div className="max-w-7xl mx-auto px-4 pb-16">
         <div className="flex gap-8">
-          {/* Sidebar Filters */}
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
-              <Suspense fallback={<div className="h-96 bg-gray-100 rounded-xl animate-pulse" />}>
-                <TourFilters locations={locations} currentFilters={filters} />
-              </Suspense>
+            <div className="bg-white rounded-xl border border-gray-200 sticky top-24">
+              <TourFilters locations={locations} currentFilters={filters} />
             </div>
           </aside>
 
-          {/* Main Content */}
           <div className="flex-1 min-w-0">
-            <Suspense
-              fallback={
-                <div className="space-y-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="h-64 bg-gray-100 rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              }
-            >
-              <ServiceList 
-                items={tours}
-                type="tour"
-                emptyTitle="Không tìm thấy tour nào"
-                emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác."
-              />
-            </Suspense>
+            <ServiceList 
+              items={tours}
+              type="tour"
+              totalCount={totalCount}
+              totalPages={totalPages}
+              emptyTitle="Không tìm thấy tour nào"
+              emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác."
+            />
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
  * Email HTML Templates — Vietnamese, responsive, branded.
  *
  * All templates return an HTML string. Uses inline styles for email client compatibility.
- * Includes 9Trip branding: logo, colors (#0ea5e9 primary), footer with contact info.
+ * Includes 9 Trip branding: logo, colors (#0ea5e9 primary), footer with contact info.
  */
 
 import { SITE, COMPANY } from "./constants";

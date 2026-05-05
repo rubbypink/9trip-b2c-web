@@ -3,8 +3,8 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { registerWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase/auth';
-import FirebaseErrorHandler from '@/components/common/FirebaseErrorHandler';
+import { registerWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase-auth';
+import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 
 function RegisterForm() {
 	const router = useRouter();

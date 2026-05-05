@@ -174,7 +174,7 @@ export async function sendContactNotification(data) {
 
   return sendEmail({
     to: FROM_ADDRESS,
-    subject: `Liên hệ mới từ ${data.name || data.email} — 9Trip`,
+    subject: `Liên hệ mới từ ${data.name || data.email} — 9 Trip`,
     html,
   });
 }

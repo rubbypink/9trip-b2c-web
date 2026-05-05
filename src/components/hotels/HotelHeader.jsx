@@ -38,7 +38,7 @@ export function ShareButton({ url, title }) {
     // Web Share API (mobile)
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: title || "Khách sạn 9Trip", url: shareUrl });
+        await navigator.share({ title: title || "Khách sạn 9 Trip", url: shareUrl });
         return;
       } catch {
         // User cancelled or API failed — fall through to copy

@@ -34,9 +34,9 @@ export default function ActivityCard({ activity, item }) {
         <Link href={`/activities/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.title}
         </Link>
-        <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || "Đang cập nhật"}</p>
+        <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || "Phú Quốc"}</p>
         <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-          <span>⏱️ {data.duration?.hours}h{data.duration?.minutes > 0 ? `${data.duration.minutes}p` : ""}</span>
+          <span>⏱️ {data.duration?.hours || "4-8"}h{data.duration?.minutes > 0 ? `${data.duration.minutes}p` : ""}</span>
         </div>
         <div className="flex items-center gap-1 mb-3">
           <StarRating rating={data.ratingAverage} size="sm" />

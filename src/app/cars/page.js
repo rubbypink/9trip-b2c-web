@@ -1,12 +1,20 @@
 import { Suspense } from "react";
-import { searchCars } from "@/lib/firestore";
+import { searchCars } from "@/lib/firestore-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import CarFilters from "@/components/cars/CarFilters";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
-  title: "Thuê Xe Du Lịch — 9Trip",
+  title: "Thuê Xe Du Lịch — 9 Trip",
   description: "Dịch vụ cho thuê xe du lịch tự lái hoặc có tài xế, đa dạng dòng xe, giá cả cạnh tranh.",
+  openGraph: {
+    title: "Thuê Xe Du Lịch — 9 Trip",
+    description: "Dịch vụ cho thuê xe du lịch tự lái hoặc có tài xế, đa dạng dòng xe, giá cả cạnh tranh.",
+    images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+    type: "website",
+    locale: "vi_VN",
+  },
+  alternates: { canonical: "/cars" },
 };
 
 export const revalidate = 3600;
@@ -25,8 +33,23 @@ export default async function CarsPage({ searchParams }) {
 
   const { cars } = await searchCars(filters);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Thuê xe du lịch",
+    description: "Danh sách xe du lịch cho thuê.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/cars`,
+    numberOfItems: cars.length,
+    itemListElement: cars.slice(0, 10).map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `/cars/${c.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -46,7 +69,7 @@ export default async function CarsPage({ searchParams }) {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
+            <div className="bg-white rounded-xl border border-gray-200 sticky top-24">
               <CarFilters />
             </div>
           </aside>

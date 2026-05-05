@@ -38,7 +38,7 @@ export default function HotelCard({ hotel, item }) {
         <Link href={`/hotels/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.name || data.title}
         </Link>
-        <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || data.address?.city || "Đang cập nhật"}</p>
+        <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || data.address?.city || "Phú Quốc"}</p>
         <div className="flex items-center gap-1 mb-3">
           <StarRating rating={data.ratingAverage || data.rating?.average} size="sm" />
           <span className="text-xs text-gray-400">({data.ratingCount || data.rating?.count || 0})</span>

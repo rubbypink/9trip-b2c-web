@@ -1,9 +1,9 @@
 ---
 applyTo: "**"
-description: "System-wide non-negotiable rules for 9Trip B2C — JavaScript only, Next.js 16 App Router, Firebase, JSDoc required, no admin/partner features."
+description: "System-wide non-negotiable rules for 9 Trip B2C — JavaScript only, Next.js 16 App Router, Firebase, JSDoc required, no admin/partner features."
 ---
 
-# 9Trip B2C — System Rules
+# 9 Trip B2C — System Rules
 
 ## Absolute Constraints (DO NOT VIOLATE)
 

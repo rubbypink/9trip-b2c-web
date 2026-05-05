@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getDocBySlug } from "@/lib/firestore";
+import { getDocBySlug } from "@/lib/firestore-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import { formatCurrency } from "@/lib/utils";
 
@@ -13,18 +13,25 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const carDoc = await getDocBySlug("cars", resolvedParams.slug);
 
-  if (!carDoc) return { title: "Xe không tìm thấy — 9Trip" };
+  if (!carDoc) return { title: "Xe không tìm thấy — 9 Trip" };
 
   const title = carDoc.title || carDoc.name || "Thuê xe";
   return {
-    title: `${title} — 9Trip`,
-    description: carDoc.excerpt || `Thuê ${title} — giá tốt tại 9Trip.`,
+    title: `${title} — 9 Trip`,
+    description: carDoc.excerpt || `Thuê ${title} — giá tốt tại 9 Trip.`,
+    alternates: { canonical: `/cars/${resolvedParams.slug}` },
     openGraph: {
-      title: `${title} — 9Trip`,
+      title: `${title} — 9 Trip`,
       description: carDoc.excerpt || "",
       images: carDoc.featuredImage ? [{ url: carDoc.featuredImage, width: 1200, height: 630 }] : [],
       type: "website",
       locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} — 9 Trip`,
+      description: carDoc.excerpt || "",
+      images: carDoc.featuredImage ? [carDoc.featuredImage] : [],
     },
   };
 }
@@ -67,8 +74,26 @@ export default async function CarDetailPage({ params }) {
   const price = pricing?.basePrice || pricing?.dailyPrice || 0;
   const currency = pricing?.currency || "VND";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: displayName,
+    description: excerpt || description?.replace(/<[^>]*>/g, "").slice(0, 200) || "",
+    image: featuredImage,
+    url: `/cars/${slug}`,
+    ...(price > 0 && {
+      offers: {
+        "@type": "Offer",
+        price,
+        priceCurrency: currency,
+        availability: "https://schema.org/InStock",
+      },
+    }),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },

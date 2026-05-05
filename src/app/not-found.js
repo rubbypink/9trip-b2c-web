@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Không tìm thấy — 9Trip" };
+export const metadata = { title: "Không tìm thấy — 9 Trip" };
 
 /**
  * Custom 404 Not Found page.

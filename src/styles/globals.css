@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* ─── 9Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
+/* ─── 9 Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
 @theme {
   --color-primary: oklch(62% 0.19 255);
   --color-primary-50: oklch(97% 0.02 255);

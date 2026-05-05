@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { SITE, COMPANY, SOCIAL, SITE_DESCRIPTION } from "@/lib/constants";
 
-import fbIcon from "@/media/pics/Facebook.webp";
-import igIcon from "@/media/pics/Insta.webp";
-import ytIcon from "@/media/pics/Youtube.webp";
-import ttIcon from "@/media/pics/Tiktok.webp";
-import logoImg from "@/media/pics/favicon.webp";
+const fbIcon = "/images/Facebook.webp";
+const igIcon = "/images/Insta.webp";
+const ytIcon = "/images/Youtube.webp";
+const ttIcon = "/images/Tiktok.webp";
+const logoImg = "/images/favicon.webp";
 
 export default function Footer() {
   const socialLinks = [

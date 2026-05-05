@@ -6,7 +6,7 @@ import HotelSearchForm from "./HotelSearchForm";
 import { useRouter } from "next/navigation";
 
 /**
- * SearchTabsClient — Tab điều hướng giữa các loại tìm kiếm: Tour, Khách sạn, Vé máy bay.
+ * SearchTabsClient — Tab điều hướng giữa các loại tìm kiếm: Tour, Khách sạn, Hoạt động.
  * Sử dụng 'use client' để xử lý state tab active.
  * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
@@ -16,7 +16,7 @@ export default function SearchTabsClient({ locations }) {
   const tabs = [
     { key: "tour", label: "Tour", icon: "🌍" },
     { key: "hotel", label: "Khách sạn", icon: "🏨" },
-    { key: "flight", label: "Vé máy bay", icon: "✈️" },
+    { key: "activities", label: "Hoạt động", icon: "🎯" },
   ];
 
   return (
@@ -44,7 +44,7 @@ export default function SearchTabsClient({ locations }) {
       {/* Search Form theo tab — truyền locations xuống */}
       {activeTab === "tour" && <TourSearchForm locations={locations} />}
       {activeTab === "hotel" && <HotelSearchForm locations={locations} />}
-      {activeTab === "flight" && <PlaceholderForm label="Tìm vé máy bay" />}
+      {activeTab === "activities" && <ActivitySearchForm locations={locations} />}
     </div>
   );
 }
@@ -150,22 +150,128 @@ function TourSearchForm({ locations }) {
 
       <button
         type="submit"
-        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-8 py-3 rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
       >
-        🔍 Tìm tour ngay
+        🔍 Tìm Tour ngay
       </button>
     </form>
   );
 }
 
 /**
- * PlaceholderForm — Form tạm cho hotel/flight tab (sẽ phát triển sau).
- * @param {{ label: string }} props
+ * ActivitySearchForm — Form tìm kiếm hoạt động với điểm đến, thể loại, giá.
+ * @param {{ locations?: Array<{id: string, name: string}> }} props
  */
-function PlaceholderForm({ label }) {
+function ActivitySearchForm({ locations }) {
+  const router = useRouter();
+  const [location, setLocation] = useState("");
+  const [category, setCategory] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+
+  const destinationList = locations && locations.length > 0
+    ? [{ value: "", label: "Chọn điểm đến" }, ...locations.map((loc) => ({ value: loc.id, label: loc.name }))]
+    : [
+        { value: "", label: "Chọn điểm đến" },
+        { value: "phu-quoc", label: "Phú Quốc" },
+        { value: "da-nang", label: "Đà Nẵng" },
+        { value: "nha-trang", label: "Nha Trang" },
+        { value: "hoi-an", label: "Hội An" },
+        { value: "ha-long", label: "Hạ Long" },
+        { value: "da-lat", label: "Đà Lạt" },
+        { value: "sapa", label: "Sapa" },
+      ];
+
+  const categories = [
+    { value: "", label: "Tất cả thể loại" },
+    { value: "sightseeing", label: "Tham quan" },
+    { value: "adventure", label: "Mạo hiểm" },
+    { value: "water-sports", label: "Thể thao dưới nước" },
+    { value: "eco-tour", label: "Sinh thái" },
+    { value: "workshop", label: "Lớp học & Workshop" },
+  ];
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (location) params.append("locationId", location);
+    if (category) params.append("categoryId", category);
+    if (priceRange) {
+      const [min, max] = priceRange.split("-");
+      if (min) params.append("minPrice", min);
+      if (max && max !== "999999999") params.append("maxPrice", max);
+    }
+    router.push(`/activities?${params.toString()}`);
+  };
+
   return (
-    <div className="flex items-center justify-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-      <p className="text-sm text-gray-400">{label} — sắp ra mắt</p>
-    </div>
+    <form onSubmit={handleSearch} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Điểm đến */}
+        <div className="relative">
+          <label className="block text-xs font-medium text-gray-500 mb-1">Điểm đến</label>
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            </svg>
+            <select
+              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            >
+              {destinationList.map((d) =>
+                d.value === "" ? (
+                  <option key="" value="" disabled>
+                    {d.label}
+                  </option>
+                ) : (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+        </div>
+
+        {/* Thể loại */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Thể loại</label>
+          <select
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {categories.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Khoảng giá */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Khoảng giá</label>
+          <select
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
+          >
+            <option value="">Tất cả mức giá</option>
+            <option value="0-500000">Dưới 500k</option>
+            <option value="500000-2000000">500k - 2 triệu</option>
+            <option value="2000000-5000000">2 - 5 triệu</option>
+            <option value="5000000-999999999">Trên 5 triệu</option>
+          </select>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+      >
+        🎯 Tìm hoạt động
+      </button>
+    </form>
   );
 }

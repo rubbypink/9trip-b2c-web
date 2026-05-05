@@ -1,7 +1,7 @@
 import ProfileForm from "@/components/account/ProfileForm";
 
 export const metadata = {
-  title: "Thông tin cá nhân - 9Trip",
+  title: "Thông tin cá nhân - 9 Trip",
 };
 
 export default function ProfilePage() {

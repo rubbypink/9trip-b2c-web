@@ -1,0 +1,57 @@
+{
+  "title": "Vé Vinwonders Phú Quốc",
+  "duration": "1/2 ngày",
+  "durationDetail": "",
+  "location": "Phú Quốc",
+  "locationDetail": "",
+  "description": "<p>Vinwonders Phú Quốc là điểm tham quan hấp dẫn với nhiều hoạt động thú vị. Tại đây, bạn có thể tham gia những trải nghiệm như:</p><ul><li>Show diễn thực cảnh \"Tinh Hoa Việt Nam\"</li><li>Du ngoạn trên kênh đào Venice</li><li>Tham quan Bảo tàng Gấu Teddy</li><li>Công trình Huyền Thoại Tre</li><li>Công viên Nghệ thuật Đương đại Urban Park</li><li>Thưởng thức ẩm thực đa dạng</li></ul>",
+  "excerpt": "Vinwonders Phú Quốc là điểm tham quan hấp dẫn với nhiều hoạt động thú vị. Tại đây, bạn có thể tham gia...",
+  "featuredImage": "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc.jpg",
+  "gallery": [
+    "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc.jpg",
+    "https://rootytrip.com/wp-content/uploads/2022/11/ve-vinwonders-phu-quoc-1.jpg",
+    "https://rootytrip.com/wp-content/uploads/2022/11/vinwonders-phu-quoc.jpg"
+  ],
+  "openingHours": "",
+  "highlights": [
+    "Show diễn thực cảnh \"Tinh Hoa Việt Nam\"",
+    "Du ngoạn trên kênh đào Venice",
+    "Tham quan Bảo tàng Gấu Teddy",
+    "Công trình Huyền Thoại Tre",
+    "Công viên Nghệ thuật Đương đại Urban Park",
+    "Thưởng thức ẩm thực đa dạng"
+  ],
+  "included": [
+    "Vé vào cổng",
+    "Hướng dẫn viên (nếu có)"
+  ],
+  "excluded": [],
+  "categories": ["Tham quan", "Giải trí", "Vé tham quan"],
+  "capacity": null,
+  "recommendation": "",
+  "childrenPolicy": "",
+  "cancellationPolicy": "",
+  "notes": [],
+  "purchaseGuide": [],
+  "ratingAverage": 0,
+  "ratingCount": 0,
+  "map": null,
+  "faq": [],
+  "pricing": {
+    "price_standard": {
+      "id": "price_standard",
+      "name": "Vé tiêu chuẩn",
+      "description": "Vé Vinwonders Phú Quốc",
+      "basePrice": 300000,
+      "childPrice": 0,
+      "currency": "VND",
+      "discountPercent": 0
+    }
+  },
+  "phone": "+84886068886",
+  "email": "",
+  "website": "https://rootytrip.com/san-pham/ve-vinwonders-phu-quoc/",
+  "tags": ["Vinwonders", "Phú Quốc", "Vé tham quan", "công viên giải trí"],
+  "reviews": {},
+  "_firecrawlCredits": 0
+}

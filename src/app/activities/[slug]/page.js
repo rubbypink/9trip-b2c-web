@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { getActivityBySlug, getReviews, getRelatedActivities } from "@/lib/firestore";
-import { resolveDocImages } from "@/lib/storage";
+import { getActivityBySlug, getReviews, getRelatedActivities } from "@/lib/firestore-admin";
+import { resolveDocImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
-import ActivityDetailClient from "./ActivityDetailClient";
+import ActivityDetailClient from "@/components/activities/ActivityDetailClient";
 
 export const revalidate = 3600;
 
@@ -13,17 +13,24 @@ export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const { activity } = await getActivityBySlug(resolvedParams.slug);
 
-  if (!activity) return { title: "Hoạt động không tìm thấy — 9Trip" };
+  if (!activity) return { title: "Hoạt động không tìm thấy — 9 Trip" };
 
   return {
-    title: `${activity.title} — 9Trip`,
-    description: activity.excerpt || `${activity.title} — đặt tour trải nghiệm giá tốt tại 9Trip.`,
+    title: `${activity.title} — 9 Trip`,
+    description: activity.excerpt || `${activity.title} — đặt tour trải nghiệm giá tốt tại 9 Trip.`,
+    alternates: { canonical: `/activities/${resolvedParams.slug}` },
     openGraph: {
-      title: `${activity.title} — 9Trip`,
+      title: `${activity.title} — 9 Trip`,
       description: activity.excerpt || "",
       images: activity.featuredImage ? [{ url: activity.featuredImage, width: 1200, height: 630 }] : [],
       type: "article",
       locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${activity.title} — 9 Trip`,
+      description: activity.excerpt || "",
+      images: activity.featuredImage ? [activity.featuredImage] : [],
     },
   };
 }

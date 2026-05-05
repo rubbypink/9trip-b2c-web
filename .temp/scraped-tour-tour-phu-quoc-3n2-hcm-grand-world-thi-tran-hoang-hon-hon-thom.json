@@ -1,0 +1,137 @@
+{
+  "title": "Tour Phú Quốc 3N2Đ: HCM - Grand World - Thị Trấn Hoàng Hôn - Hòn Thơm",
+  "duration": "3 ngày 2 đêm",
+  "durationDays": 3,
+  "location": "Phú Quốc",
+  "address": "Hồ Chí Minh",
+  "description": "<p>Tour Phú Quốc 3N2Đ: khám phá Grand World sôi động, check-in Thị Trấn Hoàng Hôn, đi cáp treo Hòn Thơm và vui chơi biển đảo – hành trình nghỉ dưỡng & giải trí lý tưởng.</p>",
+  "excerpt": "Tour Phú Quốc 3N2Đ: khám phá Grand World sôi động, check-in Thị Trấn Hoàng Hôn, đi cáp treo Hòn Thơm và vui chơi biển đảo – hành trình nghỉ dưỡng & giải trí lý tưởng.",
+  "featuredImage": "https://www.ivivu.com/du-lich/tour-phu-quoc-3n2d-grand-world-thi-tran-hoang-hon-cap-treo-hon-thom/1049",
+  "gallery": [
+    "https://cdn2.ivivu.com/2023/02/17/09/ivivu-cau-hon-dia-trung-hai-570x320.gif",
+    "https://cdn2.ivivu.com/2020/02/17/16/ivivu-chua-ho-quoc-pq-570x320.gif",
+    "https://cdn2.ivivu.com/2021/05/19/14/ivivu-cap-hon-thom-570x320.gif",
+    "https://cdn2.ivivu.com/2022/01/18/12/ivivu-grand-world-xe-dap-570x320.gif",
+    "https://cdn2.ivivu.com/2022/06/16/09/ivivu-cap-treo-hon-thom-570x320.gif",
+    "https://cdn2.ivivu.com/2023/12/06/16/dia-trung-hai-phu-quoc-750x460.gif",
+    "https://cdn2.ivivu.com/2021/05/19/14/ivivu-cap-hon-thom-750x460.gif",
+    "https://cdn2.ivivu.com/2022/01/18/12/ivivu-grand-world-xe-dap-750x460.gif",
+    "https://cdn2.ivivu.com/2023/03/27/17/thi-tran-dia-trung-hai-pq-2-750x460.jpg",
+    "https://cdn2.ivivu.com/2017/03/08/16/ivivu-tour-phu-quoc-3n2d-kham-pha-dong-dao-nam-dao-vuon-tieu-750x460.jpg"
+  ],
+  "highlights": [
+    "Bãi Sao: Tắm biển, thư giãn trên bãi cát trắng mịn.",
+    "Ẩm thực Phú Quốc: Thưởng thức hải sản tươi ngon đặc trưng.",
+    "Sunset Town: Thả dáng tại cầu Hôn, chiêm ngưỡng hoàng hôn đẹp mê hồn.",
+    "Grand World: Check-in kênh đào Venice, công trình nghệ thuật và phố mua sắm sôi động.",
+    "Cáp treo Hòn Thơm: Ngắm toàn cảnh biển xanh ngọc từ cáp treo vượt biển dài nhất thế giới."
+  ],
+  "included": [
+    "Khách sạn 3*",
+    "Bữa ăn",
+    "Xe tham quan",
+    "Vé tham quan",
+    "Hướng dẫn viên",
+    "Bảo hiểm du lịch"
+  ],
+  "excluded": [
+    "Các bữa ăn tự túc.",
+    "Tiền TIP cho HDV + Tài xế địa phương.",
+    "Vé thăm quan Vinpearl Land và Safari.",
+    "Chi phí tắm biển tại Bãi Sao."
+  ],
+  "itinerary": [
+    {
+      "day": 1,
+      "title": "Hồ Chí Minh - Phú Quốc - Grand World",
+      "description": "<p>Sáng công ty sẽ đón quý khách tại sân bay Tân Sơn Nhất, làm thủ tục khởi hành đi Phú Quốc.</p><p>Đến Phú Quốc, xe và HDV đón đoàn đi tham quan Dinh Cậu, Dinh Bà - Biểu tượng đặc trưng về vùng đất tâm linh của Phú Quốc.</p>",
+      "meals": "Ăn Trưa",
+      "overnight": "Phú Quốc",
+      "images": []
+    },
+    {
+      "day": 2,
+      "title": "Khám Phá Nam Đảo",
+      "description": "<p>Quý khách dậy sớm ngắm cảnh bình minh trên Đảo Ngọc, đoàn dùng điểm tâm sáng tại khách sạn.</p><p>Thiền viện Trúc Lâm Hộ Quốc - Nổi bật với kiến trúc Trúc Lâm độc đáo.</p>",
+      "meals": "Ăn Sáng, Trưa, Chiều",
+      "overnight": "Phú Quốc",
+      "images": []
+    },
+    {
+      "day": 3,
+      "title": "Phú Quốc - Đông Đảo - Hồ Chí Minh",
+      "description": "<p>Quý khách dùng điểm tâm sáng, tự do tắm biển, nghỉ ngơi. Làm thủ tục trả phòng.</p>",
+      "meals": "Ăn Sáng, Trưa",
+      "overnight": "None",
+      "images": []
+    }
+  ],
+  "categories": [
+    "Tour Du Lịch",
+    "Tour Phú Quốc"
+  ],
+  "map": {
+    "lat": 10.2899,
+    "lng": 103.984
+  },
+  "pricing": {
+    "adultPrice": 6290000,
+    "childPrice": 0,
+    "infantPrice": 0,
+    "currency": "VND",
+    "minPeople": 1,
+    "maxPeople": 20
+  },
+  "cancellationPolicy": "Hủy tour sau khi đăng kí: 75% giá tour. Trước ngày đi 10 Ngày: 90% giá tour.",
+  "childrenPolicy": "Trẻ dưới 2 tuổi: 500.000đ/bé (chi phi phát sinh trên tour gia đình tự phí).",
+  "notes": [
+    "Giấy tờ cần mang: CMND còn hạn dưới 15 năm, hộ chiếu, giấy khai sinh (trẻ em).",
+    "Khách từ 70-85 tuổi: Cần cam kết tình trạng sức khỏe."
+  ],
+  "faq": [
+    {
+      "question": "Có những điểm tham quan nào trong tour?",
+      "answer": "Điểm tham quan bao gồm Sunset Town, Cáp Treo Hòn Thơm, Grand World và Bãi Sao."
+    }
+  ],
+  "reviews": [
+    {
+      "reviewerName": "Nguyễn Phượng Minh",
+      "reviewerAvatar": "",
+      "rating": 10,
+      "text": "Tuyệt vời",
+      "date": "11-08-2023",
+      "country": "Việt Nam"
+    },
+    {
+      "reviewerName": "Ngô Thị Hạnh",
+      "reviewerAvatar": "",
+      "rating": 6,
+      "text": "Tạm được",
+      "date": "30-06-2023",
+      "country": "Việt Nam"
+    },
+    {
+      "reviewerName": "Nhu Nguyen",
+      "reviewerAvatar": "",
+      "rating": 8,
+      "text": "Rất tốt",
+      "date": "09-06-2023",
+      "country": "Việt Nam"
+    },
+    {
+      "reviewerName": "Đoàn Thanh Vân",
+      "reviewerAvatar": "",
+      "rating": 10,
+      "text": "Tuyệt vời",
+      "date": "10-06-2022",
+      "country": "Việt Nam"
+    }
+  ],
+  "phone": "1900 2045",
+  "email": "support@ivivu.com",
+  "website": "https://www.ivivu.com",
+  "_firecrawlCredits": 5,
+  "_scrapeId": null,
+  "_sourceUrl": "https://www.ivivu.com/du-lich/tour-phu-quoc-3n2d-grand-world-thi-tran-hoang-hon-cap-treo-hon-thom/1049"
+}

@@ -6,8 +6,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase-admin";
 
 export async function POST(request) {
   try {
@@ -18,8 +17,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "Missing gateway or event" }, { status: 400 });
     }
 
-    const db_ = db;
-    await addDoc(collection(db_, "payment_logs"), {
+    await adminDb.collection("payment_logs").add({
       gateway,
       bookingId: bookingId || "unknown",
       event,
@@ -27,7 +25,7 @@ export async function POST(request) {
       response: resData || null,
       error: error || null,
       timestamp: timestamp || new Date().toISOString(),
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
     });
 
     return NextResponse.json({ success: true });

@@ -1,32 +1,39 @@
-import { Suspense } from "react";
-import { searchActivities, getLocations } from "@/lib/firestore";
-import { resolveDocsImages } from "@/lib/storage";
+import { searchActivities, getLocations } from "@/lib/firestore-admin";
+import { resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
-  title: "Hoạt Động & Vui Chơi — 9Trip",
+  title: "Hoạt Động & Vui Chơi — 9 Trip",
   description: "Khám phá các hoạt động vui chơi, tham quan hấp dẫn tại các điểm du lịch nổi tiếng.",
+  openGraph: {
+    title: "Hoạt Động & Vui Chơi — 9 Trip",
+    description: "Khám phá các hoạt động vui chơi, tham quan hấp dẫn tại các điểm du lịch nổi tiếng.",
+    images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+    type: "website",
+    locale: "vi_VN",
+  },
+  alternates: { canonical: "/activities" },
 };
 
 export const revalidate = 3600;
 
-/**
- * Activities Page — Listing các hoạt động vui chơi.
- */
 export default async function ActivitiesPage({ searchParams }) {
   const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const pageSize = 12;
+
   const filters = {
     locationId: params.locationId || "",
     categoryId: params.categoryId || "",
     minPrice: params.minPrice ? Number(params.minPrice) : null,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
     sortBy: params.sortBy || "newest",
-    pageSize: 12,
+    pageSize,
+    page,
   };
 
-  // Mock categories for now - in production this would come from firestore
   const categories = [
     { id: "sightseeing", name: "Tham quan" },
     { id: "adventure", name: "Mạo hiểm" },
@@ -35,16 +42,31 @@ export default async function ActivitiesPage({ searchParams }) {
     { id: "workshop", name: "Lớp học & Workshop" },
   ];
 
-  const [{ activities: rawActivities }, locations] = await Promise.all([
+  const [{ activities: rawActivities, totalCount = 0 }, locations] = await Promise.all([
     searchActivities(filters),
     getLocations(),
   ]);
 
-  // Resolve image URLs (gs:// → HTTPS)
   const activities = await resolveDocsImages(rawActivities);
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Hoạt động & Vui chơi",
+    description: "Danh sách hoạt động vui chơi, tham quan.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/activities`,
+    numberOfItems: totalCount,
+    itemListElement: activities.slice(0, 10).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `/activities/${a.slug}`,
+    })),
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -63,25 +85,17 @@ export default async function ActivitiesPage({ searchParams }) {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
-              <ActivityFilters locations={locations} categories={categories} />
-            </div>
-          </aside>
+          <ActivityFilters locations={locations} categories={categories} />
 
           <div className="flex-1">
-            <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-xl aspect-[4/5] animate-pulse" />
-              ))}
-            </div>}>
-              <ServiceList 
-                items={activities}
-                type="activity"
-                emptyTitle="Không tìm thấy hoạt động nào"
-                emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở địa điểm khác nhé."
-              />
-            </Suspense>
+            <ServiceList
+              items={activities}
+              totalCount={totalCount}
+              totalPages={totalPages}
+              type="activity"
+              emptyTitle="Không tìm thấy hoạt động nào"
+              emptyMessage="Thử thay đổi bộ lọc hoặc tìm kiếm ở địa điểm khác nhé."
+            />
           </div>
         </div>
       </div>

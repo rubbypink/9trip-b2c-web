@@ -1,0 +1,122 @@
+{
+  "results": [
+    {
+      "success": false,
+      "title": "https://www.ivivu.com/du-lich/tour-phu-quoc-3n2d-grand-world-thi-tran-hoang-hon-cap-treo-hon-thom/1049",
+      "error": "Could not extract tour title",
+      "timeline": [
+        {
+          "phase": "A",
+          "status": "start",
+          "detail": "Validating URL: https://www.ivivu.com/du-lich/tour-phu-quoc-3n2d-grand-world-thi-tran-hoang-hon-cap-treo-hon-thom/1049",
+          "time": "2026-05-05T05:44:50.372Z"
+        },
+        {
+          "phase": "A",
+          "status": "ok",
+          "detail": "URL validated (https://www.ivivu.com/du-lich/tour-phu-quoc-3n2d-grand-world-thi-tran-hoang-hon-...)",
+          "time": "2026-05-05T05:44:50.372Z"
+        },
+        {
+          "phase": "B1",
+          "status": "start",
+          "detail": "Scraping tour detail (static)...",
+          "time": "2026-05-05T05:44:50.372Z"
+        },
+        {
+          "phase": "B1",
+          "status": "fail",
+          "detail": "FireCrawl API 408: {\"success\":false,\"code\":\"SCRAPE_TIMEOUT\",\"error\":\"The scrape operation timed out before completing. This happens when a page takes too long to load, render, or process. Possible causes: (1) The website is slow or unresponsive, (2) The page has heavy JavaScript that takes time to execute, (3) The pag",
+          "time": "2026-05-05T05:45:51.337Z"
+        },
+        {
+          "phase": "B2",
+          "status": "start",
+          "detail": "Missing 10 fields (title, description, duration, location, highlights, included, excluded, notes, faq, itinerary), retrying with actions...",
+          "time": "2026-05-05T05:45:51.337Z"
+        },
+        {
+          "phase": "B2",
+          "status": "fail",
+          "detail": "FireCrawl API 400: {\"success\":false,\"code\":\"BAD_REQUEST\",\"error\":\"Bad Request\",\"details\":[{\"expected\":\"array\",\"code\":\"invalid_type\",\"path\":[\"includeTags\"],\"message\":\"Invalid input: expected array, received string\"},{\"expected\":\"array\",\"code\":\"invalid_type\",\"path\":[\"excludeTags\"],\"message\":\"Invalid input: expected arra",
+          "time": "2026-05-05T05:45:52.153Z"
+        },
+        {
+          "phase": "B3",
+          "status": "start",
+          "detail": "Still missing 10 non-price fields, searching web...",
+          "time": "2026-05-05T05:45:52.153Z"
+        },
+        {
+          "phase": "B3",
+          "status": "ok",
+          "detail": "Enriched 0 fields",
+          "time": "2026-05-05T05:45:53.285Z"
+        },
+        {
+          "phase": "C",
+          "status": "fail",
+          "detail": "No title found after all phases",
+          "time": "2026-05-05T05:45:53.285Z"
+        }
+      ]
+    },
+    {
+      "success": false,
+      "title": "Tour Phú Quốc Trong Ngày: Cano 3 Đảo - Cáp Treo Hòn Thơm",
+      "slug": "tour-phu-quoc-trong-ngay-cano-3-ao-cap-treo-hon-thom",
+      "creditsUsed": 5,
+      "tourId": null,
+      "timeline": [
+        {
+          "phase": "A",
+          "status": "start",
+          "detail": "Validating URL: https://www.ivivu.com/du-lich/tour-phu-quoc-1n-cano-hon-may-rut-hon-dam-ngang-hon-mong-tay-cap-treo-hon-thom/1523",
+          "time": "2026-05-05T05:44:50.381Z"
+        },
+        {
+          "phase": "A",
+          "status": "ok",
+          "detail": "URL validated (https://www.ivivu.com/du-lich/tour-phu-quoc-1n-cano-hon-may-rut-hon-dam-ngang-ho...)",
+          "time": "2026-05-05T05:44:50.381Z"
+        },
+        {
+          "phase": "B1",
+          "status": "start",
+          "detail": "Scraping tour detail (static)...",
+          "time": "2026-05-05T05:44:50.381Z"
+        },
+        {
+          "phase": "B1",
+          "status": "ok",
+          "detail": "Title: \"Tour Phú Quốc Trong Ngày: Cano 3 Đảo - Cáp Treo Hòn Thơm\", 24 fields, 5 credits",
+          "time": "2026-05-05T05:45:37.418Z"
+        },
+        {
+          "phase": "B2",
+          "status": "skip",
+          "detail": "All fields present, actions not needed",
+          "time": "2026-05-05T05:45:37.418Z"
+        },
+        {
+          "phase": "B3",
+          "status": "skip",
+          "detail": "No missing non-price fields",
+          "time": "2026-05-05T05:45:37.418Z"
+        },
+        {
+          "phase": "C",
+          "status": "ok",
+          "detail": "Data saved to D:\\Software\\9trip-b2c-web\\.temp\\scraped-tour-tour-phu-quoc-trong-ngay-cano-3-ao-cap-treo-hon-thom.json",
+          "time": "2026-05-05T05:45:37.419Z"
+        }
+      ],
+      "errors": [
+        "Tour already exists: tours/tour-phu-quoc-trong-ngay-cano-3-ao-cap-treo-hon-thom"
+      ]
+    }
+  ],
+  "reportPath": "D:\\Software\\9trip-b2c-web\\.report\\batch-tours-20260505-124553.md",
+  "startTime": "2026-05-05T05:44:50.370Z",
+  "endTime": "2026-05-05T05:45:53.287Z"
+}

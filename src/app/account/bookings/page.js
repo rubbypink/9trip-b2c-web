@@ -1,7 +1,7 @@
-import BookingsPageClient from "./BookingsPageClient";
+import BookingsPageClient from "@/components/account/BookingsPageClient";
 
 export const metadata = {
-  title: "Lịch sử đặt tour - 9Trip",
+  title: "Lịch sử đặt tour - 9 Trip",
 };
 
 export default function BookingsPage() {

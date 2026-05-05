@@ -28,7 +28,7 @@ export function useBooking() {
   /**
    * Create inventory hold for all items in cart.
    * Note: In a production app, you might want to hold multiple items. 
-   * For 9Trip, we'll start with holding the first item or handle multiple holds.
+   * For 9 Trip, we'll start with holding the first item or handle multiple holds.
    */
   const startCheckout = useCallback(async () => {
     if (!user || items.length === 0) return null;

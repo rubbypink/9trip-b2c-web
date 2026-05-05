@@ -3,9 +3,9 @@
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { loginWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase/auth';
+import { loginWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase-auth';
 import { useAuth } from '@/lib/auth';
-import FirebaseErrorHandler from '@/components/common/FirebaseErrorHandler';
+import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 
 function LoginForm() {
 	const router = useRouter();

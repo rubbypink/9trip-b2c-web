@@ -1,0 +1,51 @@
+{
+  "title": "Vé cáp treo Hòn Thơm Phú Quốc",
+  "duration": "1 ngày",
+  "durationDetail": "",
+  "location": "Phú Quốc",
+  "locationDetail": "",
+  "description": "Trải nghiệm không gian vui chơi đẳng cấp tại Hòn Thơm, Phú Quốc. Đắm mình trong Cung Điện Hải Vương và thưởng thức show diễn triệu đô.",
+  "excerpt": "Trải nghiệm không gian vui chơi đẳng cấp tại Hòn Thơm, Phú Quốc. Đắm mình trong Cung Điện Hải Vương...",
+  "featuredImage": "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-2-chieu-1024x576.jpg",
+  "gallery": [
+    "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-hon-thom-2-chieu-1024x576.jpg",
+    "https://rootytrip.com/wp-content/uploads/2025/04/ve-cap-treo-phu-quoc-1024x576.jpg",
+    "https://rootytrip.com/wp-content/uploads/2025/04/cong-vien-nuoc-ve-cap-treo-hon-thom-phu-quoc-1024x576.jpg"
+  ],
+  "openingHours": "",
+  "highlights": [
+    "Trải nghiệm không gian vui chơi đẳng cấp",
+    "Đắm mình trong Cung Điện Hải Vương",
+    "Thưởng thức show diễn triệu đô"
+  ],
+  "included": [],
+  "excluded": [],
+  "categories": ["Vé tham quan"],
+  "capacity": null,
+  "recommendation": "",
+  "childrenPolicy": "",
+  "cancellationPolicy": "",
+  "notes": [],
+  "purchaseGuide": [],
+  "ratingAverage": 0,
+  "ratingCount": 0,
+  "map": null,
+  "faq": [],
+  "pricing": {
+    "price_standard": {
+      "id": "price_standard",
+      "name": "Vé tiêu chuẩn",
+      "description": "Vé cáp treo Hòn Thơm Phú Quốc",
+      "basePrice": 850000,
+      "childPrice": 0,
+      "currency": "VND",
+      "discountPercent": 0
+    }
+  },
+  "phone": "+84886068886",
+  "email": "",
+  "website": "https://rootytrip.com/san-pham/ve-cap-treo-hon-thom/",
+  "tags": ["Vé tham quan", "Phú Quốc", "Cáp treo", "Hòn Thơm"],
+  "reviews": {},
+  "_firecrawlCredits": 0
+}

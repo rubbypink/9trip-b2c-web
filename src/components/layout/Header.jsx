@@ -10,7 +10,8 @@ import Image from "next/image";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { SITE } from "@/lib/constants";
-import logoImg from "@/media/pics/favicon.webp";
+
+const logoImg = "/images/favicon.webp";
 
 export default function Header() {
   const { user, logout } = useAuth();

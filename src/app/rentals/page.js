@@ -1,12 +1,20 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { searchRentals } from "@/lib/firestore";
+import { searchRentals } from "@/lib/firestore-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ServiceList from "@/components/shared/ServiceList";
 
 export const metadata = {
-  title: "Dịch Vụ Cho Thuê — 9Trip",
+  title: "Dịch Vụ Cho Thuê — 9 Trip",
   description: "Cho thuê xe máy, trang phục, dụng cụ du lịch và các dịch vụ đi kèm khác.",
+  openGraph: {
+    title: "Dịch Vụ Cho Thuê — 9 Trip",
+    description: "Cho thuê xe máy, trang phục, dụng cụ du lịch và các dịch vụ đi kèm khác.",
+    images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+    type: "website",
+    locale: "vi_VN",
+  },
+  alternates: { canonical: "/rentals" },
 };
 
 export const revalidate = 3600;
@@ -24,8 +32,23 @@ export default async function RentalsPage({ searchParams }) {
 
   const { rentals } = await searchRentals(filters);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Dịch vụ cho thuê",
+    description: "Danh sách dịch vụ cho thuê.",
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/rentals`,
+    numberOfItems: rentals.length,
+    itemListElement: rentals.slice(0, 10).map((r, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `/rentals/${r.slug}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },

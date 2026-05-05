@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
@@ -9,9 +9,8 @@ import CustomerForm from "@/components/checkout/CustomerForm";
 import CartSummary from "@/components/checkout/CartSummary";
 import CouponInput from "@/components/checkout/CouponInput";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
-import { useEffect } from "react";
 
-export default function CheckoutPage() {
+export default function CheckoutPageClient() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, subtotal, tax, grandTotal, couponDiscount, couponData, clearCart } = useCart();
@@ -23,13 +22,11 @@ export default function CheckoutPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // 1. THÊM 2 STATE NÀY VÀO ĐỂ KHÓA NÚT VÀ CHỨA GIÁ THẬT
   const [isValidatingPrice, setIsValidatingPrice] = useState(true);
   const [realGrandTotal, setRealGrandTotal] = useState(grandTotal);
 
   const showEmptyCart = items.length === 0;
 
-  // 2. DÁN CỤC USEEFFECT NÀY VÀO ĐÂY (Ngay trước các hàm xử lý click)
   useEffect(() => {
     const validateCartPrice = async () => {
       if (items.length === 0) {
@@ -73,16 +70,15 @@ export default function CheckoutPage() {
     setIsLoading(true);
     setErrorMsg(null);
 
-    // Đóng gói data: Thay vì bóc tách item[0], ta nhét thẳng toàn bộ mảng items vào
     const bookingData = {
       userId: user?.uid || null,
-      items: items, // <--- Nước đi "mastermind" ở đây =)))
+      items: items,
       pricing: {
         subtotal,
         tax,
         discount: couponDiscount,
         total: grandTotal,
-        currency: items[0]?.currency || "VND", // Lấy loại tiền tệ của item đầu làm chuẩn
+        currency: items[0]?.currency || "VND",
       },
       contactInfo,
       couponCode: couponData?.code || null,
@@ -104,8 +100,6 @@ export default function CheckoutPage() {
       if (response.ok && data.success && data.url) {
         setIsRedirecting(true); 
         localStorage.setItem("9trip_last_booking_id", data.bookingId);
-        
-        // Backup lại nguyên cái giỏ hàng (items) vào LocalStorage để phòng hờ thanh toán xịt
         localStorage.setItem("9trip_cart_backup", JSON.stringify(items)); 
         
         window.location.href = data.url;
@@ -125,7 +119,7 @@ export default function CheckoutPage() {
       setIsRedirecting(false);
     }
   };
-  // Khóa toàn bộ màn hình khi đang chuẩn bị bay sang cổng thanh toán
+
   if (isRedirecting) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
@@ -135,6 +129,7 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
   if (showEmptyCart) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -149,7 +144,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // Render luồng Checkout chính
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -158,10 +152,7 @@ export default function CheckoutPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* CỘT TRÁI: FORM VÀ THANH TOÁN */}
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* STEP 1 */}
             {step === 1 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Thông tin liên lạc</h2>
@@ -178,7 +169,6 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* STEP 2 */}
             {step === 2 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
@@ -188,7 +178,6 @@ export default function CheckoutPage() {
                   </button>
                 </div>
                 
-                {/* Chọn cổng thanh toán thay thế cho Component cũ */}
                 <div className="flex flex-col gap-3 mb-6">
                     <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
                         <input type="radio" name="gateway" value="VNPAY" checked={gateway === 'VNPAY'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
@@ -229,7 +218,6 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* CỘT PHẢI: BILLING SUMMARY */}
           <div className="space-y-6">
             <CartSummary />
             <CouponInput />

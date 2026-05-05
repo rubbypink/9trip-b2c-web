@@ -2,7 +2,7 @@
  * BestActivities section — Server Component hiển thị activity nổi bật.
  * Fetch từ Firestore, hiển thị dạng grid 3 cột.
  */
-import { getActivitiesList } from "@/lib/firestore";
+import { getActivitiesList } from "@/lib/firestore-admin";
 import ActivityCard from "@/components/shared/ActivityCard";
 import Link from "next/link";
 

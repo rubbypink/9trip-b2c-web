@@ -1,5 +1,5 @@
 /**
- * Media Audit Script — Quét và phân loại tất cả ảnh trong hệ thống 9Trip B2C.
+ * Media Audit Script — Quét và phân loại tất cả ảnh trong hệ thống 9 Trip B2C.
  *
  * Triển khai media-finder skill:
  * 1. Quét tất cả Firestore collections tìm image fields
@@ -279,7 +279,7 @@ async function auditCollection(colName) {
 
 async function main() {
   console.log("=".repeat(70));
-  console.log("🖼️  9Trip — Media Audit Script (media-finder)");
+  console.log("🖼️  9 Trip — Media Audit Script (media-finder)");
   console.log("=".repeat(70));
 
   const startTime = Date.now();

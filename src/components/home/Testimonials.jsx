@@ -1,5 +1,6 @@
 import { getDocs, query, collection, where, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { mockTestimonials } from "@/lib/mockData";
 
 /**
  * Serialize Firestore doc to plain object — local helper since serializeDoc is module-private.
@@ -20,9 +21,12 @@ function serializeDoc(snap) {
   return result;
 }
 
+const MAX_REVIEWS = 6;
+
 /**
  * Testimonials — Server component hiển thị đánh giá từ khách hàng.
- * Tự fetch approved reviews 4-5 sao từ Firestore.
+ * Fetch approved reviews từ Firestore, sau đó bổ sung mock data
+ * vào cuối danh sách nếu chưa đủ MAX_REVIEWS items.
  */
 export default async function Testimonials() {
   let reviews = [];
@@ -38,8 +42,11 @@ export default async function Testimonials() {
     const snap = await getDocs(q);
     reviews = snap.docs.map((d) => serializeDoc(d));
   } catch {
-    // Firestore unavailable — render empty gracefully
+    // Firestore unavailable — fallback to mock data
   }
+
+  const remaining = Math.max(0, MAX_REVIEWS - reviews.length);
+  reviews = [...reviews, ...mockTestimonials.slice(0, remaining)];
 
   if (!reviews || reviews.length === 0) return null;
 
@@ -61,7 +68,7 @@ export default async function Testimonials() {
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {reviews.slice(0, 6).map((review) => (
+          {reviews.slice(0, MAX_REVIEWS).map((review) => (
             <div
               key={review.id}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"

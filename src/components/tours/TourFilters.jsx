@@ -201,7 +201,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
       )}
 
       {/* Desktop Sidebar */}
-      <aside className={cn("hidden lg:block w-64 flex-shrink-0", className)}>
+      <aside className={cn("hidden lg:block w-auto flex-shrink-0", className)}>
         <div className="sticky top-24 rounded-xl border border-gray-200 bg-white p-5">
           {filterContent}
         </div>

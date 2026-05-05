@@ -284,7 +284,7 @@ async function reseedPriceDataForFixedHotels() {
 
 async function main() {
   console.log("=".repeat(70));
-  console.log("🚀 9Trip — Storage Init + Hotel Room Fix + Price Reseed");
+  console.log("🚀 9 Trip — Storage Init + Hotel Room Fix + Price Reseed");
   console.log("=".repeat(70));
   console.log();
 

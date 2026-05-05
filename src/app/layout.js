@@ -18,6 +18,7 @@ const roboto = Roboto({
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata = {
+	metadataBase: new URL(SITE.url),
 	title: `${SITE.name} — ${SITE.tagline}`,
 	description: SITE_DESCRIPTION,
 	keywords: SITE_KEYWORDS,
@@ -28,6 +29,13 @@ export const metadata = {
 		locale: 'vi_VN',
 		siteName: SITE.name,
 		url: SITE.url,
+		images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: `${SITE.name} — ${SITE.tagline}`,
+		description: SITE_DESCRIPTION,
+		images: ['/images/og-default.jpg'],
 	},
 };
 

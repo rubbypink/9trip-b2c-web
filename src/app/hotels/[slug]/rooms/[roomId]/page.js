@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getHotelBySlug, getHotelPriceSchedule, resolveRoomPricing } from "@/lib/firestore";
-import { resolveDocImages } from "@/lib/storage";
+import { getHotelBySlug, getHotelPriceSchedule, resolveRoomPricing } from "@/lib/firestore-admin";
+import { resolveDocImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import { formatCurrency } from "@/lib/utils";
@@ -40,17 +40,24 @@ export async function generateMetadata({ params }) {
   const { hotel } = await getHotelBySlug(slug);
   const room = hotel ? findRoomInHotel(hotel, roomId) : null;
 
-  if (!room) return { title: "Phòng không tìm thấy — 9Trip" };
+  if (!room) return { title: "Phòng không tìm thấy — 9 Trip" };
 
   return {
-    title: `${room.name} — ${hotel?.name || "Khách sạn"} — 9Trip`,
-    description: room.excerpt || `${room.name} tại ${hotel?.name || ""}. Đặt phòng giá tốt tại 9Trip.`,
+    title: `${room.name} — ${hotel?.name || "Khách sạn"} — 9 Trip`,
+    description: room.excerpt || `${room.name} tại ${hotel?.name || ""}. Đặt phòng giá tốt tại 9 Trip.`,
+    alternates: { canonical: `/hotels/${slug}/rooms/${roomId}` },
     openGraph: {
-      title: `${room.name} — ${hotel?.name || "Khách sạn"} — 9Trip`,
+      title: `${room.name} — ${hotel?.name || "Khách sạn"} — 9 Trip`,
       description: room.excerpt || "",
       images: room.featuredImage ? [{ url: room.featuredImage, width: 1200, height: 630 }] : [],
       type: "website",
       locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${room.name} — ${hotel?.name || "Khách sạn"} — 9 Trip`,
+      description: room.excerpt || "",
+      images: room.featuredImage ? [room.featuredImage] : [],
     },
   };
 }

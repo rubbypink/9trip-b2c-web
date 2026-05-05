@@ -1,7 +1,7 @@
 import UserReviewsList from "@/components/account/UserReviewsList";
 
 export const metadata = {
-  title: "Đánh giá của tôi - 9Trip",
+  title: "Đánh giá của tôi - 9 Trip",
 };
 
 /**

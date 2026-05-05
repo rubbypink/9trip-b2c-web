@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
+import Badge from "@/components/shared/Badge";
 import StarRating from "@/components/shared/StarRating";
 import ActivityCard from "@/components/shared/ActivityCard";
 import ActivityBookingWidget from "@/components/activities/ActivityBookingWidget";
 import ImageCarousel from "@/components/shared/ImageCarousel";
+import GoogleMap from "@/components/shared/GoogleMap";
 import WriteReviewForm from "@/components/reviews/WriteReviewForm";
 import { formatCurrency } from "@/lib/utils";
-
-const GoogleMap = dynamic(() => import("@/components/shared/GoogleMap"), { ssr: false });
 
 const TABS = [
   { id: "overview", label: "Tổng quan" },
@@ -87,6 +86,17 @@ export default function ActivityDetailClient({
 
   const showPricing = pricingTiers.length > 0 || (Array.isArray(included) && included.length > 0) || (Array.isArray(excluded) && excluded.length > 0);
 
+  const hasAnyBadge =
+    (typeof duration === "object" ? !!(days || hours) : !!duration) ||
+    discountPct > 0 ||
+    !!openingHours ||
+    !!locationName ||
+    capacity > 0;
+
+  const hasDetails = included.length > 0 || excluded.length > 0;
+
+  const hasPolicies = !!childrenPolicy || !!cancellationPolicy || notes.length > 0;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
@@ -111,7 +121,7 @@ export default function ActivityDetailClient({
           </div>
 
           {/* Product Info Badges */}
-          <div className="flex flex-wrap gap-3">
+          <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
             {(typeof duration === "object" && (days || hours)) ? (
               <Badge icon="/icons/time.svg" label="Thời gian" value={
                 days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`
@@ -194,32 +204,34 @@ export default function ActivityDetailClient({
             </div>
 
             <div className="min-h-[300px] pt-6">
-              {/* ─── Overview ─── */}
-              {activeTab === "overview" && (
-                <div className="space-y-6">
-                  {description && (
-                    <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: description }} />
-                  )}
-                  {highlights.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Điểm nổi bật</h3>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {highlights.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                            <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div data-tab-panel="overview" className={activeTab === "overview" ? "" : "hidden"}>
+                {description || highlights.length > 0 ? (
+                  <div className="space-y-6">
+                    {description && (
+                      <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: description }} />
+                    )}
+                    {highlights.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Điểm nổi bật</h3>
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {highlights.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                              <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-10 text-gray-500">Chưa có thông tin tổng quan.</div>
+                )}
+              </div>
 
-              {/* ─── Pricing Table ─── */}
-              {activeTab === "pricing" && (
+              <div data-tab-panel="pricing" className={activeTab === "pricing" ? "" : "hidden"}>
                 <div className="space-y-6">
                   {pricingTiers.length > 0 ? (
                     <>
@@ -288,12 +300,11 @@ export default function ActivityDetailClient({
                     </div>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* ─── Details (Included / Excluded / Policies) ─── */}
-              {activeTab === "details" && (
+              <div data-tab-panel="details" className={activeTab === "details" ? "" : "hidden"}>
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${hasDetails ? "" : "hidden"}`}>
                     {included.length > 0 && (
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -335,48 +346,51 @@ export default function ActivityDetailClient({
                       </div>
                     )}
                   </div>
+                  {!hasDetails && !hasPolicies && (
+                    <div className="text-center py-6 text-gray-500">Chưa có thông tin chi tiết.</div>
+                  )}
 
-                  {/* Policies Section */}
-                  <div className="border-t border-gray-200 pt-6 space-y-4">
-                    {childrenPolicy && (
-                      <PolicyCard
-                        icon={
-                          <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                          </svg>
-                        }
-                        title="Chính sách trẻ em"
-                        content={childrenPolicy}
-                      />
-                    )}
-                    {cancellationPolicy && (
-                      <PolicyCard
-                        icon={
-                          <svg className="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        }
-                        title="Chính sách hủy vé"
-                        content={cancellationPolicy}
-                      />
-                    )}
-                    {notes.length > 0 && (
-                      <PolicyCard
-                        icon={
-                          <svg className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        }
-                        title="Lưu ý"
-                        content={notes.map((n, i) => <p key={i} className="text-sm text-gray-600">{i + 1}. {n}</p>)}
-                      />
-                    )}
-                  </div>
+                  {hasPolicies && (
+                    <div className="border-t border-gray-200 pt-6 space-y-4">
+                      {childrenPolicy && (
+                        <PolicyCard
+                          icon={
+                            <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                            </svg>
+                          }
+                          title="Chính sách trẻ em"
+                          content={childrenPolicy}
+                        />
+                      )}
+                      {cancellationPolicy && (
+                        <PolicyCard
+                          icon={
+                            <svg className="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          }
+                          title="Chính sách hủy vé"
+                          content={cancellationPolicy}
+                        />
+                      )}
+                      {notes.length > 0 && (
+                        <PolicyCard
+                          icon={
+                            <svg className="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          }
+                          title="Lưu ý"
+                          content={notes.map((n, i) => <p key={i} className="text-sm text-gray-600">{i + 1}. {n}</p>)}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* ─── Schedule ─── */}
-              {activeTab === "schedule" && (
+              <div data-tab-panel="schedule" className={activeTab === "schedule" ? "" : "hidden"}>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {openingHours && <ScheduleCard label="Giờ diễn" value={openingHours} />}
@@ -388,10 +402,9 @@ export default function ActivityDetailClient({
                     <div className="text-center py-10 text-gray-500">Chưa có thông tin giờ mở cửa.</div>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* ─── Purchase Guide ─── */}
-              {activeTab === "guide" && (
+              <div data-tab-panel="guide" className={activeTab === "guide" ? "" : "hidden"}>
                 <div>
                   {purchaseGuide.length > 0 ? (
                     <div className="space-y-6">
@@ -409,7 +422,7 @@ export default function ActivityDetailClient({
                     </div>
                   ) : (
                     <div className="text-center py-10 text-gray-500">
-                      <p>Đặt vé trực tiếp qua 9Trip:</p>
+                      <p>Đặt vé trực tiếp qua 9 Trip:</p>
                       <ol className="mt-3 space-y-2 text-sm text-left max-w-md mx-auto">
                         <li className="flex gap-3">
                           <span className="font-bold text-blue-600">1.</span>
@@ -431,10 +444,9 @@ export default function ActivityDetailClient({
                     </div>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* ─── Map ─── */}
-              {activeTab === "map" && (
+              <div data-tab-panel="map" className={activeTab === "map" ? "" : "hidden"}>
                 <div className="rounded-xl overflow-hidden border border-gray-200">
                   {map?.lat && map?.lng ? (
                     <GoogleMap
@@ -448,10 +460,9 @@ export default function ActivityDetailClient({
                     <div className="p-10 text-center text-gray-500">Chưa có thông tin bản đồ.</div>
                   )}
                 </div>
-              )}
+              </div>
 
-              {/* ─── Reviews ─── */}
-              {activeTab === "reviews" && (
+              <div data-tab-panel="reviews" className={activeTab === "reviews" ? "" : "hidden"}>
                 <div className="space-y-8">
                   {reviews.length > 0 ? (
                     <div className="space-y-4">
@@ -478,10 +489,9 @@ export default function ActivityDetailClient({
                   )}
                   <WriteReviewForm serviceId={activity.id} serviceType="activity" />
                 </div>
-              )}
+              </div>
 
-              {/* ─── FAQ ─── */}
-              {activeTab === "faq" && (
+              <div data-tab-panel="faq" className={activeTab === "faq" ? "" : "hidden"}>
                 <div>
                   {faq.length > 0 ? (
                     <div className="space-y-2">
@@ -501,7 +511,7 @@ export default function ActivityDetailClient({
                     <div className="text-center py-10 text-gray-500">Chưa có câu hỏi thường gặp.</div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -537,33 +547,6 @@ export default function ActivityDetailClient({
 }
 
 // ─── Internal Sub-components ──────────────────────────────────────────
-
-/**
- * Badge — Info badge with icon for product meta.
- * @param {{ icon?: string, label: string, value: string, highlight?: boolean }} props
- */
-function Badge({ icon, label, value, highlight }) {
-  return (
-    <div
-      className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium ${
-        highlight
-          ? "bg-red-50 text-red-600 border border-red-200"
-          : "bg-gray-50 text-gray-600 border border-gray-200"
-      }`}
-    >
-      {icon && (
-        <span className="flex-shrink-0 w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-[8px]">
-          {label === "Thời gian" && "🕐"}
-          {label === "Ưu đãi" && "🏷️"}
-          {label === "Giờ diễn" && "⏰"}
-          {label === "Địa điểm" && "📍"}
-          {label === "Sức chứa" && "👥"}
-        </span>
-      )}
-      <span>{value}</span>
-    </div>
-  );
-}
 
 /**
  * PolicyCard — Displays a policy section with icon and content.

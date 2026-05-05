@@ -25,7 +25,7 @@ export default function RentalCard({ rental, item }) {
         <Link href={`/rentals/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.name}
         </Link>
-        <p className="text-xs text-gray-500 mb-3 line-clamp-1">📍 {data.location || "Đang cập nhật"}</p>
+        <p className="text-xs text-gray-500 mb-3 line-clamp-1">📍 {data.location || "Phú Quốc"}</p>
         <div className="flex items-center justify-between border-t border-gray-50 pt-3">
           <PriceDisplay price={data.pricing?.basePrice} currency="VND" size="sm" label="Từ " />
           <Link href={`/rentals/${data.slug}`} className="text-xs font-medium text-blue-600 hover:underline">

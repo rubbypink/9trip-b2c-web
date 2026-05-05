@@ -26,7 +26,7 @@ export default function LatestNews({ posts }) {
             Tin tức & Bí kíp Du lịch
           </h2>
           <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-            Cập nhật những thông tin du lịch mới nhất, mẹo vặt và câu chuyện từ cộng đồng 9Trip
+            Cập nhật những thông tin du lịch mới nhất, mẹo vặt và câu chuyện từ cộng đồng 9 Trip
           </p>
         </div>
 

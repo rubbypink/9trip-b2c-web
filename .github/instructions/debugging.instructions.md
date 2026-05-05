@@ -1,9 +1,9 @@
 ---
-description: "Luồng phân tích và xử lý lỗi (Debugging Flow) chuẩn cho 9Trip B2C, áp dụng khi debug lỗi build, runtime, console, hydration, giao diện."
+description: "Luồng phân tích và xử lý lỗi (Debugging Flow) chuẩn cho 9 Trip B2C, áp dụng khi debug lỗi build, runtime, console, hydration, giao diện."
 applyTo: "**/*.js"
 ---
 
-# 9Trip B2C — Debugging & Error Handling Flow
+# 9 Trip B2C — Debugging & Error Handling Flow
 
 Khi phân tích nguyên nhân lỗi và đề xuất hướng xử lý (đặc biệt khi dùng Local Debugger), BẮT BUỘC tuân theo luồng sau để bắt bệnh chuẩn xác và phù hợp với kiến trúc hiện tại (Next.js 16 App Router, Firebase, Tailwind v4, Vanilla JS + JSDoc):
 

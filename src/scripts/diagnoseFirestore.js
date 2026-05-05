@@ -192,7 +192,7 @@ async function checkCollection(colName) {
 
 async function main() {
   console.log("=".repeat(70));
-  console.log("🔬 9Trip — Firestore Data Diagnostic");
+  console.log("🔬 9 Trip — Firestore Data Diagnostic");
   console.log("=".repeat(70));
   console.log();
 
