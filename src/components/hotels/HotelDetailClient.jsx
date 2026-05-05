@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Badge from "@/components/shared/Badge";
@@ -50,7 +50,13 @@ export default function HotelDetailClient({
   totalRating,
   relatedHotels,
 }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && HOTEL_TABS.some(t => t.id === hash)) return hash;
+    }
+    return "overview";
+  });
 
   // ── Hotel field destructuring ───────────────────────────
   const {
@@ -106,6 +112,21 @@ export default function HotelDetailClient({
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${tabId}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && HOTEL_TABS.some(t => t.id === hash)) {
+        setActiveTab(hash);
+      }
+    };
+    syncFromHash();
+    window.addEventListener('popstate', syncFromHash);
+    return () => window.removeEventListener('popstate', syncFromHash);
   }, []);
 
   /**
@@ -117,7 +138,7 @@ export default function HotelDetailClient({
   }, []);
 
   const handleBookNow = useCallback(() => {
-    setActiveTab("rooms");
+    handleTabChange("rooms");
     setTimeout(() => {
       const roomsSection = document.querySelector('[data-section="rooms"]');
       if (roomsSection) {

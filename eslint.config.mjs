@@ -12,7 +12,16 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Functions backend — not a Next.js app
     "9trip-b2c-back-end/**",
+    // Scripts — development only
+    "src/scripts/**",
   ]),
+  {
+    rules: {
+      // Warn on console usage in app/components (use logger instead)
+      "no-console": ["warn", { allow: ["error"] }],
+    },
+    files: ["src/app/**/*.js", "src/components/**/*.jsx", "src/lib/**/*.js"],
+  },
 ]);
 
 export default eslintConfig;

@@ -23,13 +23,13 @@ export default function Header() {
   const cartCount = items?.length || 0;
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-100">
+    <header className="sticky top-0 z-40 bg-background shadow-sm border-b border-border">
       {/* Top bar */}
-      <div className="bg-blue-600 text-white text-sm hidden md:block">
+      <div className="bg-primary-600 text-white text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-blue-200 transition-colors">📞 {SITE.phone}</a>
-            <a href={`mailto:${SITE.email}`} className="hover:text-blue-200 transition-colors">✉️ {SITE.email}</a>
+            <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-primary-200 transition-colors">📞 {SITE.phone}</a>
+            <a href={`mailto:${SITE.email}`} className="hover:text-primary-200 transition-colors">✉️ {SITE.email}</a>
           </div>
           <div className="flex items-center gap-3">
             <span>🌐 VN</span>
@@ -50,24 +50,24 @@ export default function Header() {
               height={40}
               className="rounded-lg"
             />
-            <span className="font-bold text-xl text-gray-900 hidden sm:block">{SITE.name}</span>
+            <span className="font-bold text-xl text-foreground hidden sm:block">{SITE.name}</span>
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link href="/" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Trang chủ
             </Link>
-            <Link href="/tours" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link href="/tours" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Tour
             </Link>
-            <Link href="/hotels" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link href="/hotels" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Khách sạn
             </Link>
-            <Link href="/activities" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link href="/activities" className="text-gray-700 hover:text-primary font-medium transition-colors">
               Hoạt động
             </Link>
-            <Link href="/search" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link href="/search" className="text-gray-700 hover:text-primary font-medium transition-colors">
               🔍
             </Link>
           </nav>
@@ -76,7 +76,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             {/* Cart */}
             <button
-              className="relative p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors"
               onClick={() => setIsCartOpen(!isCartOpen)}
               aria-label="Giỏ hàng"
             >
@@ -92,10 +92,10 @@ export default function Header() {
             {user ? (
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 p-2 text-gray-700 hover:text-blue-600 transition-colors"
+                  className="flex items-center gap-2 p-2 text-gray-700 hover:text-primary-600 transition-colors"
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm">
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
                     {user.email?.[0]?.toUpperCase() || "U"}
                   </div>
                   <span className="hidden md:inline text-sm">{user.email?.split("@")[0]}</span>
@@ -122,7 +122,7 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+              <Link href="/login" className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
                 Đăng nhập
               </Link>
             )}
@@ -141,11 +141,11 @@ export default function Header() {
         {/* Mobile nav */}
         {isMenuOpen && (
           <nav className="lg:hidden pb-4 border-t border-gray-100 pt-3">
-            <Link href="/" className="block py-2 text-gray-700 hover:text-blue-600" onClick={() => setIsMenuOpen(false)}>Trang chủ</Link>
-            <Link href="/tours" className="block py-2 text-gray-700 hover:text-blue-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
-            <Link href="/hotels" className="block py-2 text-gray-700 hover:text-blue-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
-            <Link href="/activities" className="block py-2 text-gray-700 hover:text-blue-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
-            <Link href="/search" className="block py-2 text-gray-700 hover:text-blue-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
+            <Link href="/" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Trang chủ</Link>
+            <Link href="/tours" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
+            <Link href="/hotels" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
+            <Link href="/activities" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
+            <Link href="/search" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
           </nav>
         )}
 
@@ -168,13 +168,13 @@ export default function Header() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{item.serviceTitle}</p>
                       <p className="text-xs text-gray-500">{item.serviceType}</p>
-                      <p className="text-sm text-blue-600 font-semibold">{item.total?.toLocaleString()}₫</p>
+                      <p className="text-sm text-primary-600 font-semibold">{item.total?.toLocaleString()}₫</p>
                     </div>
                   </div>
                 ))}
                 <Link
                   href="/checkout"
-                  className="block w-full text-center bg-blue-600 text-white py-2 rounded-lg mt-3 text-sm font-medium hover:bg-blue-700 transition-colors"
+                  className="block w-full text-center bg-primary-600 text-white py-2 rounded-lg mt-3 text-sm font-medium hover:bg-primary-700 transition-colors"
                   onClick={() => setIsCartOpen(false)}
                 >
                   Thanh toán

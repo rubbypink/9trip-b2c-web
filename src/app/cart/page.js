@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import CartItem from '@/components/cart/CartItem';
 import Link from 'next/link';
+import { logger } from '@/lib/logger';
 
 /**
  * CartPage — hiển thị giỏ hàng với quantity controls, coupon, và tổng tiền.
@@ -21,7 +22,7 @@ export default function CartPage() {
       setCouponMsg(result.message);
       setCouponSuccess(result.success);
     } catch (error) {
-      console.error('[CartPage] Error applying coupon:', error.message);
+      logger.error('[CartPage] Error applying coupon:', error.message);
       setCouponMsg('Lỗi khi áp dụng mã giảm giá. Vui lòng thử lại.');
       setCouponSuccess(false);
     }

@@ -24,7 +24,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
-const ERP_WEBHOOK_BASE = 'https://9tripphuquoc.com/api/webhook';
+const ERP_WEBHOOK_BASE = 'https://erp.9tripphuquoc.com/api/webhook';
 const MAX_RETRIES = 3;
 const VALID_READ_COLLECTIONS = ['tours', 'hotels', 'activities', 'cars', 'rentals', 'locations', 'bookings', 'settings'];
 

@@ -38,7 +38,7 @@ export default function HotelCard({ hotel, item }) {
       </Link>
       <div className="p-4">
         <div className="text-xs mb-1">{stars.join("")}</div>
-        <Link href={`/hotels/${data.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 mb-1 min-h-[2.5rem]">
+        <Link href={`/hotels/${data.slug}`} className="font-semibold text-gray-900 hover:text-primary-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.name || data.title}
         </Link>
         <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || data.address?.city || "Phú Quốc"}</p>
@@ -54,7 +54,7 @@ export default function HotelCard({ hotel, item }) {
             size="sm"
             label="Từ "
           />
-          <Link href={`/hotels/${data.slug}`} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          <Link href={`/hotels/${data.slug}`} className="px-3 py-1.5 bg-primary-600 text-white text-xs font-medium rounded-lg hover:bg-primary-700 transition-colors">
             Chi tiết
           </Link>
         </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/cart"; // Import useCart của bro vào
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import { logger } from "@/lib/logger";
 
 export default function BookingConfirmationPage({ params }) {
     const { bookingId } = params; 
@@ -35,7 +36,7 @@ export default function BookingConfirmationPage({ params }) {
             // 3. Chuyển hướng về trang checkout để khách thấy lại giỏ hàng và thanh toán
             router.push("/checkout");
         } catch (error) {
-            console.error("Lỗi khi khôi phục giỏ hàng:", error);
+            logger.error("Lỗi khi khôi phục giỏ hàng:", error);
             router.push("/cart"); // Lỗi thì cứ đá về cart cho an toàn
         }
     };

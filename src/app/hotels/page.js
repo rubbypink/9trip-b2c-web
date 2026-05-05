@@ -1,5 +1,6 @@
-import { searchHotels, getLocations, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
+import { searchHotels, getLocations, countHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
+import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -20,11 +21,9 @@ export const metadata = {
 
 export const revalidate = 3600;
 
-const PAGE_SIZE = 12;
-
 export default async function HotelsPage({ searchParams }) {
   const params = await searchParams;
-  const currentPage = Math.max(1, Number(params.page) || 1);
+  const page = Math.max(1, Number(params.page) || 1);
 
   const filters = {
     locationId: params.locationId || "",
@@ -33,12 +32,14 @@ export default async function HotelsPage({ searchParams }) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
     amenities: params.amenities || "",
     sortBy: params.sortBy || "newest",
-    pageSize: 120,
+    pageSize: PAGE_SIZE,
+    page,
   };
 
-  const [{ hotels: rawHotels }, locations] = await Promise.all([
+  const [{ hotels: rawHotels }, locations, totalCount] = await Promise.all([
     searchHotels(filters),
     getLocations(),
+    countHotels({ locationId: params.locationId || "" }),
   ]);
 
   let hotels = await resolveDocsImages(rawHotels);
@@ -57,9 +58,7 @@ export default async function HotelsPage({ searchParams }) {
     hotels.sort((a, b) => (b.lowestPrice || b.pricing?.basePrice || 0) - (a.lowestPrice || a.pricing?.basePrice || 0));
   }
 
-  const totalCount = hotels.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const pageHotels = hotels.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -68,7 +67,7 @@ export default async function HotelsPage({ searchParams }) {
     description: "Danh sách khách sạn và resort.",
     url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/hotels`,
     numberOfItems: totalCount,
-    itemListElement: pageHotels.slice(0, 10).map((h, i) => ({
+    itemListElement: hotels.slice(0, 10).map((h, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `/hotels/${h.slug}`,
@@ -111,7 +110,7 @@ export default async function HotelsPage({ searchParams }) {
 
           <div className="flex-1">
             <ServiceList
-              items={pageHotels}
+              items={hotels}
               totalCount={totalCount}
               totalPages={totalPages}
               type="hotel"

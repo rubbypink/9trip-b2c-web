@@ -3,6 +3,7 @@
  * Phân biệt expected errors (empty results, missing optional data)
  * với unexpected errors (network failure, auth issues).
  */
+import { logger } from "./logger";
 
 /** @type {string[]} Error messages that should NOT be logged as errors */
 const EXPECTED_PATTERNS = [
@@ -32,9 +33,9 @@ export function isExpectedError(error) {
 export function logError(context, error) {
   if (isExpectedError(error)) {
     // Expected — log as info, not error
-    console.info(`${context} (expected):`, typeof error === "string" ? error : error?.message);
+    logger.info(`${context} (expected):`, typeof error === "string" ? error : error?.message);
   } else {
-    console.error(`${context}:`, error);
+    logger.error(`${context}:`, error);
   }
 }
 

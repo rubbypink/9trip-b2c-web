@@ -21,13 +21,13 @@ export default function ListingPreload() {
       const store = useListingStore.getState();
 
       if (data.tours && data.tours.items?.length > 0) {
-        store.setPageData('tour:default', data.tours);
+        store.setPageData('tour:default:p1', data.tours);
       }
       if (data.hotels && data.hotels.items?.length > 0) {
-        store.setPageData('hotel:default', data.hotels);
+        store.setPageData('hotel:default:p1', data.hotels);
       }
       if (data.activities && data.activities.items?.length > 0) {
-        store.setPageData('activity:default', data.activities);
+        store.setPageData('activity:default:p1', data.activities);
       }
     } catch {
       // silently fail — data will be fetched normally by the listing page

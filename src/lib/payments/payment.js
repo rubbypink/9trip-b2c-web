@@ -1,5 +1,6 @@
 import { PaymentHelper } from './paymentHelper';
 import crypto from 'crypto';
+import { logger } from '../logger';
 
 export class PaymentService {
     
@@ -101,7 +102,7 @@ export class PaymentService {
 
         // 1. Kiểm tra biến môi trường (Debug cấp 1)
         if (!clientId || !secretKey || !apiUrl) {
-             console.error("LỖI PAYPAL ENV:", { clientId: !!clientId, secretKey: !!secretKey, apiUrl });
+             logger.error("LỖI PAYPAL ENV:", { clientId: !!clientId, secretKey: !!secretKey, apiUrl });
              throw new Error("Thiếu cấu hình PayPal trong file .env");
         }
 
@@ -120,11 +121,10 @@ export class PaymentService {
         
         // 3. Xử lý lỗi xác thực (Debug cấp 2)
         if (!tokenResponse.ok) {
-            console.error("\n=== LỖI PAYPAL AUTH ===");
-            console.error("Status:", tokenResponse.status);
-            console.error("Response:", tokenData);
-            console.error("API URL đang gọi:", apiUrl);
-            console.error("=======================\n");
+            logger.error("=== LỖI PAYPAL AUTH ===");
+            logger.error("Status:", tokenResponse.status);
+            logger.error("Response:", tokenData);
+            logger.error("API URL đang gọi:", apiUrl);
             
             // Bắt lỗi cụ thể
             if (tokenResponse.status === 401) {
@@ -166,10 +166,9 @@ export class PaymentService {
         
         // 6. Xử lý lỗi tạo đơn (Debug cấp 3)
         if (!orderResponse.ok) {
-            console.error("\n=== LỖI TẠO ĐƠN PAYPAL ===");
-            console.error("Status:", orderResponse.status);
-            console.error("Response:", orderResult);
-            console.error("==========================\n");
+            logger.error("=== LỖI TẠO ĐƠN PAYPAL ===");
+            logger.error("Status:", orderResponse.status);
+            logger.error("Response:", orderResult);
             throw new Error(`Lỗi tạo đơn PayPal: ${orderResult.message || 'Không rõ nguyên nhân'}`);
         }
 
@@ -235,7 +234,7 @@ export class PaymentService {
 
         // 3. So sánh chữ ký để chống Hacker sửa data
         if (signature !== expectedSignature) {
-            console.error('LỖI CHỮ KÝ MOMO:', { expected: expectedSignature, actual: signature });
+            logger.error('LỖI CHỮ KÝ MOMO:', { expected: expectedSignature, actual: signature });
             return { success: false, orderId, message: 'Sai chữ ký bảo mật từ MoMo.' };
         }
 
@@ -305,7 +304,7 @@ export class PaymentService {
                 };
             }
         } catch (error) {
-            console.error('[PAYPAL_VERIFY_ERROR]:', error);
+            logger.error('[PAYPAL_VERIFY_ERROR]:', error);
             return { success: false, message: 'Lỗi mạng khi gọi PayPal API.' };
         }
     }

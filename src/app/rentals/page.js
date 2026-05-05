@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { searchRentals } from "@/lib/firestore-admin";
+import { searchRentals, countRentals } from "@/lib/firestore-admin";
+import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ServiceList from "@/components/shared/ServiceList";
 
@@ -19,18 +20,23 @@ export const metadata = {
 
 export const revalidate = 3600;
 
-/**
- * Rentals Page — Listing các dịch vụ cho thuê khác.
- */
 export default async function RentalsPage({ searchParams }) {
   const params = await searchParams;
+  const page = Math.max(1, Number(params.page) || 1);
+
   const filters = {
     type: params.type || "",
     sortBy: params.sortBy || "newest",
-    pageSize: 12,
+    pageSize: PAGE_SIZE,
+    page,
   };
 
-  const { rentals } = await searchRentals(filters);
+  const [{ rentals }, totalCount] = await Promise.all([
+    searchRentals(filters),
+    countRentals({ type: params.type || "" }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -38,7 +44,7 @@ export default async function RentalsPage({ searchParams }) {
     name: "Dịch vụ cho thuê",
     description: "Danh sách dịch vụ cho thuê.",
     url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://9tripphuquoc.com"}/rentals`,
-    numberOfItems: rentals.length,
+    numberOfItems: totalCount,
     itemListElement: rentals.slice(0, 10).map((r, i) => ({
       "@type": "ListItem",
       position: i + 1,
@@ -67,7 +73,6 @@ export default async function RentalsPage({ searchParams }) {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Quick Filters - can be expanded later */}
           <aside className="w-full lg:w-64 flex-shrink-0">
              <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
                 <h3 className="font-semibold text-gray-900 mb-4">Loại dịch vụ</h3>
@@ -94,6 +99,8 @@ export default async function RentalsPage({ searchParams }) {
             </div>}>
               <ServiceList 
                 items={rentals}
+                totalCount={totalCount}
+                totalPages={totalPages}
                 type="rental"
                 emptyTitle="Không tìm thấy dịch vụ nào"
                 emptyMessage="Thử thay đổi bộ lọc hoặc xem các danh mục khác nhé."

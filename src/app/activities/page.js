@@ -1,5 +1,6 @@
 import { searchActivities, getLocations } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
+import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -22,7 +23,6 @@ export const revalidate = 3600;
 export default async function ActivitiesPage({ searchParams }) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const pageSize = 12;
 
   const filters = {
     locationId: params.locationId || "",
@@ -30,7 +30,7 @@ export default async function ActivitiesPage({ searchParams }) {
     minPrice: params.minPrice ? Number(params.minPrice) : null,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : null,
     sortBy: params.sortBy || "newest",
-    pageSize,
+    pageSize: PAGE_SIZE,
     page,
   };
 
@@ -48,7 +48,7 @@ export default async function ActivitiesPage({ searchParams }) {
   ]);
 
   const activities = await resolveDocsImages(rawActivities);
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   const jsonLd = {
     "@context": "https://schema.org",

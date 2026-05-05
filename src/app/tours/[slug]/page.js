@@ -3,6 +3,7 @@ import { getTourBySlug, getRelatedTours, getTourReviews, getTourPricing } from "
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourDetailClient from "@/components/tours/TourDetailClient";
+import { logger } from "@/lib/logger";
 
 export const revalidate = 3600; // ISR: revalidate sau 1h
 
@@ -80,7 +81,7 @@ export default async function TourDetailPage({ params }) {
     avgRating = reviewResult?.avgRating || 0;
     pricingTiers = tiers || [];
   } catch (error) {
-    console.error('[TourDetailPage] Error fetching parallel data:', error.message);
+    logger.error('[TourDetailPage] Error fetching parallel data:', error.message);
     // All fallbacks already set to empty/default above
   }
 
@@ -93,7 +94,7 @@ export default async function TourDetailPage({ params }) {
       resolveDocsImages(rawRelatedTours),
     ]);
   } catch (error) {
-    console.error('[TourDetailPage] Error resolving images:', error.message);
+    logger.error('[TourDetailPage] Error resolving images:', error.message);
     // tour stays as rawTour, relatedTours stays empty
   }
 

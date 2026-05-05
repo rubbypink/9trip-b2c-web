@@ -30,6 +30,7 @@ import {
   listAll,
 } from "firebase/storage";
 import { storage } from "./firebase";
+import { logger } from "./logger";
 
 // ─── Path Builders ────────────────────────────────────────────────────
 
@@ -241,7 +242,7 @@ export async function getStorageImageUrl(imagePath) {
       const storageRef = ref(storage, imagePath);
       return await getDownloadURL(storageRef);
     } catch (error) {
-      console.error(
+      logger.error(
         "[getStorageImageUrl] Failed to resolve gs:// path:",
         imagePath,
         error.message
@@ -255,7 +256,7 @@ export async function getStorageImageUrl(imagePath) {
     const storageRef = ref(storage, imagePath);
     return await getDownloadURL(storageRef);
   } catch (error) {
-    console.error(
+    logger.error(
       "[getStorageImageUrl] Failed to resolve relative path:",
       imagePath,
       error.message
@@ -292,7 +293,7 @@ export async function getGalleryImageUrls(serviceType, serviceId) {
     );
     return urls;
   } catch (error) {
-    console.error("[getGalleryImageUrls] Error:", error.message);
+    logger.error("[getGalleryImageUrls] Error:", error.message);
     return [];
   }
 }
@@ -370,7 +371,7 @@ export async function deleteImage(path) {
     const storageRef = ref(storage, path);
     await deleteObject(storageRef);
   } catch (error) {
-    console.error("[deleteImage] Error:", path, error.message);
+    logger.error("[deleteImage] Error:", path, error.message);
   }
 }
 
@@ -392,7 +393,7 @@ export async function deleteRoomImages(serviceType, serviceId, roomId) {
     const result = await listAll(galleryRef);
     await Promise.all(result.items.map((itemRef) => deleteObject(itemRef)));
   } catch (error) {
-    console.error("[deleteRoomImages] Error listing gallery:", error.message);
+    logger.error("[deleteRoomImages] Error listing gallery:", error.message);
   }
 }
 
@@ -413,7 +414,7 @@ export async function deleteServiceImages(serviceType, serviceId) {
     const result = await listAll(galleryRef);
     await Promise.all(result.items.map((itemRef) => deleteObject(itemRef)));
   } catch (error) {
-    console.error("[deleteServiceImages] Error listing gallery:", error.message);
+    logger.error("[deleteServiceImages] Error listing gallery:", error.message);
   }
 
   // For hotels: also delete all room images
@@ -429,7 +430,7 @@ export async function deleteServiceImages(serviceType, serviceId) {
     } catch (error) {
       // rooms folder might not exist yet — not an error
       if (error.code !== "storage/object-not-found" && error.code !== "storage/404") {
-        console.error("[deleteServiceImages] Error cleaning room images:", error.message);
+        logger.error("[deleteServiceImages] Error cleaning room images:", error.message);
       }
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Badge from "@/components/shared/Badge";
@@ -45,10 +45,31 @@ export default function ActivityDetailClient({
   avgRating = 0,
   totalRating = 0,
 }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && TABS.some(t => t.id === hash)) return hash;
+    }
+    return "overview";
+  });
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${tabId}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && TABS.some(t => t.id === hash)) {
+        setActiveTab(hash);
+      }
+    };
+    syncFromHash();
+    window.addEventListener('popstate', syncFromHash);
+    return () => window.removeEventListener('popstate', syncFromHash);
   }, []);
 
   const {

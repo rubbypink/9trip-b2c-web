@@ -17,6 +17,7 @@
 
 import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import { logger } from './logger';
 
 // ─── Collection References ────────────────────────────────────────────
 
@@ -94,7 +95,7 @@ export async function getDocById(colName, id) {
     const snap = await getDoc(doc(db, colName, id));
     return snap.exists() ? serializeDoc(snap) : null;
   } catch (error) {
-    console.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
+    logger.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
     return null;
   }
 }
@@ -110,7 +111,7 @@ export async function createDoc(colName, data) {
     const ref = await addDoc(collection(db, colName), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
     return ref.id;
   } catch (error) {
-    console.error(`[createDoc] Error creating ${colName}:`, error.message);
+    logger.error(`[createDoc] Error creating ${colName}:`, error.message);
     return null;
   }
 }
@@ -125,7 +126,7 @@ export async function updateDocById(colName, id, data) {
   try {
     await updateDoc(doc(db, colName, id), { ...data, updatedAt: serverTimestamp() });
   } catch (error) {
-    console.error(`[updateDocById] Error updating ${colName}/${id}:`, error.message);
+    logger.error(`[updateDocById] Error updating ${colName}/${id}:`, error.message);
   }
 }
 
@@ -138,7 +139,7 @@ export async function deleteDocById(colName, id) {
   try {
     await deleteDoc(doc(db, colName, id));
   } catch (error) {
-    console.error(`[deleteDocById] Error deleting ${colName}/${id}:`, error.message);
+    logger.error(`[deleteDocById] Error deleting ${colName}/${id}:`, error.message);
   }
 }
 
@@ -155,7 +156,7 @@ export async function createBooking(bookingData) {
     const id = await createDoc('bookings', { bookingCode, ...bookingData, bookingStatus: 'pending', paymentStatus: 'pending', erpSyncStatus: 'pending' });
     return id;
   } catch (error) {
-    console.error('[createBooking] Error:', error.message);
+    logger.error('[createBooking] Error:', error.message);
     return null;
   }
 }
@@ -201,7 +202,7 @@ export async function createReview(reviewData) {
     const id = await createDoc('reviews', { ...reviewData, status: 'pending' });
     return id;
   } catch (error) {
-    console.error('[createReview] Error:', error.message);
+    logger.error('[createReview] Error:', error.message);
     return null;
   }
 }
@@ -217,7 +218,7 @@ export async function getUserReviews(userId) {
     const snap = await getDocs(q);
     return snap.docs.map((d) => serializeDoc(d));
   } catch (error) {
-    console.error(`[getUserReviews] Error for user=${userId}:`, error.message);
+    logger.error(`[getUserReviews] Error for user=${userId}:`, error.message);
     return [];
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import TourCard from "@/components/tours/TourCard";
 import TourBookingWidget from "@/components/tours/TourBookingWidget";
 import WriteReviewForm from "@/components/reviews/WriteReviewForm";
@@ -24,10 +24,31 @@ const TABS = [
 ];
 
 export default function TourDetailClient({ tour, pricingTiers = [], relatedTours = [], reviews = [], avgRating = 0, totalRating = 0 }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && TABS.some(t => t.id === hash)) return hash;
+    }
+    return "overview";
+  });
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${tabId}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && TABS.some(t => t.id === hash)) {
+        setActiveTab(hash);
+      }
+    };
+    syncFromHash();
+    window.addEventListener('popstate', syncFromHash);
+    return () => window.removeEventListener('popstate', syncFromHash);
   }, []);
 
   const {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Pagination from "./Pagination";
 import EmptyState from "./EmptyState";
@@ -21,9 +21,10 @@ const CARD_MAP = {
 
 function buildCacheKey(type, searchParams) {
   const params = new URLSearchParams(searchParams);
+  const page = params.get("page") || "1";
   params.delete("page");
   const filterStr = params.toString();
-  return `${type}:${filterStr ? filterStr : "default"}`;
+  return `${type}:${filterStr ? filterStr : "default"}:p${page}`;
 }
 
 function buildPageKey(type, searchParams, page) {
@@ -34,8 +35,8 @@ function buildPageKey(type, searchParams, page) {
 
 /**
  * ServiceList — "use client" listing component.
- * Renders service cards based on a string `type` prop to avoid serialization errors
- * that occur when passing React components (functions) from Server to Client Components.
+ * Cache-first rendering: checks zustand cache on mount for instant display,
+ * then updates with fresh server data when it arrives.
  *
  * @param {{
  *   items: Array,
@@ -59,8 +60,26 @@ export default function ServiceList({
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
+  const cacheKey = buildCacheKey(type, searchParams);
+  const getPageData = useListingStore((s) => s.getPageData);
   const setPageData = useListingStore((s) => s.setPageData);
   const prefetchedPages = useRef(new Set());
+
+  const [displayItems, setDisplayItems] = useState(() => {
+    const cached = getPageData(cacheKey);
+    if (cached?.items?.length > 0) return cached.items;
+    return items;
+  });
+  const [displayTotalCount, setDisplayTotalCount] = useState(() => {
+    const cached = getPageData(cacheKey);
+    if (cached?.totalCount != null && cached.totalCount > 0) return cached.totalCount;
+    return totalCount;
+  });
+  const [displayTotalPages, setDisplayTotalPages] = useState(() => {
+    const cached = getPageData(cacheKey);
+    if (cached?.totalPages != null && cached.totalPages > 0) return cached.totalPages;
+    return totalPages;
+  });
 
   const handlePageChange = (page) => {
     const params = new URLSearchParams(searchParams);
@@ -70,15 +89,17 @@ export default function ServiceList({
 
   useEffect(() => {
     if (items.length > 0) {
-      const filterKey = buildCacheKey(type, searchParams);
-      setPageData(filterKey, {
+      setDisplayItems(items);
+      setDisplayTotalCount(totalCount);
+      setDisplayTotalPages(totalPages);
+      setPageData(cacheKey, {
         items,
         totalCount,
         totalPages,
         currentPage,
       });
     }
-  }, [items, totalCount, totalPages, currentPage, type, searchParams, setPageData]);
+  }, [items, totalCount, totalPages, currentPage, cacheKey, setPageData]);
 
   useEffect(() => {
     prefetchedPages.current.clear();
@@ -89,7 +110,7 @@ export default function ServiceList({
     }
   }, [currentPage, totalPages, type, searchParams, router]);
 
-  if (items.length === 0) {
+  if (displayItems.length === 0) {
     return <EmptyState title={emptyTitle} message={emptyMessage} />;
   }
 
@@ -98,15 +119,15 @@ export default function ServiceList({
   return (
     <div>
       <div className={gridClassName + " mb-10"}>
-        {items.map((item) => (
+        {displayItems.map((item) => (
           <CardComponent key={item.id} item={item} />
         ))}
       </div>
 
-      {totalPages > 1 && (
+      {displayTotalPages > 1 && (
         <Pagination
           currentPage={currentPage}
-          totalPages={totalPages}
+          totalPages={displayTotalPages}
           onPageChange={handlePageChange}
         />
       )}

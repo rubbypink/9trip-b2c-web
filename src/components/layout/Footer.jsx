@@ -21,7 +21,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-auto">
+    <footer className="bg-gray-900 text-muted-foreground mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company info */}
@@ -34,9 +34,9 @@ export default function Footer() {
                 height={40}
                 className="rounded-lg"
               />
-              <span className="font-bold text-xl text-white">{SITE.name}</span>
+              <span className="font-bold text-xl text-card-foreground">{SITE.name}</span>
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               {SITE_DESCRIPTION}
             </p>
             <div className="flex gap-3 mt-4">
@@ -46,7 +46,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center hover:bg-blue-600 transition-colors"
+                  className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center hover:bg-primary-600 transition-colors"
                   aria-label={social.alt}
                 >
                   {social.icon ? (
@@ -68,10 +68,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-4">Liên kết nhanh</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/tours" className="hover:text-blue-400 transition-colors">Tour du lịch</Link></li>
-              <li><Link href="/hotels" className="hover:text-blue-400 transition-colors">Khách sạn</Link></li>
-              <li><Link href="/activities" className="hover:text-blue-400 transition-colors">Hoạt động</Link></li>
-              <li><Link href="/search" className="hover:text-blue-400 transition-colors">Tìm kiếm</Link></li>
+              <li><Link href="/tours" className="hover:text-primary-400 transition-colors">Tour du lịch</Link></li>
+              <li><Link href="/hotels" className="hover:text-primary-400 transition-colors">Khách sạn</Link></li>
+              <li><Link href="/activities" className="hover:text-primary-400 transition-colors">Hoạt động</Link></li>
+              <li><Link href="/search" className="hover:text-primary-400 transition-colors">Tìm kiếm</Link></li>
             </ul>
           </div>
 
@@ -79,9 +79,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-4">Hỗ trợ</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/cancellation" className="hover:text-blue-400 transition-colors">Chính sách hủy</Link></li>
-              <li><Link href="/terms" className="hover:text-blue-400 transition-colors">Điều khoản sử dụng</Link></li>
-              <li><Link href="/privacy" className="hover:text-blue-400 transition-colors">Chính sách bảo mật</Link></li>
+              <li><Link href="/cancellation" className="hover:text-primary-400 transition-colors">Chính sách hủy</Link></li>
+              <li><Link href="/terms" className="hover:text-primary-400 transition-colors">Điều khoản sử dụng</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary-400 transition-colors">Chính sách bảo mật</Link></li>
             </ul>
           </div>
 
@@ -93,10 +93,10 @@ export default function Footer() {
                 <span>📍</span> {COMPANY.address}
               </li>
               <li className="flex items-center gap-2">
-                <span>📞</span> <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-blue-400 transition-colors">{SITE.phone}</a>
+                <span>📞</span> <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-primary-400 transition-colors">{SITE.phone}</a>
               </li>
               <li className="flex items-center gap-2">
-                <span>✉️</span> <a href={`mailto:${SITE.email}`} className="hover:text-blue-400 transition-colors">{SITE.email}</a>
+                <span>✉️</span> <a href={`mailto:${SITE.email}`} className="hover:text-primary-400 transition-colors">{SITE.email}</a>
               </li>
             </ul>
           </div>

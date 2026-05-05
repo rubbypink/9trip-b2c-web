@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import { logger } from './logger';
 
 // Hàm xử lý parse private key do Vercel hay bị lỗi vụ dấu \n
 const formatPrivateKey = (key) => {
@@ -17,7 +18,7 @@ if (!admin.apps.length) {
       }),
     });
   } catch (error) {
-    console.error('Lỗi khởi tạo Firebase Admin:', error);
+    logger.error('Lỗi khởi tạo Firebase Admin:', error);
   }
 }
 

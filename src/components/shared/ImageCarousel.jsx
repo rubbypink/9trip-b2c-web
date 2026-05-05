@@ -88,6 +88,15 @@ export default function ImageCarousel({
     setCurrentIndex(0);
   }, [images.length]);
 
+  useEffect(() => {
+    if (showLightbox) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showLightbox]);
+
   if (!hasImages) {
     return (
       <div className={`bg-gray-200 rounded-xl flex items-center justify-center h-64 ${className}`}>
@@ -110,6 +119,7 @@ export default function ImageCarousel({
           {images.map((img, idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => setShowLightbox(true)}
               className="relative w-full h-full flex-shrink-0 snap-start cursor-pointer bg-gray-100"
               aria-label={`${alt} ${idx + 1}`}
@@ -136,6 +146,7 @@ export default function ImageCarousel({
             {images.map((_, idx) => (
               <button
                 key={idx}
+                type="button"
                 onClick={() => scrollToIndex(idx)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   idx === currentIndex
@@ -151,6 +162,7 @@ export default function ImageCarousel({
         {/* "Xem tất cả ảnh" overlay button */}
         {showOverlay && images.length > 1 && (
           <button
+            type="button"
             onClick={() => setShowLightbox(true)}
             className="absolute bottom-4 right-4 z-10 rounded-lg bg-black/60 text-white text-sm font-medium px-3 py-1.5 hover:bg-black/80 transition-colors backdrop-blur-sm"
           >
@@ -167,6 +179,7 @@ export default function ImageCarousel({
         {images.length > 1 && (
           <>
             <button
+              type="button"
               onClick={() => scrollToIndex(Math.max(0, currentIndex - 1))}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 hover:bg-white/90 text-gray-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md z-10"
               aria-label="Ảnh trước"
@@ -176,6 +189,7 @@ export default function ImageCarousel({
               </svg>
             </button>
             <button
+              type="button"
               onClick={() => scrollToIndex(Math.min(images.length - 1, currentIndex + 1))}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 hover:bg-white/90 text-gray-800 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md z-10"
               aria-label="Ảnh sau"
@@ -195,6 +209,7 @@ export default function ImageCarousel({
           onClick={() => setShowLightbox(false)}
         >
           <button
+            type="button"
             className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10"
             onClick={() => setShowLightbox(false)}
             aria-label="Đóng"
@@ -202,6 +217,7 @@ export default function ImageCarousel({
             ✕
           </button>
           <button
+            type="button"
             className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
             onClick={(e) => {
               e.stopPropagation();
@@ -214,6 +230,7 @@ export default function ImageCarousel({
             ‹
           </button>
           <button
+            type="button"
             className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
             onClick={(e) => {
               e.stopPropagation();

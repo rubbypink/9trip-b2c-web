@@ -37,12 +37,20 @@ import { serializeDoc } from "@/lib/firestore";
 return <ClientComponent data={serializeDoc(snapshot)} />;
 ```
 
-## Project Context
-For full project context, see in `memory-bank/`. Choose to read the following files based on your needs:
-1. **projectbrief** project overview, goals, target audience, key features.
-2. **techContext** current tech stack, project structure, environment variable, coding standards.
-3. **systemPatterns** system patterns, firebase architecture,  calculation logic, other patterns like Payment, data fetching, seo etc.
-4. **productContext** project reality meaning like project goals, user needs...
-5. **activeContext** current focus, recent changes, next steps. Refresh this before starting work to ensure alignment with current priorities and context.
-6. **progress** Project progress, milestones, blockers, etc. Update this regularly to keep track of progress and challenges.
-7. **schema** includes files like `hotels.schema.md`, `tours.schema.md`, etc. that define the Firestore document structure for each collection.
+## Memory Bank — How to Use
+
+Project knowledge is split into **7 specialized files**. Each file has ONE clear purpose. Read only what you need:
+
+| File | Purpose | When to Read |
+|---|---|---|
+| **projectbrief** | Vision, goals, roadmap, architecture decisions | Starting a new feature — understand WHY and direction |
+| **techContext** | Tech stack, coding standards, constraints, env vars | Writing code — know WHAT tools and rules |
+| **systemPatterns** | Architectural patterns, data flow, auth, payments, SEO | Building a feature — know HOW the system works |
+| **productContext** | Business rules, domain concepts, DB collections & permissions, user flows | Understanding domain logic or DB structure |
+| **directory-index** | File finder — where everything lives, organized by purpose | Finding a specific file or understanding project layout |
+| **activeContext** | Current work focus, recent changes, active decisions | Starting ANY work — ensure alignment with current state |
+| **progress** | Phase tracking, milestones, known issues, decision history | Checking what's done or finding historical context |
+
+**Quick lookup:** Tôi cần sửa X → Check `directory-index.md` mục "Tìm file theo mục đích".
+
+**Priority order when starting work:** `activeContext` → `projectbrief` → `productContext` → `systemPatterns` → `techContext`

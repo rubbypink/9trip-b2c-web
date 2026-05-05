@@ -1,5 +1,6 @@
 import { searchTours, getLocations, countTours } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
+import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -30,7 +31,7 @@ export default async function ToursPage({ searchParams }) {
     maxPrice: params.maxPrice ? Number(params.maxPrice) : "",
     minRating: params.minRating ? Number(params.minRating) : "",
     sortBy: params.sortBy || "newest",
-    pageSize: 12,
+    pageSize: PAGE_SIZE,
     page,
   };
 
@@ -41,7 +42,7 @@ export default async function ToursPage({ searchParams }) {
   ]);
 
   const tours = await resolveDocsImages(rawTours);
-  const totalPages = Math.max(1, Math.ceil(totalCount / 12));
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const jsonLd = {
     "@context": "https://schema.org",
