@@ -67,7 +67,12 @@ export default function ImageCarousel({
         const newIndex = diff > 0
           ? Math.min(currentIndex + 1, images.length - 1)
           : Math.max(currentIndex - 1, 0);
-        scrollRef.current.children[newIndex]?.scrollIntoView({ behavior: "smooth", inline: "start" });
+        
+        const el = scrollRef.current;
+        el.scrollTo({
+          left: newIndex * el.clientWidth,
+          behavior: "smooth"
+        });
         setCurrentIndex(newIndex);
       }
       setTouchStart(null);
@@ -79,7 +84,10 @@ export default function ImageCarousel({
   const scrollToIndex = useCallback((idx) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.children[idx]?.scrollIntoView({ behavior: "smooth", inline: "start" });
+    el.scrollTo({
+      left: idx * el.clientWidth,
+      behavior: "smooth"
+    });
     setCurrentIndex(idx);
   }, []);
 
