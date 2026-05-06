@@ -1,11 +1,63 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { mockLatestNews } from "@/lib/mockData";
+
 /**
  * LatestNews / BlogPosts — Section hiển thị bài viết mới nhất.
  * Hiển thị dạng grid card với ảnh, tiêu đề, excerpt, ngày đăng.
  *
- * @param {{ posts: Array<{id: string, title: string, slug: string, excerpt: string, featuredImage?: string, createdAt: {toDate: Function}}> }} props
+ * @param {{ posts?: Array<{id: string, title: string, slug: string, excerpt: string, featuredImage?: string, createdAt: any}> }} props
  */
-export default function LatestNews({ posts }) {
-  if (!posts || posts.length === 0) return null;
+export default function LatestNews({ posts: initialPosts }) {
+  const [posts, setPosts] = useState(initialPosts || []);
+  const [loading, setLoading] = useState(!initialPosts);
+
+  useEffect(() => {
+    if (initialPosts) return;
+
+    async function fetchPosts() {
+      try {
+        const postsRef = collection(db, "posts");
+        const q = query(
+          postsRef,
+          where("status", "==", "published"),
+          orderBy("createdAt", "desc"),
+          limit(3)
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedPosts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        if (fetchedPosts.length > 0) {
+          setPosts(fetchedPosts);
+        } else {
+          // Fallback to mock data if empty
+          setPosts(mockLatestNews.map(p => ({
+            ...p,
+            featuredImage: p.thumbnail,
+            createdAt: p.publishedAt
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching latest news:", error);
+        // Fallback to mock data on error
+        setPosts(mockLatestNews.map(p => ({
+          ...p,
+          featuredImage: p.thumbnail,
+          createdAt: p.publishedAt
+        })));
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, [initialPosts]);
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "";
@@ -16,6 +68,34 @@ export default function LatestNews({ posts }) {
       day: "numeric",
     });
   };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="h-10 w-64 bg-muted animate-pulse mx-auto mb-4 rounded-lg" />
+            <div className="h-6 w-96 bg-muted animate-pulse mx-auto rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-2xl overflow-hidden shadow-sm bg-card">
+                <div className="aspect-[16/10] bg-muted animate-pulse" />
+                <div className="p-5">
+                  <div className="h-4 w-24 bg-muted animate-pulse mb-2 rounded" />
+                  <div className="h-6 w-full bg-muted animate-pulse mb-2 rounded" />
+                  <div className="h-4 w-full bg-muted animate-pulse mb-1 rounded" />
+                  <div className="h-4 w-2/3 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!posts || posts.length === 0) return null;
 
   return (
     <section className="py-16 bg-background">
