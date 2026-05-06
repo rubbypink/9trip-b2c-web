@@ -349,3 +349,93 @@ Sử dụng lazy rendering mode. Standard mode chỉ extract visible text, khôn
 | `.agents/lib/adapters/booking-adapter.mjs` | Booking.com specific extraction |
 | `.agents/lib/adapters/index.mjs` | Adapter registry |
 | `.agents/lib/pricing-extractor.mjs` | Mandatory child pricing validation |
+
+## Agent-Browser Command Reference
+
+Khi cần tương tác trình duyệt trực tiếp (lazy rendering, click tabs, scroll), sử dụng **agent-browser CLI** thay vì sleep cố định.
+
+| Lệnh | Mô tả | Ví dụ |
+|------|--------|-------|
+| `snapshot -i` | Chụp accessibility tree chỉ interactive elements | `agent-browser snapshot -i` |
+| `wait --fn "JS"` | Chờ JS expression trả về truthy | `agent-browser wait --fn "!document.querySelector('.spinner')"` |
+| `wait --text "..."` | Chờ text xuất hiện trên trang | `agent-browser wait --text "Kết quả"` |
+| `wait --load networkidle` | Chờ network idle (AJAX xong) | `agent-browser wait --load networkidle` |
+| `batch` | Chạy nhiều lệnh liên tiếp | `agent-browser batch "open URL" "snapshot -i"` |
+| `click @ref` | Click element theo @ref từ snapshot | `agent-browser click @e3` |
+
+> **Tài liệu đầy đủ:** [`.agents/lib/agent-browser-guide.md`](../../lib/agent-browser-guide.md)
+
+### Quy tắc vàng
+
+1. **Luôn `snapshot -i` trước khi tương tác** — @ref cũ không hợp lệ sau khi DOM thay đổi.
+2. **Dùng `wait --fn` hoặc `wait --text`** thay vì `sleep(ms)` — chờ điều kiện thực tế, không đoán thời gian.
+3. **Re-snapshot sau mỗi lần DOM thay đổi** (click, scroll, navigate).
+
+## Lazy Rendering Best Practices
+
+Khi scrape tour từ các website có lazy rendering (ivivu.com, v.v.), **KHÔNG dùng `sleep(1000)`** hoặc `wait <ms>` cố định. Thay vào đó, dùng `agent-browser` wait commands với điều kiện cụ thể:
+
+### Scroll tải ảnh — dùng `{ action: 'wait' }` (NetworkIdle)
+
+```bash
+# ❌ SAI — sleep cố định, không biết khi nào ảnh load xong
+agent-browser scroll down 1000
+agent-browser wait 3000
+
+# ✅ ĐÚNG — chờ network idle, đảm bảo ảnh đã load
+agent-browser scroll down 1000
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+```
+
+### Bung lịch trình — dùng `wait --text`
+
+```bash
+# ❌ SAI — đoán thời gian, có thể quá sớm
+agent-browser click @e_xem_tat_ca
+agent-browser wait 2000
+
+# ✅ ĐÚNG — chờ nội dung lịch trình thực sự hiển thị
+agent-browser click @e_xem_tat_ca
+agent-browser wait --text "Ngày"
+agent-browser snapshot -i
+```
+
+### Click tabs giá trẻ em — dùng `wait --fn`
+
+```bash
+# ❌ SAI — tab chưa kịp render
+agent-browser click @e_tre_em_tab
+agent-browser wait 1000
+
+# ✅ ĐÚNG — chờ element giá xuất hiện
+agent-browser click @e_tre_em_tab
+agent-browser wait --fn "document.querySelector('.child-price')"
+agent-browser snapshot -i
+```
+
+### Luồng khuyến nghị cho tour lazy rendering
+
+```bash
+agent-browser open https://www.ivivu.com/du-lich/tour/...
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# Scroll để load ảnh
+agent-browser scroll down 500
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# Bung lịch trình
+agent-browser click @e_xem_tat_ca
+agent-browser wait --text "Ngày"
+agent-browser snapshot -i
+
+# Click tab giá trẻ em
+agent-browser click @e_tre_em_tab
+agent-browser wait --fn "document.querySelector('.child-price')"
+agent-browser snapshot -i
+
+# Extract toàn bộ dữ liệu
+agent-browser get text body
+```

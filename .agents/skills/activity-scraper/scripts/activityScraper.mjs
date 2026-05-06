@@ -13,6 +13,63 @@ import { normalizeImageUrl, deduplicateUrls } from '../../../lib/image-helpers.m
 import fs from 'fs';
 
 /**
+ * Scrape activity data from a URL using browser automation (lazy rendering mode).
+ * Extracts page content via Playwright, then processes with scrapeActivityFromText.
+ * Merges per-tier child pricing data from browser interaction into the result.
+ *
+ * @param {string} url - Activity page URL
+ * @param {Object} [options] - Scraping options
+ * @returns {Promise<Object>} Scraped and mapped activity data with merged child pricing
+ */
+export async function scrapeActivityFromUrl(url, options = {}) {
+  const timeline = [];
+  const log = (p, s, d) => timeline.push({ phase: p, status: s, detail: d, time: new Date().toISOString() });
+
+  log('A', 'start', `URL: ${url} (lazy rendering mode)`);
+
+  // Step 1: Extract page data with browser automation
+  const { extractActivityPage } = await import('../../../lib/browser-automation.mjs');
+  const extractResult = await extractActivityPage(url);
+
+  if (!extractResult.success) {
+    log('A', 'fail', `Extraction failed: ${extractResult.error || 'unknown'}`);
+    return { success: false, error: 'Failed to extract activity page', timeline };
+  }
+
+  const { data, childPrices, childPricing } = extractResult;
+  const pageText = data?.bodyText || '';
+
+  log('B', 'ok', `Extracted page data, ${pageText.length} chars, ${Object.keys(childPrices || {}).length} tier child prices`);
+
+  // Step 2: Process with scrapeActivityFromText
+  const scrapeResult = await scrapeActivityFromText(pageText, url);
+
+  if (!scrapeResult.success) {
+    log('C', 'fail', `Scrape failed: ${scrapeResult.error}`);
+    return scrapeResult;
+  }
+
+  // Step 3: Merge per-tier child pricing data
+  if (childPrices && Object.keys(childPrices).length > 0) {
+    for (const [tierIndex, priceData] of Object.entries(childPrices)) {
+      const idx = parseInt(tierIndex);
+      if (idx < scrapeResult.data.pricing.tiers.length && priceData.childPrice) {
+        scrapeResult.data.pricing.tiers[idx].childPrice = priceData.childPrice;
+      }
+    }
+  }
+  if (childPricing) {
+    if (childPricing.childPrice && !scrapeResult.data.pricing.childPrice) scrapeResult.data.pricing.childPrice = childPricing.childPrice;
+    if (childPricing.infantPrice && !scrapeResult.data.pricing.infantPrice) scrapeResult.data.pricing.infantPrice = childPricing.infantPrice;
+    if (childPricing.seniorPrice && !scrapeResult.data.pricing.seniorPrice) scrapeResult.data.pricing.seniorPrice = childPricing.seniorPrice;
+  }
+
+  log('C', 'ok', 'Merged child pricing data');
+
+  return scrapeResult;
+}
+
+/**
  * Scrape activity data from page text.
  * @param {string} pageText - Full page text/markdown
  * @param {string} url - Source URL

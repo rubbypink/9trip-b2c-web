@@ -310,3 +310,82 @@ Skill này hỗ trợ mọi URL web hợp lệ. Dưới đây là một số pat
 - **List page**: URL trang danh sách activity (fallback — agent tự tìm và scrape từng activity)
 
 > **Lưu ý:** Skill không giới hạn nguồn web. Bạn có thể cung cấp URL từ bất kỳ website nào có chứa thông tin activity / điểm tham quan.
+
+## Agent-Browser Command Reference
+
+Khi cần tương tác trình duyệt trực tiếp (lazy rendering, click tabs, scroll), sử dụng **agent-browser CLI** thay vì sleep cố định.
+
+| Lệnh | Mô tả | Ví dụ |
+|------|--------|-------|
+| `snapshot -i` | Chụp accessibility tree chỉ interactive elements | `agent-browser snapshot -i` |
+| `wait --fn "JS"` | Chờ JS expression trả về truthy | `agent-browser wait --fn "!document.querySelector('.spinner')"` |
+| `wait --text "..."` | Chờ text xuất hiện trên trang | `agent-browser wait --text "Kết quả"` |
+| `wait --load networkidle` | Chờ network idle (AJAX xong) | `agent-browser wait --load networkidle` |
+| `batch` | Chạy nhiều lệnh liên tiếp | `agent-browser batch "open URL" "snapshot -i"` |
+| `click @ref` | Click element theo @ref từ snapshot | `agent-browser click @e3` |
+
+> **Tài liệu đầy đủ:** [`.agents/lib/agent-browser-guide.md`](../../lib/agent-browser-guide.md)
+
+### Quy tắc vàng
+
+1. **Luôn `snapshot -i` trước khi tương tác** — @ref cũ không hợp lệ sau khi DOM thay đổi.
+2. **Dùng `wait --fn` hoặc `wait --text`** thay vì `sleep(ms)` — chờ điều kiện thực tế, không đoán thời gian.
+3. **Re-snapshot sau mỗi lần DOM thay đổi** (click, scroll, navigate).
+
+## Scraping Workflow Patterns
+
+### Pattern 1: Navigate + Wait + Extract
+
+Luồng cơ bản cho mọi trang activity:
+
+```bash
+# 1. Mở trang
+agent-browser open https://example.com/activity/xyz
+agent-browser wait --load networkidle
+
+# 2. Snapshot để lấy @refs
+agent-browser snapshot -i
+
+# 3. Scroll để kích hoạt lazy load (ảnh, pricing)
+agent-browser scroll down 500
+agent-browser wait --fn "document.querySelectorAll('.gallery-img').length > 3"
+agent-browser snapshot -i
+
+# 4. Extract dữ liệu
+agent-browser get text body
+```
+
+### Pattern 2: Batch Form Operations
+
+Khi cần click nhiều tabs/accordions để reveal nội dung ẩn (FAQ, pricing tiers, itinerary):
+
+```bash
+agent-browser batch --bail \
+  "open https://example.com/activity/xyz" \
+  "wait --load networkidle" \
+  "snapshot -i" \
+  "click @e_faq_tab" \
+  "wait --text 'Câu hỏi thường gặp'" \
+  "snapshot -i" \
+  "click @e_pricing_tab" \
+  "wait --text 'Giá trẻ em'" \
+  "snapshot -i" \
+  "get text body"
+```
+
+## Child Price Extraction
+
+Giá trẻ em thường bị ẩn trong tabs/collapsed sections trên trang activity. Luồng dữ liệu xử lý:
+
+1. **`extractActivityPage(url)`** (trong `.agents/lib/browser-automation.mjs`) mở trang activity bằng agent-browser.
+2. Sau khi page load, hàm gọi **`extractChildPricesPerTier(tierInfo)`** — duyệt từng pricing tier, click vào tab "Trẻ em" / "Em bé" để reveal giá, rồi extract từ DOM.
+3. Kết quả child price được **merge vào `pricing.tiers`** trong `activityScraper.mjs`:
+   ```javascript
+   // activityScraper.mjs — merge child prices vào tiers
+   if (idx < scrapeResult.data.pricing.tiers.length && priceData.childPrice) {
+     scrapeResult.data.pricing.tiers[idx].childPrice = priceData.childPrice;
+   }
+   ```
+4. Mỗi tier trong `pricing.tiers` sẽ có đầy đủ `basePrice` (người lớn) + `childPrice` (trẻ em) trước khi lưu vào Firestore.
+
+> **Lưu ý:** Nếu `extractChildPricesPerTier` không tìm thấy giá trẻ em, `childPrice` sẽ là `0` (miễn phí) theo schema mặc định.

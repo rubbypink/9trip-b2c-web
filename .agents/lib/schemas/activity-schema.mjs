@@ -385,7 +385,7 @@ export function MAP_TO_FIRESTORE(rawData) {
 			name: tier.name || 'Standard',
 			description: tier.description || '',
 			adultPrice: tier.adultPrice || 0,
-			childPrice: tier.childPrice || 0,
+			childPrice: tier.childPrice ?? null,
 			currency: tier.currency || 'VND',
 			discountPercent: tier.discountPercent || 0,
 			included: Array.isArray(tier.included) ? tier.included : [],
@@ -398,7 +398,7 @@ export function MAP_TO_FIRESTORE(rawData) {
 		pricing = {
 			basePrice,
 			adultPrice: rawData.pricing.adultPrice || basePrice,
-			childPrice: rawData.pricing.childPrice || 0,
+			childPrice: rawData.pricing.childPrice ?? null,
 			currency: rawData.pricing.currency || 'VND',
 			tiers,
 		};

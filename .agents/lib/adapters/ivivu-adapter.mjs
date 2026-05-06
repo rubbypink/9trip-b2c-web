@@ -19,7 +19,7 @@ import { slugify } from '../scrape-helpers.mjs';
 
 export function extractFromDOM() {
   const body = document.body.innerText;
-  const result = {};
+  let result = {};
 
   // Title
   const h1 = document.querySelector('h1');
@@ -190,8 +190,7 @@ function extractItineraryWithDetails(body) {
   const dayBlocks = document.querySelectorAll('[id*="collapseDay"], [class*="collapseDay"], [class*="day-"]');
   dayBlocks.forEach((block) => {
     const text = block.textContent.trim();
-    const dayMatch = text.match(/Ngày\s*(\d+)[\s:]*([^(
-]+)/);
+    const dayMatch = text.match(/Ngày\s*(\d+)[\s:]*([^(]+)/);
     const mealMatch = text.match(/\(([^)]*(?:Ăn|ăn)[^)]*)\)/);
     
     if (dayMatch) {
@@ -214,8 +213,7 @@ function extractItineraryWithDetails(body) {
 
   // Fallback: parse from body text
   if (itineraryDays.length === 0) {
-    const dayPattern = /Ngày\s*(\d+)[\s:]*([^(
-]+?)(?:\s*\(([^)]*)\))?/g;
+    const dayPattern = /Ngày\s*(\d+)[\s:]*([^(]+?)(?:\s*\(([^)]*)\))?/g;
     let m;
     while ((m = dayPattern.exec(body)) !== null) {
       itineraryDays.push({ 
@@ -269,7 +267,7 @@ function extractNotes(body) {
 // ============================================================================
 
 export function extractFromMarkdown(markdown, url) {
-  const result = {};
+  let result = {};
 
   // Title - try markdown format first, then plain text
   const h1Match = markdown.match(/^#\s*\*?\*?(Tour[^\n]+)/m);
@@ -418,8 +416,7 @@ function extractItineraryFromMarkdown(markdown) {
   
   // Fallback: simpler pattern
   if (itinDays.length === 0) {
-    const dayRegex2 = /Ngày\s*(\d+)\s*[:]*\s*([^(
-]+?)(?:\s*\(([^)]+)\))?/g;
+    const dayRegex2 = /Ngày\s*(\d+)\s*[:]*\s*([^(]+?)(?:\s*\(([^)]+)\))?/g;
     while ((m = dayRegex2.exec(markdown)) !== null) {
       if (!itinDays.find(d => d.day === parseInt(m[1]))) {
         itinDays.push({ 
@@ -478,22 +475,22 @@ export function getLazyRenderingSteps() {
     
     // Scroll to trigger lazy loading
     { action: 'scroll', direction: 'down', amount: 800 },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     { action: 'scroll', direction: 'down', amount: 800 },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     
     // Expand itinerary section
     { action: 'click', text: 'Xem tất cả', optional: true },
     { action: 'click', text: 'Xem chi tiết', optional: true },
-    { action: 'wait', ms: 1500 },
+    { action: 'wait' }, // waitForNetworkIdle
     
     // Click child pricing tabs
     { action: 'click', text: 'Trẻ em', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     { action: 'click', text: 'Em bé', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     { action: 'click', text: 'Người lớn', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
   ];
 }
 

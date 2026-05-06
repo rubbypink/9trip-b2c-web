@@ -111,10 +111,10 @@ async function validateAndCheck(data) {
       : {
           basePrice: 0,
           adultPrice: 0,
-          childPrice: 0,
+          childPrice: null,
           currency: 'VND',
           tiers: [
-            { id: 'price_default', name: 'Vé tiêu chuẩn', description: '', adultPrice: 0, childPrice: 0, currency: 'VND', discountPercent: 0, included: [] }
+            { id: 'price_default', name: 'Vé tiêu chuẩn', description: '', adultPrice: 0, childPrice: null, currency: 'VND', discountPercent: 0, included: [] }
           ],
         },
     reviews: {},

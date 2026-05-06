@@ -373,3 +373,95 @@ const result = await sanitizeScrapedData(data, {
 | `.env.local` | `FIRECRAWL_API_KEY`, `OPENROUTER_API_KEY` |
 | `tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json` | Firebase Admin service account |
 
+## Agent-Browser Command Reference
+
+Khi cần tương tác trình duyệt trực tiếp (đóng popup, scroll load rooms, v.v.), sử dụng **agent-browser CLI** thay vì sleep cố định.
+
+| Lệnh | Mô tả | Ví dụ |
+|------|--------|-------|
+| `snapshot -i` | Chụp accessibility tree chỉ interactive elements | `agent-browser snapshot -i` |
+| `wait --fn "JS"` | Chờ JS expression trả về truthy | `agent-browser wait --fn "!document.querySelector('.spinner')"` |
+| `wait --text "..."` | Chờ text xuất hiện trên trang | `agent-browser wait --text "Kết quả"` |
+| `wait --load networkidle` | Chờ network idle (AJAX xong) | `agent-browser wait --load networkidle` |
+| `batch` | Chạy nhiều lệnh liên tiếp | `agent-browser batch "open URL" "snapshot -i"` |
+| `click @ref` | Click element theo @ref từ snapshot | `agent-browser click @e3` |
+
+> **Tài liệu đầy đủ:** [`.agents/lib/agent-browser-guide.md`](../../lib/agent-browser-guide.md)
+
+### Quy tắc vàng
+
+1. **Luôn `snapshot -i` trước khi tương tác** — @ref cũ không hợp lệ sau khi DOM thay đổi.
+2. **Dùng `wait --fn` hoặc `wait --text`** thay vì `sleep(ms)` — chờ điều kiện thực tế, không đoán thời gian.
+3. **Re-snapshot sau mỗi lần DOM thay đổi** (click, scroll, navigate).
+
+## Hotel Data Extraction Patterns
+
+### Xử lý overlay popup
+
+Booking.com thường hiển thị overlay popup (cookie consent, sign-up modal, promotion) chặn tương tác. Cách xử lý:
+
+```bash
+# Mở trang hotel
+agent-browser open https://www.booking.com/hotel/vn/...
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# Đóng popup — chờ nút đóng (×) xuất hiện rồi click
+agent-browser wait --text "×"
+agent-browser snapshot -i
+agent-browser click @e_close_popup   # Click nút × hoặc "Dismiss"
+
+# Verify popup đã đóng
+agent-browser wait --fn "!document.querySelector('.modal-overlay')"
+agent-browser snapshot -i
+```
+
+> **Lưu ý:** Nếu popup không có text "×", dùng `wait --fn` để chờ element đóng xuất hiện: `agent-browser wait --fn "document.querySelector('[aria-label=\"Dismiss\"]')"`
+
+### Scroll XHR rooms — chờ network idle
+
+Danh sách rooms trên booking.com load qua XHR khi scroll. Phải chờ network idle sau mỗi lần scroll:
+
+```bash
+# Scroll xuống phần rooms
+agent-browser scroll down 1000
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# Tiếp tục scroll nếu còn rooms
+agent-browser scroll down 1000
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# Verify tất cả rooms đã load
+agent-browser wait --fn "document.querySelectorAll('[data-room-id]').length > 0"
+agent-browser get text body
+```
+
+### Luồng khuyến nghị cho booking.com
+
+```bash
+# 1. Mở trang hotel
+agent-browser open https://www.booking.com/hotel/vn/...
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 2. Đóng popup nếu có
+agent-browser wait --text "×"
+agent-browser snapshot -i
+agent-browser click @e_close_popup
+
+# 3. Scroll load rooms (XHR)
+agent-browser scroll down 1000
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 4. Click gallery để lấy ảnh độ phân giải cao
+agent-browser click @e_gallery
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 5. Extract toàn bộ dữ liệu
+agent-browser get text body
+```
+

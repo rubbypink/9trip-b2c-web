@@ -146,7 +146,7 @@ function extractActivity(md, url) {
   result.included = extractSectionItems(md, 'Bao gồm|Included', 'Không bao gồm|Excluded');
   result.excluded = extractSectionItems(md, 'Không bao gồm|Excluded', 'Chính sách|Policy|FAQ');
 
-  result.pricing = { basePrice: 0, adultPrice: 0, childPrice: 0, currency: 'VND', tiers: [] };
+  result.pricing = { basePrice: 0, adultPrice: 0, childPrice: null, currency: 'VND', tiers: [] };
   result.faq = [];
   result.isFeatured = false;
   result.status = 'active';

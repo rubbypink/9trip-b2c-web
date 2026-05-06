@@ -15,7 +15,7 @@
 // ============================================================================
 
 export function extractFromDOM() {
-  const result = {
+  let result = {
     source: 'booking.com',
     url: document.location.href,
     extractedAt: new Date().toISOString(),
@@ -433,32 +433,32 @@ export function getLazyRenderingSteps() {
     
     // Scroll to load rooms
     { action: 'scroll', direction: 'down', amount: 1000 },
-    { action: 'wait', ms: 2000 },
+    { action: 'wait' }, // waitForNetworkIdle
     { action: 'scroll', direction: 'down', amount: 1000 },
-    { action: 'wait', ms: 2000 },
+    { action: 'wait' }, // waitForNetworkIdle
     
     // Click on first room to see popup details
     { action: 'click', text: 'Select rooms', optional: true },
-    { action: 'wait', ms: 3000 },
+    { action: 'wait' }, // waitForNetworkIdle
     
-    // Click gallery if available
+    // Click gallery if available — wait for close button to confirm gallery opened
     { action: 'click', text: 'Photos', optional: true },
-    { action: 'wait', ms: 2000 },
+    { action: 'wait', text: '×', timeout: 5000 },
     
     // Navigate through gallery
     { action: 'click', text: 'Next', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     { action: 'click', text: 'Next', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     
     // Close popup
     { action: 'click', text: 'Close', optional: true },
     { action: 'click', text: '×', optional: true },
-    { action: 'wait', ms: 1000 },
+    { action: 'wait' }, // waitForNetworkIdle
     
     // Scroll more for additional rooms
     { action: 'scroll', direction: 'down', amount: 1500 },
-    { action: 'wait', ms: 2000 },
+    { action: 'wait' }, // waitForNetworkIdle
   ];
 }
 
