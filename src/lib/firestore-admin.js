@@ -80,6 +80,7 @@ const usersCol = () => adminDb.collection('users');
 const couponsCol = () => adminDb.collection('coupons');
 const notificationsCol = () => adminDb.collection('notifications');
 const inventoryHoldsCol = () => adminDb.collection('inventory_holds');
+const blogsCol = () => adminDb.collection('blogs');
 
 // ─── Generic Helpers ─────────────────────────────────────────────────
 
@@ -1069,4 +1070,46 @@ export async function getUserNotifications(userId, pageSize = 20) {
  */
 export async function getSiteSettings() {
   return getDocById('settings', 'site');
+}
+
+// ─── Blogs ───────────────────────────────────────────────────────────
+
+/**
+ * Fetch a single blog post by slug.
+ * @param {string} slug
+ * @returns {Promise<{blog: Object|null}>}
+ */
+export async function getBlogBySlug(slug) {
+  try {
+    const snap = await blogsCol().where('slug', '==', slug).where('status', '==', 'published').limit(1).get();
+    if (snap.empty) return { blog: null };
+    return { blog: serializeSnap(snap.docs[0]) };
+  } catch (error) {
+    console.error('[getBlogBySlug] Error:', error.message);
+    return { blog: null };
+  }
+}
+
+/**
+ * Fetch related blog posts by category.
+ * @param {string} category
+ * @param {string} currentSlug
+ * @param {number} count
+ * @returns {Promise<{blogs: Object[]}>}
+ */
+export async function getRelatedBlogs(category, currentSlug, count = 3) {
+  if (!category) return { blogs: [] };
+  try {
+    const snap = await blogsCol()
+      .where('category', '==', category)
+      .where('status', '==', 'published')
+      .orderBy('createdAt', 'desc')
+      .limit(count + 5)
+      .get();
+    let blogs = serializeDocs(snap).filter((b) => b.slug !== currentSlug).slice(0, count);
+    return { blogs };
+  } catch (error) {
+    console.error('[getRelatedBlogs] Error:', error.message);
+    return { blogs: [] };
+  }
 }
