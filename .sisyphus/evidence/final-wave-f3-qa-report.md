@@ -3,7 +3,7 @@
 **Date:** 2026-05-06  
 **Tester:** Sisyphus Agent  
 **Environment:** Local Development Server (bun run dev)  
-**Server URL:** http://localhost:3000  
+**Server URL:** http://localhost:3000
 
 ---
 
@@ -27,36 +27,41 @@ The application **cannot function** in the current environment state. All tested
 ## Smoke Test Results
 
 ### 1. Homepage (`/`)
+
 - **Status:** ❌ FAIL (HTTP 500)
 - **Response Time:** 35.59s (excessive)
 - **Error:** Firebase initialization failure
-  ```
-  Error: The default Firebase app does not exist. 
-  Make sure you call initializeApp() before using any of the Firebase services.
-  at src/lib/firebase-admin.js:25
-  ```
+    ```
+    Error: The default Firebase app does not exist.
+    Make sure you call initializeApp() before using any of the Firebase services.
+    at src/lib/firebase-admin.js:25
+    ```
 
 ### 2. Blog List (`/blog`)
+
 - **Status:** ❌ FAIL (HTTP 500)
 - **Response Time:** 34.31s
 - **Error:** Same Firebase Admin initialization error
-  ```
-  at src/lib/firebase-admin.js:25
-  export const adminDb = admin.firestore();
-  ```
+    ```
+    at src/lib/firebase-admin.js:25
+    export const adminDb = admin.firestore();
+    ```
 
 ### 3. Search (`/search`)
+
 - **Status:** ❌ FAIL (HTTP 500)
 - **Response Time:** 31.61s
 - **Error:** Firebase Admin initialization failure
-  - Also shows secondary error: `Firebase: Error (auth/invalid-api-key)`
+    - Also shows secondary error: `Firebase: Error (auth/invalid-api-key)`
 
 ### 4. Wishlist (`/account/wishlist`)
+
 - **Status:** ⚠️ PARTIAL (HTTP 301 Redirect)
 - **Response Time:** 0.60s
 - **Note:** Redirects to HTTPS version. Cannot fully test due to missing Firebase config.
 
 ### 5. Cart Dropdown (Header)
+
 - **Status:** ❌ NOT TESTED
 - **Reason:** All pages return 500 errors; no functional UI to interact with
 
@@ -69,7 +74,9 @@ The application **cannot function** in the current environment state. All tested
 The application **completely fails to start** due to missing required environment variables:
 
 #### Firebase Client SDK (Client-Side)
-All NEXT_PUBLIC_* variables are missing:
+
+All NEXT*PUBLIC*\* variables are missing:
+
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
@@ -77,10 +84,12 @@ All NEXT_PUBLIC_* variables are missing:
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
 
-**Location:** Found in `/tripphuquoc-db-fs-back-end/.env` but **NOT** in project root `.env.local`
+**Location:** Found in `/functions/.env` but **NOT** in project root `.env.local`
 
 #### Firebase Admin SDK (Server-Side)
+
 Critical service account credentials are **missing entirely**:
+
 - `FIREBASE_CLIENT_EMAIL` (Service Account email)
 - `FIREBASE_PRIVATE_KEY` (Private key for authentication)
 
@@ -97,17 +106,19 @@ Critical service account credentials are **missing entirely**:
 ## Error Details
 
 ### Server-Side Error (All Pages)
+
 ```
-⨯ Error: The default Firebase app does not exist. 
+⨯ Error: The default Firebase app does not exist.
   Make sure you call initializeApp() before using any of the Firebase services.
     at module evaluation (src/lib/firebase-admin.js:25:30)
     at module evaluation (src/lib/firestore-admin.js:1:1)
-    
+
 export const adminDb = admin.firestore();
                          ^
 ```
 
 ### Client-Side Error (Secondary)
+
 ```
 ⨯ Error [FirebaseError]: Firebase: Error (auth/invalid-api-key).
     at module evaluation (src/lib/firebase.js:24:21)
@@ -121,17 +132,17 @@ export const adminDb = admin.firestore();
 ### Immediate Actions Required
 
 1. **Create `.env.local` in project root** with:
-   - Copy client-side Firebase vars from `tripphuquoc-db-fs-back-end/.env`
-   - Add Firebase Admin service account credentials (FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
+    - Copy client-side Firebase vars from `functions/.env`
+    - Add Firebase Admin service account credentials (FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
 
 2. **Document Environment Setup** in README or setup guide:
-   - Required env vars list
-   - How to obtain Firebase Admin SDK credentials
-   - Where to place `.env.local`
+    - Required env vars list
+    - How to obtain Firebase Admin SDK credentials
+    - Where to place `.env.local`
 
 3. **Improve Error Handling** in `firebase-admin.js`:
-   - Currently catches error but still exports uninitialized services
-   - Should either throw hard error OR provide fallback/mock for dev
+    - Currently catches error but still exports uninitialized services
+    - Should either throw hard error OR provide fallback/mock for dev
 
 ### Code Improvements (Non-blocking)
 
@@ -143,24 +154,26 @@ export const adminDb = admin.firestore();
 
 ## Files Requiring Attention
 
-| File | Issue |
-|------|-------|
-| `/src/lib/firebase-admin.js:25` | Exports fail when Firebase Admin not initialized |
-| `/src/lib/firebase.js:24` | Invalid API key error from missing env |
-| `/.env.local` | **MISSING** - Required for local development |
-| `/memory-bank/techContext.md:64-83` | Docs don't mention Firebase Admin env vars |
+| File                                | Issue                                            |
+| ----------------------------------- | ------------------------------------------------ |
+| `/src/lib/firebase-admin.js:25`     | Exports fail when Firebase Admin not initialized |
+| `/src/lib/firebase.js:24`           | Invalid API key error from missing env           |
+| `/.env.local`                       | **MISSING** - Required for local development     |
+| `/memory-bank/techContext.md:64-83` | Docs don't mention Firebase Admin env vars       |
 
 ---
 
 ## Conclusion
 
 **QA Testing cannot proceed** until the environment configuration issue is resolved. All pages return HTTP 500 errors, making it impossible to:
+
 - Test UI functionality
 - Verify console errors
 - Test cart dropdown interactions
 - Validate page rendering
 
 **Next Steps:**
+
 1. Obtain Firebase Admin service account credentials
 2. Create proper `.env.local` file
 3. Re-run F3 QA testing
