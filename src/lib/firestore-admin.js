@@ -1075,6 +1075,25 @@ export async function getSiteSettings() {
 // ─── Blogs ───────────────────────────────────────────────────────────
 
 /**
+ * Fetch all published blog posts, ordered by creation date descending.
+ * @param {number} [limit=50] - Maximum number of posts to return.
+ * @returns {Promise<{blogs: Object[]}>}
+ */
+export async function getPublishedBlogs(limit = 50) {
+  try {
+    const snap = await blogsCol()
+      .where('status', '==', 'published')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+    return { blogs: serializeDocs(snap) };
+  } catch (error) {
+    console.error('[getPublishedBlogs] Error:', error.message);
+    return { blogs: [] };
+  }
+}
+
+/**
  * Fetch a single blog post by slug.
  * @param {string} slug
  * @returns {Promise<{blog: Object|null}>}

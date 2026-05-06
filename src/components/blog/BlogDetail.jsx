@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, User, Share2, Facebook, Twitter, Link as LinkIcon, Check } from "lucide-react";
+import { Calendar, User, Share2, Link as LinkIcon, Check } from "lucide-react";
 import { useState, useEffect } from "react";
 
 /**
@@ -126,17 +126,17 @@ export default function BlogDetail({ post, relatedPosts = [] }) {
           <div className="flex items-center gap-3">
             <button
               onClick={shareToFacebook}
-              className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-bold"
               aria-label="Share on Facebook"
             >
-              <Facebook className="w-4 h-4" />
+              f
             </button>
             <button
               onClick={shareToTwitter}
-              className="p-2 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors"
-              aria-label="Share on Twitter"
+              className="p-2 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors text-sm font-bold"
+              aria-label="Share on X"
             >
-              <Twitter className="w-4 h-4" />
+              𝕏
             </button>
             <button
               onClick={handleCopyLink}
