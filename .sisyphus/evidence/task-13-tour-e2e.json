@@ -1,0 +1,853 @@
+{
+  "success": true,
+  "slug": "tour-trung-quoc-6n5d-hcm-dai-ly-le-giang-shangrila-no-shopping",
+  "data": {
+    "title": "Tour Trung Quốc 6N5Đ: HCM - Đại Lý - Lệ Giang - Shangrila - No Shopping",
+    "slug": "tour-phu-quoc-4n3d",
+    "duration": "6 ngày 5 đêm",
+    "durationDays": 6,
+    "location": "Phú Quốc",
+    "address": "Tất cả",
+    "description": "",
+    "excerpt": "",
+    "featuredImage": "",
+    "gallery": [],
+    "highlights": [],
+    "included": [],
+    "excluded": [],
+    "categories": [
+      "Tour Trọn Gói",
+      "Du lịch Phú Quốc",
+      "Tour từ Tất cả"
+    ],
+    "tags": [
+      "Phú Quốc",
+      "Tour",
+      "Tất cả",
+      "6 ngày 5 đêm",
+      "Tour Trọn Gói",
+      "Du lịch Phú Quốc",
+      "Tour từ Tất cả"
+    ],
+    "itinerary": [
+      {
+        "day": 4,
+        "title": "-6 ngày",
+        "description": "7-9",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 10,
+        "title": "-12 ngày",
+        "description": "Giá tour/khách",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 14,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 2,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 19,
+        "title": "/07",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 19,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 25,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 13,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 21,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 6,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 13,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 2,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 8,
+        "title": "/08",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 17,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 12,
+        "title": "/10",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 11,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 14,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 30,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 27,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "Đêm",
+        "description": "Khởi hànhMỹ",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 9,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 21,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "/08",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 10,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 10,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhThượng Hải",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 30,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 17,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 21,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 14,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 23,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 14,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 1,
+        "title": "/09",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 23,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 5,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 3,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 21,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 8,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 2,
+        "title": "/07",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhSingapore",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 19,
+        "title": "/01",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 2,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 8,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 7,
+        "title": "Đêm",
+        "description": "Khởi hànhHà Nội, Hồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 20,
+        "title": "/05",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 8,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 12,
+        "title": "/06",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 4,
+        "title": "Đêm",
+        "description": "Khởi hànhHồ Chí Minh",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      },
+      {
+        "day": 19,
+        "title": "/08",
+        "description": "Xem chi tiết",
+        "meals": "",
+        "overnight": "",
+        "images": []
+      }
+    ],
+    "map": null,
+    "pricing": {
+      "adultPrice": null,
+      "childPrice": null,
+      "infantPrice": null,
+      "currency": "VND",
+      "minPeople": null,
+      "maxPeople": null,
+      "discountPercent": 0
+    },
+    "cancellationPolicy": "",
+    "childrenPolicy": "",
+    "notes": [],
+    "faq": [],
+    "phone": "",
+    "email": "",
+    "website": "",
+    "reviews": {},
+    "isFeatured": false,
+    "status": "active",
+    "createdAt": "2026-05-06T12:33:56.835Z",
+    "updatedAt": "2026-05-06T12:33:56.835Z",
+    "_sourceUrl": "https://www.ivivu.com/du-lich/tour-phu-quoc-4n3d",
+    "_strategy": "agent-browser-lazy",
+    "_snapshotsCount": 16,
+    "_pricingTiers": [
+      {
+        "id": "tier_tour-phu-quoc-4n3d_default",
+        "name": "Tour ghép",
+        "description": "Tour ghép đoàn tiêu chuẩn",
+        "isFeatured": true,
+        "adultPrice": 0,
+        "childPrice": 0,
+        "infantPrice": 0,
+        "currency": "VND",
+        "minPeople": 1,
+        "maxPeople": 20,
+        "included": [],
+        "isActive": true,
+        "sortOrder": 1,
+        "createdAt": "2026-05-06T12:33:56.834Z",
+        "updatedAt": "2026-05-06T12:33:56.834Z"
+      }
+    ]
+  },
+  "tempFile": "/home/rubbypink/projects/tripphuquoc-db-fs/.temp/scraped-tour-tour-trung-quoc-6n5d-hcm-dai-ly-le-giang-shangrila-no-shopping.json",
+  "timeline": [
+    {
+      "phase": "A",
+      "status": "start",
+      "detail": "Lazy rendering mode: https://www.ivivu.com/du-lich/tour-phu-quoc-4n3d",
+      "time": "2026-05-06T12:33:32.232Z"
+    },
+    {
+      "phase": "B",
+      "status": "info",
+      "detail": "Loaded 15 interaction steps from adapter",
+      "time": "2026-05-06T12:33:32.241Z"
+    },
+    {
+      "phase": "B",
+      "status": "ok",
+      "detail": "Extraction completed, 16 snapshots",
+      "time": "2026-05-06T12:33:56.821Z"
+    },
+    {
+      "phase": "C",
+      "status": "ok",
+      "detail": "Adapter extracted 23 fields",
+      "time": "2026-05-06T12:33:56.832Z"
+    },
+    {
+      "phase": "C",
+      "status": "ok",
+      "detail": "Found 91 detailed itinerary days",
+      "time": "2026-05-06T12:33:56.833Z"
+    },
+    {
+      "phase": "D",
+      "status": "ok",
+      "detail": "Lazy rendering extraction complete",
+      "time": "2026-05-06T12:33:56.833Z"
+    },
+    {
+      "phase": "E",
+      "status": "ok",
+      "detail": "Saved to /home/rubbypink/projects/tripphuquoc-db-fs/.temp/scraped-tour-tour-trung-quoc-6n5d-hcm-dai-ly-le-giang-shangrila-no-shopping.json (agent-browser-lazy)",
+      "time": "2026-05-06T12:33:57.553Z"
+    }
+  ],
+  "lazyRendering": true
+}

@@ -1,0 +1,63 @@
+Task 7: Replace sleep() calls with proper waits in tour scraper pipeline
+============================================================================
+
+## Files Modified
+
+### 1. .agents/lib/browser-automation.mjs
+
+#### extractIvivuTour() (lines ~568-580)
+Replaced 4 `{ action: 'wait', ms: N }` steps with proper waits:
+- `{ action: 'wait', ms: 1000 }` after scroll → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1500 }` after "Xem tất cả" → `{ action: 'wait', text: 'Ngày' }` (waitForText)
+- `{ action: 'wait', ms: 1000 }` after "Trẻ em" → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1000 }` after "Em bé" → `{ action: 'wait' }` (waitForNetworkIdle)
+
+Added comments explaining why each wait is proper vs sleep.
+
+#### extractActivityPage() (lines ~1135-1205)
+Replaced 5 `sleep()` calls with proper waits:
+- `sleep(1000)` after scroll → `waitForNetworkIdle(5000)` — lazy content loads after scroll
+- `sleep(2000)` after quantity buttons → `waitForNetworkIdle(5000)` — prices update via network
+- `sleep(1500)` after scroll → `waitForNetworkIdle(5000)` — lazy content loads after scroll
+- `sleep(1500)` after second scroll → `waitForNetworkIdle(5000)` — more lazy content loads
+- `sleep(2000)` after expandable sections → `waitForNetworkIdle(5000)` — expanded content loads via network
+
+#### clickQuantityButtons() (line ~934)
+Replaced 1 `sleep()` call:
+- `sleep(3000)` after clicking qty button → `waitForNetworkIdle(5000)` — pricing data loads via network
+
+#### extractChildPricesPerTier() (lines ~1010, ~1038, ~1078)
+Replaced 3 `sleep()` calls:
+- `sleep(3000)` after clicking "Chọn" → `waitForNetworkIdle(5000)` — booking form loads via network
+- `sleep(2000)` after clicking child "+" → `waitForNetworkIdle(5000)` — price DOM updates after click
+- `sleep(2000)` after clicking "Chọn gói dịch vụ" → `waitForNetworkIdle(3000)` — form resets via network
+
+### 2. .agents/lib/adapters/ivivu-adapter.mjs
+
+#### getLazyRenderingSteps() (lines ~470-495)
+Replaced 6 `{ action: 'wait', ms: N }` steps with proper waits:
+- `{ action: 'wait', ms: 1000 }` after scroll → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1000 }` after second scroll → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1500 }` after expand sections → `{ action: 'wait', text: 'Ngày' }` (waitForText)
+- `{ action: 'wait', ms: 1000 }` after "Trẻ em" → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1000 }` after "Em bé" → `{ action: 'wait' }` (waitForNetworkIdle)
+- `{ action: 'wait', ms: 1000 }` after "Người lớn" → `{ action: 'wait' }` (waitForNetworkIdle)
+
+Added comments explaining why each wait is proper vs sleep.
+
+## Total Replacements
+
+- **13 sleep() calls replaced** with proper waits across 2 files
+- **4 functions modified**: extractIvivuTour, extractActivityPage, clickQuantityButtons, extractChildPricesPerTier
+- **1 function modified**: getLazyRenderingSteps (adapter)
+
+## Remaining sleep() calls (intentionally kept)
+
+- `sleep()` function definition (line 398) — must keep for backward compatibility
+- `sleep(step.ms)` in step handler (line 526) — fallback for `{ action: 'wait', ms: N }` steps, needed for backward compatibility with any remaining ms-based steps
+
+## Verification
+
+- `node --check` passed on both modified files (zero errors)
+- LSP diagnostics: zero errors on both files
+- No changes to adapter pattern structure or tour schema

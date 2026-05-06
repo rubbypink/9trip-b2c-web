@@ -1,0 +1,49 @@
+=== Task 4: childPrice null vs zero ===
+Date: Wed May  6 11:50:59 UTC 2026
+
+=== node --check ivivu-adapter.mjs ===
+PASS: No syntax errors
+
+=== node --check pricing-extractor.mjs ===
+PASS: No syntax errors
+
+=== grep -n 'childPrice: 0' (should return nothing) ===
+EXIT_CODE=1
+
+=== grep -n 'childPrice' in ivivu-adapter.mjs (showing current state) ===
+118:  const childPricePatterns = [
+125:  for (const pattern of childPricePatterns) {
+147:  // If child pricing found, set childPrice field
+148:  const childPrice = result.childPricingHints.find(h => h.type === 'child');
+149:  if (childPrice) {
+150:    result.childPrice = childPrice.price;
+393:  const childPrice = result.childPricingHints.find(h => h.type === 'child');
+394:  if (childPrice) result.childPrice = childPrice.price;
+733:      let childPrice = null;
+740:            childPrice = extractedChildPrice;
+752:        childPrice,
+819:            let childPrice = null;
+826:                  childPrice = extractedChildPrice;
+838:              childPrice,
+
+=== grep -n 'childPrice' in pricing-extractor.mjs (showing current state) ===
+38: * @returns {number|null} returns.childPrice - Child price in VND
+46: * // Returns: { adultPrice: 1500000, childPrice: 1200000, infantPrice: null, currency: 'VND', found: true, missing: ['infantPrice'] }
+51:    childPrice: null,
+59:    result.missing = ['adultPrice', 'childPrice', 'infantPrice'];
+71:    if (data.pricing?.childPrice) {
+72:      result.childPrice = normalizePrice(data.pricing.childPrice);
+73:    } else if (data.childPrice) {
+74:      result.childPrice = normalizePrice(data.childPrice);
+82:    result.found = result.adultPrice !== null || result.childPrice !== null;
+84:    if (result.childPrice === null) result.missing.push('childPrice');
+109:    result.childPrice = childResult.price;
+132:  result.found = result.adultPrice !== null || result.childPrice !== null;
+135:  if (result.childPrice === null) result.missing.push('childPrice');
+291: * @returns {Array} returns.tiers - Array of tier objects {id, name, adultPrice, childPrice, currency, description}
+295: * extractActivityPricingTiers([{tierName: 'Vé Vào Cửa', adultPrice: 986000, childPrice: null, description: '...'}])
+296: * // Returns: { tiers: [{id: 'tier-0', name: 'Vé Vào Cửa', adultPrice: 986000, childPrice: null, currency: 'VND', description: '...'}], found: true }
+348:    const childPrice = normalizePrice(tier.childPrice) || 0;
+352:    if (tierName && (adultPrice > 0 || childPrice > 0 || description)) {
+357:        childPrice,
+437:        childPrice: null, // HTML parsing doesn't reliably extract child prices

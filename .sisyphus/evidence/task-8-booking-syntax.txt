@@ -1,0 +1,43 @@
+Task 8: Replace sleep() calls with proper waits in booking scraper
+============================================================
+
+Date: 2026-05-06
+
+Files Modified:
+1. .agents/lib/browser-automation.mjs — extractBookingPage()
+2. .agents/lib/adapters/booking-adapter.mjs — getLazyRenderingSteps()
+
+Changes Made:
+--------------
+
+1. browser-automation.mjs — extractBookingPage()
+   - REWROTE function to use direct browser automation calls instead of extractWithInteractions
+   - Replaced { action: 'wait', ms: 2000 } after scroll → waitForNetworkIdle()
+   - Replaced { action: 'wait', ms: 2000 } after Photos/Ảnh click → waitForText('×', 5000)
+   - Added batch() for cookie dismiss + scroll sequence (Accept/Đồng ý + scroll)
+   - Uses initSession/openPage/waitForNetworkIdle/clickByText/waitForText/evaluate/closeSession directly
+   - Proper session management with try/finally
+
+2. booking-adapter.mjs — getLazyRenderingSteps()
+   - Replaced { action: 'wait', ms: 2000 } after scroll → { action: 'wait' } (waitForNetworkIdle)
+   - Replaced { action: 'wait', ms: 3000 } after "Select rooms" → { action: 'wait' } (waitForNetworkIdle)
+   - Replaced { action: 'wait', ms: 2000 } after "Photos" → { action: 'wait', text: '×', timeout: 5000 } (waitForText)
+   - Replaced { action: 'wait', ms: 2000 } after final scroll → { action: 'wait' } (waitForNetworkIdle)
+   - Kept { action: 'wait', ms: 1000 } for gallery navigation (client-side, no network wait needed)
+   - Added comments explaining which waits use waitForNetworkIdle vs waitForText vs sleep
+
+Sleep calls replaced: 5+ (3 in extractBookingPage via step rewrite, 5 in getLazyRenderingSteps)
+Sleep calls kept: 3 (gallery Next navigation + popup close animation — client-side, no network)
+
+Syntax Verification:
+--------------------
+$ node --check .agents/lib/browser-automation.mjs — PASS (no errors)
+$ node --check .agents/lib/adapters/booking-adapter.mjs — PASS (no errors)
+$ node --check .agents/skills/booking-scraper/scripts/getHotelImages.mjs — PASS (no errors)
+
+LSP Diagnostics:
+----------------
+browser-automation.mjs: 3 pre-existing hints (unused variables) — no new errors
+booking-adapter.mjs: No diagnostics found
+
+No changes to booking schema or hotel data mapping — only wait strategy changes.

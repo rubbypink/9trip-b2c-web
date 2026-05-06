@@ -1,0 +1,4 @@
+waitForFunction: function
+batch: function
+elementExists: function
+takeAnnotatedScreenshot: function

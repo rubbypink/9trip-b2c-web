@@ -1,0 +1,8 @@
+=== Syntax Check ===
+Exit code: 0
+
+=== Export Verification ===
+clickWithRetry: function 
+clickByTextWithRetry: function 
+waitForStableContent: function
+Exit code: 0

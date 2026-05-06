@@ -1,0 +1,7 @@
+
+🔍 Scraping hotel from: https://www.booking.com/hotel/vn/salinda-resort-phu-quoc-island.html
+   🌐 Navigating with browser automation...
+   ✅ Page extracted: Booking.com Online Hotel Reservations (1890 chars)
+   ❌ Error: Failed to extract hotel data: missing name
+
+❌ Failed: Failed to extract hotel data: missing name

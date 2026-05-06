@@ -1,0 +1,52 @@
+childPrice null preservation fix - Verification Evidence
+=========================================================
+Date: 2026-05-06
+
+## Changes Made
+
+1. .agents/lib/schemas/activity-schema.mjs:325
+   - OLD: childPrice: tier.childPrice || 0,
+   - NEW: childPrice: tier.childPrice ?? null,
+
+2. .agents/lib/schemas/activity-schema.mjs:338
+   - OLD: childPrice: rawData.pricing.childPrice || 0,
+   - NEW: childPrice: rawData.pricing.childPrice ?? null,
+
+3. .agents/lib/pricing-extractor.mjs:348
+   - OLD: const childPrice = normalizePrice(tier.childPrice) || 0;
+   - NEW: const childPrice = normalizePrice(tier.childPrice) ?? null;
+
+4. .agents/lib/pricing-extractor.mjs:352
+   - OLD: if (tierName && (adultPrice > 0 || childPrice > 0 || description)) {
+   - NEW: if (tierName && (adultPrice > 0 || childPrice > 0 || childPrice === null || description)) {
+
+5. .agents/lib/markdown-to-json.mjs:149
+   - OLD: result.pricing = { basePrice: 0, adultPrice: 0, childPrice: 0, currency: 'VND', tiers: [] };
+   - NEW: result.pricing = { basePrice: 0, adultPrice: 0, childPrice: null, currency: 'VND', tiers: [] };
+
+6. .agents/skills/activity-scraper/scripts/saveActivityData.mjs:114
+   - OLD: childPrice: 0,
+   - NEW: childPrice: null,
+
+7. .agents/skills/activity-scraper/scripts/saveActivityData.mjs:117
+   - OLD: childPrice: 0, currency: 'VND', discountPercent: 0, included: [] }
+   - NEW: childPrice: null, currency: 'VND', discountPercent: 0, included: [] }
+
+## Syntax Checks (node --check)
+
+- activity-schema.mjs: OK
+- pricing-extractor.mjs: OK
+- markdown-to-json.mjs: OK
+- saveActivityData.mjs: OK
+
+## LSP Diagnostics
+
+- activity-schema.mjs: No diagnostics found
+- pricing-extractor.mjs: No diagnostics found
+- markdown-to-json.mjs: No diagnostics found
+- saveActivityData.mjs: No diagnostics found
+
+## Summary
+
+All 7 locations across 4 files updated. null values now preserved instead of coerced to 0.
+Tiers with null childPrice are still included via the updated if condition.

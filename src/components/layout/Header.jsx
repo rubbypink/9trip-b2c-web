@@ -1,0 +1,193 @@
+/**
+ * Header - Thanh điều hướng chính toàn cục.
+ * Hiển thị logo, menu, search, mini cart, user menu.
+ */
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
+import { SITE } from "@/lib/constants";
+import ThemeToggle from "@/components/shared/ThemeToggle";
+
+const logoImg = "/images/favicon.webp";
+
+export default function Header() {
+  const { user, logout } = useAuth();
+  const { items } = useCart();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const cartCount = items?.length || 0;
+
+  return (
+    <header className="sticky top-0 z-40 bg-background shadow-sm border-b border-border">
+      {/* Top bar */}
+      <div className="bg-primary-600 text-white text-sm hidden md:block">
+        <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <a href={`tel:+84${SITE.phone.substring(1)}`} className="hover:text-primary-200 transition-colors">📞 {SITE.phone}</a>
+            <a href={`mailto:${SITE.email}`} className="hover:text-primary-200 transition-colors">✉️ {SITE.email}</a>
+          </div>
+          <div className="flex items-center gap-3">
+            <span>🌐 VN</span>
+            <span>💰 VND</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main nav */}
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <Image
+              src={logoImg}
+              alt={SITE.name}
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
+            <span className="font-bold text-xl text-foreground hidden sm:block">{SITE.name}</span>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden lg:flex items-center gap-8">
+            <Link href="/" className="text-foreground hover:text-primary font-medium transition-colors">
+              Trang chủ
+            </Link>
+            <Link href="/tours" className="text-foreground hover:text-primary font-medium transition-colors">
+              Tour
+            </Link>
+            <Link href="/hotels" className="text-foreground hover:text-primary font-medium transition-colors">
+              Khách sạn
+            </Link>
+            <Link href="/activities" className="text-foreground hover:text-primary font-medium transition-colors">
+              Hoạt động
+            </Link>
+            <Link href="/search" className="text-foreground hover:text-primary font-medium transition-colors">
+              🔍
+            </Link>
+          </nav>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Cart */}
+            <button
+              className="relative p-2 text-foreground hover:text-primary-600 transition-colors"
+              onClick={() => setIsCartOpen(!isCartOpen)}
+              aria-label="Giỏ hàng"
+            >
+              🛒
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+
+            {/* User menu */}
+            {user ? (
+              <div className="relative">
+                <button
+                  className="flex items-center gap-2 p-2 text-foreground hover:text-primary-600 transition-colors"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
+                    {user.email?.[0]?.toUpperCase() || "U"}
+                  </div>
+                  <span className="hidden md:inline text-sm">{user.email?.split("@")[0]}</span>
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border py-2 z-50">
+                    <Link href="/account/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                      Tài khoản
+                    </Link>
+                    <Link href="/account/bookings" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                      Lịch sử đặt
+                    </Link>
+                    <Link href="/account/wishlist" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                      Yêu thích
+                    </Link>
+                    <hr className="my-1" />
+                    <button
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-muted"
+                      onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
+                Đăng nhập
+              </Link>
+            )}
+
+            {/* Mobile menu toggle */}
+            <button
+              className="lg:hidden p-2 text-foreground"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Menu"
+            >
+              {isMenuOpen ? "✕" : "☰"}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile nav */}
+        {isMenuOpen && (
+          <nav className="lg:hidden pb-4 border-t border-border pt-3">
+            <Link href="/" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Trang chủ</Link>
+            <Link href="/tours" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
+            <Link href="/hotels" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
+            <Link href="/activities" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
+            <Link href="/search" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
+          </nav>
+        )}
+
+        {/* Cart dropdown */}
+        {isCartOpen && (
+          <div className="absolute right-4 top-16 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-50">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-foreground">Giỏ hàng ({cartCount})</h3>
+              <button onClick={() => setIsCartOpen(false)} className="text-muted-foreground hover:text-muted-foreground">✕</button>
+            </div>
+            {cartCount === 0 ? (
+              <p className="text-muted-foreground text-sm text-center py-4">Giỏ hàng trống</p>
+            ) : (
+              <>
+                {items.map((item, idx) => (
+                  <div key={idx} className="flex gap-3 py-2 border-b border-border">
+                    <div className="w-14 h-14 bg-muted rounded flex-shrink-0 flex items-center justify-center text-muted-foreground text-xs">
+                      Ảnh
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.serviceTitle}</p>
+                      <p className="text-xs text-muted-foreground">{item.serviceType}</p>
+                      <p className="text-sm text-primary-600 font-semibold">{item.total?.toLocaleString()}₫</p>
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  href="/checkout"
+                  className="block w-full text-center bg-primary-600 text-white py-2 rounded-lg mt-3 text-sm font-medium hover:bg-primary-700 transition-colors"
+                  onClick={() => setIsCartOpen(false)}
+                >
+                  Thanh toán
+                </Link>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </header>
+  );
+}

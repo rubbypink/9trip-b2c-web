@@ -1,0 +1,73 @@
+Task 6: Replace sleep() calls with proper waits in extractActivityPage
+=============================================================================
+
+Date: 2026-05-06
+
+VERIFICATION: node --check .agents/lib/browser-automation.mjs
+Result: PASSED (no syntax errors)
+
+Changes made in extractActivityPage (lines ~1129-1260):
+-----------------------------------------------------------------
+
+1. Cookie dismiss (Step 1):
+   - BEFORE: clickByText('Đồng ý'/'Accept') + waitForNetworkIdle(3000)
+   - AFTER:  clickByTextWithRetry('Đồng ý'/'Accept') + waitForFunction("!document.querySelector('.cookie-banner, .cookie-consent, [class*=\"cookie\"], [id*=\"cookie\"]')", 3000)
+   - Rationale: clickWithRetry for critical interactions, waitForFunction for cookie banner dismissal
+
+2. Scroll after cookie (Step 2):
+   - BEFORE: scroll('down', 500) + waitForNetworkIdle(5000)
+   - AFTER:  scroll('down', 500) + waitForStableContent(2000)
+   - Rationale: waitForStableContent is more appropriate than waitForNetworkIdle for lazy-loaded content after scroll
+
+3. "Chọn gói dịch vụ" click (Step 4):
+   - VERIFIED: Already uses waitForText('Vé', 5000) — no change needed
+
+4. Quantity buttons (Step 5):
+   - BEFORE: waitForNetworkIdle(5000) after qty clicks
+   - AFTER:  waitForStableContent(2000) after qty clicks
+   - Rationale: Price updates are DOM changes, not network requests
+
+5. Scroll more (Step 6):
+   - BEFORE: scroll('down', 800) + waitForNetworkIdle(5000) x2 (sequential)
+   - AFTER:  batch([{command:'scroll',args:['down','800']},{command:'scroll',args:['down','800']}]) + waitForStableContent(2000)
+   - Rationale: batch() for sequential scroll operations, waitForStableContent for content stabilization
+
+6. Expandable sections (Step 7):
+   - BEFORE: clickByText(text) + waitForNetworkIdle(5000)
+   - AFTER:  clickByTextWithRetry(text) + waitForStableContent(2000)
+   - Rationale: clickByTextWithRetry for critical interactions, waitForStableContent for expanded content
+
+Changes made in extractChildPricesPerTier (lines ~953-1090):
+-----------------------------------------------------------------
+
+7. After clicking "Chọn" on tier:
+   - BEFORE: waitForNetworkIdle(5000)
+   - AFTER:  waitForStableContent(3000)
+   - Rationale: Booking form rendering is a DOM change
+
+8. After clicking child "+" button:
+   - BEFORE: waitForNetworkIdle(5000)
+   - AFTER:  waitForStableContent(2000)
+   - Rationale: Price DOM update is a DOM change
+
+9. After clicking "Chọn gói dịch vụ" to close:
+   - BEFORE: waitForNetworkIdle(3000)
+   - AFTER:  waitForStableContent(2000)
+   - Rationale: Form reset is a DOM change
+
+Changes made in clickQuantityButtons (lines ~946-960):
+-----------------------------------------------------------------
+
+10. After clicking quantity button:
+    - BEFORE: waitForNetworkIdle(5000)
+    - AFTER:  waitForStableContent(3000)
+    - Rationale: Pricing data stabilization is a DOM change
+
+Summary:
+--------
+- sleep() calls remaining: 1 (in revealLazyContent step handler, legitimate fallback)
+- waitForNetworkIdle calls remaining in scope: 1 (initial page load, appropriate)
+- All other waits replaced with condition-specific alternatives
+- batch() used for sequential scroll operations (Step 6)
+- clickByTextWithRetry used for cookie dismiss and expandable sections
+- Function signature and return type: UNCHANGED
