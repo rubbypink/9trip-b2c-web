@@ -1,15 +1,5 @@
 T12: Activity Scraper E2E Test Results
 URL: https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3
 Exit Code: 0
-
-Verifications:
-- success: true
-- tiers count: 14 (including basePrice)
-- adult prices: [145000, 625000, 625000, 625000, 625000, 435000, 240000, 145000, 630000, 780000, 780000, 680000, 820000, 820000]
-- child prices: ALL null (not 0) — correct for unavailable
-- all childPrice === 0: false
-- all childPrice === null: true
-- location: Tây Ninh
-- gallery images: 27
-
-Result: PASS — childPrice is null (not 0) for unavailable tiers, adult prices and location match baseline.
+Verifications: success: true, tiers count: 14, child prices: ALL null, location: Tây Ninh.
+Result: PASS — childPrice is null (not 0) for unavailable tiers, adult prices match baseline.

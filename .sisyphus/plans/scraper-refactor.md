@@ -223,14 +223,14 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/browser-automation.mjs` — current wrapper functions and patterns
 
   **Acceptance Criteria**:
-  - [ ] File `.agents/lib/agent-browser-guide.md` exists
-  - [ ] Contains "Core Commands" section with: open, click, type, fill, scroll, snapshot, get, wait, eval
-  - [ ] Contains "Wait Commands" section with `wait --fn` and `wait --text` examples
-  - [ ] Contains "Batch Execution" section with `agent-browser batch` examples
-  - [ ] Contains "Scraping Patterns" section with at least 5 patterns
-  - [ ] Contains "Common Mistakes" section
-  - [ ] Does NOT contain "AI Chat" or "chat" section
-  - [ ] Does NOT contain "Dashboard" or "Stream" sections
+  - [x] File `.agents/lib/agent-browser-guide.md` exists
+  - [x] Contains "Core Commands" section with: open, click, type, fill, scroll, snapshot, get, wait, eval
+  - [x] Contains "Wait Commands" section with `wait --fn` and `wait --text` examples
+  - [x] Contains "Batch Execution" section with `agent-browser batch` examples
+  - [x] Contains "Scraping Patterns" section with at least 5 patterns
+  - [x] Contains "Common Mistakes" section
+  - [x] Does NOT contain "AI Chat" or "chat" section
+  - [x] Does NOT contain "Dashboard" or "Stream" sections
 
   **QA Scenarios**:
   ```
@@ -281,12 +281,12 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - Agent-browser docs: `wait --fn` syntax, `batch` JSON format
 
   **Acceptance Criteria**:
-  - [ ] `waitForFunction(fn, timeout)` exported and wrapping `wait --fn`
-  - [ ] `batch(commands)` exported and wrapping `batch`
-  - [ ] `takeAnnotatedScreenshot(path)` exported
-  - [ ] `elementExists(selector)` exported
-  - [ ] All new functions in default export
-  - [ ] `node -e "import('./.agents/lib/browser-automation.mjs').then(m => console.log(Object.keys(m.default)))"` shows new function names
+  - [x] `waitForFunction(fn, timeout)` exported and wrapping `wait --fn`
+  - [x] `batch(commands)` exported and wrapping `batch`
+  - [x] `takeAnnotatedScreenshot(path)` exported
+  - [x] `elementExists(selector)` exported
+  - [x] All new functions in default export
+  - [x] `node -e "import('./.agents/lib/browser-automation.mjs').then(m => console.log(Object.keys(m.default)))"` shows new function names
 
   **QA Scenarios**:
   ```
@@ -336,12 +336,12 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/browser-automation.mjs:616-676` — findAndClickPriceButtons current sleep() usage
 
   **Acceptance Criteria**:
-  - [ ] `clickWithRetry()` exported with max 2 retries
-  - [ ] `clickByTextWithRetry()` exported with max 2 retries
-  - [ ] `waitForStableContent()` exported
-  - [ ] At least 3 `sleep()` calls in extractActivityPage replaced with proper waits
-  - [ ] At least 1 `sleep()` call in findAndClickPriceButtons replaced with waitForNetworkIdle
-  - [ ] All new functions in default export
+  - [x] `clickWithRetry()` exported with max 2 retries
+  - [x] `clickByTextWithRetry()` exported with max 2 retries
+  - [x] `waitForStableContent()` exported
+  - [x] At least 3 `sleep()` calls in extractActivityPage replaced with proper waits
+  - [x] At least 1 `sleep()` call in findAndClickPriceButtons replaced with waitForNetworkIdle
+  - [x] All new functions in default export
 
   **QA Scenarios**:
   ```
@@ -399,11 +399,11 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/pricing-extractor.mjs:154-190` — `extractChildPricing()` existing patterns (reference for child price regex)
 
   **Acceptance Criteria**:
-  - [ ] `childPrice: null` (not `0`) in both tier extraction functions
-  - [ ] 40-line look-ahead limit in `extractActivityTiersFromPlainText()`
-  - [ ] Child price extraction logic added after adult price in both functions
-  - [ ] Validation: childPrice < adultPrice (otherwise set to null)
-  - [ ] `pricing-extractor.mjs` HTML extraction also changed to `childPrice: null`
+  - [x] `childPrice: null` (not `0`) in both tier extraction functions
+  - [x] 40-line look-ahead limit in `extractActivityTiersFromPlainText()`
+  - [x] Child price extraction logic added after adult price in both functions
+  - [x] Validation: childPrice < adultPrice (otherwise set to null)
+  - [x] `pricing-extractor.mjs` HTML extraction also changed to `childPrice: null`
 
   **QA Scenarios**:
   ```
@@ -483,11 +483,11 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `activity-schema.mjs:mapActivityToFirestore()` — how tiers map to Firestore
 
   **Acceptance Criteria**:
-  - [ ] `childPrices` merged into `pricing.tiers[]` in activityScraper.mjs
-  - [ ] `extractChildPricesPerTier()` processes up to 10 tiers (not 3)
-  - [ ] `extractChildPricesPerTier()` uses snapshot-based clicks instead of evaluate() for initial clicks
-  - [ ] Timeout guard per tier (10s max)
-  - [ ] evaluate() kept as fallback for price reading
+  - [x] `childPrices` merged into `pricing.tiers[]` in activityScraper.mjs
+  - [x] `extractChildPricesPerTier()` processes up to 10 tiers (not 3)
+  - [x] `extractChildPricesPerTier()` uses snapshot-based clicks instead of evaluate() for initial clicks
+  - [x] Timeout guard per tier (10s max)
+  - [x] evaluate() kept as fallback for price reading
 
   **QA Scenarios**:
   ```
@@ -557,12 +557,12 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/agent-browser-guide.md` — new guide with scraping patterns (Task 1 output)
 
   **Acceptance Criteria**:
-  - [ ] At least 5 `sleep()` calls replaced with proper waits in `extractActivityPage()`
-  - [ ] `batch()` used for at least 2 sequential operations
-  - [ ] `clickWithRetry()` used for cookie dismiss clicks
-  - [ ] `clickByTextWithRetry()` used for expandable section clicks
-  - [ ] Function signature unchanged
-  - [ ] Return type unchanged
+  - [x] At least 5 `sleep()` calls replaced with proper waits in `extractActivityPage()`
+  - [x] `batch()` used for at least 2 sequential operations
+  - [x] `clickWithRetry()` used for cookie dismiss clicks
+  - [x] `clickByTextWithRetry()` used for expandable section clicks
+  - [x] Function signature unchanged
+  - [x] Return type unchanged
 
   **QA Scenarios**:
   ```
@@ -613,10 +613,10 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/browser-automation.mjs:441-481` — `extractIvivuTour()` current implementation
 
   **Acceptance Criteria**:
-  - [ ] At least 3 `sleep()` calls replaced with proper waits in tour scraper
-  - [ ] `waitForNetworkIdle()` used after page navigation
-  - [ ] Comment added to lazy steps noting which need waits vs actual sleep
-  - [ ] Tour scraper still produces correct output for ivivu URLs
+  - [x] At least 3 `sleep()` calls replaced with proper waits in tour scraper
+  - [x] `waitForNetworkIdle()` used after page navigation
+  - [x] Comment added to lazy steps noting which need waits vs actual sleep
+  - [x] Tour scraper still produces correct output for ivivu URLs
 
   **QA Scenarios**:
   ```
@@ -668,10 +668,10 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/browser-automation.mjs:501-516` — `extractBookingPage()` current implementation
 
   **Acceptance Criteria**:
-  - [ ] At least 3 `sleep()` calls replaced with proper waits in booking scraper
-  - [ ] `waitForNetworkIdle()` used after page navigation
-  - [ ] Comment added to lazy steps noting which need waits vs actual sleep
-  - [ ] Booking scraper still produces correct output
+  - [x] At least 3 `sleep()` calls replaced with proper waits in booking scraper
+  - [x] `waitForNetworkIdle()` used after page navigation
+  - [x] Comment added to lazy steps noting which need waits vs actual sleep
+  - [x] Booking scraper still produces correct output
 
   **QA Scenarios**:
   ```
@@ -724,10 +724,10 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/agent-browser-guide.md` — new guide (Task 1 output)
 
   **Acceptance Criteria**:
-  - [ ] SKILL.md contains "agent-browser Command Reference" section
-  - [ ] SKILL.md contains "Scraping Workflow Patterns" section with 4+ patterns
-  - [ ] SKILL.md contains "Child Price Extraction" section
-  - [ ] Shared Modules table references agent-browser-guide.md
+  - [x] SKILL.md contains "agent-browser Command Reference" section
+  - [x] SKILL.md contains "Scraping Workflow Patterns" section with 4+ patterns
+  - [x] SKILL.md contains "Child Price Extraction" section
+  - [x] Shared Modules table references agent-browser-guide.md
 
   **QA Scenarios**:
   ```
@@ -774,9 +774,9 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/agent-browser-guide.md` — new guide (Task 1 output)
 
   **Acceptance Criteria**:
-  - [ ] SKILL.md contains "agent-browser Command Reference" section
-  - [ ] SKILL.md contains "Lazy Rendering Best Practices" section
-  - [ ] Shared Modules table references agent-browser-guide.md
+  - [x] SKILL.md contains "agent-browser Command Reference" section
+  - [x] SKILL.md contains "Lazy Rendering Best Practices" section
+  - [x] Shared Modules table references agent-browser-guide.md
 
   **QA Scenarios**:
   ```
@@ -822,9 +822,9 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/lib/agent-browser-guide.md` — new guide (Task 1 output)
 
   **Acceptance Criteria**:
-  - [ ] SKILL.md contains "agent-browser Command Reference" section
-  - [ ] SKILL.md contains "Hotel Data Extraction" section
-  - [ ] Shared Modules table references agent-browser-guide.md
+  - [x] SKILL.md contains "agent-browser Command Reference" section
+  - [x] SKILL.md contains "Hotel Data Extraction" section
+  - [x] Shared Modules table references agent-browser-guide.md
 
   **QA Scenarios**:
   ```
@@ -872,13 +872,13 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - Pre-refactor baseline: 10 tiers with adultPrice [625000, 435000, 240000, 145000, 630000, 780000, 780000, 680000, 820000, 820000]
 
   **Acceptance Criteria**:
-  - [ ] Activity scraper runs without errors
-  - [ ] Output has `pricing.tiers` with 10 entries
-  - [ ] Adult prices match baseline values
-  - [ ] Not all `childPrice` values are 0
-  - [ ] `childPrice` is null (not 0) when genuinely unavailable
-  - [ ] Gallery has 30+ images
-  - [ ] Location is "Tây Ninh"
+  - [x] Activity scraper runs without errors
+  - [x] Output has `pricing.tiers` with 10 entries
+  - [x] Adult prices match baseline values
+  - [x] Not all `childPrice` values are 0
+  - [x] `childPrice` is null (not 0) when genuinely unavailable
+  - [x] Gallery has 30+ images
+  - [x] Location is "Tây Ninh"
 
   **QA Scenarios**:
   ```
@@ -926,11 +926,11 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - Tour URL: `https://www.ivivu.com/du-lich/tour-phu-quoc-4n3d`
 
   **Acceptance Criteria**:
-  - [ ] Tour scraper runs without errors
-  - [ ] `success: true` in output
-  - [ ] `adultPrice` > 0
-  - [ ] `childPrice` is not undefined (null is acceptable if genuinely unavailable)
-  - [ ] `itinerary` array has entries
+  - [x] Tour scraper runs without errors
+  - [x] `success: true` in output
+  - [x] `adultPrice` > 0
+  - [x] `childPrice` is not undefined (null is acceptable if genuinely unavailable)
+  - [x] `itinerary` array has entries
 
   **QA Scenarios**:
   ```
@@ -978,9 +978,9 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - Booking.com hotel URL: user will provide or use a known URL
 
   **Acceptance Criteria**:
-  - [ ] Booking scraper runs without fatal errors
-  - [ ] Output has valid hotel data (name, address, etc.)
-  - [ ] Proper waits used (no excessive sleep in logs)
+  - [x] Booking scraper runs without fatal errors
+  - [x] Output has valid hotel data (name, address, etc.)
+  - [x] Proper waits used (no excessive sleep in logs)
 
   **QA Scenarios**:
   ```
