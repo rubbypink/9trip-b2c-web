@@ -26,7 +26,7 @@ export default function WishlistList() {
     try {
       setError(null);
       const data = await getUserWishlist(user.uid);
-      setItems(data);
+      setItems(data || []);
     } catch (err) {
       console.error("Failed to fetch wishlist:", err);
       setError("Không thể tải danh sách yêu thích.");
@@ -57,15 +57,20 @@ export default function WishlistList() {
 
   const formattedItems = useMemo(
     () =>
-      items.map((item) => ({
-        ...item,
-        imageUrl: item.imageUrl || "/placeholder-tour.jpg",
-        typeLabel: item.type === "hotel" ? "Khách sạn" : "Tour",
-        link:
-          item.type === "hotel"
-            ? `/hotels/${item.slug || item.id}`
-            : `/tours/${item.slug || item.id}`,
-      })),
+      (items || []).map((item) => {
+        if (!item) return null;
+        return {
+          ...item,
+          imageUrl: item?.imageUrl || item?.featuredImage || "/placeholder-tour.jpg",
+          typeLabel: item?.type === "hotel" ? "Khách sạn" : item?.type === "activity" ? "Hoạt động" : "Tour",
+          link:
+            item?.type === "hotel"
+              ? `/hotels/${item?.slug || item?.id}`
+              : item?.type === "activity"
+              ? `/activities/${item?.slug || item?.id}`
+              : `/tours/${item?.slug || item?.id}`,
+        };
+      }).filter(Boolean),
     [items],
   );
 
@@ -119,7 +124,7 @@ export default function WishlistList() {
           href="/tours"
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-medium hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md"
         >
-          Khám phá tour
+          Khám phá ngay
           <ExternalLink className="w-4 h-4" />
         </Link>
       </div>
@@ -144,7 +149,7 @@ export default function WishlistList() {
             >
               <img
                 src={item.imageUrl}
-                alt={item.name || item.title}
+                alt={item?.name || item?.title || "Hình ảnh"}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
               />
@@ -156,14 +161,16 @@ export default function WishlistList() {
                 <div className="flex items-center gap-2 mb-1">
                   <span
                     className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      item.type === "hotel"
+                      item?.type === "hotel"
                         ? "bg-purple-100 text-purple-700"
+                        : item?.type === "activity"
+                        ? "bg-orange-100 text-orange-700"
                         : "bg-cyan-100 text-cyan-700"
                     }`}
                   >
                     {item.typeLabel}
                   </span>
-                  {item.rating && (
+                  {item?.rating && (
                     <span className="flex items-center gap-0.5 text-xs text-amber-500">
                       <Star className="w-3 h-3 fill-current" />
                       {item.rating}
@@ -172,18 +179,18 @@ export default function WishlistList() {
                 </div>
                 <Link href={item.link} className="block">
                   <h3 className="font-semibold text-foreground truncate group-hover:text-cyan-600 transition-colors text-sm sm:text-base">
-                    {item.name || item.title}
+                    {item?.name || item?.title}
                   </h3>
                 </Link>
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                {item.location && (
+                {item?.location && (
                   <span className="flex items-center gap-1 truncate">
                     <MapPin className="w-3 h-3 flex-shrink-0" />
                     <span className="truncate">{item.location}</span>
                   </span>
                 )}
-                {item.savedAt && (
+                {item?.savedAt && (
                   <span className="flex items-center gap-1 flex-shrink-0">
                     <Calendar className="w-3 h-3" />
                     {new Date(item.savedAt.seconds ? item.savedAt.seconds * 1000 : item.savedAt).toLocaleDateString("vi-VN")}
@@ -194,16 +201,16 @@ export default function WishlistList() {
 
             {/* Price & Actions */}
             <div className="flex flex-col items-end justify-between flex-shrink-0">
-              {item.price !== undefined && (
+              {item?.price !== undefined && (
                 <span className="font-bold text-cyan-600 text-sm">
-                  {item.price.toLocaleString("vi-VN")} {item.currency || "₫"}
+                  {item.price.toLocaleString("vi-VN")} {item?.currency || "₫"}
                 </span>
               )}
               <button
                 onClick={() => handleRemove(item.id)}
                 disabled={removingId === item.id}
                 className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label={`Xóa ${item.name || item.title} khỏi danh sách yêu thích`}
+                aria-label={`Xóa ${item?.name || item?.title || "mục này"} khỏi danh sách yêu thích`}
                 title="Xóa khỏi yêu thích"
               >
                 {removingId === item.id ? (
