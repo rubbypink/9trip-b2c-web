@@ -1,10 +1,10 @@
 /**
  * Header - Thanh điều hướng chính toàn cục.
- * Hiển thị logo, menu, search, mini cart, user menu.
+ * Hiển thị logo, menu, mini cart với qty controls, user menu.
  */
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
@@ -16,12 +16,41 @@ const logoImg = "/images/favicon.webp";
 
 export default function Header() {
   const { user, logout } = useAuth();
-  const { items } = useCart();
+  const { items, updateItemQuantity, removeItem, getCartItemsForDropdown } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const cartItems = getCartItemsForDropdown();
   const cartCount = items?.length || 0;
+
+  /**
+   * Handle quantity change for a cart item.
+   * Hotels: changes rooms. Tours/activities: changes adults.
+   * @param {number} idx - Cart item index
+   * @param {number} delta - +1 or -1
+   */
+  const handleQtyChange = useCallback((idx, delta) => {
+    const item = items[idx];
+    if (!item) return;
+    let newQty;
+    if (item.serviceType === "hotel_room") {
+      newQty = (item.rooms || 1) + delta;
+    } else {
+      newQty = (item.adults || 1) + delta;
+    }
+    if (newQty < 1) return;
+    if (newQty > 10) return;
+    updateItemQuantity(idx, newQty);
+  }, [items, updateItemQuantity]);
+
+  /**
+   * Handle removing a cart item by index.
+   * @param {number} idx - Cart item index
+   */
+  const handleRemoveItem = useCallback((idx) => {
+    removeItem(idx);
+  }, [removeItem]);
 
   return (
     <header className="sticky top-0 z-40 bg-background shadow-sm border-b border-border">
@@ -68,8 +97,8 @@ export default function Header() {
             <Link href="/activities" className="text-foreground hover:text-primary font-medium transition-colors">
               Hoạt động
             </Link>
-            <Link href="/search" className="text-foreground hover:text-primary font-medium transition-colors">
-              🔍
+            <Link href="/blog" className="text-foreground hover:text-primary font-medium transition-colors">
+              Blog
             </Link>
           </nav>
 
@@ -149,7 +178,7 @@ export default function Header() {
             <Link href="/tours" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
             <Link href="/hotels" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
             <Link href="/activities" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
-            <Link href="/search" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
+            <Link href="/blog" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Blog</Link>
           </nav>
         )}
 
@@ -164,18 +193,53 @@ export default function Header() {
               <p className="text-muted-foreground text-sm text-center py-4">Giỏ hàng trống</p>
             ) : (
               <>
-                {items.map((item, idx) => (
-                  <div key={idx} className="flex gap-3 py-2 border-b border-border">
-                    <div className="w-14 h-14 bg-muted rounded flex-shrink-0 flex items-center justify-center text-muted-foreground text-xs">
-                      Ảnh
+                {cartItems.map((item, idx) => {
+                  const qty = item.displayQuantity || 1;
+                  const unitPrice = item.basePrice || 0;
+                  const lineTotal = unitPrice * qty;
+                  const isMinQty = qty <= 1;
+                  return (
+                    <div key={idx} className="flex gap-3 py-2 border-b border-border">
+                      <div className="w-14 h-14 bg-muted rounded flex-shrink-0 flex items-center justify-center text-muted-foreground text-xs">
+                        Ảnh
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <p className="text-sm font-medium text-foreground truncate">{item.serviceTitle}</p>
+                          <button
+                            className="cart-item-remove flex-shrink-0 text-muted-foreground hover:text-red-500 transition-colors text-sm min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            onClick={() => handleRemoveItem(idx)}
+                            aria-label="Xóa"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{item.serviceType === "hotel_room" ? "Khách sạn" : item.serviceType === "tour" ? "Tour" : item.serviceType === "activity" ? "Hoạt động" : item.serviceType}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <div className="cart-item-qty flex items-center gap-1">
+                            <button
+                              className={`w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm transition-colors ${isMinQty ? "text-muted-foreground cursor-not-allowed" : "text-foreground hover:bg-muted"}`}
+                              onClick={() => !isMinQty && handleQtyChange(idx, -1)}
+                              disabled={isMinQty}
+                              aria-label="Giảm số lượng"
+                            >
+                              −
+                            </button>
+                            <span className="text-sm font-medium text-foreground w-6 text-center">{qty}</span>
+                            <button
+                              className="w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm text-foreground hover:bg-muted transition-colors"
+                              onClick={() => handleQtyChange(idx, 1)}
+                              aria-label="Tăng số lượng"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <p className="text-sm text-primary-600 font-semibold">{lineTotal.toLocaleString()}₫</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{item.serviceTitle}</p>
-                      <p className="text-xs text-muted-foreground">{item.serviceType}</p>
-                      <p className="text-sm text-primary-600 font-semibold">{item.total?.toLocaleString()}₫</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <Link
                   href="/checkout"
                   className="block w-full text-center bg-primary-600 text-white py-2 rounded-lg mt-3 text-sm font-medium hover:bg-primary-700 transition-colors"
