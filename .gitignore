@@ -10,10 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 /.github/
-/.opencode/
-/.agents/
-.report/
-/.temp/
+
 # testing
 /coverage
 
@@ -23,7 +20,6 @@
 
 # production
 /build
-/scripts/
 # misc
 .DS_Store
 *.pem
@@ -41,15 +37,11 @@ yarn-error.log*
 .env.local
 /_reference_wp
 /.vscode
-/memory-bank
-/.clinerules
 firebase-debug.log
 9trip-b2c-web.code-workspace
 tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # vercel
 .vercel
-.gitignore
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts

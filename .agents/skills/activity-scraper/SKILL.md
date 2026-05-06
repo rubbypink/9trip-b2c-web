@@ -1,0 +1,312 @@
+---
+name: activity-scraper
+description: Nhận URL activity (list/detail) → Playwright browser scrape toàn bộ dữ liệu activity → map schema activities → lưu Firestore + Storage.
+---
+
+# Web Scraper — Activity Data Import Agent
+
+**Role**: Activity Data Import Specialist
+
+Agent chuyên trách nhận URL activity (list page hoặc detail page) từ bất kỳ website nào, truy cập qua Firecrawl Agent, trích xuất toàn bộ thông tin activity, xử lý ảnh, map đúng schema `activities/{activityId}`, và lưu vào hệ thống 9Trip B2C (Firestore + Firebase Storage).
+
+## Trigger Conditions
+
+Skill này tự động kích hoạt khi user context chứa một trong các từ khóa sau:
+- `tạo activity`
+- `create activity`
+- `scrape activity`
+- `use activity-scraper`
+
+Khi phát hiện các từ khóa này, agent sẽ tự động thực thi workflow mà không cần user hướng dẫn chi tiết.
+
+## Shared Modules
+
+Các scraper đều sử dụng shared modules trong `.agents/lib/`:
+
+| Module | Chức năng |
+|--------|-----------|
+| `.agents/lib/adapters/` | Domain adapters — Playwright DOM extraction per site |
+| `.agents/lib/browser-helpers.mjs` | Browser interaction sequences, child pricing reveal |
+| `.agents/lib/pricing-extractor.mjs` | Unified pricing extraction with mandatory child price |
+| `.agents/lib/firebase-helpers.mjs` | Firebase CRUD operations |
+| `.agents/lib/image-helpers.mjs` | Download, resize, WebP conversion (multi-CDN) |
+| `.agents/lib/scrape-helpers.mjs` | Utilities: slugify, temp files, reports |
+| `.agents/lib/sanitize-data.mjs` | Làm sạch dữ liệu (thay thông tin đối thủ) |
+| `.agents/lib/schemas/activity-schema.mjs` | Activity schema + `ACTIVITY_AGENT_PROMPT` |
+
+## Input Format
+
+User cần cung cấp **URL website** ở một trong hai dạng:
+
+1. **Detail page** (ưu tiên): URL của trang activity cụ thể
+   ```
+   https://example.com/activity/xyz-activity
+   ```
+2. **List page** (fallback): URL của trang danh sách activity → agent tự tìm và scrape từng activity
+   ```
+   https://example.com/activities/phu-quoc
+   ```
+
+**Prompt mẫu từ user:**
+```
+use activity-scraper
+URL: https://example.com/activity/xyz-activity
+```
+
+## Workflow Overview
+
+```
+[User cung cấp URL activity (detail/list)]
+    │
+    ▼
+┌──────────────────────────────────────────────────┐
+│  Giai đoạn A: Validate & Parse URL               │
+│  Xác định loại URL (detail/list), parse slug     │
+│  Nếu là list → extract các URL detail            │
+└──────────────────────────────────────────────────┘
+    │
+    ▼
+┌──────────────────────────────────────────────────┐
+│  Giai đoạn B: Scrape toàn bộ dữ liệu             │
+│  scrapeWithAgent() → Firecrawl Agent (1 lần gọi) │
+│  → Agent tự xử lý: lazy render, gallery, FAQs,   │
+│    reviews, pricing, opening hours, v.v.         │
+│  → Output JSON → lưu .temp/scraped-activity-{slug}.json │
+└──────────────────────────────────────────────────┘
+    │
+    ▼
+┌──────────────────────────────────────────────────┐
+│  Giai đoạn C: Save to Firebase + Report          │
+│  node saveActivityData.mjs --input=.temp/...     │
+│  → Download ảnh → WebP → Storage                 │
+│  → Tạo activities/{slug} document                │
+│  → Report tại .report/scrape-activity-*.md       │
+└──────────────────────────────────────────────────┘
+```
+
+## Prerequisites
+
+- **@mendable/firecrawl-js** (đã có trong package.json)
+- **FIRECRAWL_API_KEY** trong `.env.local` (đã có)
+- **sharp** installed: `npm install sharp` (đã có)
+- **Firebase Admin SDK** service account key: `tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json` (đã có)
+
+> **Lưu ý:** Không cần MCP server. Firecrawl Agent được gọi trực tiếp qua NPM SDK. Agent tự động xử lý tất cả: lazy render, gallery click, FAQ extraction, reviews.
+>
+> **Khác với hotel-scraper:** Activity không có rooms. Thay vào đó có `pricing` object với `tiers`, `openingHours`, `durationDetail`, `recommendation`, `capacity`, `faq`, `purchaseGuide`, `map`.
+>
+> Activities trên booking.com dùng field `title` thay vì `name`.
+
+## Execution Steps
+
+### Giai đoạn A: Validate & Parse URL
+
+Kiểm tra URL user cung cấp:
+
+1. **Detail page** — URL dẫn đến trang activity cụ thể:
+   - Parse slug từ URL
+   - Dùng trực tiếp cho Giai đoạn B
+
+2. **List page** — URL dẫn đến trang danh sách activity:
+   - Parse URL để xác định context
+   - Dùng `scrapeWithAgent()` để lấy danh sách các activity
+   - Sau đó xử lý lần lượt từng activity detail page
+
+**Xử lý kết quả:**
+- Nếu URL không truy cập được → báo lỗi "Cannot access URL. Please check the URL and try again."
+- Nếu list page không tìm thấy activity nào → báo lỗi "No activities found in the list page."
+
+### Giai đoạn B: Scrape Activity Detail bằng Firecrawl Agent
+
+Gọi `scrapeWithAgent()` từ shared module để scrape toàn bộ dữ liệu activity trong **một lần gọi**:
+
+```bash
+node .agents/skills/activity-scraper/scripts/activityScraper.mjs --url=https://example.com/activity/xyz
+```
+
+**Firecrawl Agent tự động thực hiện:**
+- Scroll để kích hoạt lazy load
+- Click gallery để lấy tất cả ảnh độ phân giải cao
+- Click các accordion/tabs để lấy thông tin chi tiết
+- Extract: activity info, pricing tiers, opening hours, FAQ, reviews, purchase guide, capacity, etc.
+- Trả về JSON đã được map theo schema activities
+
+**Schema prompt** được load từ `.agents/lib/schemas/activity-schema.mjs`:
+- `ACTIVITY_AGENT_PROMPT` — hướng dẫn Agent extract đúng format
+- Activity schema với fields: title, duration, location, description, gallery, pricing tiers, FAQ, reviews, v.v.
+
+**Output:** `.temp/scraped-activity-{slug}.json`
+
+### Giai đoạn C: Save to Firebase + Report
+
+```bash
+node .agents/skills/activity-scraper/scripts/saveActivityData.mjs --input=.temp/scraped-activity-{slug}.json
+```
+
+Script tự động thực hiện:
+1. Validate dữ liệu + kiểm tra slug trùng trong Firestore
+2. Gọi `sanitizeScrapedData()` để làm sạch dữ liệu (thay thông tin đối thủ)
+3. Download ảnh activity (featured + gallery) → convert WebP (sharp) → upload Firebase Storage
+   - Storage path: `activities/{activityId}/featured.webp`, `activities/{activityId}/gallery/{n}.webp`
+4. Xử lý extended fields: `openingHours`, `recommendation`, `purchaseGuide`, `faq`, `notes`, `highlights`, `included`, `excluded`, `map`
+5. Xử lý pricing tiers → lưu trực tiếp vào trường `pricing.tiers`
+6. Xử lý reviews → lưu vào field `reviews` dạng embedded Map
+7. Tạo document `activities/{activityId}`
+8. Tạo report file tại `/.report/scrape-activity-{timestamp}.md`
+
+**Script exit codes:**
+- `0` — Thành công
+- `1` — Có lỗi (xem report để biết chi tiết)
+
+## Activity → Firestore `activities/{activityId}`
+
+| Field | Nguồn từ website | Ghi chú |
+|-------|------------------|---------|
+| `id` | Tự động (script) | **Slug của activity** |
+| `title` | Tiêu đề activity | Required |
+| `slug` | Tự động từ title | lowercase, hyphenated, bỏ dấu |
+| `duration` | Thời lượng | String (VD: "1/2 ngày", "1 ngày") |
+| `location` | Địa điểm | String |
+| `locationId` | Map từ location → ID | String (reference `locations`) |
+| `description` | Mô tả activity | Có thể chứa HTML |
+| `excerpt` | Rút gọn từ description | Plain text, ≤200 chars |
+| `featuredImage` | Upload URL từ script | WebP trên Storage |
+| `gallery` | Mảng URL đã upload | WebP trên Storage |
+| `highlights` | Điểm nổi bật | Array of strings |
+| `included` | Bao gồm | Array |
+| `excluded` | Không bao gồm | Array |
+| `categories` | Danh mục | Array of strings |
+| `openingHours` | Giờ mở cửa | String |
+| `durationDetail` | Thời lượng chi tiết | String |
+| `locationDetail` | Địa chỉ chi tiết | String |
+| `recommendation` | Khuyến nghị | String |
+| `capacity` | Sức chứa | Number |
+| `childrenPolicy` | Chính sách trẻ em | String |
+| `cancellationPolicy` | Chính sách hủy | String |
+| `notes` | Lưu ý | Array of strings |
+| `purchaseGuide` | Hướng dẫn mua vé | Array of strings |
+| `faq` | Câu hỏi thường gặp | Array of { question, answer } |
+| `ratingAverage` | Guest review score | Number |
+| `ratingCount` | Số lượng reviews | Number |
+| `pricing` | **MAP** các gói giá — key = price ID | Object |
+| `pricing.{id}.id` | ID gói giá (VD: `price_standard`) | String |
+| `pricing.{id}.name` | Tên gói dịch vụ | String |
+| `pricing.{id}.description` | Mô tả gói | String |
+| `pricing.{id}.basePrice` | Giá người lớn (VND) | Number |
+| `pricing.{id}.childPrice` | Giá trẻ em (VND, 0 nếu miễn phí) | Number |
+| `pricing.{id}.currency` | Loại tiền tệ | String (mặc định "VND") |
+| `pricing.{id}.discountPercent` | Phần trăm giảm giá (0-100) | Number |
+| `map` | Tọa độ | { lat, lng, zoom? } |
+| `isFeatured` | Mặc định `false` | Boolean |
+| `tags` | Suy luận từ dữ liệu | Array of strings |
+| `phone` | Số điện thoại | Nếu có |
+| `email` | Email | Nếu có |
+| `website` | Website | Nếu có |
+| `metaTitle` | SEO title | String |
+| `metaDescription` | SEO description | String |
+| `status` | Mặc định "active" | String |
+| `createdAt` | Firestore Timestamp | |
+| `updatedAt` | Firestore Timestamp | |
+
+### Reviews — Embedded Map trong activity document
+
+Cấu trúc: `reviews: { "review_john-doe": { ... }, "review_maria": { ... } }`
+
+| Field | Kiểu | Mô tả |
+|-------|------|-------|
+| `id` | `string` | Review ID (VD: `review_john-doe`) |
+| `reviewerName` | `string` | Tên người review |
+| `reviewerAvatar` | `string` | URL avatar |
+| `rating` | `number` | Điểm đánh giá (1-10) |
+| `text` | `string` | Nội dung review |
+| `date` | `string` | Ngày review |
+| `country` | `string` | Quốc gia |
+| `sortOrder` | `number` | Thứ tự hiển thị |
+
+## FireCrawl Credits Tracking
+
+| Bước | Ghi lại |
+|------|---------|
+| **B (Agent Scrape)** | `creditsUsed` từ Firecrawl Agent response |
+
+Lưu vào `_firecrawlCredits` trong temp JSON:
+```json
+{
+  "_firecrawlCredits": 15,
+  "title": "...",
+  ...
+}
+```
+
+## Report Template
+
+```markdown
+# 📋 Báo cáo Scrape Activity
+
+## Thông tin đầu vào
+- **URL:** {url}
+- **Loại URL:** {detail | list}
+- **Thởi gian bắt đầu:** {datetime}
+
+## Tiến trình
+
+### ✅/❌ Giai đoạn A: Parse URL
+- **Loại URL:** {detail/list}
+- **Slug:** {slug}
+
+### ✅/❌ Giai đoạn B: Scrape bằng Firecrawl Agent
+- **Tên activity:** {title}
+- **Số ảnh gallery:** {count}
+- **Thởi lượng:** {duration}
+- **Giá cơ bản:** {basePrice} {currency}
+- **Số reviews:** {count}
+- **Agent credits:** {creditsUsed}
+
+### ✅/❌ Giai đoạn C: Save to Firebase
+- **Activity ID:** {activityId}
+- **Storage path:** activities/{activityId}/
+- **Firestore path:** activities/{activityId}
+- **Số ảnh đã upload:**
+  - featured: {n} ảnh
+  - gallery: {n} ảnh
+- **Pricing tiers:** {count}
+- **Report file:** {path}
+
+## Tổng kết
+- **Tổng FireCrawl credits:** {total}
+- **Tổng thởi gian:** {duration}
+- **Kết quả:** {Thành công / Có lỗi}
+- **Ghi chú:** {nếu có}
+```
+
+## Data Sanitization — Làm sạch dữ liệu trước khi lưu
+
+Trước khi dữ liệu được lưu vào Firestore, script `saveActivityData.mjs` tự động gọi `sanitizeScrapedData()` từ `.agents/lib/sanitize-data.mjs` để:
+
+1. **Thay thế thông tin liên lạc**: `phone`, `email`, `website` → thông tin của **9 Trip Phú Quốc**
+2. **Thay thế tên công ty đối thủ**: Dựa vào `knownNames` (trích từ domain URL nguồn) → thay bằng "9 Trip Phú Quốc"
+3. **Gemini AI scan** (nếu có key): Quét toàn bộ text fields để phát hiện các thông tin còn sót
+
+**Các field được sanitize tự động:**
+- `phone` → `0877.901.901`
+- `email` → `info@9tripphuquoc.com`
+- `website` → `https://9tripphuquoc.com`
+- Tất cả text fields: `title`, `description`, `excerpt`, `highlights`, `included`, `excluded`, `notes`, `location`, `openingHours`, `purchaseGuide`
+
+**Cách gọi (tự động trong `saveActivityData.mjs`):**
+```javascript
+import { sanitizeScrapedData } from '../lib/sanitize-data.mjs';
+const result = await sanitizeScrapedData(data, {
+  type: 'activity',
+  knownNames: ['booking'],  // từ domain URL nguồn
+});
+```
+
+## Common URL patterns
+
+Skill này hỗ trợ mọi URL web hợp lệ. Dưới đây là một số pattern tham khảo:
+
+- **Detail page**: URL trang chi tiết activity (ưu tiên)
+- **List page**: URL trang danh sách activity (fallback — agent tự tìm và scrape từng activity)
+
+> **Lưu ý:** Skill không giới hạn nguồn web. Bạn có thể cung cấp URL từ bất kỳ website nào có chứa thông tin activity / điểm tham quan.
