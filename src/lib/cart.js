@@ -27,9 +27,11 @@ const CartContext = createContext(null);
  * @property {number} rooms - Number of rooms (for hotel)
  * @property {number} basePrice - Unit price
  * @property {number} discount - Discount amount per unit
- * @property {number} total - Line total
+  * @property {number} total - Line total
  * @property {string} currency
+ * @property {number} [displayQuantity] - Formatted quantity for dropdown display
  */
+
 
 /**
  * @typedef {Object} CartState
@@ -238,6 +240,32 @@ export function CartProvider({ children }) {
 
   // Derived values (rounded to avoid floating point errors)
   const subtotal = useMemo(() => Math.round(items.reduce((sum, item) => sum + item.total, 0)), [items]);
+
+  /**
+   * Get cart items formatted for dropdown display.
+   * Adds displayQuantity based on service type.
+   * @returns {CartItem[]}
+   */
+  const getCartItemsForDropdown = useCallback(() => {
+    return items.map((item) => {
+      let displayQuantity = 1;
+      if (item.serviceType === "hotel_room") {
+        displayQuantity = item.rooms || 1;
+      } else if (item.serviceType === "tour" || item.serviceType === "activity") {
+        displayQuantity = (item.adults || 0) + (item.children || 0);
+      }
+      return { ...item, displayQuantity };
+    });
+  }, [items]);
+
+  /**
+   * Get total number of distinct services in cart.
+   * @returns {number}
+   */
+  const getCartTotalItems = useCallback(() => {
+    return items.length;
+  }, [items]);
+
   const itemCount = items.length;
   const taxRate = 0.08; // 8% default, can be overridden from settings
   const tax = useMemo(() => Math.round((subtotal - couponDiscount) * taxRate), [subtotal, couponDiscount]);
@@ -252,6 +280,8 @@ export function CartProvider({ children }) {
     subtotal,
     tax,
     grandTotal,
+    getCartItemsForDropdown,
+    getCartTotalItems,
     addItem,
     removeItem,
     updateItemQuantity,
@@ -273,6 +303,8 @@ export function CartProvider({ children }) {
  *   subtotal: number,
  *   tax: number,
  *   grandTotal: number,
+ *   getCartItemsForDropdown: Function,
+ *   getCartTotalItems: Function,
  *   addItem: Function,
  *   removeItem: Function,
  *   clearCart: Function,
