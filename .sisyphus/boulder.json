@@ -1,68 +1,77 @@
 {
-  "active_plan": "/home/rubbypink/projects/tripphuquoc-db-fs/.sisyphus/plans/scraper-refactor.md",
-  "started_at": "2026-05-06T11:31:17.436Z",
+  "active_plan": "/home/rubbypink/projects/tripphuquoc-db-fs/.sisyphus/plans/system-update-2026-05-06.md",
+  "started_at": "2026-05-06T18:44:35.977Z",
   "session_ids": [
-    "ses_20321ed55ffeETmexQ2FZCo9kr"
+    "ses_201a31114ffejy0YLzBd14MBSi"
   ],
   "session_origins": {
-    "ses_20321ed55ffeETmexQ2FZCo9kr": "direct"
+    "ses_201a31114ffejy0YLzBd14MBSi": "direct"
   },
-  "plan_name": "scraper-refactor",
+  "plan_name": "system-update-2026-05-06",
   "agent": "atlas",
   "task_sessions": {
     "todo:1": {
       "task_key": "todo:1",
       "task_label": "1",
-      "task_title": "Create agent-browser-guide.md — condensed command reference + scraping patterns",
-      "session_id": "ses_202e87ccaffekPFBv4dZzYEQ4P",
+      "task_title": "Test Infrastructure Setup (Vitest + Playwright)",
+      "session_id": "ses_20163a59cffedMTIuHZ9XGWp1P",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-05-06T18:49:42.096Z"
+    },
+    "todo:2": {
+      "task_key": "todo:2",
+      "task_label": "2",
+      "task_title": "Blog Firestore Collection + Seed Script",
+      "session_id": "ses_2015f66abffeLJfqlosMGUGa4d",
+      "agent": "Sisyphus-Junior",
+      "category": "quick",
+      "updated_at": "2026-05-06T18:58:40.492Z"
+    },
+    "todo:6": {
+      "task_key": "todo:6",
+      "task_label": "6",
+      "task_title": "Fix Wishlist Blank Page",
+      "session_id": "ses_20156beafffeEXbh2RMbWvl0z7",
       "agent": "Sisyphus-Junior",
       "category": "deep",
-      "updated_at": "2026-05-06T11:41:11.054Z"
+      "updated_at": "2026-05-06T19:01:43.072Z"
     },
-    "todo:3": {
-      "task_key": "todo:3",
-      "task_label": "3",
-      "task_title": "Add retry logic + standardized waits to browser-automation.mjs",
-      "session_id": "ses_202e21632ffeVq7wl55SOvblqw",
+    "todo:8": {
+      "task_key": "todo:8",
+      "task_label": "8",
+      "task_title": "Reviews Tab — Email/Phone Filter UI",
+      "session_id": "ses_2015058c4ffez4eZb1TRHg5Bjd",
       "agent": "Sisyphus-Junior",
       "category": "unspecified-high",
-      "updated_at": "2026-05-06T11:49:54.234Z"
-    },
-    "todo:5": {
-      "task_key": "todo:5",
-      "task_label": "5",
-      "task_title": "Fix extractChildPricesPerTier data flow in activityScraper.mjs",
-      "session_id": "ses_202dc906dffeyV2lk12D4Cre24",
-      "agent": "Sisyphus-Junior",
-      "category": "unspecified-high",
-      "updated_at": "2026-05-06T11:55:43.238Z"
+      "updated_at": "2026-05-06T19:08:55.246Z"
     },
     "todo:9": {
       "task_key": "todo:9",
       "task_label": "9",
-      "task_title": "Update activity-scraper SKILL.md with agent-browser patterns",
-      "session_id": "ses_202d47c06ffe1eB1tNQrOWOJeK",
+      "task_title": "CustomerForm Update — Identity Fields",
+      "session_id": "ses_2014de492ffeA0iUQlW9Fc9GBm",
       "agent": "Sisyphus-Junior",
       "category": "unspecified-high",
-      "updated_at": "2026-05-06T12:04:47.966Z"
+      "updated_at": "2026-05-06T19:11:49.627Z"
     },
-    "todo:12": {
-      "task_key": "todo:12",
-      "task_label": "12",
-      "task_title": "End-to-end test: ivivu activity scraper with child prices",
-      "session_id": "ses_202c6608dffeYxYOFdfnH5LiVa",
+    "todo:13": {
+      "task_key": "todo:13",
+      "task_label": "13",
+      "task_title": "Blog List Page (`/blog`)",
+      "session_id": "ses_201460fc6ffeMc2nGqNGqvbh1Y",
       "agent": "Sisyphus-Junior",
       "category": "unspecified-high",
-      "updated_at": "2026-05-06T12:19:26.190Z"
+      "updated_at": "2026-05-06T19:24:36.344Z"
     },
     "final-wave:f1": {
       "task_key": "final-wave:f1",
       "task_label": "F1",
       "task_title": "**Plan Compliance Audit** — `oracle`",
-      "session_id": "ses_202ac4da3ffelRMvpAFTkvrYDL",
+      "session_id": "ses_201398788ffe3j0VlktduX87Zd",
       "agent": "Sisyphus-Junior",
       "category": "unspecified-high",
-      "updated_at": "2026-05-06T12:50:50.651Z"
+      "updated_at": "2026-05-06T19:33:13.962Z"
     }
   }
 }

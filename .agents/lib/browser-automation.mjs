@@ -291,17 +291,15 @@ export async function waitForFunction(fn, timeout = 25000) {
 }
 
 export async function batch(commands) {
-  const tmpFile = path.join(os.tmpdir(), `batch-${Date.now()}.json`);
   try {
-    fs.writeFileSync(tmpFile, JSON.stringify(commands), 'utf-8');
-    const output = await runCommand('batch', ['--file', tmpFile]);
+    const output = await runCommand('batch', [...commands]);
     try {
       return JSON.parse(output);
     } catch {
       return output;
     }
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch { /* ignore */ }
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -429,7 +427,8 @@ export async function getUrl() {
 
 export async function evaluate(script) {
   try {
-    return await runCommand('eval', [script], { timeout: 30000 });
+    const escapedScript = `'${script.replace(/'/g, "'\\''")}'`;
+    return await runCommand('eval', [escapedScript], { timeout: 30000 });
   } catch (e) {
     return null;
   }
@@ -704,21 +703,30 @@ export async function extractChildPricesPerTier(tierInfo = []) {
  * Uses batch for cookie+scroll, clickByTextWithRetry for expandable sections,
  * waitForNetworkIdle/waitForText/waitForStableContent instead of sleep.
  * Also extracts per-tier child prices via extractChildPricesPerTier.
+ * 
+ * For iVIVU: Uses extractIvivuActivityPrices for enhanced pricing extraction
+ * by clicking through all "Chọn" buttons.
+ * 
  * @param {string} url - URL of the activity page
+ * @param {Object} [options] - Extraction options (forwarded to iVIVU extractor)
  * @returns {Promise<Object>} Extracted page data including childPrices and childPricing
  */
-export async function extractActivityPage(url) {
+export async function extractActivityPage(url, options = {}) {
+  // Check if this is iVIVU and use specialized extraction
+  if (url.includes('ivivu.com')) {
+    console.log('[Activity Scraper] Using iVIVU specialized extraction v2');
+    return extractIvivuActivityPrices(url, options);
+  }
+  
   await initSession();
   try {
     await openPage(url);
     await waitForNetworkIdle(3000);
 
-    // Batch: accept cookie + scroll to reveal lazy content
-    await batch([
-      { action: 'click', text: 'Đồng ý', optional: true },
-      { action: 'click', text: 'Accept', optional: true },
-      { action: 'scroll', direction: 'down', amount: 800 },
-    ]);
+    // Accept cookie + scroll to reveal lazy content
+    await clickByText('Đồng ý', { optional: true });
+    await clickByText('Accept', { optional: true });
+    await runCommand('scroll', ['down', '800']);
     await waitForStableContent(2000);
 
     // Click expandable sections with retry
@@ -807,6 +815,369 @@ export async function findAndClickPriceButtons(options = {}) {
   };
 }
 
+/**
+ * Parse pricing data from raw text extracted from iVIVU price panel.
+ * Runs in Node.js to avoid regex escaping issues in browser evaluate context.
+ *
+ * @param {string} text - Raw text from the price panel
+ * @param {string} tierName - Tier/ticket name
+ * @param {number} index - Button index
+ * @returns {Object} Parsed pricing data with adultPrice, childPrice, infantPrice
+ */
+function parsePricingFromRawText(text, tierName, index) {
+  const result = {
+    index,
+    tierName: tierName || `Tier ${index + 1}`,
+    adultPrice: null,
+    childPrice: null,
+    infantPrice: null,
+    currency: 'VND',
+    description: ''
+  };
+
+  if (!text) return result;
+
+  const parsePrice = (str) => {
+    if (!str) return null;
+    const cleaned = str.replace(/[.,]/g, '');
+    const num = parseInt(cleaned, 10);
+    return isNaN(num) ? null : num;
+  };
+
+  // Adult price patterns (most specific first)
+  const adultPatterns = [
+    /Người\s*lớn[^0-9]*?([\d.,]+)\s*đ/i,
+    /adult[^0-9]*?([\d.,]+)\s*đ/i,
+    /([\d.,]+)\s*đ[^\n]*?người\s*lớn/i,
+    /Giá\s*vé[^0-9]*?([\d.,]+)\s*đ/i,
+  ];
+  for (const p of adultPatterns) {
+    const m = text.match(p);
+    if (m) {
+      result.adultPrice = parsePrice(m[1]);
+      if (result.adultPrice) break;
+    }
+  }
+
+  // Child price patterns
+  const childPatterns = [
+    /Trẻ\s*em\s*\([^)]*\)[^0-9]*?([\d.,]+)\s*đ/i,
+    /Trẻ\s*em[^0-9]*?([\d.,]+)\s*đ/i,
+    /([\d.,]+)\s*đ[^\n]*?trẻ\s*em/i,
+    /child[^0-9]*?([\d.,]+)\s*đ/i,
+  ];
+  for (const p of childPatterns) {
+    const m = text.match(p);
+    if (m) {
+      result.childPrice = parsePrice(m[1]);
+      if (result.childPrice !== null) break;
+    }
+  }
+
+  // Infant/Em bé patterns
+  const infantPatterns = [
+    /Em\s*bé\s*\([^)]*\)[^0-9]*?([\d.,]+)\s*đ/i,
+    /Em\s*bé[^0-9]*?([\d.,]+)\s*đ/i,
+    /([\d.,]+)\s*đ[^\n]*?em\s*bé/i,
+    /infant[^0-9]*?([\d.,]+)\s*đ/i,
+  ];
+  for (const p of infantPatterns) {
+    const m = text.match(p);
+    if (m) {
+      result.infantPrice = parsePrice(m[1]);
+      if (result.infantPrice !== null) break;
+    }
+  }
+
+  // Handle "Miễn phí" (free) pricing
+  if (result.childPrice === null && /trẻ\s*em.*miễn\s*phí|miễn\s*phí.*trẻ\s*em/i.test(text)) {
+    result.childPrice = 0;
+  }
+  if (result.infantPrice === null && /em\s*bé.*miễn\s*phí|miễn\s*phí.*em\s*bé/i.test(text)) {
+    result.infantPrice = 0;
+  }
+
+  return result;
+}
+
+/**
+ * Extract iVIVU activity prices v2 — optimized with fast clicking and Node.js parsing.
+ *
+ * Optimizations over v1:
+ * - Native sleep (100ms) instead of agent-browser wait (2s) between buttons
+ * - Single evaluate calls for scroll+click, btn-more, and extraction
+ * - waitForSelector only on last button (not every button)
+ * - Regex parsing in Node.js (avoids escaping issues in evaluate context)
+ * - Chunked streaming via onChunk callback
+ * - Parallel extraction support via buttonRange (startIndex/endIndex)
+ *
+ * Flow:
+ * 1. Load page, dismiss cookie, scroll to reveal tickets
+ * 2. Count all "Chọn" / btn-choose buttons
+ * 3. For each button: scroll+click → 500ms wait → click btn-more → extract raw text
+ * 4. Only on last button: poll for '.tkn__quantity--box .price-panel' selector
+ * 5. Parse all prices in Node.js from raw text
+ * 6. Stream chunks via onChunk callback every chunkSize tiers
+ *
+ * @param {string} url - iVIVU activity URL
+ * @param {Object} [options] - Extraction options
+ * @param {number} [options.startIndex=0] - First button index (for parallel splitting)
+ * @param {number} [options.endIndex] - Last button index exclusive (defaults to all)
+ * @param {number} [options.chunkSize=2] - Number of tiers per chunk callback
+ * @param {Function} [options.onChunk] - Callback receiving partial pricing data chunks
+ * @returns {Promise<Object>} Extracted pricing data for all processed tiers
+ */
+export async function extractIvivuActivityPrices(url, options = {}) {
+  await initSession();
+  const allPricingData = [];
+  const { startIndex = 0, endIndex, chunkSize = 2, onChunk } = options;
+  const nativeSleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  try {
+    // Phase 1: Load page and prepare
+    await openPage(url);
+    await waitForNetworkIdle(5000);
+    await clickByText('Đồng ý', { optional: true });
+    await clickByText('Accept', { optional: true });
+
+    // Scroll thoroughly to reveal all ticket sections and lazy-loaded gallery images
+    await runCommand('scroll', ['down', '1000']);
+    await nativeSleep(2000);
+    await runCommand('scroll', ['down', '1000']);
+    await nativeSleep(2000);
+    await runCommand('scroll', ['up', '2000']);
+    await nativeSleep(1000);
+
+    // Phase 2: Count all "Chọn" buttons via single evaluate
+    const btnCountRaw = await evaluate(
+      '(function() {' +
+      'var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
+      'var count = 0;' +
+      'for (var i = 0; i < btns.length; i++) {' +
+      '  var t = (btns[i].textContent || "").trim();' +
+      '  var c = typeof btns[i].className === "string" && btns[i].className.includes("btn-choose");' +
+      '  if (t.startsWith("Chọn") || c) count++;' +
+      '}' +
+      'return count;' +
+      '})()'
+    );
+
+    const totalBtns = parseInt(btnCountRaw, 10) || 0;
+    const effectiveEnd = endIndex !== undefined ? Math.min(endIndex, totalBtns) : totalBtns;
+    console.log(`[iVIVU v2] Found ${totalBtns} buttons, processing range [${startIndex}, ${effectiveEnd})`);
+
+    if (totalBtns === 0) {
+      console.log('[iVIVU v2] No buttons found, returning empty pricing');
+    }
+
+    // Phase 3: Process each button sequentially
+    let chunkBuffer = [];
+
+    for (let i = startIndex; i < effectiveEnd; i++) {
+      const btnNum = i + 1;
+
+      // Step A: Scroll to and click the ith "Chọn" button
+      const clickRes = await evaluate(
+        '(function() {' +
+        'var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
+        'var chooseBtns = [];' +
+        'for (var j = 0; j < btns.length; j++) {' +
+        '  var t = (btns[j].textContent || "").trim();' +
+        '  var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
+        '  if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
+        '}' +
+        'var target = chooseBtns[' + i + '];' +
+        'if (!target) return JSON.stringify({ status: "not-found" });' +
+        'target.scrollIntoView({ behavior: "instant", block: "center" });' +
+        'target.click();' +
+        'var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], .ivu-shadow") || target.parentElement;' +
+        'var titleEl = card ? card.querySelector("h3, h4, h5, [class*=\\"title\\"], [class*=\\"name\\"]") : null;' +
+        'return JSON.stringify({ status: "clicked", tierName: titleEl ? titleEl.textContent.trim() : "" });' +
+        '})()'
+      );
+
+      let tierName = `Tier ${btnNum}`;
+      try {
+        let parsed = JSON.parse(clickRes || '{}');
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+        if (parsed.status === 'not-found') {
+          console.log(`[iVIVU v2] Button ${btnNum} not found, skipping`);
+          continue;
+        }
+        if (parsed.tierName) tierName = parsed.tierName;
+      } catch (e) {
+        // Fallback
+      }
+
+      // Step B: Wait for panel to expand
+      await nativeSleep(1000);
+
+      // Step C: Click the "Chọn" button to expand the card, then click btn-more inside
+      const clickResult = await evaluate(
+        '(function() {' +
+        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
+        '  var chooseBtns = [];' +
+        '  for (var j = 0; j < btns.length; j++) {' +
+        '    var t = (btns[j].textContent || "").trim();' +
+        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
+        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
+        '  }' +
+        '  var target = chooseBtns[' + i + '];' +
+        '  if (!target) return "not-found";' +
+        '  target.click();' +
+        '  return "clicked";' +
+        '})()'
+      );
+      
+      await nativeSleep(500);
+      
+      // Step D: Find and click btn-more buttons WITHIN the expanded card
+      await evaluate(
+        '(function() {' +
+        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
+        '  var chooseBtns = [];' +
+        '  for (var j = 0; j < btns.length; j++) {' +
+        '    var t = (btns[j].textContent || "").trim();' +
+        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
+        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
+        '  }' +
+        '  var target = chooseBtns[' + i + '];' +
+        '  if (!target) return "0";' +
+        '  ' +
+        '  // Find the parent card/container' +
+        '  var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], [class*=\\"tier\\"], .ivu-shadow") || target.parentElement.parentElement;' +
+        '  if (!card) return "0";' +
+        '  ' +
+        '  // Find btn-more buttons INSIDE this card' +
+        '  var mores = card.querySelectorAll(".btn-more, [class*=\\"btn-more\\"]");' +
+        '  var clicked = 0;' +
+        '  for (var k = 0; k < mores.length; k++) {' +
+        '    if (mores[k].offsetParent !== null) {' +
+        '      mores[k].click();' +
+        '      clicked++;' +
+        '    }' +
+        '  }' +
+        '  return String(clicked);' +
+        '})()'
+      );
+      
+      await nativeSleep(500);
+      
+      // Step E: Extract text from the expanded card
+      const tierText = await evaluate(
+        '(function() {' +
+        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
+        '  var chooseBtns = [];' +
+        '  for (var j = 0; j < btns.length; j++) {' +
+        '    var t = (btns[j].textContent || "").trim();' +
+        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
+        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
+        '  }' +
+        '  var target = chooseBtns[' + i + '];' +
+        '  if (!target) return "";' +
+        '  ' +
+        '  // Get expanded content - look for next sibling or parent container' +
+        '  var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], [class*=\\"tier\\"], .ivu-shadow") || target.parentElement.parentElement;' +
+        '  if (card) {' +
+        '    // Check for expanded content in next sibling (accordion pattern)' +
+        '    var next = card.nextElementSibling;' +
+        '    if (next && next.innerText.length > card.innerText.length * 0.5) {' +
+        '      return card.innerText + "\\n" + next.innerText;' +
+        '    }' +
+        '    return card.innerText;' +
+        '  }' +
+        '  return "";' +
+        '})()'
+      );
+
+      // Step F: Parse pricing from expanded tier text using regex
+      let tierPricing = { index: i, tierName, adultPrice: null, childPrice: null, infantPrice: null, currency: 'VND' };
+      try {
+        const text = tierText || '';
+        
+        // Extract all price-like numbers (VND format: 1.254.000 or 986.000)
+        const priceMatches = text.match(/\d{1,3}(?:[.,]\d{3})+/g) || [];
+        const prices = priceMatches.map(p => parseInt(p.replace(/[.,]/g, ''), 10)).filter(p => p > 10000);
+        
+        // Remove duplicates and sort
+        const uniquePrices = [...new Set(prices)].sort((a, b) => a - b);
+        
+        // The main price is the one right before "Chọn" button
+        if (uniquePrices.length > 0) {
+          const chooseMatch = text.match(/(\d{1,3}(?:[.,]\d{3})+)\s*Chọn/);
+          if (chooseMatch) {
+            tierPricing.adultPrice = parseInt(chooseMatch[1].replace(/[.,]/g, ''), 10);
+          } else {
+            tierPricing.adultPrice = uniquePrices[0];
+          }
+        }
+        
+        // Check for child/infant mentions and assign additional prices
+        const hasChild = /trẻ\s*em|100\s*-\s*140\s*cm/i.test(text);
+        const hasInfant = /em\s*bé|under\s*100|dưới\s*100|ngườí\s*lớn\s*tuổi|70\s*tuổi/i.test(text);
+        
+        if (uniquePrices.length > 1) {
+          // Additional prices after adult price
+          tierPricing.childPrice = uniquePrices[1];
+          if (uniquePrices.length > 2) {
+            tierPricing.infantPrice = uniquePrices[2];
+          }
+        }
+        
+      } catch (e) {
+        console.log(`[iVIVU v2] Parse error button ${btnNum}: ${e.message}`);
+      }
+
+      allPricingData.push(tierPricing);
+      console.log(`[iVIVU v2] ${btnNum}/${effectiveEnd}: "${tierPricing.tierName}" — Adult: ${tierPricing.adultPrice}, Child: ${tierPricing.childPrice}, Infant: ${tierPricing.infantPrice}`);
+
+      // Step G: Chunked streaming callback
+      chunkBuffer.push(tierPricing);
+      if (onChunk && chunkBuffer.length >= chunkSize) {
+        onChunk([...chunkBuffer]);
+        chunkBuffer = [];
+      }
+
+      // Step H: Close modal/popup if exists
+      await evaluate(
+        '(function() {' +
+        'var closeBtn = document.querySelector("[class*=\\"close\\"], .btn-close, [aria-label=\\"Close\\"]");' +
+        'if (closeBtn) { closeBtn.click(); return "closed"; }' +
+        'document.body.click();' +
+        'return "body-clicked";' +
+        '})()'
+      );
+
+      await nativeSleep(500);
+    }
+
+    // Flush remaining chunk buffer
+    if (onChunk && chunkBuffer.length > 0) {
+      onChunk([...chunkBuffer]);
+    }
+
+    // Phase 4: Extract page info
+    const pageText = await evaluate('document.body.innerText');
+    const pageTitle = await evaluate('document.title');
+    const pageUrl = await evaluate('document.location.href');
+
+    console.log(`[iVIVU v2] Extraction complete: ${allPricingData.length} tiers extracted`);
+
+    return {
+      url,
+      data: {
+        bodyText: pageText || '',
+        title: pageTitle || '',
+        url: pageUrl || url,
+      },
+      pricingData: allPricingData,
+      success: true,
+    };
+  } finally {
+    await closeSession();
+  }
+}
+
 export async function healthCheck() {
   try {
     const output = await runCommand('doctor', ['--quick'], { timeout: 30000 });
@@ -856,6 +1227,7 @@ export default {
   extractIvivuTour,
   extractBookingHotel,
   extractActivityPage,
+  extractIvivuActivityPrices,
   extractChildPricesPerTier,
   findAndClickPriceButtons,
   healthCheck,

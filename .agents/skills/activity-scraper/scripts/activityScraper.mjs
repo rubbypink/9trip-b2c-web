@@ -19,6 +19,10 @@ import fs from 'fs';
  *
  * @param {string} url - Activity page URL
  * @param {Object} [options] - Scraping options
+ * @param {number} [options.startIndex] - First button index for parallel splitting
+ * @param {number} [options.endIndex] - Last button index exclusive for parallel splitting
+ * @param {number} [options.chunkSize] - Number of tiers per chunk callback
+ * @param {Function} [options.onChunk] - Callback receiving partial pricing data chunks
  * @returns {Promise<Object>} Scraped and mapped activity data with merged child pricing
  */
 export async function scrapeActivityFromUrl(url, options = {}) {
@@ -27,29 +31,35 @@ export async function scrapeActivityFromUrl(url, options = {}) {
 
   log('A', 'start', `URL: ${url} (lazy rendering mode)`);
 
-  // Step 1: Extract page data with browser automation
+  // Step 1: Extract page data with browser automation (forward options for v2)
   const { extractActivityPage } = await import('../../../lib/browser-automation.mjs');
-  const extractResult = await extractActivityPage(url);
+  const extractionOpts = {};
+  if (options.startIndex !== undefined) extractionOpts.startIndex = options.startIndex;
+  if (options.endIndex !== undefined) extractionOpts.endIndex = options.endIndex;
+  if (options.chunkSize !== undefined) extractionOpts.chunkSize = options.chunkSize;
+  if (options.onChunk) extractionOpts.onChunk = options.onChunk;
+
+  const extractResult = await extractActivityPage(url, extractionOpts);
 
   if (!extractResult.success) {
     log('A', 'fail', `Extraction failed: ${extractResult.error || 'unknown'}`);
     return { success: false, error: 'Failed to extract activity page', timeline };
   }
 
-  const { data, childPrices, childPricing } = extractResult;
+  const { data, childPrices, childPricing, pricingData } = extractResult;
   const pageText = data?.bodyText || '';
 
-  log('B', 'ok', `Extracted page data, ${pageText.length} chars, ${Object.keys(childPrices || {}).length} tier child prices`);
+  log('B', 'ok', `Extracted page data, ${pageText.length} chars, ${Object.keys(childPrices || {}).length} tier child prices, ${pricingData?.length || 0} iVIVU pricing entries`);
 
   // Step 2: Process with scrapeActivityFromText
-  const scrapeResult = await scrapeActivityFromText(pageText, url);
+  const scrapeResult = await scrapeActivityFromText(pageText, url, data?.title, pricingData);
 
   if (!scrapeResult.success) {
     log('C', 'fail', `Scrape failed: ${scrapeResult.error}`);
     return scrapeResult;
   }
 
-  // Step 3: Merge per-tier child pricing data
+  // Step 3: Merge per-tier child pricing data (from generic extraction)
   if (childPrices && Object.keys(childPrices).length > 0) {
     for (const [tierIndex, priceData] of Object.entries(childPrices)) {
       const idx = parseInt(tierIndex);
@@ -63,6 +73,45 @@ export async function scrapeActivityFromUrl(url, options = {}) {
     if (childPricing.infantPrice && !scrapeResult.data.pricing.infantPrice) scrapeResult.data.pricing.infantPrice = childPricing.infantPrice;
     if (childPricing.seniorPrice && !scrapeResult.data.pricing.seniorPrice) scrapeResult.data.pricing.seniorPrice = childPricing.seniorPrice;
   }
+  
+  // Step 3b: Merge iVIVU pricing data if available
+  if (pricingData && pricingData.length > 0) {
+    log('C', 'info', `Merging ${pricingData.length} iVIVU pricing tiers`);
+    
+    // Convert pricingData to proper tier format
+    const ivivuTiers = pricingData
+      .filter(p => p.adultPrice || p.tierName)
+      .map((p, idx) => ({
+        id: `price_${slugify(p.tierName || `tier-${idx + 1}`)}`,
+        name: p.tierName || `Gói ${idx + 1}`,
+        description: p.description || '',
+        basePrice: p.adultPrice || 0,
+        childPrice: p.childPrice !== null ? p.childPrice : 0,
+        infantPrice: p.infantPrice !== null ? p.infantPrice : 0,
+        currency: p.currency || 'VND'
+      }));
+    
+    // Replace or merge tiers
+    if (ivivuTiers.length > 0) {
+      // If we have more detailed pricing from iVIVU, use it
+      if (scrapeResult.data.pricing.tiers.length === 0 || ivivuTiers.length >= scrapeResult.data.pricing.tiers.length) {
+        scrapeResult.data.pricing.tiers = ivivuTiers;
+        // Update basePrice to lowest tier
+        const prices = ivivuTiers.map(t => t.basePrice).filter(p => p > 0);
+        if (prices.length > 0) {
+          scrapeResult.data.pricing.basePrice = Math.min(...prices);
+        }
+      } else {
+        // Merge child prices into existing tiers
+        ivivuTiers.forEach((ivivuTier, idx) => {
+          if (idx < scrapeResult.data.pricing.tiers.length && ivivuTier.childPrice !== undefined) {
+            scrapeResult.data.pricing.tiers[idx].childPrice = ivivuTier.childPrice;
+            scrapeResult.data.pricing.tiers[idx].infantPrice = ivivuTier.infantPrice;
+          }
+        });
+      }
+    }
+  }
 
   log('C', 'ok', 'Merged child pricing data');
 
@@ -73,9 +122,11 @@ export async function scrapeActivityFromUrl(url, options = {}) {
  * Scrape activity data from page text.
  * @param {string} pageText - Full page text/markdown
  * @param {string} url - Source URL
+ * @param {string} pageTitle - Page title from browser
+ * @param {Array} [pricingData] - Optional pricing data from iVIVU extraction
  * @returns {Promise<Object>}
  */
-export async function scrapeActivityFromText(pageText, url) {
+export async function scrapeActivityFromText(pageText, url, pageTitle = '', pricingData = null) {
   const timeline = [];
   const log = (p, s, d) => timeline.push({ phase: p, status: s, detail: d, time: new Date().toISOString() });
 
@@ -88,9 +139,37 @@ export async function scrapeActivityFromText(pageText, url) {
     rawData = { ...rawData, ...adapter.extractFromMarkdown(pageText, url) };
   }
 
-  const pricing = extractPricing(rawData, 'activity');
-  if (!pricing.found) log('B', 'warn', `Missing pricing: ${pricing.missing.join(', ')}`);
-  rawData = { ...rawData, ...pricing };
+  if (!rawData.title && pageTitle) {
+    rawData.title = pageTitle.split(' - ')[0].replace(/^"|"$/g, '').trim();
+  }
+
+  // If we have iVIVU pricing data, use it instead of extracting from text
+  if (pricingData && pricingData.length > 0) {
+    log('A', 'info', `Using ${pricingData.length} pricing tiers from iVIVU extraction`);
+    rawData.pricing = {
+      tiers: pricingData
+        .filter(p => p.adultPrice || p.tierName)
+        .map((p, idx) => ({
+          id: `price_${slugify(p.tierName || `tier-${idx + 1}`)}`,
+          name: p.tierName || `Gói ${idx + 1}`,
+          description: p.description || '',
+          basePrice: p.adultPrice || 0,
+          childPrice: p.childPrice !== null ? p.childPrice : 0,
+          infantPrice: p.infantPrice !== null ? p.infantPrice : 0,
+          currency: p.currency || 'VND'
+        })),
+      currency: 'VND'
+    };
+    // Set basePrice to lowest tier price
+    const prices = rawData.pricing.tiers.map(t => t.basePrice).filter(p => p > 0);
+    if (prices.length > 0) {
+      rawData.pricing.basePrice = Math.min(...prices);
+    }
+  } else {
+    const pricing = extractPricing(rawData, 'activity');
+    if (!pricing.found) log('B', 'warn', `Missing pricing: ${pricing.missing.join(', ')}`);
+    rawData = { ...rawData, ...pricing };
+  }
 
   log('B', 'ok', `Activity: "${rawData.title || 'N/A'}", ${Object.keys(rawData).length} fields`);
 

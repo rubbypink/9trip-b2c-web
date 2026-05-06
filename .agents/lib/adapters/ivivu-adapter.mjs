@@ -29,7 +29,9 @@ export function extractFromDOM() {
   result.slug = document.location.pathname
     .replace(/^\/du-lich\//, '')
     .replace(/\/\d+$/, '')
-    .replace(/\/$/, '') || '';
+    .replace(/\/$/, '')
+    .split('/')
+    .pop() || '';
 
   // Duration
   const durMatch = body.match(/(\d+)\s*[Nn]gày\s*(\d+)\s*[Đđ]êm/);
@@ -294,7 +296,9 @@ export function extractFromMarkdown(markdown, url) {
     result.slug = new URL(url).pathname
       .replace(/^\/du-lich\//, '')
       .replace(/\/\d+$/, '')
-      .replace(/\/$/, '');
+      .replace(/\/$/, '')
+      .split('/')
+      .pop() || '';
   }
   if (!result.slug && result.title) {
     result.slug = slugify(result.title);
