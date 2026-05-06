@@ -182,6 +182,40 @@ export async function getUserBookings(userId) {
 }
 
 /**
+ * Find bookings by contact email address.
+ * Queries the bookings collection where contactInfo.email matches.
+ * @param {string} email - The email address to search for.
+ * @returns {Promise<Object[]>}
+ */
+export async function findBookingsByEmail(email) {
+  try {
+    const q = query(bookingsCol, where('contactInfo.email', '==', email), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => serializeDoc(d));
+  } catch (error) {
+    logger.error(`[findBookingsByEmail] Error for email=${email}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Find bookings by contact phone number.
+ * Queries the bookings collection where contactInfo.phone matches.
+ * @param {string} phone - The phone number to search for.
+ * @returns {Promise<Object[]>}
+ */
+export async function findBookingsByPhone(phone) {
+  try {
+    const q = query(bookingsCol, where('contactInfo.phone', '==', phone), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => serializeDoc(d));
+  } catch (error) {
+    logger.error(`[findBookingsByPhone] Error for phone=${phone}:`, error.message);
+    return [];
+  }
+}
+
+/**
  * Update booking status.
  * @param {string} bookingId
  * @param {Object} updates
@@ -219,6 +253,23 @@ export async function getUserReviews(userId) {
     return snap.docs.map((d) => serializeDoc(d));
   } catch (error) {
     logger.error(`[getUserReviews] Error for user=${userId}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Find reviews by reviewer email address.
+ * Queries the reviews collection where userEmail matches.
+ * @param {string} email - The email address to search for.
+ * @returns {Promise<Object[]>}
+ */
+export async function findReviewsByEmail(email) {
+  try {
+    const q = query(reviewsCol, where('userEmail', '==', email), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => serializeDoc(d));
+  } catch (error) {
+    logger.error(`[findReviewsByEmail] Error for email=${email}:`, error.message);
     return [];
   }
 }
