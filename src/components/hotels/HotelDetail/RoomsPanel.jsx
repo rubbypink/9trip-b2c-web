@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
+import { getRateTypeLabel, getRateTypeIcon, RATE_TYPES } from "@/lib/rateLabels";
 
 /**
  * RoomImageWithLightbox — Main thumbnail that opens GalleryWithLightbox on click.
@@ -414,32 +415,40 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                   const key = `${room.roomId}_${rt.rateType}`;
                   const qty = quantities[key] || 0;
                   const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
+                  const isSelected = qty > 0;
 
                   return (
-                    <div key={rt.rateType} className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors">
-                      {/* Rate Type Name */}
+                    <div
+                      key={rt.rateType}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center gap-3 p-4 rounded-lg transition-all cursor-pointer ${
+                        isSelected
+                          ? 'ring-2 ring-blue-500 bg-blue-50/50'
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1);
+                        }
+                      }}
+                    >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground capitalize">
-                          {rt.rateType.replace(/_/g, " ")}
+                        <p className="text-sm font-medium text-foreground">
+                          {getRateTypeIcon(rt.rateType)} {getRateTypeLabel(rt.rateType)} — {formatCurrency(rt.avgSellPrice, "VND")}/đêm
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {nights} đêm × {Math.round(rt.avgSellPrice).toLocaleString()}₫/đêm
+                          {nights} đêm × {formatCurrency(rt.avgSellPrice, "VND")}/đêm
                         </p>
-                      </div>
-
-                      {/* Unit Price */}
-                      <div className="text-right w-28">
-                        <p className="text-sm font-semibold text-foreground">
-                          {formatCurrency(rt.avgSellPrice, "VND")}
-                        </p>
-                        <p className="text-xs text-muted-foreground">/đêm</p>
                       </div>
 
                       {/* Quantity Selector */}
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={() => updateQuantity(room.roomId, rt.rateType, -1)}
+                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, -1); }}
                           disabled={qty === 0}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
@@ -448,7 +457,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                         <span className="w-10 text-center text-sm font-semibold text-foreground">{qty}</span>
                         <button
                           type="button"
-                          onClick={() => updateQuantity(room.roomId, rt.rateType, 1)}
+                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, 1); }}
                           disabled={qty >= room.totalRooms}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
