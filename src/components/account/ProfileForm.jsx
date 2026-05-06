@@ -37,8 +37,8 @@ export default function ProfileForm() {
   if (!profile) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-10 bg-slate-200 rounded w-1/3" />
-        <div className="h-40 bg-slate-200 rounded" />
+        <div className="h-10 bg-muted rounded w-1/3" />
+        <div className="h-40 bg-muted rounded" />
       </div>
     );
   }
@@ -59,8 +59,8 @@ export default function ProfileForm() {
           </div>
         )}
         <div>
-          <h2 className="text-xl font-bold text-slate-800">{profile.displayName || "Người dùng"}</h2>
-          <p className="text-sm text-slate-500">{profile.email}</p>
+          <h2 className="text-xl font-bold text-foreground">{profile.displayName || "Người dùng"}</h2>
+          <p className="text-sm text-muted-foreground">{profile.email}</p>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export default function ProfileForm() {
 
       {/* Display Name */}
       <div>
-        <label htmlFor="displayName" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="displayName" className="block text-sm font-medium text-foreground mb-1">
           Họ và tên
         </label>
         <input
@@ -87,14 +87,14 @@ export default function ProfileForm() {
           name="displayName"
           type="text"
           defaultValue={profile.displayName || ""}
-          className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
           placeholder="Nhập họ và tên của bạn"
         />
       </div>
 
       {/* Email — read only */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
           Email
         </label>
         <input
@@ -103,14 +103,14 @@ export default function ProfileForm() {
           type="email"
           value={profile.email || ""}
           disabled
-          className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed"
+          className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted text-muted-foreground cursor-not-allowed"
         />
-        <p className="mt-1 text-xs text-slate-400">Email không thể thay đổi.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Email không thể thay đổi.</p>
       </div>
 
       {/* Phone */}
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">
           Số điện thoại
         </label>
         <input
@@ -118,14 +118,14 @@ export default function ProfileForm() {
           name="phone"
           type="tel"
           defaultValue={profile.phone || ""}
-          className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
           placeholder="Nhập số điện thoại"
         />
       </div>
 
       {/* Address */}
       <div>
-        <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="address" className="block text-sm font-medium text-foreground mb-1">
           Địa chỉ
         </label>
         <textarea
@@ -133,7 +133,7 @@ export default function ProfileForm() {
           name="address"
           rows={3}
           defaultValue={profile.address || ""}
-          className="w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
+          className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
           placeholder="Nhập địa chỉ của bạn"
         />
       </div>

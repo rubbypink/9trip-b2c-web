@@ -1,0 +1,6 @@
+success: true
+title: Tour Trung Quốc 6N5Đ: HCM - Đại Lý - Lệ Giang - Shangrila - 
+adultPrice: null
+childPrice: null
+itinerary length: 91
+location: Phú Quốc

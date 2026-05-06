@@ -12,8 +12,8 @@ export default function GalleryWithLightbox({ images = [], className = "" }) {
 
   if (!images || images.length === 0) {
     return (
-      <div className={`bg-gray-200 rounded-lg flex items-center justify-center h-64 ${className}`}>
-        <span className="text-gray-400">Chưa có ảnh</span>
+      <div className={`bg-muted rounded-lg flex items-center justify-center h-64 ${className}`}>
+        <span className="text-muted-foreground">Chưa có ảnh</span>
       </div>
     );
   }
@@ -53,19 +53,19 @@ export default function GalleryWithLightbox({ images = [], className = "" }) {
       {selectedIndex !== null && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setSelectedIndex(null)}>
           <button
-            className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10"
+            className="absolute top-4 right-4 text-white text-3xl hover:text-muted-foreground z-10"
             onClick={(e) => { e.stopPropagation(); setSelectedIndex(null); }}
           >
             ✕
           </button>
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-muted-foreground z-10"
             onClick={(e) => { e.stopPropagation(); prev(); }}
           >
             ‹
           </button>
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-muted-foreground z-10"
             onClick={(e) => { e.stopPropagation(); next(); }}
           >
             ›

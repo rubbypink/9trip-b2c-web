@@ -1,97 +1,44 @@
-# Scraper Refactor - Learnings
+## [2026-05-06] Initial Setup
 
-## Completed Tasks (11/11)
+### Key Architecture
+- `browser-automation.mjs` (~1210+ lines) — main browser wrapper, runCommand() at lines 60-80
+- `ivivu-adapter.mjs` — extractActivityTiersFromMarkdown() ~line 738, extractActivityTiersFromPlainText() ~line 809
+- `pricing-extractor.mjs` — extractActivityPricingTiersFromHTML() ~line 437
+- `activityScraper.mjs` — main scraper, childPrices NEVER merged into pricing.tiers (CRITICAL BUG)
 
-### Wave 1: Foundation
-- ✅ Task 1: Schema Modules with AGENT_PROMPTs - 3 schemas (hotel, tour, activity)
-- ✅ Task 2: Firebase Helpers + Image Helpers - Shared CRUD and image processing
-- ✅ Task 3: Simplified Firecrawl Agent + Websearch + Scrape Helpers
+### Root Cause
+extractChildPricesPerTier() extracts real child prices BUT activityScraper.mjs NEVER MERGES them into pricing.tiers[]
 
-### Wave 2: Simplified Scraper Refactor
-- ✅ Task 4: Booking Scraper - `getHotelImages.mjs` uses `scrapeWithAgent()`
-- ✅ Task 5: Tour Scraper - `tourScraper.mjs` uses `scrapeWithAgent()`
-- ✅ Task 6: Activity Scraper - `activityScraper.mjs` uses `scrapeWithAgent()`
+### Bugs to Fix
+1. childPrice: 0 hardcoded (should be null) in ivivu-adapter.mjs lines ~738 and ~809
+2. childPrice: 0 hardcoded in pricing-extractor.mjs line ~437
+3. extractChildPricesPerTier() only processes first 3 tiers (need 10)
+4. 20-line look-ahead limit in extractActivityTiersFromPlainText() (need 40)
+5. activityScraper.mjs missing merge of childPrices into pricing.tiers[]
 
-### Wave 3: Documentation
-- ✅ Task 7: Updated all 3 SKILL.md files
+### Baseline (Pre-Refactor) — MUST PRESERVE
+Adult prices: [625000, 435000, 240000, 145000, 630000, 780000, 780000, 680000, 820000, 820000]
+Gallery: 30+ images
+Location: "Tây Ninh"
 
-### Wave Final: Verification
-- ✅ F1: Plan Compliance Audit - All scrapers use agent()
-- ✅ F2: Code Quality Review - No inline schemas, uses shared helpers
-- ✅ F3: Integration QA - All imports working
-- ✅ F4: Scope Fidelity Check - Removed complex scrape functions
+### Constraints
+- Do NOT change /gi regex patterns
+- Do NOT change MAP_TO_FIRESTORE
+- Do NOT change adapter pattern structure
+- Do NOT remove browser-helpers.mjs
+- Keep sleep() as fallback — do NOT remove entirely
+- Do NOT add new agent-browser features (diff, annotate, tabs)
 
-## Key Architecture Changes
+### agent-browser Key Patterns (from research)
+- `snapshot -i` → interactive elements with refs
+- `wait --fn "JS_EXPRESSION"` → smart JS condition wait
+- `wait --text "content"` → wait for text to appear
+- `wait --load networkidle` → wait for network idle
+- `batch` → multi-command batch execution
+- `get text @ref` → read text from element
+- `find role/text/label` → find elements
 
-### Before (Complex Multi-step)
-```javascript
-// Old approach: 4-5 steps with manual interact
-const scrapeId = await firecrawl.scrape(url);
-await firecrawl.interact(scrapeId, {...});
-await firecrawl.stopInteraction(scrapeId);
-```
-
-### After (Simplified Agent)
-```javascript
-// New approach: 1 call, Agent handles everything
-const { data } = await scrapeWithAgent(fc, url, PROMPT, SCHEMA);
-```
-
-## Verification Results
-
-| Check | Status |
-|-------|--------|
-| Schema AGENT_PROMPTs exported | ✅ 3/3 |
-| Firecrawl Agent exports | ✅ initFirecrawl, scrapeWithAgent, getFirecrawlClient |
-| Firebase helpers | ✅ 10 functions |
-| Image helpers | ✅ 10 functions |
-| Websearch helpers | ✅ 2 functions |
-| Scrape helpers | ✅ 6 functions |
-| No multi-step flows in .mjs | ✅ Verified |
-| All scrapers use agent() | ✅ 3/3 |
-
-## File Structure
-
-```
-.agents/
-├── lib/
-│   ├── schemas/
-│   │   ├── hotel-schema.mjs (489 lines)
-│   │   ├── tour-schema.mjs (608 lines)
-│   │   ├── activity-schema.mjs (494 lines)
-│   │   └── index.mjs
-│   ├── firebase-helpers.mjs (238 lines)
-│   ├── image-helpers.mjs (362 lines)
-│   ├── firecrawl-agent.mjs (83 lines) - Simplified!
-│   ├── websearch.mjs (111 lines)
-│   ├── scrape-helpers.mjs (140 lines)
-│   └── sanitize-data.mjs
-└── skills/
-    ├── booking-scraper/
-    │   ├── SKILL.md (373 lines)
-    │   └── scripts/getHotelImages.mjs (172 lines)
-    ├── tour-scraper/
-    │   ├── SKILL.md (288 lines)
-    │   └── scripts/tourScraper.mjs (79 lines)
-    └── activity-scraper/
-        ├── SKILL.md (310 lines)
-        └── scripts/activityScraper.mjs (222 lines)
-```
-
-## Code Reduction
-
-- firecrawl-agent.mjs: ~83 lines (vs ~200+ in old approach)
-- No more: scrapeId, interact(), stopInteraction() chains
-- No more: Tavily dependency (removed from tour-scraper)
-- No more: MCP dependencies (removed from activity-scraper)
-
-## Success Criteria Met
-
-- ✅ All "Must Have" present
-- ✅ All "Must NOT Have" absent
-- ✅ Code simplified 60%+ (using Agent vs multi-step)
-- ✅ No complex scrape logic (interact chains removed)
-- ✅ All scrapers use Firecrawl Agent
-- ✅ Shared helpers working for image and Firebase
-
-Date: 2026-05-05
+### ivivu Booking Form DOM
+- `.tkn__quantity--box non-pkg` containers
+- `btn btn-more` (plus button), `btn btn-less` (minus button)
+- Flow: click "Chọn" → form loads → click child "+" → price appears

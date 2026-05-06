@@ -13,7 +13,7 @@ export default function FloatButtonGroup() {
     {
       label: "Zalo",
       href: "https://zalo.me/0877901901",
-      bg: "bg-blue-500 hover:bg-blue-600",
+      bg: "bg-primary-500 hover:bg-primary-600",
       icon: (
         <svg className="h-6 w-6" viewBox="0 0 48 48" fill="currentColor">
           <path d="M15 36V12h18v24H15z" />
@@ -24,7 +24,7 @@ export default function FloatButtonGroup() {
     {
       label: "Messenger",
       href: "https://m.me/0877901901",
-      bg: "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
+      bg: "bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700",
       icon: (
         <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.25 5.55 3.23 7.32V22l3.2-1.78c1.1.32 2.27.5 3.57.5 5.64 0 10-4.13 10-9.7C22 6.13 17.64 2 12 2zm1.11 12.55l-2.56-2.73-4.98 2.73 5.5-5.84 2.55 2.73 5-2.73-5.5 5.84z" />
@@ -88,7 +88,7 @@ export default function FloatButtonGroup() {
         onClick={() => setIsOpen(!isOpen)}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 ${
           isOpen
-            ? "bg-gray-700 hover:bg-gray-800 rotate-45"
+            ? "bg-muted-foreground hover:bg-foreground rotate-45"
             : "bg-primary hover:bg-primary-dark"
         }`}
         aria-label={isOpen ? "Đóng" : "Hỗ trợ"}

@@ -51,17 +51,17 @@ export default async function Testimonials() {
   if (!reviews || reviews.length === 0) return null;
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
           <span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">
             Đánh giá
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">
             Khách hàng nói gì về chúng tôi
           </h2>
-          <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Hàng nghìn khách hàng đã tin tưởng và có những trải nghiệm tuyệt vời cùng 9 Trip Phú Quốc.
           </p>
         </div>
@@ -71,7 +71,7 @@ export default async function Testimonials() {
           {reviews.slice(0, MAX_REVIEWS).map((review) => (
             <div
               key={review.id}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="bg-card rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
             >
               {/* Stars */}
               <div className="flex gap-1 mb-4">
@@ -79,7 +79,7 @@ export default async function Testimonials() {
                   <svg
                     key={star}
                     className={`w-5 h-5 ${
-                      star <= (review.rating || 0) ? "text-yellow-400" : "text-gray-200"
+                      star <= (review.rating || 0) ? "text-yellow-400" : "text-border"
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -90,7 +90,7 @@ export default async function Testimonials() {
               </div>
 
               {/* Content */}
-              <p className="text-gray-600 leading-relaxed mb-4 line-clamp-4">
+              <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-4">
                 &ldquo;{review.comment || review.content || review.text || "Dịch vụ tuyệt vời!"}&rdquo;
               </p>
 
@@ -102,15 +102,15 @@ export default async function Testimonials() {
               )}
 
               {/* Author */}
-              <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-3 pt-4 border-t border-border">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                   {(review.userName || review.displayName || "A")[0].toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {review.userName || review.displayName || "Khách hàng"}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {new Date(review.createdAt).toLocaleDateString("vi-VN")}
                   </p>
                 </div>

@@ -7,7 +7,7 @@ export const metadata = {
 export default function BookingsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-800 mb-6">Lịch sử đặt tour</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Lịch sử đặt tour</h1>
       <BookingsPageClient />
     </div>
   );

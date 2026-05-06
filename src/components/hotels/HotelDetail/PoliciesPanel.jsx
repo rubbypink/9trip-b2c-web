@@ -40,7 +40,7 @@ function PoliciesPanel({ hotel }) {
               {section.label}
             </SectionHeading>
             <div
-              className="prose max-w-none text-gray-700 text-sm"
+              className="prose max-w-none text-foreground text-sm"
               dangerouslySetInnerHTML={{ __html: content }}
             />
           </Card>

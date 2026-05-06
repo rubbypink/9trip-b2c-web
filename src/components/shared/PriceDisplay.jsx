@@ -37,16 +37,16 @@ export default function PriceDisplay({
   return (
     <div className={`flex flex-col ${className}`}>
       <div className="flex items-baseline gap-2">
-        {label && <span className="text-sm text-gray-500">{label}</span>}
+        {label && <span className="text-sm text-muted-foreground">{label}</span>}
         {discount > 0 && (
-          <span className={`text-gray-400 line-through ${isSm ? "text-xs" : "text-sm"}`}>
+          <span className={`text-muted-foreground line-through ${isSm ? "text-xs" : "text-sm"}`}>
             {formatCurrency(price, currency)}
           </span>
         )}
         <span className={priceClass}>
           {formatCurrency(finalPrice, currency)}
         </span>
-        {perPerson && <span className="text-sm text-gray-500">/ người</span>}
+        {perPerson && <span className="text-sm text-muted-foreground">/ người</span>}
         {discount > 0 && (
           <span className="inline-block bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
             {discountType === "percent" ? `-${discount}%` : `-${formatCurrency(discount, currency)}`}
@@ -54,7 +54,7 @@ export default function PriceDisplay({
         )}
       </div>
       {childPrice > 0 && (
-        <span className="text-xs text-gray-500 mt-0.5">
+        <span className="text-xs text-muted-foreground mt-0.5">
           Trẻ em: {formatCurrency(childPrice, currency)}/người
         </span>
       )}

@@ -160,7 +160,7 @@ export default function HotelDetailClient({
           {/* Main Content */}
           <div className="flex-1 min-w-0 space-y-6">
             {/* 1. Image Gallery */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+            <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
               {allImages.length > 0 ? (
                 <ImageCarousel
                   images={allImages}
@@ -171,7 +171,7 @@ export default function HotelDetailClient({
                   serviceType="hotel"
                 />
               ) : (
-                <div className="aspect-[21/9] bg-gray-200 flex items-center justify-center text-gray-400">
+                <div className="aspect-[21/9] bg-muted flex items-center justify-center text-muted-foreground">
                   Chưa có ảnh
                 </div>
               )}
@@ -196,8 +196,8 @@ export default function HotelDetailClient({
             {/* 3. Title + Meta */}
             <div className="flex flex-col md:flex-row items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{name}</h1>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{name}</h1>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                   {address?.city && (
                     <span className="inline-flex items-center gap-1">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -208,15 +208,15 @@ export default function HotelDetailClient({
                     </span>
                   )}
                   {avgRating > 0 && (
-                    <span className="inline-flex items-center gap-1 text-gray-400">
-                      <span className="text-gray-300">|</span>
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <span className="text-muted-foreground">|</span>
                       <span className="text-yellow-500">★</span>
-                      <span className="font-semibold text-gray-900">{avgRating.toFixed(1)}</span>
+                      <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
                       {totalRating > 0 && <span>({totalRating})</span>}
                     </span>
                   )}
                 </div>
-                {excerpt && <p className="text-gray-600 mt-3 line-clamp-2">{excerpt}</p>}
+                {excerpt && <p className="text-muted-foreground mt-3 line-clamp-2">{excerpt}</p>}
               </div>
 
               {/* Action Buttons */}
@@ -236,10 +236,10 @@ export default function HotelDetailClient({
             </div>
 
             {/* 4. Date Filter — Check-in / Check-out (reactive pricing) */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="bg-card rounded-xl border border-border p-4">
               <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Nhận phòng:</label>
+                  <label className="text-sm font-medium text-foreground whitespace-nowrap">Nhận phòng:</label>
                   <input
                     type="date"
                     value={checkIn}
@@ -254,20 +254,20 @@ export default function HotelDetailClient({
                       }
                     }}
                     min={new Date().toISOString().split("T")[0]}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Trả phòng:</label>
+                  <label className="text-sm font-medium text-foreground whitespace-nowrap">Trả phòng:</label>
                   <input
                     type="date"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
                     min={checkIn}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   {nights} đêm
                 </span>
               </div>
@@ -275,7 +275,7 @@ export default function HotelDetailClient({
 
             {/* 5. Tab Navigation */}
             <div>
-              <div data-tab-nav className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+              <div data-tab-nav className="flex border-b border-border overflow-x-auto scrollbar-hide">
                 {HOTEL_TABS.map((tab) => (
                   <button
                     key={tab.id}
@@ -283,7 +283,7 @@ export default function HotelDetailClient({
                     className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                       activeTab === tab.id
                         ? "border-blue-600 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                     }`}
                   >
                     {tab.label}
@@ -326,30 +326,30 @@ export default function HotelDetailClient({
 
             {/* 6. Related Hotels */}
             {relatedHotels.length > 0 && (
-              <div className="pt-10 border-t border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-5">Khách sạn tương tự</h3>
+              <div className="pt-10 border-t border-border">
+                <h3 className="text-xl font-bold text-foreground mb-5">Khách sạn tương tự</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {relatedHotels.map((h) => (
                     <Link
                       key={h.id}
                       href={`/hotels/${h.slug}`}
-                      className="group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+                      className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
                     >
-                      <div className="aspect-[4/3] relative bg-gray-100">
+                      <div className="aspect-[4/3] relative bg-muted">
                         {h.featuredImage ? (
                           <Image src={h.featuredImage} alt={h.name} fill className="object-cover" sizes="33vw" />
                         ) : (
-                          <div className="flex items-center justify-center h-full text-gray-400">No image</div>
+                          <div className="flex items-center justify-center h-full text-muted-foreground">No image</div>
                         )}
                         {h.rating?.average > 0 && (
-                          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-0.5 text-xs font-bold text-primary shadow-sm">
+                          <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded-lg px-2 py-0.5 text-xs font-bold text-primary shadow-sm">
                             {h.rating.average.toFixed(1)}
                           </div>
                         )}
                       </div>
                       <div className="p-4">
-                        <h4 className="font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">{h.name}</h4>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-1">{h.address?.city || ""}</p>
+                        <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">{h.name}</h4>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{h.address?.city || ""}</p>
                         {(h.lowestPrice || h.pricing?.basePrice) > 0 && (
                           <p className="mt-2 text-sm font-semibold text-primary">
                             Từ {formatCurrency(h.lowestPrice || h.pricing.basePrice, "VND")}/đêm
@@ -377,9 +377,9 @@ export default function HotelDetailClient({
 
               {/* Map Box */}
               {hasMap && (
-                <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm mt-6">
-                  <div className="p-4 border-b border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm mt-6">
+                  <div className="p-4 border-b border-border">
+                    <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                       <svg className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -394,7 +394,7 @@ export default function HotelDetailClient({
               )}
 
               {/* Reviews Box (compact) */}
-              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm mt-6">
+              <div className="rounded-2xl border border-border bg-card shadow-sm mt-6">
                 <ReviewSummaryCompact reviews={reviews} avgRating={avgRating} totalRating={totalRating} />
               </div>
             </div>
@@ -403,10 +403,10 @@ export default function HotelDetailClient({
       </div>
 
       {/* Mobile sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white border-t border-gray-200 shadow-lg px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-background border-t border-border shadow-lg px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-500">Giá từ</p>
+            <p className="text-xs text-muted-foreground">Giá từ</p>
             <p className="text-lg font-bold text-primary">
               {lowestPrice > 0 ? formatCurrency(lowestPrice, "VND") : "Liên hệ"}/đêm
             </p>

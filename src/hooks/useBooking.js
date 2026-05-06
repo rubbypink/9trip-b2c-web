@@ -110,6 +110,14 @@ export function useBooking() {
       const id = await createBooking(bookingData);
       setBookingId(id);
       
+      // Send booking confirmation email (fire-and-forget)
+      const bookingWithId = { id, bookingCode: `9T-${Date.now().toString(36).toUpperCase()}`, ...bookingData };
+      fetch('/api/bookings/confirmation-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingWithId),
+      }).catch(() => {});
+      
       // Clear cart after successful booking creation
       clearCart();
       

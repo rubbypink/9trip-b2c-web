@@ -105,6 +105,12 @@ export function AuthProvider({ children }) {
     await upsertUserProfile(cred.user.uid, { email, displayName });
     // Notify ERP — new customer
     forwardToERP('new-customer', { id: cred.user.uid, email, displayName, createdAt: new Date().toISOString() });
+    // Send welcome email (fire-and-forget)
+    fetch('/api/auth/welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, userName: displayName }),
+    }).catch(() => {});
     return cred.user;
   }, []);
 

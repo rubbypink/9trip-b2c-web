@@ -10,6 +10,7 @@ import Image from "next/image";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { SITE } from "@/lib/constants";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 
 const logoImg = "/images/favicon.webp";
 
@@ -55,28 +56,31 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link href="/" className="text-gray-700 hover:text-primary font-medium transition-colors">
+            <Link href="/" className="text-foreground hover:text-primary font-medium transition-colors">
               Trang chủ
             </Link>
-            <Link href="/tours" className="text-gray-700 hover:text-primary font-medium transition-colors">
+            <Link href="/tours" className="text-foreground hover:text-primary font-medium transition-colors">
               Tour
             </Link>
-            <Link href="/hotels" className="text-gray-700 hover:text-primary font-medium transition-colors">
+            <Link href="/hotels" className="text-foreground hover:text-primary font-medium transition-colors">
               Khách sạn
             </Link>
-            <Link href="/activities" className="text-gray-700 hover:text-primary font-medium transition-colors">
+            <Link href="/activities" className="text-foreground hover:text-primary font-medium transition-colors">
               Hoạt động
             </Link>
-            <Link href="/search" className="text-gray-700 hover:text-primary font-medium transition-colors">
+            <Link href="/search" className="text-foreground hover:text-primary font-medium transition-colors">
               🔍
             </Link>
           </nav>
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Cart */}
             <button
-              className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors"
+              className="relative p-2 text-foreground hover:text-primary-600 transition-colors"
               onClick={() => setIsCartOpen(!isCartOpen)}
               aria-label="Giỏ hàng"
             >
@@ -92,7 +96,7 @@ export default function Header() {
             {user ? (
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 p-2 text-gray-700 hover:text-primary-600 transition-colors"
+                  className="flex items-center gap-2 p-2 text-foreground hover:text-primary-600 transition-colors"
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 >
                   <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
@@ -101,19 +105,19 @@ export default function Header() {
                   <span className="hidden md:inline text-sm">{user.email?.split("@")[0]}</span>
                 </button>
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
-                    <Link href="/account/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsUserMenuOpen(false)}>
+                  <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border py-2 z-50">
+                    <Link href="/account/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
                       Tài khoản
                     </Link>
-                    <Link href="/account/bookings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsUserMenuOpen(false)}>
+                    <Link href="/account/bookings" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
                       Lịch sử đặt
                     </Link>
-                    <Link href="/account/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsUserMenuOpen(false)}>
+                    <Link href="/account/wishlist" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
                       Yêu thích
                     </Link>
                     <hr className="my-1" />
                     <button
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-muted"
                       onClick={() => { logout(); setIsUserMenuOpen(false); }}
                     >
                       Đăng xuất
@@ -129,7 +133,7 @@ export default function Header() {
 
             {/* Mobile menu toggle */}
             <button
-              className="lg:hidden p-2 text-gray-700"
+              className="lg:hidden p-2 text-foreground"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Menu"
             >
@@ -140,34 +144,34 @@ export default function Header() {
 
         {/* Mobile nav */}
         {isMenuOpen && (
-          <nav className="lg:hidden pb-4 border-t border-gray-100 pt-3">
-            <Link href="/" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Trang chủ</Link>
-            <Link href="/tours" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
-            <Link href="/hotels" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
-            <Link href="/activities" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
-            <Link href="/search" className="block py-2 text-gray-700 hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
+          <nav className="lg:hidden pb-4 border-t border-border pt-3">
+            <Link href="/" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Trang chủ</Link>
+            <Link href="/tours" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tour</Link>
+            <Link href="/hotels" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Khách sạn</Link>
+            <Link href="/activities" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Hoạt động</Link>
+            <Link href="/search" className="block py-2 text-foreground hover:text-primary-600" onClick={() => setIsMenuOpen(false)}>Tìm kiếm</Link>
           </nav>
         )}
 
         {/* Cart dropdown */}
         {isCartOpen && (
-          <div className="absolute right-4 top-16 w-80 bg-white rounded-lg shadow-xl border border-gray-100 p-4 z-50">
+          <div className="absolute right-4 top-16 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-50">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold text-gray-900">Giỏ hàng ({cartCount})</h3>
-              <button onClick={() => setIsCartOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <h3 className="font-semibold text-foreground">Giỏ hàng ({cartCount})</h3>
+              <button onClick={() => setIsCartOpen(false)} className="text-muted-foreground hover:text-muted-foreground">✕</button>
             </div>
             {cartCount === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">Giỏ hàng trống</p>
+              <p className="text-muted-foreground text-sm text-center py-4">Giỏ hàng trống</p>
             ) : (
               <>
                 {items.map((item, idx) => (
-                  <div key={idx} className="flex gap-3 py-2 border-b border-gray-50">
-                    <div className="w-14 h-14 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">
+                  <div key={idx} className="flex gap-3 py-2 border-b border-border">
+                    <div className="w-14 h-14 bg-muted rounded flex-shrink-0 flex items-center justify-center text-muted-foreground text-xs">
                       Ảnh
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{item.serviceTitle}</p>
-                      <p className="text-xs text-gray-500">{item.serviceType}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{item.serviceTitle}</p>
+                      <p className="text-xs text-muted-foreground">{item.serviceType}</p>
                       <p className="text-sm text-primary-600 font-semibold">{item.total?.toLocaleString()}₫</p>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 /**
  * Save Booking.com Scraped Data — Firebase Handler Script.
  *
- * Nhận file JSON chứa dữ liệu hotel đã được FireCrawl scrape + agent xử lý,
+ * Nhận file JSON chứa dữ liệu hotel đã được Playwright/agent-browser scrape + agent xử lý,
  * thực hiện:
  *   1. Validate & check slug trùng
  *   2. Download ảnh → WebP (sharp) → Upload Firebase Storage

@@ -35,17 +35,17 @@ function LocationPanel({ hotel }) {
             Địa chỉ
           </SectionHeading>
           {hotel.address && (
-            <p className="text-gray-700">
+            <p className="text-foreground">
               {[hotel.address.street, hotel.address.city, hotel.address.country].filter(Boolean).join(", ")}
             </p>
           )}
           {hotel.phone && (
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               📞 <a href={`tel:${hotel.phone.replace(/[^0-9]/g, "")}`} className="hover:text-primary">{hotel.phone}</a>
             </p>
           )}
           {hotel.email && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               ✉️ <a href={`mailto:${hotel.email}`} className="hover:text-primary">{hotel.email}</a>
             </p>
           )}

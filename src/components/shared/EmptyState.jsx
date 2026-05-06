@@ -14,8 +14,8 @@ export default function EmptyState({
       <span className="text-5xl mb-4" role="img" aria-hidden="true">
         {icon}
       </span>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-500 max-w-md mb-6">{message}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-muted-foreground max-w-md mb-6">{message}</p>
       {action && <div>{action}</div>}
     </div>
   );

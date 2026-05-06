@@ -15,10 +15,10 @@ export default async function BestActivities() {
     <section className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
             Trải nghiệm thú vị
           </h2>
-          <p className="text-gray-500 max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto">
             Khám phá những hoạt động hấp dẫn nhất tại điểm đến của bạn — từ tham quan, ẩm thực đến phiêu lưu mạo hiểm.
           </p>
         </div>

@@ -53,7 +53,7 @@ export default async function RentalsPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -62,26 +62,26 @@ export default async function RentalsPage({ searchParams }) {
         ]}
       />
 
-      <div className="bg-white border-b border-gray-200 mb-8">
+      <div className="bg-card border-b border-border mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Dịch Vụ Cho Thuê
           </h1>
-          <p className="text-gray-500">Mọi thứ bạn cần cho một chuyến đi trọn vẹn</p>
+          <p className="text-muted-foreground">Mọi thứ bạn cần cho một chuyến đi trọn vẹn</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-64 flex-shrink-0">
-             <div className="bg-white rounded-xl border border-gray-200 p-5 sticky top-24">
-                <h3 className="font-semibold text-gray-900 mb-4">Loại dịch vụ</h3>
+             <div className="bg-card rounded-xl border border-border p-5 sticky top-24">
+                <h3 className="font-semibold text-foreground mb-4">Loại dịch vụ</h3>
                 <div className="space-y-2">
                   {["Xe máy", "Trang phục", "Dụng cụ", "Khác"].map((t) => (
                     <Link 
                       key={t}
                       href={`/rentals?type=${t}`}
-                      className={`block px-3 py-2 rounded-lg text-sm ${params.type === t ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                      className={`block px-3 py-2 rounded-lg text-sm ${params.type === t ? 'bg-blue-50 text-blue-600 font-medium' : 'text-muted-foreground hover:bg-muted'}`}
                     >
                       {t}
                     </Link>
@@ -94,7 +94,7 @@ export default async function RentalsPage({ searchParams }) {
           <div className="flex-1">
             <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-xl aspect-[4/3] animate-pulse" />
+                <div key={i} className="bg-muted rounded-xl aspect-[4/3] animate-pulse" />
               ))}
             </div>}>
               <ServiceList 

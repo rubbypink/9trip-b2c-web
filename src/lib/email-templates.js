@@ -2,13 +2,13 @@
  * Email HTML Templates — Vietnamese, responsive, branded.
  *
  * All templates return an HTML string. Uses inline styles for email client compatibility.
- * Includes 9 Trip branding: logo, colors (#0ea5e9 primary), footer with contact info.
+ * Includes 9 Trip branding: logo, colors (#e6b422 primary), footer with contact info.
  */
 
 import { SITE, COMPANY } from "./constants";
 import { formatCurrency, formatDate } from "./utils";
 
-const PRIMARY = "#0ea5e9";
+const PRIMARY = "#e6b422";  // Bright Sunshine Yellow — oklch(80% 0.17 95)
 const DARK = "#1e293b";
 const LIGHT_BG = "#f8fafc";
 const TEXT = "#334155";
@@ -330,6 +330,41 @@ export function contactFormTemplate(data) {
   `;
 
   return baseLayout({ title: "Liên hệ mới từ website", content });
+}
+
+/**
+ * Welcome email for new registered users.
+ * @param {string} userName
+ * @returns {string}
+ */
+export function welcomeTemplate(userName) {
+  const content = `
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:56px;height:56px;background-color:#fef3c7;border-radius:50%;display:inline-block;line-height:56px;font-size:28px;">&#9992;</div>
+    </div>
+    <p style="font-size:18px;color:${DARK};text-align:center;font-weight:700;margin:0 0 8px 0;">
+      Chào mừng đến với ${SITE_NAME}!
+    </p>
+    <p style="font-size:14px;color:${TEXT};text-align:center;line-height:1.6;margin:0 0 20px 0;">
+      Xin chào <strong>${userName || "bạn"}</strong>, cảm ơn bạn đã đăng ký tài khoản tại ${SITE_NAME}.
+    </p>
+    <p style="font-size:14px;color:${TEXT};text-align:center;line-height:1.6;margin:0 0 24px 0;">
+      Khám phá hàng trăm tour du lịch, khách sạn, hoạt động trải nghiệm và dịch vụ thuê xe với giá tốt nhất.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td align="center">
+          <a href="${SITE.url}/tours" style="display:inline-block;padding:12px 32px;background-color:${PRIMARY};color:${WHITE};text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;">
+            Khám phá ngay
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="font-size:13px;color:${MUTED};text-align:center;line-height:1.5;margin:0;">
+      Nếu bạn cần hỗ trợ, vui lòng liên hệ &#128231; <a href="mailto:${SITE.email}" style="color:${PRIMARY};">${SITE.email}</a> hoặc gọi &#128222; ${SITE.phone}.
+    </p>
+  `;
+  return baseLayout({ title: `Chào mừng đến với ${SITE_NAME}`, content });
 }
 
 /**

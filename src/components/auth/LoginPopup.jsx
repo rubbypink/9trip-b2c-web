@@ -63,14 +63,14 @@ export default function LoginPopup({ open, onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 p-8 animate-scaleIn"
+        className="relative w-full max-w-md bg-card rounded-2xl shadow-xl border border-border p-8 animate-scaleIn"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-card text-muted-foreground hover:text-muted-foreground hover:bg-muted transition-colors"
           aria-label="Đóng"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,8 +83,8 @@ export default function LoginPopup({ open, onClose }) {
           <svg className="h-10 w-10 mx-auto text-red-400 mb-2" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
-          <h2 className="text-xl font-bold text-gray-800">Đăng nhập để lưu yêu thích</h2>
-          <p className="text-gray-500 text-sm mt-1">Lưu khách sạn vào danh sách yêu thích của bạn</p>
+          <h2 className="text-xl font-bold text-foreground">Đăng nhập để lưu yêu thích</h2>
+          <p className="text-muted-foreground text-sm mt-1">Lưu khách sạn vào danh sách yêu thích của bạn</p>
         </div>
 
         {/* Error */}
@@ -95,7 +95,7 @@ export default function LoginPopup({ open, onClose }) {
         {/* Email Form */}
         <form onSubmit={handleEmailLogin} className="space-y-3">
           <div>
-            <label htmlFor="login-popup-email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-popup-email" className="block text-sm font-medium text-foreground mb-1">
               Email
             </label>
             <input
@@ -104,12 +104,12 @@ export default function LoginPopup({ open, onClose }) {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm"
+              className="w-full px-4 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm"
               placeholder="your@email.com"
             />
           </div>
           <div>
-            <label htmlFor="login-popup-password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="login-popup-password" className="block text-sm font-medium text-foreground mb-1">
               Mật khẩu
             </label>
             <input
@@ -118,7 +118,7 @@ export default function LoginPopup({ open, onClose }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm"
+              className="w-full px-4 py-2.5 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm"
               placeholder="••••••••"
             />
           </div>
@@ -134,10 +134,10 @@ export default function LoginPopup({ open, onClose }) {
         {/* Divider */}
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white text-gray-400">hoặc</span>
+            <span className="px-3 bg-card text-muted-foreground">hoặc</span>
           </div>
         </div>
 
@@ -147,7 +147,7 @@ export default function LoginPopup({ open, onClose }) {
             type="button"
             onClick={() => handleSocialLogin("google")}
             disabled={!!socialLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -161,7 +161,7 @@ export default function LoginPopup({ open, onClose }) {
             type="button"
             onClick={() => handleSocialLogin("facebook")}
             disabled={!!socialLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -171,7 +171,7 @@ export default function LoginPopup({ open, onClose }) {
         </div>
 
         {/* Register link */}
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-muted-foreground mt-4">
           Chưa có tài khoản?{" "}
           <a href="/register" className="text-primary hover:text-primary-dark font-semibold">
             Đăng ký ngay

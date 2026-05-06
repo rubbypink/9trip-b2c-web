@@ -41,7 +41,7 @@ export default function BookingsList({ onReviewRequest }) {
     return (
       <div className="space-y-3 animate-pulse">
         {[1, 2, 3].map((n) => (
-          <div key={n} className="h-24 bg-slate-100 rounded-xl" />
+          <div key={n} className="h-24 bg-muted rounded-xl" />
         ))}
       </div>
     );
@@ -59,8 +59,8 @@ export default function BookingsList({ onReviewRequest }) {
     return (
       <div className="text-center py-12">
         <div className="text-5xl mb-4">📋</div>
-        <h3 className="text-lg font-semibold text-slate-700 mb-1">Chưa có đơn đặt tour nào</h3>
-        <p className="text-sm text-slate-500">
+        <h3 className="text-lg font-semibold text-foreground mb-1">Chưa có đơn đặt tour nào</h3>
+        <p className="text-sm text-muted-foreground">
           Khi bạn đặt tour, lịch sử sẽ hiển thị ở đây.
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function BookingsList({ onReviewRequest }) {
       pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
       confirmed: "bg-emerald-100 text-emerald-700 border-emerald-200",
       completed: "bg-blue-100 text-blue-700 border-blue-200",
-      cancelled: "bg-slate-100 text-slate-500 border-slate-200",
+      cancelled: "bg-muted text-muted-foreground border-border",
     };
     const labels = {
       pending: "Chờ xác nhận",
@@ -102,25 +102,25 @@ export default function BookingsList({ onReviewRequest }) {
         .filter((g) => g.items.length > 0)
         .map((group) => (
           <section key={group.title}>
-            <h3 className="text-lg font-semibold text-slate-700 mb-4">{group.title}</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">{group.title}</h3>
             <div className="space-y-4">
               {group.items.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition-shadow"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-card border border-border rounded-xl hover:shadow-sm transition-shadow"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-slate-800 truncate">
+                      <h4 className="font-semibold text-foreground truncate">
                         {booking.tourName || booking.productName || "Tour"}
                       </h4>
                       {statusBadge(booking.status)}
                     </div>
-                    <div className="text-sm text-slate-500 space-x-4">
+                    <div className="text-sm text-muted-foreground space-x-4">
                       {booking.date && <span>📅 {booking.date}</span>}
                       {booking.guests && <span>👥 {booking.guests} khách</span>}
                       {booking.total != null && (
-                        <span className="font-medium text-slate-700">
+                        <span className="font-medium text-foreground">
                           💰 {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(booking.total)}
                         </span>
                       )}

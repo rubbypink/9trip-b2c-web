@@ -124,7 +124,7 @@ export default function ActivityDetailClient({
         {/* Main content */}
         <div className="flex-1 min-w-0 space-y-6">
           {/* Image Gallery — Banner style with carousel */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+          <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
             {allImages.length > 0 ? (
               <ImageCarousel
                 images={allImages}
@@ -135,7 +135,7 @@ export default function ActivityDetailClient({
                 serviceType="activity"
               />
             ) : (
-              <div className="aspect-[21/9] bg-gray-200 flex items-center justify-center text-gray-400">
+              <div className="aspect-[21/9] bg-muted flex items-center justify-center text-muted-foreground">
                 Chưa có ảnh
               </div>
             )}
@@ -171,8 +171,8 @@ export default function ActivityDetailClient({
 
           {/* Title + Meta */}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {locationName && (
                 <span className="inline-flex items-center gap-1">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -189,7 +189,7 @@ export default function ActivityDetailClient({
               )}
               <StarRating rating={avgRating} showCount reviewCount={totalRating} />
             </div>
-            {excerpt && <p className="text-gray-600 mt-3">{excerpt}</p>}
+            {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
 
             {/* Tags */}
             {tags.length > 0 && (
@@ -197,7 +197,7 @@ export default function ActivityDetailClient({
                 {tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600"
+                    className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
                   >
                     {tag}
                   </span>
@@ -208,7 +208,7 @@ export default function ActivityDetailClient({
 
           {/* Tabs */}
           <div>
-            <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+            <div className="flex border-b border-border overflow-x-auto scrollbar-hide">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -216,7 +216,7 @@ export default function ActivityDetailClient({
                   className={`px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === tab.id
                       ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-muted-foreground hover:text-muted-foreground hover:border-border"
                   }`}
                 >
                   {tab.label}
@@ -229,14 +229,14 @@ export default function ActivityDetailClient({
                 {description || highlights.length > 0 ? (
                   <div className="space-y-6">
                     {description && (
-                      <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: description }} />
+                      <div className="prose max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: description }} />
                     )}
                     {highlights.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Điểm nổi bật</h3>
+                        <h3 className="text-lg font-semibold text-foreground mb-3">Điểm nổi bật</h3>
                         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {highlights.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                            <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                               <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
@@ -248,7 +248,7 @@ export default function ActivityDetailClient({
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-10 text-gray-500">Chưa có thông tin tổng quan.</div>
+                  <div className="text-center py-10 text-muted-foreground">Chưa có thông tin tổng quan.</div>
                 )}
               </div>
 
@@ -256,28 +256,28 @@ export default function ActivityDetailClient({
                 <div className="space-y-6">
                   {pricingTiers.length > 0 ? (
                     <>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         Bảng giá chi tiết các gói dịch vụ. Giá có thể thay đổi theo từng thời điểm.
                       </p>
-                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                      <div className="overflow-x-auto rounded-xl border border-border">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                              <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói dịch vụ</th>
-                              <th className="text-left px-4 py-3 font-semibold text-gray-900">Mô tả</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Người lớn</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Trẻ em</th>
+                            <tr className="bg-muted border-b border-border">
+                              <th className="text-left px-4 py-3 font-semibold text-foreground">Gói dịch vụ</th>
+                              <th className="text-left px-4 py-3 font-semibold text-foreground">Mô tả</th>
+                              <th className="text-right px-4 py-3 font-semibold text-foreground">Người lớn</th>
+                              <th className="text-right px-4 py-3 font-semibold text-foreground">Trẻ em</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-100">
+                          <tbody className="divide-y divide-border">
                             {pricingTiers.map((tier) => (
-                              <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
-                                <td className="px-4 py-3 text-gray-500 max-w-[200px] truncate" title={tier.description}>{tier.description || "—"}</td>
+                              <tr key={tier.id} className="hover:bg-muted transition-colors">
+                                <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
+                                <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate" title={tier.description}>{tier.description || "—"}</td>
                                 <td className="px-4 py-3 text-right font-semibold text-blue-600">
                                   {formatCurrency(tier.adultPrice, tier.currency || currency)}
                                 </td>
-                                <td className="px-4 py-3 text-right text-gray-600">
+                                <td className="px-4 py-3 text-right text-muted-foreground">
                                   {tier.childPrice != null
                                     ? formatCurrency(tier.childPrice, tier.currency || currency)
                                     : "—"}
@@ -289,13 +289,13 @@ export default function ActivityDetailClient({
                       </div>
                       {pricingTiers.some((t) => t.included?.length > 0) && (
                         <div className="space-y-3">
-                          <h3 className="text-lg font-semibold text-gray-900">Bao gồm theo gói</h3>
+                          <h3 className="text-lg font-semibold text-foreground">Bao gồm theo gói</h3>
                           {pricingTiers.filter((t) => t.included?.length > 0).map((tier) => (
-                            <div key={tier.id} className="bg-gray-50 rounded-xl p-4">
-                              <h4 className="font-medium text-gray-900 text-sm mb-2">{tier.name}</h4>
+                            <div key={tier.id} className="bg-muted rounded-xl p-4">
+                              <h4 className="font-medium text-foreground text-sm mb-2">{tier.name}</h4>
                               <ul className="space-y-1">
                                 {tier.included.map((item, idx) => (
-                                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                                  <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                                     <svg className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
@@ -309,10 +309,10 @@ export default function ActivityDetailClient({
                       )}
                     </>
                   ) : (
-                    <div className="text-center py-10 text-gray-500">
+                    <div className="text-center py-10 text-muted-foreground">
                       {price > 0 ? (
                         <div>
-                          <p className="text-lg font-semibold text-gray-900 mb-1">{formatCurrency(price, currency)}</p>
+                          <p className="text-lg font-semibold text-foreground mb-1">{formatCurrency(price, currency)}</p>
                           <p className="text-sm">Giá cơ bản cho 1 người</p>
                         </div>
                       ) : (
@@ -328,7 +328,7 @@ export default function ActivityDetailClient({
                   <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${hasDetails ? "" : "hidden"}`}>
                     {included.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                           <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
@@ -336,7 +336,7 @@ export default function ActivityDetailClient({
                         </h3>
                         <ul className="space-y-1.5">
                           {included.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                            <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                               <svg className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
@@ -348,7 +348,7 @@ export default function ActivityDetailClient({
                     )}
                     {excluded.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                           <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
@@ -356,7 +356,7 @@ export default function ActivityDetailClient({
                         </h3>
                         <ul className="space-y-1.5">
                           {excluded.map((item, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                            <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                               <svg className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
@@ -368,11 +368,11 @@ export default function ActivityDetailClient({
                     )}
                   </div>
                   {!hasDetails && !hasPolicies && (
-                    <div className="text-center py-6 text-gray-500">Chưa có thông tin chi tiết.</div>
+                    <div className="text-center py-6 text-muted-foreground">Chưa có thông tin chi tiết.</div>
                   )}
 
                   {hasPolicies && (
-                    <div className="border-t border-gray-200 pt-6 space-y-4">
+                    <div className="border-t border-border pt-6 space-y-4">
                       {childrenPolicy && (
                         <PolicyCard
                           icon={
@@ -403,7 +403,7 @@ export default function ActivityDetailClient({
                             </svg>
                           }
                           title="Lưu ý"
-                          content={notes.map((n, i) => <p key={i} className="text-sm text-gray-600">{i + 1}. {n}</p>)}
+                          content={notes.map((n, i) => <p key={i} className="text-sm text-muted-foreground">{i + 1}. {n}</p>)}
                         />
                       )}
                     </div>
@@ -420,7 +420,7 @@ export default function ActivityDetailClient({
                     {recommendation && <ScheduleCard label="Khuyến nghị" value={recommendation} />}
                   </div>
                   {!openingHours && !durationDetail && !locationDetail && !recommendation && (
-                    <div className="text-center py-10 text-gray-500">Chưa có thông tin giờ mở cửa.</div>
+                    <div className="text-center py-10 text-muted-foreground">Chưa có thông tin giờ mở cửa.</div>
                   )}
                 </div>
               </div>
@@ -429,20 +429,20 @@ export default function ActivityDetailClient({
                 <div>
                   {purchaseGuide.length > 0 ? (
                     <div className="space-y-6">
-                      <p className="text-sm text-gray-500">Hướng dẫn mua vé chi tiết:</p>
+                      <p className="text-sm text-muted-foreground">Hướng dẫn mua vé chi tiết:</p>
                       {purchaseGuide.map((step, idx) => (
                         <div key={idx} className="flex gap-4">
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
                             {idx + 1}
                           </div>
                           <div className="flex-1 pt-1">
-                            <p className="text-sm text-gray-700">{step}</p>
+                            <p className="text-sm text-muted-foreground">{step}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-10 text-gray-500">
+                    <div className="text-center py-10 text-muted-foreground">
                       <p>Đặt vé trực tiếp qua 9 Trip:</p>
                       <ol className="mt-3 space-y-2 text-sm text-left max-w-md mx-auto">
                         <li className="flex gap-3">
@@ -468,7 +468,7 @@ export default function ActivityDetailClient({
               </div>
 
               <div data-tab-panel="map" className={activeTab === "map" ? "" : "hidden"}>
-                <div className="rounded-xl overflow-hidden border border-gray-200">
+                <div className="rounded-xl overflow-hidden border border-border">
                   {map?.lat && map?.lng ? (
                     <GoogleMap
                       lat={map.lat}
@@ -478,7 +478,7 @@ export default function ActivityDetailClient({
                       height="400px"
                     />
                   ) : (
-                    <div className="p-10 text-center text-gray-500">Chưa có thông tin bản đồ.</div>
+                    <div className="p-10 text-center text-muted-foreground">Chưa có thông tin bản đồ.</div>
                   )}
                 </div>
               </div>
@@ -488,24 +488,24 @@ export default function ActivityDetailClient({
                   {reviews.length > 0 ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 mb-6">
-                        <span className="text-3xl font-bold text-gray-900">{avgRating.toFixed(1)}</span>
+                        <span className="text-3xl font-bold text-foreground">{avgRating.toFixed(1)}</span>
                         <StarRating rating={avgRating} showCount reviewCount={totalRating} />
                       </div>
                       {reviews.map((review) => (
-                        <div key={review.id} className="bg-gray-50 rounded-xl p-4">
+                        <div key={review.id} className="bg-muted rounded-xl p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-sm text-gray-900">{review.userName || "Khách hàng"}</span>
+                            <span className="font-medium text-sm text-foreground">{review.userName || "Khách hàng"}</span>
                             <StarRating rating={review.rating} />
-                            <span className="text-xs text-gray-400 ml-auto">{review.createdAt}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">{review.createdAt}</span>
                           </div>
-                          <p className="text-sm text-gray-700">{review.comment}</p>
+                          <p className="text-sm text-muted-foreground">{review.comment}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-10 text-gray-500">
+                    <div className="text-center py-10 text-muted-foreground">
                       <p>Chưa có đánh giá nào.</p>
-                      <p className="text-xs text-gray-400 mt-1">Hãy là người đầu tiên đánh giá hoạt động này.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Hãy là người đầu tiên đánh giá hoạt động này.</p>
                     </div>
                   )}
                   <WriteReviewForm serviceId={activity.id} serviceType="activity" />
@@ -517,19 +517,19 @@ export default function ActivityDetailClient({
                   {faq.length > 0 ? (
                     <div className="space-y-2">
                       {faq.map((item, idx) => (
-                        <details key={idx} className="group rounded-xl border border-gray-200">
-                          <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-gray-900 hover:bg-gray-50 rounded-xl group-open:rounded-b-none">
+                        <details key={idx} className="group rounded-xl border border-border">
+                          <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-muted rounded-xl group-open:rounded-b-none">
                             {item.question}
-                            <svg className="h-4 w-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                           </summary>
-                          <div className="px-5 pb-4 text-sm text-gray-600">{item.answer}</div>
+                          <div className="px-5 pb-4 text-sm text-muted-foreground">{item.answer}</div>
                         </details>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-10 text-gray-500">Chưa có câu hỏi thường gặp.</div>
+                    <div className="text-center py-10 text-muted-foreground">Chưa có câu hỏi thường gặp.</div>
                   )}
                 </div>
               </div>
@@ -538,8 +538,8 @@ export default function ActivityDetailClient({
 
           {/* Related Activities */}
           {relatedActivities.length > 0 && (
-            <div className="pt-10 border-t border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-5">Có thể bạn sẽ thích</h3>
+            <div className="pt-10 border-t border-border">
+              <h3 className="text-xl font-bold text-foreground mb-5">Có thể bạn sẽ thích</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {relatedActivities.map((related) => (
                   <ActivityCard key={related.id} activity={related} />
@@ -575,12 +575,12 @@ export default function ActivityDetailClient({
  */
 function PolicyCard({ icon, title, content }) {
   return (
-    <div className="bg-gray-50 rounded-xl p-4">
+    <div className="bg-muted rounded-xl p-4">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">{icon}</div>
         <div>
-          <h4 className="font-semibold text-gray-900 text-sm mb-1">{title}</h4>
-          <div className="text-sm text-gray-600">{content}</div>
+          <h4 className="font-semibold text-foreground text-sm mb-1">{title}</h4>
+          <div className="text-sm text-muted-foreground">{content}</div>
         </div>
       </div>
     </div>
@@ -593,9 +593,9 @@ function PolicyCard({ icon, title, content }) {
  */
 function ScheduleCard({ label, value }) {
   return (
-    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">{label}</p>
-      <p className="text-sm font-medium text-gray-900">{value}</p>
+    <div className="bg-muted rounded-xl p-4 border border-border">
+      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

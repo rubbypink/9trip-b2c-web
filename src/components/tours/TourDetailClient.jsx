@@ -78,7 +78,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
         {/* Main Content */}
         <div className="flex-1 min-w-0 space-y-6">
           {/* 1. Image Gallery */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+          <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
             {allImages.length > 0 ? (
               <ImageCarousel
                 images={allImages}
@@ -89,7 +89,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                 serviceType="tour"
               />
             ) : (
-              <div className="aspect-[21/9] bg-gray-200 flex items-center justify-center text-gray-400">
+              <div className="aspect-[21/9] bg-muted flex items-center justify-center text-muted-foreground">
                 Chưa có ảnh
               </div>
             )}
@@ -119,8 +119,8 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
 
           {/* 3. Title + Meta */}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {locationName && (
                 <span className="inline-flex items-center gap-1">
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,12 +143,12 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                 <span>{tour.viewCount.toLocaleString("vi-VN")} lượt xem</span>
               )}
             </div>
-            {excerpt && <p className="text-gray-600 mt-3">{excerpt}</p>}
+            {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
           </div>
 
           {/* 4. Tab Navigation + Tab Panels */}
           <div>
-            <nav className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide" role="tablist">
+            <nav className="flex border-b border-border overflow-x-auto scrollbar-hide" role="tablist">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -158,7 +158,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                   className={`flex-shrink-0 px-5 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                     activeTab === tab.id
                       ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   }`}
                 >
                   {tab.label}
@@ -170,14 +170,14 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
               <div data-tab-panel="overview" className={activeTab === "overview" ? "" : "hidden"}>
                 <div className="space-y-6">
                   {tour.description && (
-                    <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: tour.description }} />
+                    <div className="prose max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: tour.description }} />
                   )}
                   {tour.highlights?.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Điểm nổi bật</h3>
+                      <h3 className="text-lg font-semibold text-foreground mb-3">Điểm nổi bật</h3>
                       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {tour.highlights.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                          <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
                             <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -198,28 +198,28 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                 <div className="space-y-6">
                   {pricingTiers.length > 0 ? (
                     <>
-                      <p className="text-sm text-gray-500">Bảng giá chi tiết các gói dịch vụ:</p>
-                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                      <p className="text-sm text-muted-foreground">Bảng giá chi tiết các gói dịch vụ:</p>
+                      <div className="overflow-x-auto rounded-xl border border-border">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                              <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói dịch vụ</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Người lớn</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Trẻ em</th>
-                              <th className="text-right px-4 py-3 font-semibold text-gray-900">Số khách</th>
+                            <tr className="bg-muted border-b border-border">
+                              <th className="text-left px-4 py-3 font-semibold text-foreground">Gói dịch vụ</th>
+                              <th className="text-right px-4 py-3 font-semibold text-foreground">Người lớn</th>
+                              <th className="text-right px-4 py-3 font-semibold text-foreground">Trẻ em</th>
+                              <th className="text-right px-4 py-3 font-semibold text-foreground">Số khách</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-100">
+                          <tbody className="divide-y divide-border">
                             {pricingTiers.map((tier) => (
-                              <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
+                              <tr key={tier.id} className="hover:bg-muted transition-colors">
+                                <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
                                 <td className="px-4 py-3 text-right font-semibold text-blue-600">
                                   {tier.adultPrice > 0 ? formatCurrency(tier.adultPrice, tier.currency || "VND") : "Liên hệ"}
                                 </td>
-                                <td className="px-4 py-3 text-right text-gray-600">
+                                <td className="px-4 py-3 text-right text-muted-foreground">
                                   {tier.childPrice != null ? formatCurrency(tier.childPrice, tier.currency || "VND") : "—"}
                                 </td>
-                                <td className="px-4 py-3 text-right text-gray-500">
+                                <td className="px-4 py-3 text-right text-muted-foreground">
                                   {tier.minPeople || 1}-{tier.maxPeople || 99} khách
                                 </td>
                               </tr>
@@ -229,8 +229,8 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                       </div>
                     </>
                   ) : (
-                    <div className="text-center py-10 text-gray-500">
-                      <p className="text-lg font-semibold text-gray-900 mb-1">
+                    <div className="text-center py-10 text-muted-foreground">
+                      <p className="text-lg font-semibold text-foreground mb-1">
                         {tour.pricing?.adultPrice > 0 ? formatCurrency(tour.pricing.adultPrice, "VND") : "Liên hệ"}
                       </p>
                       <p className="text-sm">Giá cơ bản cho 1 người</p>
@@ -243,7 +243,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                 <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${tour.included?.length > 0 || tour.excluded?.length > 0 ? "" : "hidden"}`}>
                   {tour.included?.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                         <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -251,14 +251,14 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                       </h3>
                       <ul className="space-y-1.5">
                         {tour.included.map((item, idx) => (
-                          <li key={idx} className="text-sm text-gray-600 pl-7">{item}</li>
+                          <li key={idx} className="text-sm text-muted-foreground pl-7">{item}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                   {tour.excluded?.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                         <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -266,20 +266,20 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                       </h3>
                       <ul className="space-y-1.5">
                         {tour.excluded.map((item, idx) => (
-                          <li key={idx} className="text-sm text-gray-600 pl-7">{item}</li>
+                          <li key={idx} className="text-sm text-muted-foreground pl-7">{item}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                 </div>
                 {tour.included?.length === 0 && tour.excluded?.length === 0 && (
-                  <div className="text-center py-10 text-gray-500">Chưa có thông tin chi tiết.</div>
+                  <div className="text-center py-10 text-muted-foreground">Chưa có thông tin chi tiết.</div>
                 )}
               </div>
 
               <div data-tab-panel="map" className={activeTab === "map" ? "" : "hidden"}>
                 {tour.map?.lat && tour.map?.lng ? (
-                  <div className="rounded-xl overflow-hidden border border-gray-200">
+                  <div className="rounded-xl overflow-hidden border border-border">
                     <GoogleMap
                       lat={tour.map.lat}
                       lng={tour.map.lng}
@@ -289,8 +289,8 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                     />
                   </div>
                 ) : (
-                  <div className="rounded-xl overflow-hidden border border-gray-200">
-                    <div className="p-10 text-center text-gray-500">Chưa có thông tin bản đồ.</div>
+                  <div className="rounded-xl overflow-hidden border border-border">
+                    <div className="p-10 text-center text-muted-foreground">Chưa có thông tin bản đồ.</div>
                   </div>
                 )}
               </div>
@@ -306,19 +306,19 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                 {tour.faq?.length > 0 ? (
                   <div className="space-y-2">
                     {tour.faq.map((item, idx) => (
-                      <details key={idx} className="group rounded-xl border border-gray-200">
-                        <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-gray-900 hover:bg-gray-50 rounded-xl group-open:rounded-b-none">
+                      <details key={idx} className="group rounded-xl border border-border">
+                        <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-muted rounded-xl group-open:rounded-b-none">
                           {item.question}
-                          <svg className="h-4 w-4 text-gray-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </summary>
-                        <div className="px-5 pb-4 text-sm text-gray-600">{item.answer}</div>
+                        <div className="px-5 pb-4 text-sm text-muted-foreground">{item.answer}</div>
                       </details>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-10 text-gray-500">
+                  <div className="text-center py-10 text-muted-foreground">
                     <p>Chưa có câu hỏi thường gặp cho tour này.</p>
                   </div>
                 )}
@@ -326,12 +326,12 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
 
               <div data-tab-panel="guide" className={activeTab === "guide" ? "" : "hidden"}>
                 <div className="text-center py-10">
-                  <p className="text-gray-500 mb-6">Hướng dẫn đặt tour:</p>
+                  <p className="text-muted-foreground mb-6">Hướng dẫn đặt tour:</p>
                   <ol className="space-y-3 text-sm text-left max-w-md mx-auto">
                     {["Chọn ngày khởi hành và gói dịch vụ phù hợp.", "Nhập số lượng khách và tiến hành thanh toán.", "Nhận voucher điện tử qua Zalo/Email (có mã QR).", "Xuất trình voucher tại điểm khởi hành."].map((step, i) => (
                       <li key={i} className="flex gap-3 items-start">
                         <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                        <span className="text-gray-700 pt-0.5">{step}</span>
+                        <span className="text-foreground pt-0.5">{step}</span>
                       </li>
                     ))}
                   </ol>
@@ -342,8 +342,8 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
 
           {/* 5. Related Tours */}
           {relatedTours.length > 0 && (
-            <div className="pt-10 border-t border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-5">Tour tương tự</h3>
+            <div className="pt-10 border-t border-border">
+              <h3 className="text-xl font-bold text-foreground mb-5">Tour tương tự</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {relatedTours.slice(0, 3).map((relatedTour) => (
                   <TourCard key={relatedTour.id} tour={relatedTour} variant="grid" showBadge={false} />

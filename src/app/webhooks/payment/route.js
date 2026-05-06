@@ -17,6 +17,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { sendPaymentConfirmation, sendPaymentFailed } from '@/lib/email';
 import { PaymentService } from '@/lib/payments/payment';
 import { adminDb } from '@/lib/firebase-admin';
 
@@ -123,6 +124,47 @@ async function logPaymentEvent(logData) {
   }
 }
 
+/**
+ * Send payment confirmation email to customer (fire-and-forget, non-blocking).
+ * Fetches full booking from Firestore (webhook only has orderId).
+ * Includes idempotency check to prevent duplicate emails from VNPay GET+POST.
+ * @param {string} bookingId
+ */
+async function sendConfirmationEmail(bookingId) {
+  try {
+    const bookingSnap = await adminDb.collection('bookings').doc(bookingId).get();
+    if (!bookingSnap.exists) return;
+    const booking = { id: bookingId, ...bookingSnap.data() };
+    if (booking.paymentStatus !== 'PAID') return;
+    const result = await sendPaymentConfirmation(booking);
+    if (result.success) {
+      console.log(`[Payment Webhook] ✅ Confirmation email sent for booking ${bookingId}`);
+    } else {
+      console.error(`[Payment Webhook] Failed to send confirmation email for booking ${bookingId}:`, result.error);
+    }
+  } catch (err) {
+    console.error(`[Payment Webhook] Error sending confirmation email for booking ${bookingId}:`, err.message);
+  }
+}
+
+/**
+ * Send payment failure email notification to customer.
+ * Fetches full booking from Firestore (webhook only has orderId).
+ * @param {string} bookingId
+ */
+async function sendFailureEmail(bookingId) {
+  try {
+    const bookingSnap = await adminDb.collection('bookings').doc(bookingId).get();
+    if (!bookingSnap.exists) return;
+    const booking = { id: bookingId, ...bookingSnap.data() };
+    sendPaymentFailed(booking).catch(err =>
+      console.error('[Payment Webhook] Failure email error:', err.message)
+    );
+  } catch (err) {
+    console.error(`[Payment Webhook] Error sending failure email for ${bookingId}:`, err.message);
+  }
+}
+
 // ─── Verification ────────────────────────────────────────────────────
 
 /**
@@ -169,6 +211,7 @@ export async function GET(request) {
       await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, gateway.toUpperCase());
       await releaseInventoryHold(verifyResult.orderId);
       await forwardToERP(verifyResult.orderId);
+      sendConfirmationEmail(verifyResult.orderId);
 
       await logPaymentEvent({
         gateway,
@@ -181,6 +224,7 @@ export async function GET(request) {
     }
 
     const fallbackId = verifyResult.orderId || 'unknown';
+    sendFailureEmail(fallbackId);
     await logPaymentEvent({
       gateway,
       bookingId: fallbackId,
@@ -223,12 +267,14 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'VNPAY');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId);
           // VNPay expects specific IPN response format
           return NextResponse.json({
             RspCode: '00',
             Message: 'Confirm Success',
           });
         }
+        sendFailureEmail(verifyResult.orderId);
         return NextResponse.json({
           RspCode: '99',
           Message: 'Verify signature failed',
@@ -240,6 +286,7 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'MOMO');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId);
         }
         return new NextResponse(null, { status: 204 }); // MoMo expects 204 No Content
 
@@ -250,8 +297,13 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'PAYPAL');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId);
         }
         return NextResponse.json({ received: true });
+
+      case 'STRIPE':
+        // TODO: Implement Stripe webhook verification when STRIPE_SECRET_KEY is available
+        return NextResponse.json({ message: 'Stripe webhook not yet configured' }, { status: 501 });
 
       default:
         return NextResponse.json({ error: `Unsupported gateway: ${gateway}` }, { status: 400 });

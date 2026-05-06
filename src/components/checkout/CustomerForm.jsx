@@ -25,12 +25,12 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
     <form id="customer-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Họ và tên *</label>
           <input
             type="text"
             {...register("fullName", { required: "Vui lòng nhập họ tên" })}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none ${
-              errors.fullName ? "border-red-500" : "border-gray-300"
+              errors.fullName ? "border-red-500" : "border-border"
             }`}
             placeholder="VD: Nguyễn Văn A"
           />
@@ -38,7 +38,7 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Email *</label>
           <input
             type="email"
             {...register("email", {
@@ -49,7 +49,7 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
               },
             })}
             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none ${
-              errors.email ? "border-red-500" : "border-gray-300"
+              errors.email ? "border-red-500" : "border-border"
             }`}
             placeholder="email@example.com"
           />
@@ -58,7 +58,7 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Số điện thoại *</label>
         <input
           type="tel"
           {...register("phone", { 
@@ -69,7 +69,7 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
             }
           })}
           className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none ${
-            errors.phone ? "border-red-500" : "border-gray-300"
+            errors.phone ? "border-red-500" : "border-border"
           }`}
           placeholder="VD: 0912345678"
         />
@@ -77,11 +77,11 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Yêu cầu đặc biệt (tùy chọn)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Yêu cầu đặc biệt (tùy chọn)</label>
         <textarea
           {...register("specialRequests")}
           rows="3"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+          className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
           placeholder="VD: Tôi muốn phòng hướng biển, thức ăn chay..."
         ></textarea>
       </div>

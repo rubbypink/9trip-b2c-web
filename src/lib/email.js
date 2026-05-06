@@ -180,7 +180,27 @@ export async function sendContactNotification(data) {
 }
 
 /**
+ * Send welcome email to newly registered user.
+ * @param {string} to - Recipient email
+ * @param {string} userName - User's display name
+ * @returns {Promise<{ success: boolean, messageId?: string }>}
+ */
+export async function sendWelcomeEmail(to, userName) {
+  const { welcomeTemplate } = await import("./email-templates");
+  const html = welcomeTemplate(userName);
+
+  return sendEmail({
+    to,
+    subject: `Chào mừng đến với 9 Trip Phú Quốc!`,
+    html,
+  });
+}
+
+/**
  * Send password reset email with reset link.
+ * @deprecated Firebase Auth handles password reset natively via sendPasswordResetEmail().
+ *   This function is kept for reference but should NOT be used in new code.
+ *   See src/lib/auth.js for the Firebase-native implementation.
  * @param {string} to - Recipient email
  * @param {string} resetLink - Password reset link
  * @returns {Promise<{ success: boolean, messageId?: string }>}

@@ -44,7 +44,7 @@ export default function ReviewCard({ review, showImages = true, compact = false 
   } = review;
 
   return (
-    <div className={`bg-white rounded-xl border border-gray-200 ${compact ? "p-4" : "p-5"}`}>
+    <div className={`bg-card rounded-xl border border-border ${compact ? "p-4" : "p-5"}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className="flex-shrink-0">
@@ -69,9 +69,9 @@ export default function ReviewCard({ review, showImages = true, compact = false 
         <div className="flex-1 min-w-0">
           {/* Name + Date */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            <span className="font-semibold text-gray-900 text-sm">{userName}</span>
+            <span className="font-semibold text-foreground text-sm">{userName}</span>
             {createdAt && (
-              <span className="text-xs text-gray-400">{formatDate(createdAt, "short")}</span>
+              <span className="text-xs text-muted-foreground">{formatDate(createdAt, "short")}</span>
             )}
           </div>
 
@@ -80,7 +80,7 @@ export default function ReviewCard({ review, showImages = true, compact = false 
             {[1, 2, 3, 4, 5].map((star) => (
               <svg
                 key={star}
-                className={`h-3.5 w-3.5 ${star <= Math.round(rating) ? "text-yellow-400" : "text-gray-200"}`}
+                className={`h-3.5 w-3.5 ${star <= Math.round(rating) ? "text-yellow-400" : "text-border"}`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -91,12 +91,12 @@ export default function ReviewCard({ review, showImages = true, compact = false 
 
           {/* Title */}
           {title && (
-            <h4 className="font-medium text-gray-800 mt-2 text-sm">{title}</h4>
+            <h4 className="font-medium text-foreground mt-2 text-sm">{title}</h4>
           )}
 
           {/* Content */}
           {content && (
-            <p className={`text-gray-600 mt-1 ${compact ? "text-sm line-clamp-3" : "text-sm"}`}>
+            <p className={`text-muted-foreground mt-1 ${compact ? "text-sm line-clamp-3" : "text-sm"}`}>
               {content}
             </p>
           )}
@@ -107,7 +107,7 @@ export default function ReviewCard({ review, showImages = true, compact = false 
               {tags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"
+                  className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full"
                 >
                   {tag}
                 </span>
@@ -121,7 +121,7 @@ export default function ReviewCard({ review, showImages = true, compact = false 
               {images.map((img, idx) => (
                 <div
                   key={idx}
-                  className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100"
+                  className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-muted"
                 >
                   <Image
                     src={img}

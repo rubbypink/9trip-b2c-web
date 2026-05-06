@@ -1,22 +1,68 @@
 {
-  "active_plan": "D:\\Software\\9trip-b2c-web\\.sisyphus\\plans\\scraper-refactor.md",
-  "started_at": "2026-05-05T14:58:00.000Z",
+  "active_plan": "/home/rubbypink/projects/tripphuquoc-db-fs/.sisyphus/plans/scraper-refactor.md",
+  "started_at": "2026-05-06T11:31:17.436Z",
   "session_ids": [
-    "ses_2075ad07bffeT0fa4iteHgsUHe"
+    "ses_20321ed55ffeETmexQ2FZCo9kr"
   ],
-  "plan_name": "scraper-refactor",
-  "worktree_path": null,
   "session_origins": {
-    "ses_2075ad07bffeT0fa4iteHgsUHe": "direct"
+    "ses_20321ed55ffeETmexQ2FZCo9kr": "direct"
   },
+  "plan_name": "scraper-refactor",
+  "agent": "atlas",
   "task_sessions": {
     "todo:1": {
       "task_key": "todo:1",
       "task_label": "1",
-      "task_title": "Create Schema Modules with Firecrawl Agent Prompts (.agents/lib/schemas/)",
-      "session_id": "ses_2075a3127ffevHnmgM6MEIYV7Y",
-      "agent": "explore",
-      "updated_at": "2026-05-05T15:00:39.466Z"
+      "task_title": "Create agent-browser-guide.md — condensed command reference + scraping patterns",
+      "session_id": "ses_202e87ccaffekPFBv4dZzYEQ4P",
+      "agent": "Sisyphus-Junior",
+      "category": "deep",
+      "updated_at": "2026-05-06T11:41:11.054Z"
+    },
+    "todo:3": {
+      "task_key": "todo:3",
+      "task_label": "3",
+      "task_title": "Add retry logic + standardized waits to browser-automation.mjs",
+      "session_id": "ses_202e21632ffeVq7wl55SOvblqw",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-05-06T11:49:54.234Z"
+    },
+    "todo:5": {
+      "task_key": "todo:5",
+      "task_label": "5",
+      "task_title": "Fix extractChildPricesPerTier data flow in activityScraper.mjs",
+      "session_id": "ses_202dc906dffeyV2lk12D4Cre24",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-05-06T11:55:43.238Z"
+    },
+    "todo:9": {
+      "task_key": "todo:9",
+      "task_label": "9",
+      "task_title": "Update activity-scraper SKILL.md with agent-browser patterns",
+      "session_id": "ses_202d47c06ffe1eB1tNQrOWOJeK",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-05-06T12:04:47.966Z"
+    },
+    "todo:12": {
+      "task_key": "todo:12",
+      "task_label": "12",
+      "task_title": "End-to-end test: ivivu activity scraper with child prices",
+      "session_id": "ses_202c6608dffeYxYOFdfnH5LiVa",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-05-06T12:19:26.190Z"
+    },
+    "final-wave:f1": {
+      "task_key": "final-wave:f1",
+      "task_label": "F1",
+      "task_title": "**Plan Compliance Audit** — `oracle`",
+      "session_id": "ses_202ac4da3ffelRMvpAFTkvrYDL",
+      "agent": "Sisyphus-Junior",
+      "category": "unspecified-high",
+      "updated_at": "2026-05-06T12:50:50.651Z"
     }
   }
 }

@@ -7,11 +7,11 @@ export const metadata = { title: "Không tìm thấy — 9 Trip" };
  */
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-muted flex items-center justify-center">
       <div className="text-center max-w-md px-4">
-        <div className="text-8xl font-bold text-gray-200 mb-4">404</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy trang</h1>
-        <p className="text-gray-500 mb-8">
+        <div className="text-8xl font-bold text-muted-foreground mb-4">404</div>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Không tìm thấy trang</h1>
+        <p className="text-muted-foreground mb-8">
           Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

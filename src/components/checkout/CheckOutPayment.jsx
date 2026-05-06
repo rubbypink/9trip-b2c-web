@@ -42,12 +42,12 @@ export default function CheckoutPayment({ orderId, amount }) {
     };
 
     return (
-        <div className="max-w-md p-6 bg-white rounded-lg shadow-md border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Phương thức thanh toán</h2>
+        <div className="max-w-md p-6 bg-card rounded-lg shadow-md border border-border">
+            <h2 className="text-xl font-bold text-foreground mb-4">Phương thức thanh toán</h2>
             
             {/* Lựa chọn Cổng thanh toán */}
             <div className="flex flex-col gap-3 mb-6">
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-border hover:bg-muted'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 
@@ -56,10 +56,10 @@ export default function CheckoutPayment({ orderId, amount }) {
                         onChange={(e) => setGateway(e.target.value)}
                         className="mr-3"
                     />
-                    <span className="font-medium text-gray-700">VNPay (Thẻ ATM/QR Code)</span>
+                    <span className="font-medium text-foreground">VNPay (Thẻ ATM/QR Code)</span>
                 </label>
 
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-border hover:bg-muted'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 
@@ -68,10 +68,10 @@ export default function CheckoutPayment({ orderId, amount }) {
                         onChange={(e) => setGateway(e.target.value)}
                         className="mr-3"
                     />
-                    <span className="font-medium text-gray-700">Ví MoMo</span>
+                    <span className="font-medium text-foreground">Ví MoMo</span>
                 </label>
 
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-border hover:bg-muted'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 
@@ -80,7 +80,7 @@ export default function CheckoutPayment({ orderId, amount }) {
                         onChange={(e) => setGateway(e.target.value)}
                         className="mr-3"
                     />
-                    <span className="font-medium text-gray-700">PayPal (Thẻ Quốc tế)</span>
+                    <span className="font-medium text-foreground">PayPal (Thẻ Quốc tế)</span>
                 </label>
             </div>
 
@@ -90,7 +90,7 @@ export default function CheckoutPayment({ orderId, amount }) {
             // Ép cố định chiều cao, overflow-hidden để không cho thành phần con tràn ra ngoài
             className={`w-full flex items-center justify-center py-3 px-4 min-h-[52px] max-h-[52px] rounded-xl font-bold transition-all duration-300 overflow-hidden ${
                 isLoading 
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none" 
+                ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none" 
                 : "bg-primary-600 text-white hover:bg-primary-700 shadow-lg"
             }`}
             >

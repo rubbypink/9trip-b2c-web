@@ -22,8 +22,8 @@ export default function GoogleMap({ lat, lng, zoom = 14, className = "", height 
 
   if (error || !lat || !lng) {
     return (
-      <div className={`bg-gray-200 rounded-lg flex items-center justify-center ${className}`} style={{ minHeight: height }}>
-        <p className="text-gray-400 text-sm">Không có dữ liệu bản đồ</p>
+      <div className={`bg-muted rounded-lg flex items-center justify-center ${className}`} style={{ minHeight: height }}>
+        <p className="text-muted-foreground text-sm">Không có dữ liệu bản đồ</p>
       </div>
     );
   }

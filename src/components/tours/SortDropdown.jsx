@@ -33,11 +33,11 @@ export default function SortDropdown({ className }) {
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <label className="text-sm text-gray-500 flex-shrink-0">Sắp xếp:</label>
+      <label className="text-sm text-muted-foreground flex-shrink-0">Sắp xếp:</label>
       <select
         value={currentSort}
         onChange={(e) => handleSort(e.target.value)}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+        className="rounded-lg border border-border px-3 py-2 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
       >
         {sortOptions.map((opt) => (
           <option key={opt.value} value={opt.value}>

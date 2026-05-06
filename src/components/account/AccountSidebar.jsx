@@ -47,7 +47,7 @@ export default function AccountSidebar() {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Profile quick info */}
-      <div className="p-5 border-b border-slate-200">
+      <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
           {avatar ? (
             <img
@@ -61,11 +61,11 @@ export default function AccountSidebar() {
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-800 truncate">
+            <p className="text-sm font-semibold text-foreground truncate">
               {displayName}
             </p>
             {email && (
-              <p className="text-xs text-slate-500 truncate">{email}</p>
+              <p className="text-xs text-muted-foreground truncate">{email}</p>
             )}
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function AccountSidebar() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 isActive
                   ? "bg-orange-50 text-orange-600"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -99,11 +99,11 @@ export default function AccountSidebar() {
       </nav>
 
       {/* Logout */}
-      <div className="p-3 border-t border-slate-200">
+      <div className="p-3 border-t border-border">
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-red-50 hover:text-red-600 transition-colors duration-200"
         >
           <LogOut className="h-5 w-5 shrink-0" />
           <span>Đăng xuất</span>
@@ -118,14 +118,14 @@ export default function AccountSidebar() {
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md border border-slate-200 text-slate-600 hover:text-orange-600 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-card shadow-md border border-border text-muted-foreground hover:text-orange-600 transition-colors"
         aria-label="Mở menu tài khoản"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-white border-r border-slate-200 shadow-sm">
+      <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-card border-r border-border shadow-sm">
         {sidebarContent}
       </aside>
 
@@ -139,15 +139,15 @@ export default function AccountSidebar() {
             aria-hidden="true"
           />
           {/* Panel */}
-          <aside className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-xl z-50 flex flex-col animate-slide-in-left">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              <span className="text-sm font-semibold text-slate-800">
+          <aside className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-card shadow-xl z-50 flex flex-col animate-slide-in-left">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <span className="text-sm font-semibold text-foreground">
                 Tài khoản
               </span>
               <button
                 type="button"
                 onClick={closeMobile}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-muted-foreground hover:bg-muted transition-colors"
                 aria-label="Đóng menu"
               >
                 <X className="h-5 w-5" />

@@ -32,10 +32,10 @@ export default async function FlashDealsServer() {
           <span className="text-orange-600 font-semibold text-sm uppercase tracking-wider">
             🔥 Ưu đãi sốc
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mt-2">
             Flash Deals
           </h2>
-          <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
             Tour giảm giá sốc — số lượng có hạn, đặt ngay kẻo lỡ!
           </p>
         </div>
@@ -53,7 +53,7 @@ export default async function FlashDealsServer() {
               <Link
                 key={tour.id}
                 href={`/tours/${tour.slug}`}
-                className="group flex-shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group flex-shrink-0 w-72 snap-start bg-card rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 {/* Image */}
                 <div className="aspect-[4/3] relative overflow-hidden">
@@ -67,7 +67,7 @@ export default async function FlashDealsServer() {
                       sizes="288px"
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">
+                    <div className="flex items-center justify-center h-full bg-muted text-muted-foreground">
                       <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
                       </svg>
@@ -84,19 +84,19 @@ export default async function FlashDealsServer() {
                 {/* Content */}
                 <div className="p-4">
                   <div className="flex items-center gap-1 mb-1">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
-                    <span className="text-xs text-gray-500">{tour.locationName || tour.location || "—"}</span>
+                    <span className="text-xs text-muted-foreground">{tour.locationName || tour.location || "—"}</span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-2 text-sm">
+                  <h3 className="font-semibold text-foreground group-hover:text-orange-600 transition-colors line-clamp-2 text-sm">
                     {tour.name}
                   </h3>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-lg font-bold text-red-600">
                       {formatCurrency(tour.pricing.salePrice, tour.pricing.currency || "VND")}
                     </span>
-                    <span className="text-xs text-gray-400 line-through">
+                    <span className="text-xs text-muted-foreground line-through">
                       {formatCurrency(tour.pricing.basePrice, tour.pricing.currency || "VND")}
                     </span>
                   </div>

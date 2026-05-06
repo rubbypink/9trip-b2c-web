@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     // Functions backend — not a Next.js app
-    "9trip-b2c-back-end/**",
+    "tripphuquoc-db-fs-back-end/**",
     // Scripts — development only
     "src/scripts/**",
   ]),

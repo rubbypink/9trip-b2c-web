@@ -13,9 +13,9 @@ export default function CartSummary() {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-        <h3 className="font-bold text-gray-900">Chi tiết đơn hàng</h3>
+    <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <div className="p-4 border-b border-border bg-muted/50">
+        <h3 className="font-bold text-foreground">Chi tiết đơn hàng</h3>
       </div>
       
       <div className="p-4 space-y-4">
@@ -30,14 +30,14 @@ export default function CartSummary() {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-gray-900 truncate">
+              <h4 className="text-sm font-semibold text-foreground truncate">
                 {item.serviceTitle}
               </h4>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {formatDate(item.startDate)} {item.endDate ? ` - ${formatDate(item.endDate)}` : ""}
               </p>
               <div className="flex justify-between items-end mt-1">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   {item.adults} người lớn{item.children > 0 ? `, ${item.children} trẻ em` : ""}
                 </span>
                 <span className="text-sm font-bold text-primary-600">
@@ -49,10 +49,10 @@ export default function CartSummary() {
         ))}
       </div>
 
-      <div className="p-4 bg-gray-50/50 border-t border-gray-100 space-y-2">
+      <div className="p-4 bg-muted/50 border-t border-border space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Tạm tính</span>
-          <span className="text-gray-900 font-medium">{formatCurrency(subtotal)}</span>
+          <span className="text-muted-foreground">Tạm tính</span>
+          <span className="text-foreground font-medium">{formatCurrency(subtotal)}</span>
         </div>
         
         {couponDiscount > 0 && (
@@ -63,12 +63,12 @@ export default function CartSummary() {
         )}
         
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Thuế (10%)</span>
-          <span className="text-gray-900 font-medium">{formatCurrency(tax)}</span>
+          <span className="text-muted-foreground">Thuế (10%)</span>
+          <span className="text-foreground font-medium">{formatCurrency(tax)}</span>
         </div>
 
-        <div className="pt-2 mt-2 border-t border-gray-200 flex justify-between items-center">
-          <span className="text-base font-bold text-gray-900">Tổng cộng</span>
+        <div className="pt-2 mt-2 border-t border-border flex justify-between items-center">
+          <span className="text-base font-bold text-foreground">Tổng cộng</span>
           <span className="text-xl font-bold text-primary-600">{formatCurrency(grandTotal)}</span>
         </div>
       </div>

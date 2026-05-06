@@ -25,10 +25,10 @@ export default function FeaturedTours({ tours }) {
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wider">
             Khám phá
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
             Tour nổi bật
           </h2>
-          <p className="text-sm text-gray-500 mt-1 max-w-md">
+          <p className="text-sm text-muted-foreground mt-1 max-w-md">
             Những tour du lịch được yêu thích nhất, đặt ngay kẻo hết chỗ!
           </p>
         </div>

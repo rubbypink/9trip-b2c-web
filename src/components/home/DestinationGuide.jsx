@@ -51,17 +51,17 @@ export default function DestinationGuide() {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4">
         {/* Section header */}
         <div className="text-center mb-10">
           <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider">
             Khám phá
           </span>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mt-2">
             Điểm đến hấp dẫn
           </h2>
-          <p className="text-gray-500 mt-3 max-w-2xl mx-auto">
+          <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
             Khám phá những điểm đến tuyệt vời nhất Việt Nam với hàng trăm tour được tuyển chọn.
           </p>
         </div>

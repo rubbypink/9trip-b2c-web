@@ -11,7 +11,7 @@ export const metadata = {
  */
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -19,14 +19,14 @@ export default function PrivacyPage() {
         ]}
       />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
             Chính sách bảo mật
           </h1>
 
-          <div className="prose max-w-none text-gray-700 space-y-6">
+          <div className="prose max-w-none text-foreground space-y-6">
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 1. Cam kết bảo mật
               </h2>
               <p>
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 2. Thông tin chúng tôi thu thập
               </h2>
               <ul className="list-disc pl-5 space-y-1">
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 3. Mục đích sử dụng thông tin
               </h2>
               <ul className="list-disc pl-5 space-y-1">
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 4. Chia sẻ thông tin
               </h2>
               <p>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 5. Bảo mật dữ liệu
               </h2>
               <p>
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 6. Cookie
               </h2>
               <p>
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 7. Quyền của người dùng
               </h2>
               <p>Bạn có quyền:</p>
@@ -131,7 +131,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 8. Thay đổi chính sách
               </h2>
               <p>
@@ -142,7 +142,7 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 9. Liên hệ
               </h2>
               <p>

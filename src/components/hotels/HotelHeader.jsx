@@ -16,8 +16,8 @@ function StarRatingInline({ rating = 0, count = 0 }) {
       <svg className="h-4 w-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
       </svg>
-      <span className="font-semibold text-gray-900">{rating.toFixed(1)}</span>
-      {count > 0 && <span className="text-gray-400">({count})</span>}
+      <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+      {count > 0 && <span className="text-muted-foreground">({count})</span>}
     </div>
   );
 }
@@ -67,7 +67,7 @@ export function ShareButton({ url, title }) {
     <button
       type="button"
       onClick={handleShare}
-      className="flex items-center gap-1.5 rounded-xl bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-white transition-colors"
+      className="flex items-center gap-1.5 rounded-xl bg-background/90 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-muted-foreground shadow-sm hover:bg-background transition-colors"
       title={copied ? "Đã sao chép!" : "Chia sẻ"}
       aria-label={copied ? "Đã sao chép liên kết" : "Chia sẻ khách sạn"}
     >
@@ -135,7 +135,7 @@ export function WishlistButton({ hotelId }) {
         className={`flex items-center gap-1.5 rounded-xl backdrop-blur-sm px-3 py-1.5 text-sm font-medium shadow-sm transition-all ${
           isWishlisted
             ? "bg-red-50/90 text-red-500 hover:bg-red-100"
-            : "bg-white/90 text-gray-600 hover:bg-white hover:text-red-500"
+            : "bg-background/90 text-muted-foreground hover:bg-background hover:text-red-500"
         }`}
         title={isWishlisted ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
         aria-label={isWishlisted ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
@@ -166,7 +166,7 @@ export function WishlistButton({ hotelId }) {
 export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating = 0 }) {
   if (totalRating === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-400 py-12">
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-12">
         <svg className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
@@ -180,7 +180,7 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
       {/* Big score */}
       <div className="text-center mb-4">
         <span className="text-5xl font-bold text-primary">{avgRating.toFixed(1)}</span>
-        <p className="text-sm text-gray-500 mt-1">{totalRating} đánh giá</p>
+        <p className="text-sm text-muted-foreground mt-1">{totalRating} đánh giá</p>
       </div>
 
       {/* Star distribution bars */}
@@ -190,11 +190,11 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
           const pct = totalRating > 0 ? (count / totalRating) * 100 : 0;
           return (
             <div key={star} className="flex items-center gap-2 text-xs">
-              <span className="w-4 text-right text-gray-500">{star}</span>
-              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="w-6 text-gray-400 text-right">{count}</span>
+<span className="w-4 text-right text-muted-foreground">{star}</span>
+               <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                 <div className="h-full bg-yellow-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+               </div>
+               <span className="w-6 text-muted-foreground text-right">{count}</span>
             </div>
           );
         })}
@@ -204,12 +204,12 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
       {reviews.length > 0 && (
         <div className="w-full mt-4 space-y-2 max-h-[120px] overflow-y-auto">
           {reviews.slice(0, 2).map((review, i) => (
-            <div key={i} className="text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+            <div key={i} className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
               <div className="flex items-center gap-1 mb-0.5">
                 {Array.from({ length: 5 }).map((_, s) => (
                   <svg
                     key={s}
-                    className={`h-3 w-3 ${s < Math.round(review.rating) ? "text-yellow-400 fill-current" : "text-gray-300 fill-current"}`}
+                    className={`h-3 w-3 ${s < Math.round(review.rating) ? "text-yellow-400 fill-current" : "text-muted-foreground fill-current"}`}
                     viewBox="0 0 20 20"
                   >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -262,10 +262,10 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       {/* ── Gallery Section (70% width) ────────────── */}
       <div className="w-full px-4 pt-4">
-        <div className="relative w-full max-w-4xl mx-auto bg-gray-100 rounded-2xl overflow-hidden shadow-sm">
+        <div className="relative w-full max-w-4xl mx-auto bg-muted rounded-2xl overflow-hidden shadow-sm">
           {/* ── Gallery Content ─────────────────────────────── */}
           <div className="aspect-[16/9] md:aspect-[21/9] max-h-[60vh] relative">
             <ImageCarousel
@@ -279,7 +279,7 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
 
             {/* ── Star badge top-left ──────────────────────── */}
             {starRating > 0 && (
-              <span className="absolute top-3 left-3 z-10 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-yellow-600 shadow-sm flex items-center gap-1">
+              <span className="absolute top-3 left-3 z-10 rounded-lg bg-background/90 backdrop-blur-sm px-3 py-1.5 text-sm font-medium text-yellow-600 shadow-sm flex items-center gap-1">
                 <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
@@ -289,9 +289,9 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
 
             {/* ── Score badge top-right ─────────────────────── */}
             {displayRating > 0 && (
-              <div className="absolute top-3 right-3 z-10 flex flex-col items-center rounded-xl bg-white/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
+              <div className="absolute top-3 right-3 z-10 flex flex-col items-center rounded-xl bg-background/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
                 <span className="text-lg font-bold text-primary">{displayRating.toFixed(1)}</span>
-                <span className="text-[10px] font-medium text-gray-600 whitespace-nowrap">
+                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">
                   {getScoreLabel(displayRating)}
                 </span>
               </div>
@@ -311,9 +311,9 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
       <div className="max-w-7xl mx-auto px-4 pt-6 pb-8">
         <div className="flex flex-col md:flex-row items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{name}</h1>
 
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {address.city && (
                 <div className="flex items-center gap-1.5">
                   <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -324,15 +324,15 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
                 </div>
               )}
               {displayRating > 0 && (
-                <div className="flex items-center gap-1 text-gray-400">
-                  <span className="text-gray-300">|</span>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <span className="text-muted-foreground">|</span>
                   <StarRatingInline rating={displayRating} count={displayTotal} />
                 </div>
               )}
             </div>
 
             {excerpt && (
-              <p className="text-gray-600 mt-3 line-clamp-2 max-w-2xl">{excerpt}</p>
+              <p className="text-muted-foreground mt-3 line-clamp-2 max-w-2xl">{excerpt}</p>
             )}
           </div>
 

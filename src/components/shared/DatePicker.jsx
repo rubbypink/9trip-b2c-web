@@ -36,7 +36,7 @@ export default function DatePicker({
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-foreground">
           {label}
           {required && <span className="text-red-500 ml-0.5">*</span>}
         </label>
@@ -51,12 +51,12 @@ export default function DatePicker({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "w-full rounded-lg border px-4 py-2.5 text-sm text-gray-900 transition-colors",
+            "w-full rounded-lg border px-4 py-2.5 text-sm text-foreground transition-colors",
             "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
-            "disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400",
+            "disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground",
             error
               ? "border-red-400 focus:ring-red-400/20 focus:border-red-400"
-              : "border-gray-300"
+              : "border-border"
           )}
         />
       </div>

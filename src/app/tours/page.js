@@ -59,7 +59,7 @@ export default async function ToursPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -68,12 +68,12 @@ export default async function ToursPage({ searchParams }) {
         ]}
       />
 
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Tìm Tour Du Lịch
           </h1>
-          <p className="text-gray-500">Khám phá hàng trăm tour du lịch hấp dẫn</p>
+          <p className="text-muted-foreground">Khám phá hàng trăm tour du lịch hấp dẫn</p>
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export default async function ToursPage({ searchParams }) {
       <div className="max-w-7xl mx-auto px-4 pb-16">
         <div className="flex gap-8">
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 sticky top-24">
+            <div className="bg-card rounded-xl border border-border sticky top-24">
               <TourFilters locations={locations} currentFilters={filters} />
             </div>
           </aside>

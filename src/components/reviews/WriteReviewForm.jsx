@@ -75,8 +75,8 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
 
   if (!user) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
-        <p className="text-gray-500 text-sm mb-3">Vui lòng đăng nhập để viết đánh giá</p>
+      <div className="bg-card rounded-xl border border-border p-6 text-center">
+        <p className="text-muted-foreground text-sm mb-3">Vui lòng đăng nhập để viết đánh giá</p>
         <button
           type="button"
           onClick={() => setShowLoginPopup(true)}
@@ -109,8 +109,8 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-      <h3 className="font-semibold text-gray-900">Viết đánh giá của bạn</h3>
+    <form onSubmit={handleSubmit} className="bg-card rounded-xl border border-border p-6 space-y-4">
+      <h3 className="font-semibold text-foreground">Viết đánh giá của bạn</h3>
 
       {/* Error */}
       {error && (
@@ -121,7 +121,7 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
 
       {/* Star Rating */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Đánh giá của bạn</label>
+        <label className="block text-sm font-medium text-foreground mb-2">Đánh giá của bạn</label>
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -137,7 +137,7 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
                 className={`h-7 w-7 ${
                   star <= (hoveredStar || rating)
                     ? "text-yellow-400 fill-current"
-                    : "text-gray-300 fill-current"
+                    : "text-muted-foreground fill-current"
                 }`}
                 viewBox="0 0 20 20"
               >
@@ -145,7 +145,7 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
               </svg>
             </button>
           ))}
-          <span className="ml-2 text-sm text-gray-500">
+          <span className="ml-2 text-sm text-muted-foreground">
             {rating > 0 ? `${rating}/5 sao` : "Chọn sao"}
           </span>
         </div>
@@ -153,23 +153,23 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
 
       {/* Comment */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung đánh giá</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Nội dung đánh giá</label>
         <textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={4}
           placeholder="Chia sẻ trải nghiệm của bạn..."
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+          className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
           maxLength={2000}
         />
-        <div className="text-xs text-gray-400 mt-1 text-right">{comment.length}/2000</div>
+        <div className="text-xs text-muted-foreground mt-1 text-right">{comment.length}/2000</div>
       </div>
 
       {/* Submit */}
       <button
         type="submit"
         disabled={submitting || rating === 0 || !comment.trim()}
-        className="w-full sm:w-auto px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+        className="w-full sm:w-auto px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
       >
         {submitting ? "Đang gửi..." : "Gửi đánh giá"}
       </button>

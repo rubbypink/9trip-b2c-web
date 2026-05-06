@@ -1,0 +1,53 @@
+Task 5: Data Flow Fix — childPrices merge + tier limit increase
+================================================================
+
+## Bug
+`extractActivityPage()` in browser-automation.mjs returns `childPrices` (per-tier
+child prices) and `childPricing` (from clickQuantityButtons), but
+`scrapeActivityFromUrl()` in activityScraper.mjs NEVER merged them into
+`pricing.tiers[]` or `pricing.childPrice/infantPrice/seniorPrice`.
+
+## Fix 1: activityScraper.mjs — Destructure + merge childPrices/childPricing
+
+### Change A: Destructure childPrices and childPricing from extractResult
+Line 435 (was):
+  const { bodyText, bodyHtml, title, url: rawUrl, clicked, errors } = extractResult;
+Now:
+  const { bodyText, bodyHtml, title, url: rawUrl, clicked, errors, childPrices, childPricing } = extractResult;
+
+### Change B: Merge childPrices into pricing.tiers after scrapeActivityFromText()
+After `scrapeResult.data._strategy = 'agent-browser';` (was line 457), added:
+
+  // Merge per-tier child prices from browser extraction (extractChildPricesPerTier)
+  if (childPrices && Object.keys(childPrices).length > 0) {
+    for (const [tierIndex, priceData] of Object.entries(childPrices)) {
+      const idx = parseInt(tierIndex);
+      if (idx < scrapeResult.data.pricing.tiers.length && priceData.childPrice) {
+        scrapeResult.data.pricing.tiers[idx].childPrice = priceData.childPrice;
+      }
+    }
+  }
+
+  // Merge childPricing from clickQuantityButtons if not already populated
+  if (childPricing) {
+    if (childPricing.childPrice && !scrapeResult.data.pricing.childPrice) {
+      scrapeResult.data.pricing.childPrice = childPricing.childPrice;
+    }
+    if (childPricing.infantPrice && !scrapeResult.data.pricing.infantPrice) {
+      scrapeResult.data.pricing.infantPrice = childPricing.infantPrice;
+    }
+    if (childPricing.seniorPrice && !scrapeResult.data.pricing.seniorPrice) {
+      scrapeResult.data.pricing.seniorPrice = childPricing.seniorPrice;
+    }
+  }
+
+## Fix 2: browser-automation.mjs — Increase tier limit from 3 to 10
+
+Line 973 (was):
+  for (const tier of tierInfo.slice(0, 3)) { // Limit to first 3 tiers for performance
+Now:
+  for (const tier of tierInfo.slice(0, 10)) { // Support up to 10 tiers
+
+## Verification
+node --check activityScraper.mjs    → PASS (no output = success)
+node --check browser-automation.mjs  → PASS (no output = success)

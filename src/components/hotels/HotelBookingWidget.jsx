@@ -204,15 +204,15 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
   }, [activeRooms]);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       {/* Price Header */}
-      <div className="p-5 border-b border-gray-100">
-        <div className="text-sm text-gray-500 mb-1">Giá từ</div>
+      <div className="p-5 border-b border-border">
+        <div className="text-sm text-muted-foreground mb-1">Giá từ</div>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-2xl font-bold text-foreground">
             {lowestPrice > 0 ? formatCurrency(lowestPrice, "VND") : "Liên hệ"}
           </span>
-          <span className="text-sm text-gray-500">/ đêm</span>
+          <span className="text-sm text-muted-foreground">/ đêm</span>
         </div>
       </div>
 
@@ -220,23 +220,23 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
         {/* Check-in / Check-out */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Nhận phòng</label>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Nhận phòng</label>
             <input
               type="date"
               value={checkIn}
               onChange={handleCheckInChange}
               min={minDate}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">Trả phòng</label>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Trả phòng</label>
             <input
               type="date"
               value={checkOut}
               onChange={handleCheckOutChange}
               min={checkIn || minDate}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -244,8 +244,8 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
         {/* Room Quantity per room type */}
         {activeRooms.length > 0 && (
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Chọn phòng <span className="text-gray-400 font-normal">(+ để thêm)</span>
+            <label className="block text-xs font-medium text-foreground mb-1.5">
+              Chọn phòng <span className="text-muted-foreground font-normal">(+ để thêm)</span>
             </label>
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {activeRooms.map((room) => {
@@ -261,37 +261,37 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
                     className={`rounded-lg border p-3 transition-all ${
                       isSelected
                         ? 'border-blue-300 bg-blue-50/50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-border'
                     }`}
                   >
                     <div className="flex items-start gap-2.5">
                       {/* Mini image */}
                       {room.featuredImage && (
-                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0">
+                        <div className="relative w-10 h-10 rounded-md overflow-hidden bg-muted flex-shrink-0">
                           <Image src={room.featuredImage} alt={room.roomName} fill className="object-cover" sizes="40px" />
                         </div>
                       )}
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <p className="text-sm font-medium text-gray-800 truncate">{room.roomName}</p>
+                          <p className="text-sm font-medium text-foreground truncate">{room.roomName}</p>
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <button
                               type="button"
                               onClick={() => updateRoomQty(room.roomId, -1)}
                               disabled={qty === 0}
-                              className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
                             >
                               −
                             </button>
-                            <span className="w-7 text-center text-sm font-semibold text-gray-900 tabular-nums">
+                            <span className="w-7 text-center text-sm font-semibold text-foreground tabular-nums">
                               {qty}
                             </span>
                             <button
                               type="button"
                               onClick={() => updateRoomQty(room.roomId, 1)}
                               disabled={qty >= (room.totalRooms || 10)}
-                              className="w-7 h-7 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
                             >
                               +
                             </button>
@@ -305,15 +305,15 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
                               {formatCurrency(roomPrice, "VND")}
                             </span>
                           )}
-                          <span className="text-xs text-gray-400">/đêm</span>
+                          <span className="text-xs text-muted-foreground">/đêm</span>
                           {room.bedType && (
-                            <span className="text-xs text-gray-400">· {room.bedType}</span>
+                            <span className="text-xs text-muted-foreground">· {room.bedType}</span>
                           )}
                         </div>
 
                         {/* Line total when selected */}
                         {isSelected && (
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {formatCurrency(roomPrice, "VND")} × {qty} phòng × {nights} đêm
                             <span className="text-primary font-semibold ml-1">
                               = {formatCurrency(lineTotal, "VND")}
@@ -332,13 +332,13 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
         {/* Empty state */}
         {activeRooms.length === 0 && (
           <div className="text-center py-4">
-            <p className="text-sm text-gray-400">Chưa có thông tin phòng</p>
+            <p className="text-sm text-muted-foreground">Chưa có thông tin phòng</p>
           </div>
         )}
 
         {/* Price Breakdown */}
         {hasSelection && (
-          <div className="border-t border-gray-100 pt-4">
+          <div className="border-t border-border pt-4">
             <div className="space-y-2 text-sm">
               {activeRooms.map((room) => {
                 const qty = getRoomQty(room.roomId);
@@ -347,23 +347,23 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
                 const roomPrice = rt ? rt.avgSellPrice : 0;
                 const lineTotal = roomPrice * nights * qty;
                 return (
-                  <div key={room.roomId} className="flex items-center justify-between text-gray-600">
+                  <div key={room.roomId} className="flex items-center justify-between text-muted-foreground">
                     <span className="text-xs truncate max-w-[180px]">
                       {room.roomName} × {qty}
                     </span>
-                    <span className="text-xs font-medium text-gray-800">
+                    <span className="text-xs font-medium text-foreground">
                       {formatCurrency(lineTotal, "VND")}
                     </span>
                   </div>
                 );
               })}
-              <div className="flex items-center justify-between pt-2 border-t border-dashed border-gray-200">
-                <span className="font-semibold text-gray-900">Tổng cộng</span>
+              <div className="flex items-center justify-between pt-2 border-t border-dashed border-border">
+                <span className="font-semibold text-foreground">Tổng cộng</span>
                 <span className="text-lg font-bold text-primary">
                   {formatCurrency(grandTotal, "VND")}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 text-right">{nights} đêm</p>
+              <p className="text-xs text-muted-foreground text-right">{nights} đêm</p>
             </div>
           </div>
         )}
@@ -379,13 +379,13 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
           </button>
           <button
             onClick={handleConsult}
-            className="w-full rounded-xl border-2 border-gray-200 text-gray-700 font-medium text-sm px-6 py-3 hover:border-primary hover:text-primary transition-colors"
+            className="w-full rounded-xl border-2 border-border text-foreground font-medium text-sm px-6 py-3 hover:border-primary hover:text-primary transition-colors"
           >
             📞 Gọi tư vấn: 0877.901.901
           </button>
         </div>
 
-        <p className="text-xs text-center text-gray-400">
+        <p className="text-xs text-center text-muted-foreground">
           🔒 Miễn phí hủy &bull; Thanh toán an toàn
         </p>
       </div>

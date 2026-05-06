@@ -48,14 +48,14 @@ const REASONS = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
             Vì sao nên chọn 9 Trip?
           </h2>
-          <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Chúng tôi cam kết mang đến trải nghiệm du lịch tốt nhất với dịch vụ chuyên nghiệp
           </p>
         </div>
@@ -73,12 +73,12 @@ export default function WhyChooseUs() {
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 {reason.title}
               </h3>
 
               {/* Description */}
-              <p className="text-gray-500 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {reason.description}
               </p>
             </div>

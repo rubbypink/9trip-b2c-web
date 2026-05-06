@@ -36,11 +36,11 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <svg className="h-7 w-7 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
@@ -56,11 +56,11 @@ export default function CartPage() {
         {/* Empty state */}
         {items.length === 0 ? (
           <div className="text-center py-20">
-            <svg className="mx-auto h-20 w-20 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.5}>
+            <svg className="mx-auto h-20 w-20 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
-            <h2 className="mt-4 text-xl font-semibold text-slate-600">Giỏ hàng trống</h2>
-            <p className="mt-2 text-slate-400 text-sm">Hãy thêm một số chuyến đi, khách sạn hoặc hoạt động vào giỏ hàng</p>
+            <h2 className="mt-4 text-xl font-semibold text-muted-foreground">Giỏ hàng trống</h2>
+            <p className="mt-2 text-muted-foreground text-sm">Hãy thêm một số chuyến đi, khách sạn hoặc hoạt động vào giỏ hàng</p>
             <Link href="/" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-orange-600 text-white px-6 py-3 font-semibold text-sm hover:bg-orange-700 transition-colors">
               Tiếp tục khám phá
             </Link>
@@ -80,8 +80,8 @@ export default function CartPage() {
               ))}
 
               {/* Coupon Section */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Mã giảm giá</h3>
+              <div className="bg-card rounded-xl border border-border p-5">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Mã giảm giá</h3>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -89,7 +89,7 @@ export default function CartPage() {
                     onChange={(e) => setCouponInput(e.target.value)}
                     placeholder="Nhập mã giảm giá"
                     disabled={!!couponCode}
-                    className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm outline-none focus:border-orange-500 disabled:bg-slate-100"
+                    className="flex-1 rounded-lg border border-border px-4 py-2 text-sm outline-none focus:border-orange-500 disabled:bg-muted"
                   />
                   {couponCode ? (
                     <button
@@ -120,13 +120,13 @@ export default function CartPage() {
 
             {/* Summary sidebar */}
             <div className="lg:w-80">
-              <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 sticky top-24">
-                <h3 className="text-lg font-bold text-slate-800">Tổng đơn hàng</h3>
+              <div className="bg-card rounded-xl border border-border p-6 space-y-4 sticky top-24">
+                <h3 className="text-lg font-bold text-foreground">Tổng đơn hàng</h3>
 
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between text-slate-600">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Tạm tính ({itemCount} sản phẩm)</span>
-                    <span className="font-semibold text-slate-800">{subtotal.toLocaleString()}đ</span>
+                    <span className="font-semibold text-foreground">{subtotal.toLocaleString()}đ</span>
                   </div>
 
                   {couponDiscount > 0 && (
@@ -136,15 +136,15 @@ export default function CartPage() {
                     </div>
                   )}
 
-                  <div className="flex justify-between text-slate-600">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Thuế (8%)</span>
                     <span className="font-semibold">{tax.toLocaleString()}đ</span>
                   </div>
 
-                  <hr className="border-slate-200" />
+                  <hr className="border-border" />
 
                   <div className="flex justify-between text-base font-bold">
-                    <span className="text-slate-800">Tổng cộng</span>
+                    <span className="text-foreground">Tổng cộng</span>
                     <span className="text-orange-600 text-lg">{grandTotal.toLocaleString()}đ</span>
                   </div>
 
@@ -166,7 +166,7 @@ export default function CartPage() {
                 >
                   Tiến hành đặt chỗ
                 </Link>
-                <p className="text-xs text-center text-slate-400">
+                <p className="text-xs text-center text-muted-foreground">
                   Bạn sẽ không bị tính tiền ngay bây giờ
                 </p>
               </div>

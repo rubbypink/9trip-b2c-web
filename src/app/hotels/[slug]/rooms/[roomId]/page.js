@@ -133,7 +133,7 @@ export default async function RoomDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -149,7 +149,7 @@ export default async function RoomDetailPage({ params }) {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Gallery Carousel */}
-        <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+        <div className="rounded-2xl overflow-hidden shadow-sm border border-border">
           <ImageCarousel
             images={allImages}
             alt={room.name}
@@ -165,9 +165,9 @@ export default async function RoomDetailPage({ params }) {
           <div className="flex-1 space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{room.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{room.name}</h1>
               {hotel && (
-                <p className="text-gray-500 mt-1">
+                <p className="text-muted-foreground mt-1">
                   Thuộc khách sạn{" "}
                   <a href={`/hotels/${slug}`} className="text-primary hover:underline font-medium">
                     {hotel.name}
@@ -179,17 +179,17 @@ export default async function RoomDetailPage({ params }) {
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {room.maxAdults > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   👤 {room.maxAdults} người lớn{room.maxChildren > 0 ? ` + ${room.maxChildren} trẻ em` : ""}
                 </span>
               )}
               {room.bedType && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   🛏️ {room.bedType}
                 </span>
               )}
               {room.roomSize && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   📐 {room.roomSize}m²
                 </span>
               )}
@@ -197,19 +197,19 @@ export default async function RoomDetailPage({ params }) {
 
             {/* Description */}
             {room.description && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Mô tả phòng</h3>
-                <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: room.description }} />
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Mô tả phòng</h3>
+                <div className="prose max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: room.description }} />
               </div>
             )}
 
             {/* Included Benefits */}
             {room.included?.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Lợi ích bao gồm</h3>
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Lợi ích bao gồm</h3>
                 <div className="space-y-2">
                   {room.included.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                    <div key={idx} className="flex items-center gap-2 text-sm text-foreground">
                       <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
@@ -222,25 +222,25 @@ export default async function RoomDetailPage({ params }) {
 
             {/* Pricing Tiers */}
             {pricingTiers.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Bảng giá ({today})</h3>
-                <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Bảng giá ({today})</h3>
+                <div className="overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="text-left px-4 py-3 font-semibold text-gray-900">Gói giá</th>
-                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Giá bán</th>
-                        <th className="text-right px-4 py-3 font-semibold text-gray-900">Nhà cung cấp</th>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="text-left px-4 py-3 font-semibold text-foreground">Gói giá</th>
+                        <th className="text-right px-4 py-3 font-semibold text-foreground">Giá bán</th>
+                        <th className="text-right px-4 py-3 font-semibold text-foreground">Nhà cung cấp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-border">
                       {pricingTiers.map((tier) => (
-                        <tr key={tier.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">{tier.name}</td>
+                        <tr key={tier.id} className="hover:bg-muted transition-colors">
+                          <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
                           <td className="px-4 py-3 text-right font-semibold text-blue-600">
                             {tier.sellPrice > 0 ? formatCurrency(tier.sellPrice, currency) : "Liên hệ"}
                           </td>
-                          <td className="px-4 py-3 text-right text-gray-500 text-xs">{tier.supplier || "—"}</td>
+                          <td className="px-4 py-3 text-right text-muted-foreground text-xs">{tier.supplier || "—"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -251,11 +251,11 @@ export default async function RoomDetailPage({ params }) {
 
             {/* Amenities */}
             {room.amenities?.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tiện nghi phòng</h3>
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Tiện nghi phòng</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {room.amenities.map((amenity, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                    <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
@@ -269,24 +269,24 @@ export default async function RoomDetailPage({ params }) {
 
           {/* Booking Sidebar */}
           <aside className="lg:w-96 flex-shrink-0">
-            <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-gray-100">
-                <div className="text-sm text-gray-500 mb-1">Giá từ</div>
+            <div className="sticky top-24 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-border">
+                <div className="text-sm text-muted-foreground mb-1">Giá từ</div>
                 <div className="flex items-baseline gap-2">
                   {displayPrice > 0 ? (
-                    <span className="text-2xl font-bold text-gray-900">
+                    <span className="text-2xl font-bold text-foreground">
                       {formatCurrency(displayPrice, currency)}
                     </span>
                   ) : (
-                    <span className="text-2xl font-bold text-gray-900">Liên hệ</span>
+                    <span className="text-2xl font-bold text-foreground">Liên hệ</span>
                   )}
-                  <span className="text-sm text-gray-500">/ đêm</span>
+                  <span className="text-sm text-muted-foreground">/ đêm</span>
                 </div>
               </div>
 
               <div className="p-5 space-y-4">
                 {/* Quick specs */}
-                <div className="text-sm text-gray-600 space-y-1.5">
+                <div className="text-sm text-muted-foreground space-y-1.5">
                   <div className="flex justify-between">
                     <span>Sức chứa tối đa</span>
                     <span className="font-medium">{room.maxAdults || "—"} người</span>
@@ -312,7 +312,7 @@ export default async function RoomDetailPage({ params }) {
                   Đặt phòng ngay
                 </a>
 
-                <p className="text-xs text-center text-gray-400">🔄 Miễn phí hủy &bull; Thanh toán an toàn</p>
+                <p className="text-xs text-center text-muted-foreground">🔄 Miễn phí hủy &bull; Thanh toán an toàn</p>
               </div>
             </div>
           </aside>

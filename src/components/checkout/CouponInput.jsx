@@ -32,8 +32,8 @@ export default function CouponInput() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-      <h3 className="text-sm font-bold text-gray-900 mb-3">Mã giảm giá</h3>
+    <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
+      <h3 className="text-sm font-bold text-foreground mb-3">Mã giảm giá</h3>
       
       {couponCode ? (
         <div className="flex items-center justify-between p-2 bg-green-50 border border-green-100 rounded-lg">
@@ -48,7 +48,7 @@ export default function CouponInput() {
           </div>
           <button 
             onClick={removeCoupon}
-            className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+            className="text-xs text-muted-foreground hover:text-red-500 transition-colors"
           >
             Gỡ bỏ
           </button>
@@ -60,12 +60,12 @@ export default function CouponInput() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Nhập mã..."
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+            className="flex-1 px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
           />
           <button
             onClick={handleApply}
             disabled={loading || !code}
-            className="px-4 py-2 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-gray-800 disabled:bg-gray-300 transition-colors"
+            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary-dark disabled:bg-muted transition-colors"
           >
             {loading ? "..." : "Áp dụng"}
           </button>

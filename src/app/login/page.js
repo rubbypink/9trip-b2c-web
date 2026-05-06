@@ -55,13 +55,13 @@ function LoginForm() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-muted px-4">
 			<div className="w-full max-w-md">
-				<div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+				<div className="bg-card rounded-2xl shadow-sm border border-border p-8">
 					{/* Header */}
 					<div className="text-center mb-8">
-						<h1 className="text-2xl font-bold text-slate-800">Đăng nhập</h1>
-						<p className="text-slate-500 mt-1 text-sm">Chào mừng bạn trở lại!</p>
+						<h1 className="text-2xl font-bold text-foreground">Đăng nhập</h1>
+						<p className="text-muted-foreground mt-1 text-sm">Chào mừng bạn trở lại!</p>
 					</div>
 
 					{/* Error */}
@@ -80,7 +80,7 @@ function LoginForm() {
 						<div>
 							<label
 								htmlFor="email"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Email
 							</label>
@@ -90,7 +90,7 @@ function LoginForm() {
 								required
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="your@email.com"
 							/>
 						</div>
@@ -98,7 +98,7 @@ function LoginForm() {
 						<div>
 							<label
 								htmlFor="password"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Mật khẩu
 							</label>
@@ -108,7 +108,7 @@ function LoginForm() {
 								required
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="••••••••"
 							/>
 						</div>
@@ -125,10 +125,10 @@ function LoginForm() {
 					{/* Divider */}
 					<div className="relative my-6">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-slate-200" />
+							<div className="w-full border-t border-border" />
 						</div>
 						<div className="relative flex justify-center text-sm">
-							<span className="px-3 bg-white text-slate-400">hoặc</span>
+							<span className="px-3 bg-card text-muted-foreground">hoặc</span>
 						</div>
 					</div>
 
@@ -138,7 +138,7 @@ function LoginForm() {
 							type="button"
 							onClick={() => handleSocialLogin('google')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition text-sm font-medium text-slate-700"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -168,7 +168,7 @@ function LoginForm() {
 							type="button"
 							onClick={() => handleSocialLogin('facebook')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition text-sm font-medium text-slate-700"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -184,7 +184,7 @@ function LoginForm() {
 					</div>
 
 					{/* Register Link */}
-					<p className="text-center text-sm text-slate-500 mt-6">
+					<p className="text-center text-sm text-muted-foreground mt-6">
 						Chưa có tài khoản?{' '}
 						<Link
 							href={`/register?redirect=${encodeURIComponent(redirect)}`}

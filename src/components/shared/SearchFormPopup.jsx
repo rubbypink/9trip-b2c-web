@@ -77,7 +77,7 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm hover:border-blue-400 hover:shadow-md transition-all text-gray-700 text-sm font-medium"
+        className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border rounded-lg shadow-sm hover:border-blue-400 hover:shadow-md transition-all text-foreground text-sm font-medium"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -92,17 +92,17 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
 
       {/* Popup Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 p-4">
+        <div className="absolute top-full left-0 mt-2 w-80 bg-card rounded-xl shadow-xl border border-border z-50 p-4">
           <form onSubmit={handleSubmit}>
             {/* Location Select */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Điểm đến
               </label>
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option value="">Tất cả điểm đến</option>
                 {locations.map((loc) => (
@@ -115,13 +115,13 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
 
             {/* Tour Type Select */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Loại tour
               </label>
               <select
                 value={tourTypeId}
                 onChange={(e) => setTourTypeId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option value="">Tất cả loại tour</option>
                 {tourTypes.map((t) => (
@@ -134,13 +134,13 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
 
             {/* Sort By */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Sắp xếp
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
                 <option value="newest">Mới nhất</option>
                 <option value="price_asc">Giá tăng dần</option>
@@ -150,11 +150,11 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <div className="flex gap-2 pt-2 border-t border-border">
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex-1 px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 px-3 py-2 text-sm font-medium text-muted-foreground bg-muted rounded-lg hover:bg-muted transition-colors"
               >
                 Xóa bộ lọc
               </button>

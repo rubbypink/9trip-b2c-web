@@ -65,7 +65,7 @@ export default async function ActivitiesPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -74,12 +74,12 @@ export default async function ActivitiesPage({ searchParams }) {
         ]}
       />
 
-      <div className="bg-white border-b border-gray-200 mb-8">
+      <div className="bg-card border-b border-border mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Hoạt Động & Vui Chơi
           </h1>
-          <p className="text-gray-500">Trải nghiệm những khoảnh khắc tuyệt vời cùng người thân</p>
+          <p className="text-muted-foreground">Trải nghiệm những khoảnh khắc tuyệt vời cùng người thân</p>
         </div>
       </div>
 

@@ -59,12 +59,12 @@ function RegisterForm() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+		<div className="min-h-screen flex items-center justify-center bg-muted px-4">
 			<div className="w-full max-w-md">
-				<div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+				<div className="bg-card rounded-2xl shadow-sm border border-border p-8">
 					<div className="text-center mb-8">
-						<h1 className="text-2xl font-bold text-slate-800">Đăng ký tài khoản</h1>
-						<p className="text-slate-500 mt-1 text-sm">Tạo tài khoản để đặt tour dễ dàng hơn</p>
+						<h1 className="text-2xl font-bold text-foreground">Đăng ký tài khoản</h1>
+						<p className="text-muted-foreground mt-1 text-sm">Tạo tài khoản để đặt tour dễ dàng hơn</p>
 					</div>
 
 					{error && (
@@ -81,7 +81,7 @@ function RegisterForm() {
 						<div>
 							<label
 								htmlFor="name"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Họ và tên
 							</label>
@@ -91,14 +91,14 @@ function RegisterForm() {
 								required
 								value={name}
 								onChange={(e) => setName(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="Nguyễn Văn A"
 							/>
 						</div>
 						<div>
 							<label
 								htmlFor="email"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Email
 							</label>
@@ -108,14 +108,14 @@ function RegisterForm() {
 								required
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="your@email.com"
 							/>
 						</div>
 						<div>
 							<label
 								htmlFor="password"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Mật khẩu
 							</label>
@@ -125,14 +125,14 @@ function RegisterForm() {
 								required
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="Ít nhất 6 ký tự"
 							/>
 						</div>
 						<div>
 							<label
 								htmlFor="confirmPassword"
-								className="block text-sm font-medium text-slate-700 mb-1"
+								className="block text-sm font-medium text-foreground mb-1"
 							>
 								Xác nhận mật khẩu
 							</label>
@@ -142,7 +142,7 @@ function RegisterForm() {
 								required
 								value={confirmPassword}
 								onChange={(e) => setConfirmPassword(e.target.value)}
-								className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
+								className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition text-sm"
 								placeholder="Nhập lại mật khẩu"
 							/>
 						</div>
@@ -157,10 +157,10 @@ function RegisterForm() {
 
 					<div className="relative my-6">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-slate-200" />
+							<div className="w-full border-t border-border" />
 						</div>
 						<div className="relative flex justify-center text-sm">
-							<span className="px-3 bg-white text-slate-400">hoặc</span>
+							<span className="px-3 bg-card text-muted-foreground">hoặc</span>
 						</div>
 					</div>
 
@@ -169,7 +169,7 @@ function RegisterForm() {
 							type="button"
 							onClick={() => handleSocialLogin('google')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition text-sm font-medium text-slate-700"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -198,7 +198,7 @@ function RegisterForm() {
 							type="button"
 							onClick={() => handleSocialLogin('facebook')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition text-sm font-medium text-slate-700"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -213,7 +213,7 @@ function RegisterForm() {
 						</button>
 					</div>
 
-					<p className="text-center text-sm text-slate-500 mt-6">
+					<p className="text-center text-sm text-muted-foreground mt-6">
 						Đã có tài khoản?{' '}
 						<Link
 							href={`/login?redirect=${encodeURIComponent(redirect)}`}

@@ -92,7 +92,7 @@ export default async function CarDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -107,13 +107,13 @@ export default async function CarDetailPage({ params }) {
           {/* Main Content */}
           <div className="flex-1 space-y-6">
             {/* Gallery */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+            <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
                 <div className="aspect-[4/3] relative">
                   {allImages[0] ? (
                     <Image src={allImages[0]} alt={displayName} fill className="object-cover" priority sizes="50vw" />
                   ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-100 text-gray-400">Chưa có ảnh</div>
+                    <div className="flex items-center justify-center h-full bg-muted text-muted-foreground">Chưa có ảnh</div>
                   )}
                 </div>
                 <div className="hidden md:grid grid-cols-2 gap-1">
@@ -123,7 +123,7 @@ export default async function CarDetailPage({ params }) {
                     </div>
                   ))}
                   {allImages.length <= 1 && (
-                    <div className="col-span-2 flex items-center justify-center bg-gray-100 text-gray-400">Chưa có ảnh bổ sung</div>
+                    <div className="col-span-2 flex items-center justify-center bg-muted text-muted-foreground">Chưa có ảnh bổ sung</div>
                   )}
                 </div>
               </div>
@@ -131,58 +131,58 @@ export default async function CarDetailPage({ params }) {
 
             {/* Title + Meta */}
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{displayName}</h1>
-              <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500">
-                {carType && <span className="bg-gray-100 px-2.5 py-1 rounded-full">{carType}</span>}
-                {transmission && <span className="bg-gray-100 px-2.5 py-1 rounded-full">{transmission}</span>}
-                {fuelType && <span className="bg-gray-100 px-2.5 py-1 rounded-full">{fuelType}</span>}
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{displayName}</h1>
+              <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
+                {carType && <span className="bg-muted px-2.5 py-1 rounded-full">{carType}</span>}
+                {transmission && <span className="bg-muted px-2.5 py-1 rounded-full">{transmission}</span>}
+                {fuelType && <span className="bg-muted px-2.5 py-1 rounded-full">{fuelType}</span>}
               </div>
-              {excerpt && <p className="text-gray-600 mt-3">{excerpt}</p>}
+              {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
             </div>
 
             {/* Specs */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {seats > 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{seats}</p>
-                  <p className="text-xs text-gray-500 mt-1">Chỗ ngồi</p>
+                <div className="bg-card rounded-xl border border-border p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{seats}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Chỗ ngồi</p>
                 </div>
               )}
               {doors > 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-2xl font-bold text-gray-900">{doors}</p>
-                  <p className="text-xs text-gray-500 mt-1">Cửa</p>
+                <div className="bg-card rounded-xl border border-border p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{doors}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Cửa</p>
                 </div>
               )}
               {transmission && (
-                <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-sm font-semibold text-gray-900">{transmission}</p>
-                  <p className="text-xs text-gray-500 mt-1">Hộp số</p>
+                <div className="bg-card rounded-xl border border-border p-4 text-center">
+                  <p className="text-sm font-semibold text-foreground">{transmission}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Hộp số</p>
                 </div>
               )}
               {fuelType && (
-                <div className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                  <p className="text-sm font-semibold text-gray-900">{fuelType}</p>
-                  <p className="text-xs text-gray-500 mt-1">Nhiên liệu</p>
+                <div className="bg-card rounded-xl border border-border p-4 text-center">
+                  <p className="text-sm font-semibold text-foreground">{fuelType}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Nhiên liệu</p>
                 </div>
               )}
             </div>
 
             {/* Description */}
             {description && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Mô tả</h3>
-                <div className="prose max-w-none text-gray-700" dangerouslySetInnerHTML={{ __html: description }} />
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Mô tả</h3>
+                <div className="prose max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: description }} />
               </div>
             )}
 
             {/* Features */}
             {features.length > 0 && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Tính năng</h3>
+              <div className="bg-card rounded-xl border border-border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Tính năng</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {features.map((f, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                    <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
@@ -196,20 +196,20 @@ export default async function CarDetailPage({ params }) {
 
           {/* Booking Sidebar */}
           <aside className="lg:w-96 flex-shrink-0">
-            <div className="sticky top-24 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-gray-100">
-                <div className="text-sm text-gray-500 mb-1">Giá thuê từ</div>
+            <div className="sticky top-24 rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-border">
+                <div className="text-sm text-muted-foreground mb-1">Giá thuê từ</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold text-foreground">
                     {price > 0 ? formatCurrency(price, currency) : "Liên hệ"}
                   </span>
-                  {price > 0 && <span className="text-sm text-gray-500">/ ngày</span>}
+                  {price > 0 && <span className="text-sm text-muted-foreground">/ ngày</span>}
                 </div>
               </div>
 
               <div className="p-5 space-y-4">
                 {pickupLocation && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -225,7 +225,7 @@ export default async function CarDetailPage({ params }) {
                   Đặt xe ngay
                 </a>
 
-                <p className="text-xs text-center text-gray-400">Xác nhận tức thì, hủy miễn phí</p>
+                <p className="text-xs text-center text-muted-foreground">Xác nhận tức thì, hủy miễn phí</p>
               </div>
             </div>
           </aside>

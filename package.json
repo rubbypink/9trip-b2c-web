@@ -1,6 +1,6 @@
 {
-  "name": "9trip-b2c-web",
-  "version": "0.1.0",
+  "name": "tripphuquoc-db-fs-web",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
@@ -9,9 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mendable/firecrawl-js": "^4.21.0",
-    "@openrouter/sdk": "^0.12.24",
-    "@tavily/core": "^0.7.3",
+    "@playwright/test": "^1.59.1",
     "firebase": "^12.12.1",
     "firebase-admin": "^13.8.0",
     "lucide-react": "^1.11.0",

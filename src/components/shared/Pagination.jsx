@@ -24,14 +24,14 @@ export default function Pagination({ currentPage = 1, totalPages = 1, onPageChan
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
       >
         ← Trước
       </button>
       {start > 1 && (
         <>
-          <button onClick={() => onPageChange(1)} className="w-10 h-10 rounded-lg text-sm text-gray-600 hover:bg-gray-100">1</button>
-          {start > 2 && <span className="px-1 text-gray-400">...</span>}
+          <button onClick={() => onPageChange(1)} className="w-10 h-10 rounded-lg text-sm text-muted-foreground hover:bg-muted">1</button>
+          {start > 2 && <span className="px-1 text-muted-foreground">...</span>}
         </>
       )}
       {pages.map((page) => (
@@ -41,7 +41,7 @@ export default function Pagination({ currentPage = 1, totalPages = 1, onPageChan
           className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
             page === currentPage
               ? "bg-blue-600 text-white"
-              : "text-gray-600 hover:bg-gray-100"
+              : "text-muted-foreground hover:bg-muted"
           }`}
         >
           {page}
@@ -49,14 +49,14 @@ export default function Pagination({ currentPage = 1, totalPages = 1, onPageChan
       ))}
       {end < totalPages && (
         <>
-          {end < totalPages - 1 && <span className="px-1 text-gray-400">...</span>}
-          <button onClick={() => onPageChange(totalPages)} className="w-10 h-10 rounded-lg text-sm text-gray-600 hover:bg-gray-100">{totalPages}</button>
+          {end < totalPages - 1 && <span className="px-1 text-muted-foreground">...</span>}
+          <button onClick={() => onPageChange(totalPages)} className="w-10 h-10 rounded-lg text-sm text-muted-foreground hover:bg-muted">{totalPages}</button>
         </>
       )}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
       >
         Sau →
       </button>

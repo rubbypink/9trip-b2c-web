@@ -67,7 +67,7 @@ export default async function HotelDetailPage({ params }) {
 
   if (!rawHotel) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-muted">
         <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },
@@ -76,8 +76,8 @@ export default async function HotelDetailPage({ params }) {
           ]}
         />
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Khách sạn không tồn tại</h1>
-          <p className="text-gray-500">Vui lòng kiểm tra lại đường dẫn hoặc quay về trang danh sách.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Khách sạn không tồn tại</h1>
+          <p className="text-muted-foreground">Vui lòng kiểm tra lại đường dẫn hoặc quay về trang danh sách.</p>
         </div>
       </div>
     );
@@ -131,7 +131,7 @@ export default async function HotelDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[

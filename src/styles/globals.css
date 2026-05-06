@@ -2,30 +2,30 @@
 
 /* ─── 9 Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
 @theme {
-  /* Primary Colors */
-  --color-primary: oklch(62% 0.19 255);
-  --color-primary-50: oklch(97% 0.02 255);
-  --color-primary-100: oklch(93% 0.06 255);
-  --color-primary-200: oklch(86% 0.10 255);
-  --color-primary-300: oklch(78% 0.14 255);
-  --color-primary-400: oklch(70% 0.17 255);
-  --color-primary-500: oklch(62% 0.19 255);
-  --color-primary-600: oklch(55% 0.19 255);
-  --color-primary-700: oklch(47% 0.18 255);
-  --color-primary-800: oklch(39% 0.16 255);
-  --color-primary-900: oklch(31% 0.13 255);
-  --color-primary-dark: oklch(55% 0.19 255);
-  --color-primary-light: oklch(70% 0.15 250);
-  --color-primary-foreground: oklch(98% 0.01 255);
+  /* Primary Colors — Bright Sunshine Yellow palette */
+  --color-primary: oklch(80% 0.17 95);
+  --color-primary-50: oklch(97% 0.05 95);
+  --color-primary-100: oklch(94% 0.08 95);
+  --color-primary-200: oklch(90% 0.12 95);
+  --color-primary-300: oklch(87% 0.14 95);
+  --color-primary-400: oklch(84% 0.16 95);
+  --color-primary-500: oklch(80% 0.17 95);
+  --color-primary-600: oklch(73% 0.17 95);
+  --color-primary-700: oklch(65% 0.16 95);
+  --color-primary-800: oklch(55% 0.14 95);
+  --color-primary-900: oklch(42% 0.10 95);
+  --color-primary-dark: oklch(73% 0.17 95);
+  --color-primary-light: oklch(87% 0.12 92);
+  --color-primary-foreground: oklch(98% 0.01 95);
 
-  /* Secondary Colors */
-  --color-secondary: oklch(78% 0.16 82);
-  --color-secondary-dark: oklch(70% 0.16 72);
-  --color-secondary-foreground: oklch(98% 0.01 82);
+  /* Secondary Colors — Warm orange for prices/CTAs */
+  --color-secondary: oklch(72% 0.17 50);
+  --color-secondary-dark: oklch(62% 0.17 50);
+  --color-secondary-foreground: oklch(98% 0.01 50);
 
-  /* Accent Colors */
-  --color-accent: oklch(62% 0.15 160);
-  --color-accent-foreground: oklch(98% 0.01 160);
+  /* Accent Colors — Teal for success states */
+  --color-accent: oklch(62% 0.12 185);
+  --color-accent-foreground: oklch(98% 0.01 185);
 
   /* Neutral/Gray Scale - For flexible theming */
   --color-white: #ffffff;
@@ -47,7 +47,7 @@
   --color-muted: oklch(55% 0.02 264);
   --color-muted-foreground: oklch(46% 0.02 264);
   --color-border: oklch(91% 0.01 264);
-  --color-ring: oklch(62% 0.19 255);
+  --color-ring: oklch(80% 0.17 95);
   --color-ring-offset: oklch(100% 0 0);
 
   /* Surface Colors */
@@ -101,6 +101,29 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Dark Mode Overrides */
+.dark {
+  --color-background: oklch(15% 0.01 264);
+  --color-foreground: oklch(95% 0.01 264);
+  --color-card: oklch(20% 0.02 264);
+  --color-card-foreground: oklch(95% 0.01 264);
+  --color-popover: oklch(20% 0.02 264);
+  --color-popover-foreground: oklch(95% 0.01 264);
+  --color-primary: oklch(75% 0.16 95);
+  --color-primary-foreground: oklch(15% 0.02 264);
+  --color-secondary: oklch(65% 0.15 50);
+  --color-secondary-foreground: oklch(98% 0.01 50);
+  --color-muted: oklch(40% 0.02 264);
+  --color-muted-foreground: oklch(70% 0.02 264);
+  --color-border: oklch(30% 0.02 264);
+  --color-input: oklch(25% 0.02 264);
+  --color-ring: oklch(75% 0.16 95);
+}
+
+.dark ::-webkit-scrollbar-track { background: var(--color-gray-800); }
+.dark ::-webkit-scrollbar-thumb { background: var(--color-gray-600); }
+.dark ::-webkit-scrollbar-thumb:hover { background: var(--color-gray-500); }
+
 @layer base {
   * {
     @apply border-border;
@@ -114,11 +137,11 @@
 }
 
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #64748b; }
+::-webkit-scrollbar-track { background: var(--color-gray-100); }
+::-webkit-scrollbar-thumb { background: var(--color-gray-400); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gray-500); }
 
 *:focus-visible {
-  outline: 2px solid oklch(62% 0.19 255);
+  outline: 2px solid var(--color-ring);
   outline-offset: 2px;
 }

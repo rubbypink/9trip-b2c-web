@@ -1,0 +1,14 @@
+T14: Booking Scraper E2E Test Results
+URLs tested:
+1. https://www.booking.com/hotel/vn/salinda-resort-phu-quoc-island.html
+2. https://www.booking.com/hotel/vn/intercontinental-phu-quoc-long-beach-resort.html
+
+Results:
+- Exit Code: 1 (both URLs)
+- Page extracted: ~1890 chars ( Booking.com Online Hotel Reservations)
+- Error: "Failed to extract hotel data: missing name"
+- Root cause: Booking.com returns a minimal/captcha page, blocking automated scraping
+- Script behavior: Graceful error handling with clear error message
+- No fatal crashes or unhandled timeouts
+
+Conclusion: PASS per acceptance criteria — "Output has valid hotel data OR graceful error handling". Booking.com anti-bot protection prevents data extraction, but script handles it gracefully.

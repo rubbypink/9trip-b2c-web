@@ -27,30 +27,30 @@ export default function GuestSelector({ adults = 1, children = 0, infants = 0, o
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-left hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full flex items-center justify-between px-4 py-2.5 border border-border rounded-lg bg-card text-left hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <span className="text-gray-700">
+        <span className="text-foreground">
           {totalGuests} khách
         </span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-4 h-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
+        <div className="absolute top-full mt-1 w-full bg-card border border-border rounded-lg shadow-lg z-50 p-4">
           {(["adults", "children", "infants"]).map((type) => (
-            <div key={type} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <div key={type} className="flex items-center justify-between py-2 border-b border-border last:border-0">
               <div>
-                <div className="text-sm font-medium text-gray-800">{labels[type]}</div>
-                <div className="text-xs text-gray-500">{ageLabels[type]}</div>
+                <div className="text-sm font-medium text-foreground">{labels[type]}</div>
+                <div className="text-xs text-muted-foreground">{ageLabels[type]}</div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleChange(type, -1)}
                   disabled={(type === "adults" && adults <= 1) || (type !== "adults" && { adults, children, infants }[type] <= 0)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   −
                 </button>
@@ -58,7 +58,7 @@ export default function GuestSelector({ adults = 1, children = 0, infants = 0, o
                 <button
                   type="button"
                   onClick={() => handleChange(type, 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted"
                 >
                   +
                 </button>

@@ -1,0 +1,250 @@
+================================================================================
+CODE QUALITY REVIEW — Scraper Refactor .mjs Files
+================================================================================
+Date: 2026-05-06
+Reviewer: Sisyphus-Junior (automated)
+Files reviewed: 10
+
+================================================================================
+SUMMARY
+================================================================================
+Build [PASS] | Syntax [PASS] | Files [3 clean / 7 issues] | VERDICT: FAIL
+
+  - Syntax: All 10 files pass `node --check` (zero syntax errors)
+  - Runtime: 2 CRITICAL bugs (const reassignment → TypeError at runtime)
+  - Quality: 5 MODERATE issues, 2 MINOR issues
+  - AI Slop: Low — comments are purposeful, no over-abstraction
+
+================================================================================
+FILE-BY-FILE RESULTS
+================================================================================
+
+------------------------------------------------------------------------------
+1. .agents/lib/browser-automation.mjs          [MODERATE ISSUES]
+------------------------------------------------------------------------------
+Lines: 1374
+Syntax: PASS
+Issues:
+  [MODERATE] 15+ empty catch blocks that silently swallow errors.
+    Many are intentional (optional browser interactions), but several
+    should at least log or have explicit "ignore" comments:
+      - Line 49-51:  catch (e) { // Session might already be closed }
+      - Line 105-107: catch (e) { return []; }
+      - Line 162-168: catch (e) { return false; }
+      - Line 220-225, 232-235, 326-328, 335-338, 341-347
+      - Line 357-359, 365-367, 373-377, 383-387, 391-396
+      - Line 409-411, 417-420, 425-428, 433-436, 441-444, 449-453
+      - Line 462-465, 466-468, 821-823, 826-828, 957-958, 961-963
+      - Line 1097, 1099-1101, 1103-1105, 1148, 1155, 1227-1228
+  [MODERATE] Very long functions:
+    - extractActivityPage(): ~140 lines (1126-1267)
+    - extractChildPricesPerTier(): ~135 lines (974-1108)
+    - clickQuantityButtons(): ~125 lines (840-966)
+  [MINOR] console.log: None (good — no debug logging in production code)
+
+AI Slop Assessment: LOW
+  - Section separators (// ====) are useful for navigation
+  - JSDoc comments are purposeful and accurate
+  - No over-abstraction or generic naming
+
+------------------------------------------------------------------------------
+2. .agents/lib/adapters/ivivu-adapter.mjs      [CRITICAL BUG]
+------------------------------------------------------------------------------
+Lines: 1092
+Syntax: PASS
+Issues:
+  [CRITICAL] Line 22 declares `const result = {};` inside extractFromDOM(),
+    but Line 46 reassigns it: `result = extractPricingWithLazyHints(result, body);`
+    This will throw `TypeError: Assignment to constant variable.` at runtime.
+    FIX: Change `const result = {};` to `let result = {};` on line 22.
+
+  [MINOR] Line 633: `catch (e) { result.slug = ''; }` — acceptable fallback
+
+AI Slop Assessment: LOW
+  - Well-structured with clear extraction modes
+  - Good regex patterns with Vietnamese text handling
+  - No over-abstraction
+
+------------------------------------------------------------------------------
+3. .agents/lib/adapters/booking-adapter.mjs    [CRITICAL BUG]
+------------------------------------------------------------------------------
+Lines: 555
+Syntax: PASS
+Issues:
+  [CRITICAL] Line 18 declares `const result = {` inside extractFromDOM(),
+    but Line 84 reassigns it: `result = extractContactInfo(result);`
+    This will throw `TypeError: Assignment to constant variable.` at runtime.
+    FIX: Change `const result = {` to `let result = {` on line 18.
+
+AI Slop Assessment: LOW
+  - Clean, well-organized extraction helpers
+  - No over-abstraction
+
+------------------------------------------------------------------------------
+4. .agents/lib/pricing-extractor.mjs           [CLEAN]
+------------------------------------------------------------------------------
+Lines: 456
+Syntax: PASS
+Issues: None found.
+  - No empty catch blocks
+  - No console.log in production paths
+  - No unused imports
+  - Good JSDoc with @example tags
+  - Proper input validation
+
+AI Slop Assessment: NONE
+  - Clean, well-documented utility module
+
+------------------------------------------------------------------------------
+5. .agents/lib/schemas/activity-schema.mjs     [CLEAN]
+------------------------------------------------------------------------------
+Lines: 428
+Syntax: PASS
+Issues: None found.
+  - No empty catch blocks
+  - No console.log
+  - All imports used
+  - Good schema documentation
+
+AI Slop Assessment: NONE
+  - Clean schema definition module
+
+------------------------------------------------------------------------------
+6. .agents/lib/markdown-to-json.mjs            [CLEAN]
+------------------------------------------------------------------------------
+Lines: 229
+Syntax: PASS
+Issues: None found.
+  - Line 164: `catch { return ''; }` — acceptable fallback
+  - No console.log
+  - All imports used
+  - Concise and focused
+
+AI Slop Assessment: NONE
+  - Clean, minimal converter module
+
+------------------------------------------------------------------------------
+7. .agents/skills/activity-scraper/scripts/activityScraper.mjs  [MODERATE ISSUES]
+------------------------------------------------------------------------------
+Lines: 514
+Syntax: PASS
+Issues:
+  [MINOR] console.log on lines 421, 422, 492, 502, 505, 513
+    — Acceptable: these are in CLI entry points, not library code
+  [MODERATE] Line 103-108: Duplicate JSDoc block (two consecutive
+    `/**` comment blocks for extractGenericBlocks — one is for
+    extractDescriptionFromHtml which has no JSDoc, and one is for
+    extractGenericBlocks). The first block (lines 98-102) appears
+    to be a leftover from extractDescriptionFromHtml.
+
+AI Slop Assessment: LOW
+  - Purposeful comments for complex extraction logic
+  - Good function documentation
+
+------------------------------------------------------------------------------
+8. .agents/skills/activity-scraper/scripts/saveActivityData.mjs  [MINOR ISSUES]
+------------------------------------------------------------------------------
+Lines: 430
+Syntax: PASS
+Issues:
+  [MINOR] console.log throughout — acceptable for CLI script with
+    progress output (lines 254-256, 262, 279, 282, 287, 296-299, etc.)
+  [MINOR] Line 269: `catch { return ''; }` — acceptable fallback
+
+AI Slop Assessment: NONE
+  - Clean, well-structured save pipeline
+
+------------------------------------------------------------------------------
+9. .agents/skills/tour-scraper/scripts/tourScraper.mjs  [MODERATE ISSUES]
+------------------------------------------------------------------------------
+Lines: 300
+Syntax: PASS
+Issues:
+  [MODERATE] Unused import: `TOUR_SCHEMA` is imported on line 21
+    but never referenced in the file. Only `mapTourToFirestore` is used.
+    FIX: Remove `TOUR_SCHEMA` from the import.
+
+AI Slop Assessment: NONE
+  - Clean, focused scraper module
+
+------------------------------------------------------------------------------
+10. .agents/skills/booking-scraper/scripts/getHotelImages.mjs  [MODERATE ISSUES]
+------------------------------------------------------------------------------
+Lines: 174
+Syntax: PASS
+Issues:
+  [MODERATE] Unused imports:
+    - `HOTEL_EXTRACT_SCHEMA` imported on line 11 but never used
+    - `scrapeUrlToText` imported on line 8 but never used
+    FIX: Remove both unused imports.
+
+AI Slop Assessment: NONE
+  - Clean, minimal hotel scraper
+
+================================================================================
+CRITICAL BUGS (must fix before deployment)
+================================================================================
+
+1. ivivu-adapter.mjs:22 — `const result = {}` reassigned on line 46
+   → Change to `let result = {}`
+
+2. booking-adapter.mjs:18 — `const result = {` reassigned on line 84
+   → Change to `let result = {`
+
+Both will cause `TypeError: Assignment to constant variable` at runtime
+when extractFromDOM() is called.
+
+================================================================================
+MODERATE ISSUES (should fix)
+================================================================================
+
+3. browser-automation.mjs: 15+ empty catch blocks
+   → Add explicit `// ignore: optional operation` comments or log at debug level
+
+4. tourScraper.mjs:21 — Unused import `TOUR_SCHEMA`
+   → Remove from import statement
+
+5. getHotelImages.mjs:8 — Unused import `scrapeUrlToText`
+   → Remove from import statement
+
+6. getHotelImages.mjs:11 — Unused import `HOTEL_EXTRACT_SCHEMA`
+   → Remove from import statement
+
+7. activityScraper.mjs:103-108 — Duplicate/orphaned JSDoc block
+   → Remove orphaned comment block for extractDescriptionFromHtml
+
+================================================================================
+AI SLOP ASSESSMENT
+================================================================================
+
+Overall: LOW — No significant AI slop detected.
+
+Checked for:
+  ✅ Excessive comments: None found. Comments are purposeful (JSDoc, step labels)
+  ✅ Over-abstraction: None found. Functions map to real domain concepts
+  ✅ Generic naming: None found. Names are domain-specific (extractPricing,
+     extractChildPricesPerTier, etc.)
+  ✅ Unnecessary design patterns: None found. Code is procedural/functional
+  ✅ Boilerplate classes: None found. Uses plain functions and objects
+  ⚠️ Long functions: 3 functions over 100 lines in browser-automation.mjs
+     (extractActivityPage, extractChildPricesPerTier, clickQuantityButtons)
+     These are complex browser interaction sequences — acceptable but could
+     benefit from extraction into smaller steps.
+
+================================================================================
+VERDICT
+================================================================================
+
+Build [PASS] | Syntax [PASS] | Files [3 clean / 7 issues] | VERDICT: FAIL
+
+REASON: 2 critical runtime bugs (const reassignment) will cause TypeError
+in production when extractFromDOM() is called on either adapter.
+
+REQUIRED FIXES before merge:
+  1. ivivu-adapter.mjs:22 — `const` → `let`
+  2. booking-adapter.mjs:18 — `const` → `let`
+
+RECOMMENDED FIXES:
+  3. Remove unused imports (tourScraper.mjs, getHotelImages.mjs)
+  4. Add explicit ignore comments to empty catch blocks
+  5. Remove orphaned JSDoc block in activityScraper.mjs

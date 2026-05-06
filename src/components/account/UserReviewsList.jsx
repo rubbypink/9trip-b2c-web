@@ -65,10 +65,10 @@ export default function UserReviewsList() {
     return (
       <div className="space-y-4">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="animate-pulse bg-white p-5 rounded-xl border border-slate-100 space-y-3">
-            <div className="h-4 bg-slate-200 rounded w-1/2"></div>
-            <div className="h-3 bg-slate-100 rounded w-full"></div>
-            <div className="h-3 bg-slate-100 rounded w-3/4"></div>
+          <div key={i} className="animate-pulse bg-card p-5 rounded-xl border border-border space-y-3">
+            <div className="h-4 bg-muted rounded w-1/2"></div>
+            <div className="h-3 bg-muted rounded w-full"></div>
+            <div className="h-3 bg-muted rounded w-3/4"></div>
           </div>
         ))}
       </div>
@@ -86,10 +86,10 @@ export default function UserReviewsList() {
 
   if (reviews.length === 0) {
     return (
-      <div className="text-center py-16 px-4 bg-slate-50 rounded-2xl">
-        <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-700 mb-1">Chưa có đánh giá nào</h3>
-        <p className="text-sm text-slate-500">
+      <div className="text-center py-16 px-4 bg-muted rounded-2xl">
+        <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-foreground mb-1">Chưa có đánh giá nào</h3>
+        <p className="text-sm text-muted-foreground">
           Sau khi hoàn thành một chuyến đi, bạn có thể chia sẻ trải nghiệm của mình tại đây.
         </p>
       </div>
@@ -99,17 +99,17 @@ export default function UserReviewsList() {
   return (
     <div className="space-y-4">
       {reviews.map((review) => (
-        <div key={review.id} className="bg-white p-5 rounded-xl border border-slate-200/80 hover:shadow-lg hover:border-slate-300 transition-all duration-300">
+        <div key={review.id} className="bg-card p-5 rounded-xl border border-border/80 hover:shadow-lg hover:border-border transition-all duration-300">
           <div className="flex justify-between items-start gap-4">
             <div className="flex-1">
               <Link href={review.serviceLink} className="group">
-                <h4 className="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">
+                <h4 className="font-bold text-foreground group-hover:text-emerald-600 transition-colors">
                   {review.serviceName}
                 </h4>
               </Link>
               <div className="flex items-center gap-1 mt-1">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
+                  <Star key={i} className={`w-4 h-4 ${i < review.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
                 ))}
               </div>
             </div>
@@ -121,11 +121,11 @@ export default function UserReviewsList() {
             </div>
           </div>
           
-          <p className="text-sm text-slate-600 my-3 italic border-l-2 border-slate-200 pl-4 py-1">
+          <p className="text-sm text-muted-foreground my-3 italic border-l-2 border-border pl-4 py-1">
             "{review.comment}"
           </p>
 
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-muted-foreground">
             <span>Ngày viết: {new Date(review.createdAt).toLocaleDateString("vi-VN")}</span>
           </div>
         </div>

@@ -21,7 +21,7 @@ export default function TourHeader({ tour }) {
 	const hasMeta = !!locationName || !!durationText;
 
 	return (
-		<div className="bg-white">
+		<div className="bg-background">
 			{/* Gallery — Banner Carousel */}
 			<div className="relative mx-auto max-w-[1400px] px-4">
 				<div className="rounded-xl overflow-hidden">
@@ -49,15 +49,15 @@ export default function TourHeader({ tour }) {
 									{allImages.map((_, idx) => (
 										<div
 											key={idx}
-											className="w-2 h-2 rounded-full bg-white/70 shadow-sm"
+											className="w-2 h-2 rounded-full bg-background/70 shadow-sm"
 										/>
 									))}
 								</div>
 							)}
 						</div>
 					) : (
-						<div className="aspect-[21/9] bg-gray-200 flex items-center justify-center">
-							<span className="text-gray-400 text-lg">Chưa có ảnh</span>
+						<div className="aspect-[21/9] bg-muted flex items-center justify-center">
+							<span className="text-muted-foreground text-lg">Chưa có ảnh</span>
 						</div>
 					)}
 				</div>
@@ -69,9 +69,9 @@ export default function TourHeader({ tour }) {
 
 			{/* Title & Meta */}
 			<div className="max-w-7xl mx-auto px-4 pt-6">
-				<h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{title}</h1>
+				<h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3">{title}</h1>
 
-				<div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
+				<div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
 					<StarRating
 						rating={ratingAverage}
 						showCount
@@ -80,7 +80,7 @@ export default function TourHeader({ tour }) {
 					{viewCount > 0 && <span>{viewCount.toLocaleString('vi-VN')} lượt xem</span>}
 				</div>
 
-				<div className={`flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-2 ${hasMeta ? '' : 'hidden'}`}>
+				<div className={`flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2 ${hasMeta ? '' : 'hidden'}`}>
 					{locationName && (
 						<span className="inline-flex items-center gap-1">
 							<svg
@@ -125,7 +125,7 @@ export default function TourHeader({ tour }) {
 					)}
 				</div>
 
-				{excerpt && <p className="text-gray-600 mt-3 line-clamp-2">{excerpt}</p>}
+				{excerpt && <p className="text-muted-foreground mt-3 line-clamp-2">{excerpt}</p>}
 			</div>
 		</div>
 	);

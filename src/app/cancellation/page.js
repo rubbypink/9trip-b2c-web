@@ -11,7 +11,7 @@ export const metadata = {
  */
 export default function CancellationPage() {
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },
@@ -19,29 +19,29 @@ export default function CancellationPage() {
         ]}
       />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-10">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6 sm:p-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
             Chính sách thanh toán & hoàn, hủy, đổi trả giao dịch
           </h1>
 
-          <div className="prose max-w-none text-gray-700 space-y-8">
+          <div className="prose max-w-none text-foreground space-y-8">
             {/* 1. PHƯƠNG THỨC THANH TOÁN */}
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 1. Phương thức thanh toán
               </h2>
               <p>
                 Hiện tại, 9 Trip Phú Quốc cung cấp nhiều hình thức thanh toán linh hoạt giúp Quý khách có thể sử dụng dịch vụ một cách tiện ích nhất, trải nghiệm các phương thức thanh toán hiện đại nhất.
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 Bước 1: Truy cập và lựa chọn dịch vụ
               </h3>
               <p>
                 Quý khách truy cập vào website <strong>9tripphuquoc.com</strong>, tìm kiếm và chọn dịch vụ (tour du lịch, khách sạn, hoạt động trải nghiệm, thuê xe) cần mua.
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 Bước 2: Kiểm tra chi tiết đơn hàng
               </h3>
               <ul className="list-disc pl-5 space-y-1">
@@ -52,7 +52,7 @@ export default function CancellationPage() {
                 <li>Phương thức thanh toán;</li>
               </ul>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 Bước 3: Lựa chọn phương thức thanh toán
               </h3>
               <p>
@@ -73,7 +73,7 @@ export default function CancellationPage() {
                 </li>
               </ul>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 Bước 4: Xác nhận và hoàn tất
               </h3>
               <p>
@@ -95,11 +95,11 @@ export default function CancellationPage() {
 
             {/* 2. CHÍNH SÁCH HOÀN, HỦY, ĐỔI/TRẢ */}
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 2. Chính sách hoàn, hủy, đổi/trả
               </h2>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 2.1. Quy định về hủy đơn hàng
               </h3>
               <ul className="list-disc pl-5 space-y-2">
@@ -117,7 +117,7 @@ export default function CancellationPage() {
                 </li>
               </ul>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 2.2. Quy định về đổi, trả đơn hàng
               </h3>
               <ul className="list-disc pl-5 space-y-2">
@@ -134,7 +134,7 @@ export default function CancellationPage() {
                 </li>
               </ul>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 2.3. Quy định về thời gian xử lý hoàn tiền
               </h3>
               <p>
@@ -148,20 +148,20 @@ export default function CancellationPage() {
                 <li>Thanh toán qua ví điện tử: 3 – 7 ngày làm việc.</li>
                 <li>Thanh toán bằng các phương thức khác: Theo thỏa thuận cụ thể với Khách hàng.</li>
               </ul>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 * 9 Trip Phú Quốc không chịu trách nhiệm đối với các khoản phí phát sinh từ phía ngân hàng hoặc tổ chức cung cấp dịch vụ thanh toán trong quá trình hoàn tiền (nếu có).
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 2.4. Trách nhiệm của các bên liên quan
               </h3>
-              <p className="font-medium text-gray-800 mt-2">Trách nhiệm của Khách hàng:</p>
+              <p className="font-medium text-foreground mt-2">Trách nhiệm của Khách hàng:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Cung cấp thông tin đặt dịch vụ chính xác, đầy đủ để đảm bảo quyền lợi đổi, trả hoặc hoàn tiền.</li>
                 <li>Tuân thủ các điều kiện và quy định của Nhà cung cấp dịch vụ.</li>
                 <li>Liên hệ với 9 Trip Phú Quốc ngay khi phát hiện sai sót hoặc có nhu cầu hủy/đổi/trả.</li>
               </ul>
-              <p className="font-medium text-gray-800 mt-2">Trách nhiệm của 9 Trip Phú Quốc:</p>
+              <p className="font-medium text-foreground mt-2">Trách nhiệm của 9 Trip Phú Quốc:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Đảm bảo cung cấp đầy đủ thông tin về chính sách hoàn hủy trên website.</li>
                 <li>Hỗ trợ Khách hàng xử lý yêu cầu đổi, trả hoặc hoàn tiền theo đúng quy trình và thời gian quy định.</li>
@@ -172,25 +172,25 @@ export default function CancellationPage() {
 
             {/* 3. CHÍNH SÁCH GIAO NHẬN DỊCH VỤ */}
             <section>
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-foreground">
                 3. Chính sách giao nhận dịch vụ
               </h2>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.1. Xác nhận đặt dịch vụ
               </h3>
               <p>
                 Dịch vụ do 9 Trip Phú Quốc phân phối hợp pháp với tư cách đại lý của các Nhà cung cấp dịch vụ hoặc bên phân phối lại dịch vụ hợp tác cùng 9 Trip Phú Quốc. Ngay sau khi Khách hàng thanh toán đơn hàng thành công, hệ thống sẽ gửi thông báo xác nhận đặt dịch vụ kèm theo bằng chứng việc mua dịch vụ thông qua phương thức trực tuyến (SMS, Email được Khách hàng chỉ định khi đặt mua dịch vụ).
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.2. Thông tin xác nhận
               </h3>
               <p>
                 Kèm theo bằng chứng về việc mua dịch vụ, 9 Trip Phú Quốc sẽ thông báo xác nhận về việc đặt dịch vụ của Khách hàng và mô tả các thông tin của đơn vị dịch vụ trong đơn hàng, bao gồm nhưng không giới hạn ở: thời gian cung cấp dịch vụ, địa điểm cung cấp dịch vụ, số ghế/phòng/chỗ…, số lượng đơn vị dịch vụ, Nhà cung cấp cung ứng dịch vụ.
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.3. Bằng chứng mua dịch vụ
               </h3>
               <p>
@@ -211,21 +211,21 @@ export default function CancellationPage() {
                 </li>
               </ul>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.4. Kiểm tra thông tin giao dịch
               </h3>
               <p>
                 Khách hàng có thể kiểm tra thông tin giao dịch mua dịch vụ, thông tin vé tại mục &ldquo;Thông báo&rdquo; trên website hoặc thông qua địa chỉ email chỉ định khi đặt hàng.
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.5. Điều chỉnh thông tin dịch vụ
               </h3>
               <p>
                 Bằng chứng đặt dịch vụ, mã vé đã được kết xuất trên hệ thống 9 Trip Phú Quốc và đã được khai báo với Nhà cung cấp không thể điều chỉnh thông tin, nội dung dịch vụ, trừ trường hợp do việc truyền thông tin sai của 9 Trip Phú Quốc tới Nhà cung cấp hoặc chính sách của Nhà cung cấp cho việc điều chỉnh thông tin, nội dung dịch vụ.
               </p>
 
-              <h3 className="text-lg font-medium text-gray-800 mt-4">
+              <h3 className="text-lg font-medium text-foreground mt-4">
                 3.6. Xuất trình giấy tờ
               </h3>
               <p>

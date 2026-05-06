@@ -22,7 +22,7 @@ export default function SearchTabsClient({ locations }) {
   return (
     <div className="p-4 sm:p-5">
       {/* Tab Headers */}
-      <div className="flex gap-1 bg-gray-50 p-1 rounded-xl mb-5" role="tablist">
+      <div className="flex gap-1 bg-muted p-1 rounded-xl mb-5" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -31,8 +31,8 @@ export default function SearchTabsClient({ locations }) {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeTab === tab.key
-                ? "bg-white text-blue-600 shadow-sm ring-1 ring-gray-200/60"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-background text-blue-600 shadow-sm ring-1 ring-border/60"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <span className="text-base">{tab.icon}</span>
@@ -95,13 +95,13 @@ function TourSearchForm({ locations }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Điểm đến */}
         <div className="relative">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Điểm đến</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Điểm đến</label>
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
             <select
-              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             >
@@ -122,20 +122,20 @@ function TourSearchForm({ locations }) {
 
         {/* Ngày đi */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Ngày đi</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Ngày đi</label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         {/* Khoảng giá */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Khoảng giá</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Khoảng giá</label>
           <select
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
           >
@@ -208,13 +208,13 @@ function ActivitySearchForm({ locations }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Điểm đến */}
         <div className="relative">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Điểm đến</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Điểm đến</label>
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
             <select
-              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             >
@@ -235,9 +235,9 @@ function ActivitySearchForm({ locations }) {
 
         {/* Thể loại */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Thể loại</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Thể loại</label>
           <select
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -251,9 +251,9 @@ function ActivitySearchForm({ locations }) {
 
         {/* Khoảng giá */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Khoảng giá</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">Khoảng giá</label>
           <select
-            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
           >

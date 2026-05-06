@@ -122,20 +122,20 @@ export default function CheckoutPageClient() {
 
   if (isRedirecting) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-muted flex flex-col items-center justify-center">
         <LoadingSpinner className="w-12 h-12 text-primary-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Đang kết nối cổng thanh toán...</h2>
-        <p className="text-gray-500">Vui lòng không đóng trình duyệt trong lúc này.</p>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Đang kết nối cổng thanh toán...</h2>
+        <p className="text-muted-foreground">Vui lòng không đóng trình duyệt trong lúc này.</p>
       </div>
     );
   }
 
   if (showEmptyCart) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center">
         <div className="text-center max-w-md px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Giỏ hàng trống</h2>
-          <p className="text-gray-500 mb-8">Hãy khám phá các tour và khách sạn của chúng tôi.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Giỏ hàng trống</h2>
+          <p className="text-muted-foreground mb-8">Hãy khám phá các tour và khách sạn của chúng tôi.</p>
           <div className="flex gap-4 justify-center">
             <Link href="/tours" className="px-6 py-3 bg-primary-600 text-white rounded-xl font-bold">Khám phá Tour</Link>
           </div>
@@ -145,19 +145,19 @@ export default function CheckoutPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-muted py-10">
       <div className="container mx-auto px-4 max-w-6xl">
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Thanh toán 9 TRIP</h1>
+          <h1 className="text-3xl font-bold text-foreground">Thanh toán 9 TRIP</h1>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {step === 1 && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Thông tin liên lạc</h2>
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                <h2 className="text-xl font-bold text-foreground mb-6">Thông tin liên lạc</h2>
                 <CustomerForm onSubmit={handleInfoSubmit} initialData={user} />
-                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+                <div className="mt-8 pt-6 border-t border-border flex justify-end">
                   <button
                     type="submit"
                     form="customer-form"
@@ -170,28 +170,28 @@ export default function CheckoutPageClient() {
             )}
 
             {step === 2 && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">Phương thức thanh toán</h2>
+                  <h2 className="text-xl font-bold text-foreground">Phương thức thanh toán</h2>
                   <button onClick={() => setStep(1)} className="text-sm text-primary-600 hover:underline">
                     Sửa thông tin
                   </button>
                 </div>
                 
                 <div className="flex flex-col gap-3 mb-6">
-                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-border'}`}>
                         <input type="radio" name="gateway" value="VNPAY" checked={gateway === 'VNPAY'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
-                        <span className="font-bold text-gray-800">Thanh toán qua VNPay</span>
+                        <span className="font-bold text-foreground">Thanh toán qua VNPay</span>
                     </label>
 
-                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-gray-200'}`}>
+                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-border'}`}>
                         <input type="radio" name="gateway" value="MOMO" checked={gateway === 'MOMO'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
-                        <span className="font-bold text-gray-800">Thanh toán qua Ví MoMo</span>
+                        <span className="font-bold text-foreground">Thanh toán qua Ví MoMo</span>
                     </label>
 
-                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-gray-200'}`}>
+                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-border'}`}>
                         <input type="radio" name="gateway" value="PAYPAL" checked={gateway === 'PAYPAL'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
-                        <span className="font-bold text-gray-800">Thanh toán qua PayPal</span>
+                        <span className="font-bold text-foreground">Thanh toán qua PayPal</span>
                     </label>
                 </div>
 
@@ -201,14 +201,14 @@ export default function CheckoutPageClient() {
                   </div>
                 )}
 
-                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
-                  <button onClick={() => setStep(1)} className="text-gray-500 font-medium hover:text-gray-700">
+                <div className="mt-8 pt-6 border-t border-border flex justify-between items-center">
+                  <button onClick={() => setStep(1)} className="text-muted-foreground font-medium hover:text-foreground">
                     Quay lại
                   </button>
                   <button
                     onClick={handleFinalizeBooking}
                     disabled={isLoading || isValidatingPrice}
-                    className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:bg-gray-400 flex items-center gap-2"
+                    className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:bg-muted flex items-center gap-2"
                   >
                     {isLoading && <LoadingSpinner className="w-5 h-5 border-white" />}
                     {isLoading ? "Đang xử lý..." : `Thanh toán ${realGrandTotal.toLocaleString('vi-VN')} đ`}

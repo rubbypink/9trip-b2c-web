@@ -75,7 +75,7 @@ export default async function HotelsPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-16">
+    <div className="min-h-screen bg-muted pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -84,12 +84,12 @@ export default async function HotelsPage({ searchParams }) {
         ]}
       />
 
-      <div className="bg-white border-b border-gray-200 mb-8">
+      <div className="bg-card border-b border-border mb-8">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Khách Sạn & Nghỉ Dưỡng
           </h1>
-          <p className="text-gray-500">Tìm kiếm nơi dừng chân hoàn hảo cho chuyến đi của bạn</p>
+          <p className="text-muted-foreground">Tìm kiếm nơi dừng chân hoàn hảo cho chuyến đi của bạn</p>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ export default async function HotelsPage({ searchParams }) {
         </div>
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-200 sticky top-24">
+            <div className="bg-card rounded-xl border border-border sticky top-24">
               <HotelFilters locations={locations} />
             </div>
           </aside>

@@ -18,14 +18,14 @@ export default function LatestNews({ posts }) {
   };
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
             Tin tức & Bí kíp Du lịch
           </h2>
-          <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             Cập nhật những thông tin du lịch mới nhất, mẹo vặt và câu chuyện từ cộng đồng 9 Trip
           </p>
         </div>
@@ -36,7 +36,7 @@ export default function LatestNews({ posts }) {
             <a
               key={post.id}
               href={`/blog/${post.slug}`}
-              className="group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 bg-white"
+              className="group rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 bg-card"
             >
               {/* Image */}
               <div className="aspect-[16/10] overflow-hidden">
@@ -51,17 +51,17 @@ export default function LatestNews({ posts }) {
               {/* Content */}
               <div className="p-5">
                 {/* Date */}
-                <p className="text-xs text-gray-400 mb-2">
+                <p className="text-xs text-muted-foreground mb-2">
                   {formatDate(post.createdAt)}
                 </p>
 
                 {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                <h3 className="text-lg font-semibold text-foreground group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
                   {post.title}
                 </h3>
 
                 {/* Excerpt */}
-                <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed">
+                <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                   {post.excerpt}
                 </p>
 

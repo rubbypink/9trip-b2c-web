@@ -20,7 +20,7 @@ function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
   return (
     <>
       <div 
-        className="relative w-full aspect-video md:aspect-[4/3] bg-gray-200 cursor-pointer group"
+        className="relative w-full aspect-video md:aspect-[4/3] bg-muted cursor-pointer group"
         onClick={() => {
           if (allImages.length > 0) {
             setLightboxIndex(0);
@@ -49,7 +49,7 @@ function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
             </div>
           </>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
             Chưa có ảnh
           </div>
         )}
@@ -63,7 +63,7 @@ function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
         >
           <button
             type="button"
-            className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-10"
+            className="absolute top-4 right-4 text-white text-3xl hover:text-muted-foreground z-10"
             onClick={() => setLightboxOpen(false)}
           >
             ✕
@@ -72,7 +72,7 @@ function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
             <>
               <button
                 type="button"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-muted-foreground z-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightboxIndex((lightboxIndex - 1 + allImages.length) % allImages.length);
@@ -82,7 +82,7 @@ function RoomImageWithLightbox({ images = [], roomName, featuredImage }) {
               </button>
               <button
                 type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-gray-300 z-10"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-4xl hover:text-muted-foreground z-10"
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightboxIndex((lightboxIndex + 1) % allImages.length);
@@ -118,13 +118,13 @@ function RoomCollapsibleInfo({ room }) {
   if (!hasExtraInfo) return null;
 
   return (
-    <div className="border-t border-gray-100">
+    <div className="border-t border-border">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50/50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
-        <span className="font-medium text-gray-600">Chi tiết phòng</span>
+        <span className="font-medium text-muted-foreground">Chi tiết phòng</span>
         <svg
           className={`h-4 w-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -135,20 +135,20 @@ function RoomCollapsibleInfo({ room }) {
       {open && (
         <div className="px-5 pb-4 space-y-3 text-sm animate-fadeIn">
           {room.roomSize > 0 && (
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <span className="text-base">📐</span>
               <span><strong>Diện tích:</strong> {room.roomSize} m²</span>
             </div>
           )}
           {room.description && (
-            <div className="text-gray-600 text-xs leading-relaxed">
-              <strong className="text-gray-700">Mô tả:</strong>
+            <div className="text-muted-foreground text-xs leading-relaxed">
+              <strong className="text-foreground">Mô tả:</strong>
               <div className="mt-1" dangerouslySetInnerHTML={{ __html: room.description }} />
             </div>
           )}
           {room.amenities && room.amenities.length > 0 && (
             <div>
-              <strong className="text-gray-700 text-xs">Tiện nghi phòng:</strong>
+              <strong className="text-foreground text-xs">Tiện nghi phòng:</strong>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 {room.amenities.map((amenity, i) => (
                   <span
@@ -163,7 +163,7 @@ function RoomCollapsibleInfo({ room }) {
           )}
           {room.included && room.included.length > 0 && (
             <div>
-              <strong className="text-gray-700 text-xs">Bao gồm:</strong>
+              <strong className="text-foreground text-xs">Bao gồm:</strong>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 {room.included.map((inc, i) => (
                   <span
@@ -334,12 +334,12 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
   if (pricingTable.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
-        <svg className="h-12 w-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="bg-card rounded-xl border border-border p-10 text-center text-muted-foreground">
+        <svg className="h-12 w-12 mx-auto text-muted-foreground mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
-        <p className="font-medium text-gray-700">Chưa có thông tin phòng</p>
-        <p className="text-sm text-gray-400 mt-1">Khách sạn này chưa cập nhật phòng. Vui lòng quay lại sau.</p>
+        <p className="font-medium text-foreground">Chưa có thông tin phòng</p>
+        <p className="text-sm text-muted-foreground mt-1">Khách sạn này chưa cập nhật phòng. Vui lòng quay lại sau.</p>
       </div>
     );
   }
@@ -352,14 +352,14 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
         return (
           <div
             key={room.roomId}
-            className={`bg-white rounded-xl border overflow-hidden transition-all ${
+            className={`bg-card rounded-xl border overflow-hidden transition-all ${
               isInactive
-                ? 'border-gray-200 opacity-60 grayscale-[0.3]'
-                : 'border-gray-200'
+                ? 'border-border opacity-60 grayscale-[0.3]'
+                : 'border-border'
             }`}
           >
             {/* Room Header */}
-            <div className={`p-5 border-b border-gray-100 ${isInactive ? 'bg-gray-100/50' : 'bg-gray-50/50'}`}>
+            <div className={`p-5 border-b border-border ${isInactive ? 'bg-muted/50' : 'bg-muted/30'}`}>
               <div className="flex items-start gap-4">
                 {/* Featured Image & Lightbox */}
                 <div className={`w-24 h-16 rounded-lg overflow-hidden flex-shrink-0 relative ${
@@ -374,32 +374,32 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h4 className={`font-semibold ${isInactive ? 'text-gray-500' : 'text-gray-900'}`}>
+                    <h4 className={`font-semibold ${isInactive ? 'text-muted-foreground' : 'text-foreground'}`}>
                       {room.roomName}
                     </h4>
                     {isInactive && (
-                      <span className="inline-flex items-center text-[10px] font-medium bg-gray-200 text-gray-500 rounded-full px-2 py-0.5">
+                      <span className="inline-flex items-center text-[10px] font-medium bg-muted text-muted-foreground rounded-full px-2 py-0.5">
                         🚫 Ngừng KD
                       </span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2 mt-1.5">
                     {room.bedType && (
-                      <span className="inline-flex items-center text-xs text-gray-500">
+                      <span className="inline-flex items-center text-xs text-muted-foreground">
                         🛏️ {room.bedType}
                       </span>
                     )}
                     {room.maxGuests > 0 && (
-                      <span className="inline-flex items-center text-xs text-gray-500">
+                      <span className="inline-flex items-center text-xs text-muted-foreground">
                         👤 Tối đa {room.maxGuests} khách
                       </span>
                     )}
                     {room.roomSize > 0 && (
-                      <span className="inline-flex items-center text-xs text-gray-500">
+                      <span className="inline-flex items-center text-xs text-muted-foreground">
                         📐 {room.roomSize}m²
                       </span>
                     )}
-                    <span className="inline-flex items-center text-xs text-gray-500">
+                    <span className="inline-flex items-center text-xs text-muted-foreground">
                       📦 Còn {room.totalRooms} phòng
                     </span>
                   </div>
@@ -408,7 +408,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
             </div>
 
             {/* Rate Type Rows */}
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {!isInactive && room.rateTypes.length > 0 ? (
                 room.rateTypes.map((rt) => {
                   const key = `${room.roomId}_${rt.rateType}`;
@@ -416,23 +416,23 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                   const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
                   return (
-                    <div key={rt.rateType} className="flex items-center gap-3 p-4 hover:bg-gray-50/50 transition-colors">
+                    <div key={rt.rateType} className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors">
                       {/* Rate Type Name */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 capitalize">
+                        <p className="text-sm font-medium text-foreground capitalize">
                           {rt.rateType.replace(/_/g, " ")}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {nights} đêm × {Math.round(rt.avgSellPrice).toLocaleString()}₫/đêm
                         </p>
                       </div>
 
                       {/* Unit Price */}
                       <div className="text-right w-28">
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-foreground">
                           {formatCurrency(rt.avgSellPrice, "VND")}
                         </p>
-                        <p className="text-xs text-gray-400">/đêm</p>
+                        <p className="text-xs text-muted-foreground">/đêm</p>
                       </div>
 
                       {/* Quantity Selector */}
@@ -441,16 +441,16 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                           type="button"
                           onClick={() => updateQuantity(room.roomId, rt.rateType, -1)}
                           disabled={qty === 0}
-                          className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
                           −
                         </button>
-                        <span className="w-10 text-center text-sm font-semibold text-gray-900">{qty}</span>
+                        <span className="w-10 text-center text-sm font-semibold text-foreground">{qty}</span>
                         <button
                           type="button"
                           onClick={() => updateQuantity(room.roomId, rt.rateType, 1)}
                           disabled={qty >= room.totalRooms}
-                          className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
                           +
                         </button>
@@ -458,7 +458,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
                       {/* Line Total */}
                       <div className="text-right w-28">
-                        <p className={lineTotal > 0 ? "text-sm font-bold text-primary" : "text-sm text-gray-300"}>
+                        <p className={lineTotal > 0 ? "text-sm font-bold text-primary" : "text-sm text-muted-foreground"}>
                           {lineTotal > 0 ? formatCurrency(lineTotal, "VND") : "—"}
                         </p>
                       </div>
@@ -466,7 +466,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                   );
                 })
               ) : (
-                <div className={`p-4 text-sm text-center ${isInactive ? 'text-gray-400' : 'text-gray-400'}`}>
+                <div className={`p-4 text-sm text-center text-muted-foreground`}>
                   {isInactive ? 'Phòng tạm ngừng kinh doanh' : 'Chưa có giá cho ngày đã chọn'}
                 </div>
               )}
@@ -480,12 +480,12 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
       {/* Sticky Bottom Bar — Confirm Selection */}
       {hasSelection && (
-        <div className="sticky bottom-0 z-30 bg-white border-t border-gray-200 shadow-lg rounded-t-xl p-4 -mx-1">
+        <div className="sticky bottom-0 z-30 bg-background border-t border-border shadow-lg rounded-t-xl p-4 -mx-1">
           <div className="flex items-center justify-between max-w-xl mx-auto">
             <div>
-              <p className="text-xs text-gray-500">Tổng tạm tính</p>
+              <p className="text-xs text-muted-foreground">Tổng tạm tính</p>
               <p className="text-xl font-bold text-primary">{formatCurrency(grandTotal, "VND")}</p>
-              <p className="text-xs text-gray-400">{nights} đêm</p>
+              <p className="text-xs text-muted-foreground">{nights} đêm</p>
             </div>
             <button
               type="button"

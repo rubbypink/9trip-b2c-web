@@ -40,7 +40,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
     return (
       <div
         className={cn(
-          "flex flex-col sm:flex-row gap-4 rounded-xl border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow",
+          "flex flex-col sm:flex-row gap-4 rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow",
           className
         )}
       >
@@ -62,16 +62,16 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
         </Link>
         <div className="flex flex-1 flex-col justify-between gap-2">
           <div>
-            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
               {locationName && <span>{locationName}</span>}
               {durationText && <span>• {durationText}</span>}
             </div>
             <Link href={`/tours/${slug}`}>
-              <h3 className="text-lg font-semibold text-gray-900 hover:text-primary line-clamp-2">
+              <h3 className="text-lg font-semibold text-foreground hover:text-primary line-clamp-2">
                 {title}
               </h3>
             </Link>
-            {excerpt && <p className="text-sm text-gray-500 line-clamp-2 mt-1">{excerpt}</p>}
+            {excerpt && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{excerpt}</p>}
           </div>
           <div className="flex items-center justify-between">
             <StarRating rating={ratingAverage} showCount reviewCount={ratingCount} size="sm" />
@@ -86,7 +86,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
   return (
     <div
       className={cn(
-        "group rounded-xl border border-gray-200 bg-white overflow-hidden hover:shadow-md transition-shadow",
+        "group rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow",
         className
       )}
     >
@@ -112,12 +112,12 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
         )}
       </Link>
       <div className="p-4">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
           {locationName && <span>{locationName}</span>}
           {durationText && <span>• {durationText}</span>}
         </div>
         <Link href={`/tours/${slug}`}>
-          <h3 className="font-semibold text-gray-900 hover:text-primary line-clamp-2 mb-2 min-h-[2.5rem]">
+          <h3 className="font-semibold text-foreground hover:text-primary line-clamp-2 mb-2 min-h-[2.5rem]">
             {title}
           </h3>
         </Link>

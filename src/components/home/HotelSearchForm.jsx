@@ -52,12 +52,12 @@ export default function HotelSearchForm({ locations = [] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Điểm đến */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Điểm đến
           </label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -72,7 +72,7 @@ export default function HotelSearchForm({ locations = [] }) {
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             >
               {destinations.map((d) => (
                 <option key={d.value} value={d.value}>
@@ -85,12 +85,12 @@ export default function HotelSearchForm({ locations = [] }) {
 
         {/* Ngày nhận phòng */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Nhận phòng
           </label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -107,19 +107,19 @@ export default function HotelSearchForm({ locations = [] }) {
               value={checkin}
               min={today}
               onChange={(e) => setCheckin(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
 
         {/* Ngày trả phòng */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Trả phòng
           </label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -136,19 +136,19 @@ export default function HotelSearchForm({ locations = [] }) {
               value={checkout}
               min={checkin || today}
               onChange={(e) => setCheckout(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
 
         {/* Số khách */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-xs font-medium text-muted-foreground mb-1">
             Khách
           </label>
           <div className="relative">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -160,7 +160,7 @@ export default function HotelSearchForm({ locations = [] }) {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            <div className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700">
+            <div className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground">
               <span>
                 {adults + children} khách
                 {children > 0 && ` (${adults} NL, ${children} TE)`}
@@ -173,11 +173,11 @@ export default function HotelSearchForm({ locations = [] }) {
       {/* Guest selector expanded */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Người lớn:</span>
+          <span className="text-xs text-muted-foreground">Người lớn:</span>
           <button
             type="button"
             onClick={() => setAdults(Math.max(1, adults - 1))}
-            className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
           >
             −
           </button>
@@ -185,17 +185,17 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setAdults(Math.min(10, adults + 1))}
-            className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
           >
             +
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">Trẻ em:</span>
+          <span className="text-xs text-muted-foreground">Trẻ em:</span>
           <button
             type="button"
             onClick={() => setChildren(Math.max(0, children - 1))}
-            className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
           >
             −
           </button>
@@ -205,7 +205,7 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setChildren(Math.min(5, children + 1))}
-            className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
           >
             +
           </button>

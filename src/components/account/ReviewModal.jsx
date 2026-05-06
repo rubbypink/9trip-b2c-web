@@ -81,12 +81,12 @@ export default function ReviewModal({ booking, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-800">Viết đánh giá</h3>
+      <div className="bg-card rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="font-bold text-foreground">Viết đánh giá</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+            className="p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -94,14 +94,14 @@ export default function ReviewModal({ booking, onClose }) {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <p className="text-sm text-slate-500 mb-1">Đánh giá cho:</p>
-            <h4 className="font-semibold text-slate-800">
+            <p className="text-sm text-muted-foreground mb-1">Đánh giá cho:</p>
+            <h4 className="font-semibold text-foreground">
               {booking.tourName || booking.productName || "Tour của bạn"}
             </h4>
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <p className="text-sm font-medium text-slate-700">Bạn thấy thế nào?</p>
+            <p className="text-sm font-medium text-foreground">Bạn thấy thế nào?</p>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -116,13 +116,13 @@ export default function ReviewModal({ booking, onClose }) {
                     className={`w-8 h-8 ${
                       star <= (hoverRating || rating)
                         ? "fill-amber-400 text-amber-400"
-                        : "text-slate-300"
+                        : "text-muted-foreground"
                     } transition-colors`}
                   />
                 </button>
               ))}
             </div>
-            <p className="text-xs text-slate-400 h-4">
+            <p className="text-xs text-muted-foreground h-4">
               {rating === 5 && "Tuyệt vời!"}
               {rating === 4 && "Rất tốt"}
               {rating === 3 && "Bình thường"}
@@ -134,7 +134,7 @@ export default function ReviewModal({ booking, onClose }) {
           <div>
             <label
               htmlFor="comment"
-              className="block text-sm font-medium text-slate-700 mb-2"
+              className="block text-sm font-medium text-foreground mb-2"
             >
               Chia sẻ trải nghiệm của bạn
             </label>
@@ -144,7 +144,7 @@ export default function ReviewModal({ booking, onClose }) {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Bạn thích điều gì nhất ở chuyến đi này?"
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none text-sm"
             />
           </div>
 
@@ -152,7 +152,7 @@ export default function ReviewModal({ booking, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors"
             >
               Hủy
             </button>

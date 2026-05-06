@@ -21,7 +21,7 @@ export default function HotelCard({ hotel, item }) {
   const displayPrice = data.lowestPrice || data.pricing?.basePrice || data.pricing?.adultPrice || data.minPrice || 0;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow group">
+    <div className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
       <Link href={`/hotels/${data.slug}`} className="block relative aspect-[4/3] overflow-hidden" data-service-type="hotel" data-service-id={data.id}>
         <Image
           src={data.featuredImage || "/placeholder-hotel.jpg"}
@@ -38,13 +38,13 @@ export default function HotelCard({ hotel, item }) {
       </Link>
       <div className="p-4">
         <div className="text-xs mb-1">{stars.join("")}</div>
-        <Link href={`/hotels/${data.slug}`} className="font-semibold text-gray-900 hover:text-primary-600 line-clamp-2 mb-1 min-h-[2.5rem]">
+        <Link href={`/hotels/${data.slug}`} className="font-semibold text-foreground hover:text-primary-600 line-clamp-2 mb-1 min-h-[2.5rem]">
           {data.name || data.title}
         </Link>
-        <p className="text-xs text-gray-500 mb-2">📍 {data.locationName || data.address?.city || "Phú Quốc"}</p>
+        <p className="text-xs text-muted-foreground mb-2">📍 {data.locationName || data.address?.city || "Phú Quốc"}</p>
         <div className="flex items-center gap-1 mb-3">
           <StarRating rating={data.ratingAverage || data.rating?.average} size="sm" />
-          <span className="text-xs text-gray-400">({data.ratingCount || data.rating?.count || 0})</span>
+          <span className="text-xs text-muted-foreground">({data.ratingCount || data.rating?.count || 0})</span>
         </div>
         <div className="flex items-center justify-between">
           <PriceDisplay

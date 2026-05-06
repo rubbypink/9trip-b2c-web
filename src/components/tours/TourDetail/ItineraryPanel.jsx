@@ -12,7 +12,7 @@ export default function ItineraryPanel({ itinerary = [] }) {
 
   if (!itinerary || itinerary.length === 0) {
     return (
-      <div className="text-center py-10 text-gray-500">
+      <div className="text-center py-10 text-muted-foreground">
         <p>Chưa có thông tin lịch trình cho tour này.</p>
       </div>
     );
@@ -29,36 +29,36 @@ export default function ItineraryPanel({ itinerary = [] }) {
         return (
           <div
             key={idx}
-            className="rounded-xl border border-gray-200 overflow-hidden transition-shadow hover:shadow-sm"
+            className="rounded-xl border border-border overflow-hidden transition-shadow hover:shadow-sm"
           >
             <button
               onClick={() => toggleDay(idx)}
               className={cn(
                 "w-full flex items-center gap-4 px-5 py-4 text-left transition-colors",
-                isExpanded ? "bg-primary/5" : "bg-white hover:bg-gray-50"
+                isExpanded ? "bg-primary/5" : "bg-card hover:bg-muted"
               )}
             >
               <span
                 className={cn(
                   "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors",
-                  isExpanded ? "bg-primary text-white" : "bg-gray-100 text-gray-700"
+                  isExpanded ? "bg-primary text-white" : "bg-muted text-foreground"
                 )}
               >
                 {idx + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <h4 className={cn("font-semibold", isExpanded ? "text-primary" : "text-gray-900")}>
+                <h4 className={cn("font-semibold", isExpanded ? "text-primary" : "text-foreground")}>
                   Ngày {idx + 1}: {day.title || `Ngày ${idx + 1}`}
                 </h4>
                 {!isExpanded && day.activities?.length > 0 && (
-                  <p className="text-sm text-gray-500 truncate mt-0.5">
+                  <p className="text-sm text-muted-foreground truncate mt-0.5">
                     {day.activities.slice(0, 2).join(" • ")}
                   </p>
                 )}
               </div>
               <svg
                 className={cn(
-                  "h-5 w-5 flex-shrink-0 text-gray-400 transition-transform",
+                  "h-5 w-5 flex-shrink-0 text-muted-foreground transition-transform",
                   isExpanded && "rotate-180"
                 )}
                 fill="none"
@@ -73,16 +73,16 @@ export default function ItineraryPanel({ itinerary = [] }) {
               <div className="px-5 pb-5">
                 {day.description && (
                   <div
-                    className="prose prose-sm max-w-none text-gray-600 mb-4"
+                    className="prose prose-sm max-w-none text-muted-foreground mb-4"
                     dangerouslySetInnerHTML={{ __html: day.description }}
                   />
                 )}
                 {day.activities?.length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Hoạt động:</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Hoạt động:</p>
                     <ul className="space-y-1.5">
                       {day.activities.map((activity, aIdx) => (
-                        <li key={aIdx} className="flex items-start gap-2 text-sm text-gray-600">
+                        <li key={aIdx} className="flex items-start gap-2 text-sm text-muted-foreground">
                           <svg
                             className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5"
                             fill="none"
