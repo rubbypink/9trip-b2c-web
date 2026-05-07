@@ -154,12 +154,12 @@ export const adminDb = admin.firestore();
 
 ## Files Requiring Attention
 
-| File                                | Issue                                            |
-| ----------------------------------- | ------------------------------------------------ |
-| `/src/lib/firebase-admin.js:25`     | Exports fail when Firebase Admin not initialized |
-| `/src/lib/firebase.js:24`           | Invalid API key error from missing env           |
-| `/.env.local`                       | **MISSING** - Required for local development     |
-| `/memory-bank/techContext.md:64-83` | Docs don't mention Firebase Admin env vars       |
+| File                            | Issue                                            |
+| ------------------------------- | ------------------------------------------------ |
+| `/src/lib/firebase-admin.js:25` | Exports fail when Firebase Admin not initialized |
+| `/src/lib/firebase.js:24`       | Invalid API key error from missing env           |
+| `/.env.local`                   | **MISSING** - Required for local development     |
+| `/memory-bank/projectContext`   | Docs don't mention Firebase Admin env vars       |
 
 ---
 

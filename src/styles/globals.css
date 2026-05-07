@@ -1,129 +1,248 @@
 @import 'tailwindcss';
 
-/* ─── 9 Trip Design Tokens (Tailwind v4 @theme) ────────────────────── */
-@theme {
-  /* Primary Colors — Bright Sunshine Yellow palette */
-  --color-primary: oklch(80% 0.17 95);
-  --color-primary-50: oklch(97% 0.05 95);
-  --color-primary-100: oklch(94% 0.08 95);
-  --color-primary-200: oklch(90% 0.12 95);
-  --color-primary-300: oklch(87% 0.14 95);
-  --color-primary-400: oklch(84% 0.16 95);
-  --color-primary-500: oklch(80% 0.17 95);
-  --color-primary-600: oklch(73% 0.17 95);
-  --color-primary-700: oklch(65% 0.16 95);
-  --color-primary-800: oklch(55% 0.14 95);
-  --color-primary-900: oklch(42% 0.10 95);
-  --color-primary-dark: oklch(73% 0.17 95);
-  --color-primary-light: oklch(87% 0.12 92);
-  --color-primary-foreground: oklch(98% 0.01 95);
+/* ═══════════════════════════════════════════════════════════════════════
+   9 TRIP COLOR DESIGN SYSTEM v2 — "Sóng Vàng" (Golden Wave)
+   ─── Light Mode (default) ───
+   Phong cách: Monochromatic vàng pastel, nền trung tính, tôn ảnh du lịch
+   ═══════════════════════════════════════════════════════════════════════ */
 
-  /* Secondary Colors — Warm orange for prices/CTAs */
-  --color-secondary: oklch(72% 0.17 50);
-  --color-secondary-dark: oklch(62% 0.17 50);
+@theme {
+  /* ──────────────────────────────────────────────────────────────────
+     PRIMARY — Vàng Pastel (Soft Sunrise Gold)
+     Dịu nhẹ, tươi tắn nhưng không chói mắt.
+     Dùng cho: CTA, active state, link, badge, highlight
+     ────────────────────────────────────────────────────────────────── */
+  --color-primary-50: oklch(97.5% 0.022 95);
+  --color-primary-100: oklch(94.5% 0.045 93);
+  --color-primary-200: oklch(90% 0.07 90);
+  --color-primary-300: oklch(85% 0.095 88);
+  --color-primary-400: oklch(78% 0.11 88);
+  --color-primary: oklch(72% 0.12 88);
+  --color-primary-600: oklch(62% 0.12 88);
+  --color-primary-700: oklch(50% 0.10 85);
+  --color-primary-800: oklch(38% 0.08 85);
+  --color-primary-900: oklch(26% 0.06 85);
+  --color-primary-foreground: oklch(18% 0.02 264);
+
+  /* ──────────────────────────────────────────────────────────────────
+     SECONDARY — Cam Đất Ấm (Warm Terracotta)
+     Cá tính, tạo điểm nhấn cho giá tiền, flash sale, badge nổi bật
+     ────────────────────────────────────────────────────────────────── */
+  --color-secondary-50: oklch(97% 0.025 50);
+  --color-secondary-100: oklch(93% 0.06 48);
+  --color-secondary-200: oklch(86% 0.10 46);
+  --color-secondary-300: oklch(78% 0.13 45);
+  --color-secondary: oklch(66% 0.14 45);
+  --color-secondary-600: oklch(55% 0.14 42);
+  --color-secondary-700: oklch(44% 0.12 40);
+  --color-secondary-800: oklch(32% 0.09 38);
+  --color-secondary-900: oklch(20% 0.06 35);
   --color-secondary-foreground: oklch(98% 0.01 50);
 
-  /* Accent Colors — Teal for success states */
-  --color-accent: oklch(62% 0.12 185);
+  /* ──────────────────────────────────────────────────────────────────
+     ACCENT — Xanh Mòng Két (Teal)
+     Tin cậy, chuyên nghiệp. Dùng cho: success badge, verified, trust signals
+     ────────────────────────────────────────────────────────────────── */
+  --color-accent-50: oklch(97% 0.025 185);
+  --color-accent-100: oklch(93% 0.05 185);
+  --color-accent-200: oklch(86% 0.09 185);
+  --color-accent-300: oklch(76% 0.11 185);
+  --color-accent: oklch(60% 0.11 185);
+  --color-accent-600: oklch(50% 0.10 185);
+  --color-accent-700: oklch(40% 0.08 185);
+  --color-accent-800: oklch(28% 0.06 185);
+  --color-accent-900: oklch(18% 0.04 185);
   --color-accent-foreground: oklch(98% 0.01 185);
 
-  /* Neutral/Gray Scale - For flexible theming */
+  /* ──────────────────────────────────────────────────────────────────
+     NEUTRAL GRAY SCALE
+     Nền trung tính để tôn ảnh du lịch sặc sỡ, không tranh giành sự chú ý
+     ────────────────────────────────────────────────────────────────── */
   --color-white: #ffffff;
-  --color-black: #000000;
-  --color-gray-50: #f8fafc;
-  --color-gray-100: #f1f5f9;
-  --color-gray-200: #e2e8f0;
-  --color-gray-300: #cbd5e1;
-  --color-gray-400: #94a3b8;
-  --color-gray-500: #64748b;
-  --color-gray-600: #475569;
-  --color-gray-700: #334155;
-  --color-gray-800: #1e293b;
-  --color-gray-900: #0f172a;
+  --color-gray-50: oklch(97.5% 0.005 264);
+  --color-gray-100: oklch(94.5% 0.008 264);
+  --color-gray-200: oklch(88% 0.012 264);
+  --color-gray-300: oklch(78% 0.012 264);
+  --color-gray-400: oklch(58% 0.012 264);
+  --color-gray-500: oklch(42% 0.012 264);
+  --color-gray-600: oklch(30% 0.012 264);
+  --color-gray-700: oklch(22% 0.012 264);
+  --color-gray-800: oklch(15% 0.012 264);
+  --color-gray-900: oklch(8% 0.012 264);
 
-  /* Semantic Colors */
-  --color-background: oklch(100% 0 0);
-  --color-foreground: oklch(20% 0.02 264);
-  --color-muted: oklch(55% 0.02 264);
-  --color-muted-foreground: oklch(46% 0.02 264);
-  --color-border: oklch(91% 0.01 264);
-  --color-ring: oklch(80% 0.17 95);
+  /* ──────────────────────────────────────────────────────────────────
+     SEMANTIC — Background & Foreground
+     ────────────────────────────────────────────────────────────────── */
+  /* Nền tổng thể: off-white ấm, tạo chiều sâu nhẹ */
+  --color-background: oklch(98% 0.003 95);
+  /* Text chính: xám đậm thay vì đen tuyền, dễ đọc lâu dài */
+  --color-foreground: oklch(18% 0.02 264);
+
+  /* ──────────────────────────────────────────────────────────────────
+     SURFACE ELEVATION (Tầng giao diện)
+     Dải màu tăng dần giúp phân biệt chiều sâu không gian
+     ────────────────────────────────────────────────────────────────── */
+  --color-surface-0: oklch(100% 0 0);              /* Card trắng tinh */
+  --color-surface-1: oklch(97% 0.003 95);          /* Section nền phụ */
+  --color-surface-2: oklch(94% 0.005 95);          /* Hover, selected */
+
+  /* ──────────────────────────────────────────────────────────────────
+     LAYOUT SURFACES (Header, Footer)
+     ────────────────────────────────────────────────────────────────── */
+  --color-header: oklch(100% 0 0);
+  --color-header-foreground: oklch(18% 0.02 264);
+  --color-footer: oklch(16% 0.02 264);
+  --color-footer-foreground: oklch(88% 0.01 264);
+
+  /* ──────────────────────────────────────────────────────────────────
+     TEXT HIERARCHY
+     ────────────────────────────────────────────────────────────────── */
+  --color-muted: oklch(56% 0.02 264);              /* Text phụ */
+  --color-muted-foreground: oklch(46% 0.02 264);   /* Text mờ hơn */
+
+  /* ──────────────────────────────────────────────────────────────────
+     BORDERS & INPUTS
+     ────────────────────────────────────────────────────────────────── */
+  --color-border: oklch(88% 0.012 95);
+  --color-input: oklch(92% 0.012 95);
+  --color-ring: oklch(72% 0.12 88);
   --color-ring-offset: oklch(100% 0 0);
 
-  /* Surface Colors */
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(20% 0.02 264);
-  --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(20% 0.02 264);
-  --color-input: oklch(91% 0.01 264);
+  /* ──────────────────────────────────────────────────────────────────
+     STATUS COLORS
+     ────────────────────────────────────────────────────────────────── */
+  --color-success: oklch(56% 0.14 150);
+  --color-success-foreground: oklch(98% 0.01 150);
+  --color-warning: oklch(72% 0.15 70);
+  --color-warning-foreground: oklch(18% 0.02 70);
+  --color-danger: oklch(52% 0.22 25);
+  --color-danger-foreground: oklch(98% 0.01 25);
+  --color-info: oklch(56% 0.12 245);
+  --color-info-foreground: oklch(98% 0.01 245);
 
-  /* Status Colors */
-  --color-destructive: oklch(53% 0.22 27);
-  --color-destructive-foreground: oklch(98% 0.01 264);
-  --color-success: oklch(62% 0.15 145);
-  --color-success-foreground: oklch(98% 0.01 145);
-  --color-warning: oklch(76% 0.15 70);
-  --color-warning-foreground: oklch(20% 0.02 70);
+  /* ──────────────────────────────────────────────────────────────────
+     CARD & POPOVER (aliases cho surface)
+     ────────────────────────────────────────────────────────────────── */
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(18% 0.02 264);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(18% 0.02 264);
+
+  /* ──────────────────────────────────────────────────────────────────
+     BORDER RADIUS
+     ────────────────────────────────────────────────────────────────── */
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
+
+  /* ──────────────────────────────────────────────────────────────────
+     TYPOGRAPHY
+     ────────────────────────────────────────────────────────────────── */
   --font-sans: var(--font-roboto), Roboto, Arial, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* ──────────────────────────────────────────────────────────────────
+     ANIMATIONS
+     ────────────────────────────────────────────────────────────────── */
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-fade-in-up: fade-in-up 0.4s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-slide-in-left: slide-in-left 0.4s ease-out;
   --animate-slide-in-right: slide-in-right 0.4s ease-out;
 
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  @keyframes slide-in-left {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes slide-in-right {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
+  @keyframes fade-in        { from { opacity: 0; }                     to { opacity: 1; } }
+  @keyframes fade-in-up     { from { opacity: 0; transform: translateY(16px); }  to { opacity: 1; transform: translateY(0); } }
+  @keyframes scale-in       { from { opacity: 0; transform: scale(0.95); }       to { opacity: 1; transform: scale(1); } }
+  @keyframes slide-in-left  { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slide-in-right { from { opacity: 0; transform: translateX(20px); }  to { opacity: 1; transform: translateX(0); } }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE VARIANT — Class-based toggle (.dark trên <html>)
+   ═══════════════════════════════════════════════════════════════════════ */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Dark Mode Overrides */
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE — Modern IDE Style
+   Elevation-based gray scale. Trầm, sang trọng, tập trung.
+   KHÔNG DÙNG #000. Primary desaturated để tránh neon effect.
+   ═══════════════════════════════════════════════════════════════════════ */
 .dark {
-  --color-background: oklch(15% 0.01 264);
-  --color-foreground: oklch(95% 0.01 264);
-  --color-card: oklch(20% 0.02 264);
-  --color-card-foreground: oklch(95% 0.01 264);
-  --color-popover: oklch(20% 0.02 264);
-  --color-popover-foreground: oklch(95% 0.01 264);
-  --color-primary: oklch(75% 0.16 95);
+  /* ─── Primary — Desaturated gold (không bị "cháy" trên nền tối) ─── */
+  --color-primary-50: oklch(25% 0.05 88);
+  --color-primary-100: oklch(30% 0.06 88);
+  --color-primary-200: oklch(38% 0.08 88);
+  --color-primary-300: oklch(48% 0.10 88);
+  --color-primary-400: oklch(58% 0.10 88);
+  --color-primary: oklch(66% 0.10 88);
+  --color-primary-600: oklch(58% 0.10 88);
+  --color-primary-700: oklch(48% 0.10 88);
+  --color-primary-800: oklch(38% 0.08 88);
+  --color-primary-900: oklch(28% 0.06 88);
   --color-primary-foreground: oklch(15% 0.02 264);
-  --color-secondary: oklch(65% 0.15 50);
-  --color-secondary-foreground: oklch(98% 0.01 50);
-  --color-muted: oklch(40% 0.02 264);
-  --color-muted-foreground: oklch(70% 0.02 264);
-  --color-border: oklch(30% 0.02 264);
-  --color-input: oklch(25% 0.02 264);
-  --color-ring: oklch(75% 0.16 95);
+
+  /* ─── Secondary ─── */
+  --color-secondary: oklch(62% 0.12 45);
+  --color-secondary-foreground: oklch(98% 0.01 45);
+
+  /* ─── Accent ─── */
+  --color-accent: oklch(56% 0.09 185);
+  --color-accent-foreground: oklch(15% 0.02 264);
+
+  /* ─── Background Elevation (IDE-style layers) ─── */
+  --color-background: oklch(14% 0.012 264);        /* ~#121212 — Nền tổng thể */
+  --color-foreground: oklch(90% 0.01 264);          /* ~#E0E0E0 — Text chính */
+
+  /* ─── Surface Elevation ─── */
+  --color-surface-0: oklch(18% 0.012 264);          /* ~#1E1E1E — Card / Modal */
+  --color-surface-1: oklch(23% 0.012 264);          /* ~#2D2D2D — Layer nổi hơn */
+  --color-surface-2: oklch(28% 0.012 264);          /* Hover / Active state */
+
+  /* ─── Layout ─── */
+  --color-header: oklch(17% 0.012 264);
+  --color-header-foreground: oklch(90% 0.01 264);
+  --color-footer: oklch(11% 0.012 264);
+  --color-footer-foreground: oklch(70% 0.01 264);
+
+  /* ─── Text Hierarchy ─── */
+  --color-muted: oklch(38% 0.012 264);
+  --color-muted-foreground: oklch(65% 0.012 264);   /* ~#A0A0A0 — Text phụ */
+
+  /* ─── Borders ─── */
+  --color-border: oklch(28% 0.012 264);
+  --color-input: oklch(24% 0.012 264);
+  --color-ring: oklch(66% 0.10 88);
+  --color-ring-offset: oklch(14% 0.012 264);
+
+  /* ─── Status ─── */
+  --color-success: oklch(54% 0.12 150);
+  --color-success-foreground: oklch(98% 0.01 150);
+  --color-warning: oklch(70% 0.13 70);
+  --color-warning-foreground: oklch(15% 0.02 70);
+  --color-danger: oklch(52% 0.20 25);
+  --color-danger-foreground: oklch(98% 0.01 25);
+  --color-info: oklch(56% 0.10 245);
+  --color-info-foreground: oklch(98% 0.01 245);
+
+  /* ─── Card & Popover ─── */
+  --color-card: oklch(18% 0.012 264);
+  --color-card-foreground: oklch(90% 0.01 264);
+  --color-popover: oklch(18% 0.012 264);
+  --color-popover-foreground: oklch(90% 0.01 264);
 }
 
-.dark ::-webkit-scrollbar-track { background: var(--color-gray-800); }
-.dark ::-webkit-scrollbar-thumb { background: var(--color-gray-600); }
-.dark ::-webkit-scrollbar-thumb:hover { background: var(--color-gray-500); }
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK MODE SCROLLBARS
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark ::-webkit-scrollbar-track           { background: var(--color-gray-800); }
+.dark ::-webkit-scrollbar-thumb           { background: var(--color-gray-600); }
+.dark ::-webkit-scrollbar-thumb:hover     { background: var(--color-gray-500); }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   BASE LAYER — Global resets & defaults
+   ═══════════════════════════════════════════════════════════════════════ */
 @layer base {
   * {
     @apply border-border;
@@ -136,12 +255,106 @@
   }
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--color-gray-100); }
-::-webkit-scrollbar-thumb { background: var(--color-gray-400); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-gray-500); }
+/* ═══════════════════════════════════════════════════════════════════════
+   SCROLLBARS (Light)
+   ═══════════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar                { width: 8px; }
+::-webkit-scrollbar-track          { background: var(--color-gray-100); }
+::-webkit-scrollbar-thumb          { background: var(--color-gray-400); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover    { background: var(--color-gray-500); }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   FOCUS VISIBLE — Global ring
+   ═══════════════════════════════════════════════════════════════════════ */
 *:focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITY LAYER — Convenience classes for non-Tailwind patterns
+   ═══════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  /* ─── Surface shorthands (ánh xạ tới surface elevation) ─── */
+  .bg-surface     { background-color: var(--color-surface-0); }
+  .bg-surface-alt { background-color: var(--color-surface-1); }
+
+  /* ─── Header / Footer backgrounds ─── */
+  .bg-header      { background-color: var(--color-header); }
+  .bg-footer      { background-color: var(--color-footer); color: var(--color-footer-foreground); }
+
+  /* ─── Travel Card — Container cho ảnh + text, nền trung tính ─── */
+  .card-travel {
+    background-color: var(--color-surface-0);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-travel:hover {
+    box-shadow: 0 4px 24px oklch(0% 0 0 / 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* ─── Image Overlay — Lớp phủ mờ trên hero image ─── */
+  .image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      oklch(0% 0 0 / 0.15) 0%,
+      oklch(0% 0 0 / 0.45) 100%
+    );
+  }
+
+  /* ─── Section Padding — Khoảng cách chuẩn cho section ─── */
+  .section-py { padding-top: 3rem; padding-bottom: 3rem; }
+  @media (min-width: 768px) {
+    .section-py { padding-top: 5rem; padding-bottom: 5rem; }
+  }
+
+  /* ─── Price Tag — Hiển thị giá nổi bật ─── */
+  .price-tag {
+    font-weight: 700;
+    color: var(--color-secondary);
+    font-size: 1.125rem;
+  }
+
+  /* ─── Badge Gradient — Badge nổi bật với gradient vàng ─── */
+  .badge-featured {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-400),
+      var(--color-primary-300)
+    );
+    color: var(--color-primary-900);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.625rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ─── Divider — Đường kẻ phân cách tinh tế ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 1rem 0;
+  }
+
+  /* ─── Skeleton Loading — Nền placeholder khi đang load ─── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-2) 25%,
+      var(--color-surface-1) 50%,
+      var(--color-surface-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 }
