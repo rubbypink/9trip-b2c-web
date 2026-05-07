@@ -218,4 +218,5 @@ ${sample}`;
 	}
 }
 
-export default NINE_TRIP_INFO;
+// [DEAD CODE] Default export — NINE_TRIP_INFO is used internally but never imported as default
+// export default NINE_TRIP_INFO;

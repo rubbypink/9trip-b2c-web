@@ -1,0 +1,9 @@
+[    1788ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.ivivu.com/glyphicons-halflings-regular.b70781972ce7320b.woff2:0
+[    1889ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.ivivu.com/glyphicons-halflings-regular.4ba85deaf3670942.woff:0
+[    1989ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.ivivu.com/glyphicons-halflings-regular.009b407a9881be10.ttf:0
+[    2908ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.ivivu.com/Roboto-Regular.a5023d7b0e4feb5d.ttf:0
+[    4308ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://metrics.ivivu.com/_/service_worker/63b0/sw_iframe.html?origin=https%3A%2F%2Fwww.ivivu.com&1p=1:0
+[    5389ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://www.ivivu.com/Roboto-Bold.ff2763127e873d16.ttf:0
+[    5420ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ha-long/12:0
+[    5420ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ha-long/12:0
+[    5420ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ha-long/12:0

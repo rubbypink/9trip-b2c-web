@@ -57,7 +57,7 @@ export async function closeSession() {
 // Command Execution
 // ============================================================================
 
-async function runCommand(command, args = [], options = {}) {
+export async function runCommand(command, args = [], options = {}) {
   const cmd = `agent-browser ${command} ${args.join(' ')}`;
   
   const execOptions = {
@@ -79,22 +79,23 @@ async function runCommand(command, args = [], options = {}) {
   }
 }
 
-function runCommandSync(command, args = []) {
-  const cmd = `agent-browser ${command} ${args.join(' ')}`;
-  
-  try {
-    return execSync(cmd, {
-      encoding: 'utf-8',
-      timeout: 600000, // 10 minutes
-      env: {
-        ...process.env,
-        AGENT_BROWSER_SESSION_NAME: currentSession || generateSessionName(),
-      },
-    });
-  } catch (error) {
-    throw new Error(`agent-browser sync command failed: ${error.message}`);
-  }
-}
+// [DEAD CODE] runCommandSync — sync variant of runCommand, never called anywhere
+// function runCommandSync(command, args = []) {
+//   const cmd = `agent-browser ${command} ${args.join(' ')}`;
+//   
+//   try {
+//     return execSync(cmd, {
+//       encoding: 'utf-8',
+//       timeout: 600000, // 10 minutes
+//       env: {
+//         ...process.env,
+//         AGENT_BROWSER_SESSION_NAME: currentSession || generateSessionName(),
+//       },
+//     });
+//   } catch (error) {
+//     throw new Error(`agent-browser sync command failed: ${error.message}`);
+//   }
+// }
 
 // ============================================================================
 // Navigation & Basic Operations
@@ -102,6 +103,9 @@ function runCommandSync(command, args = []) {
 
 export async function openPage(url, options = {}) {
   const args = [url];
+  if (options.headed) {
+    args.push('--headed');
+  }
   if (options.waitForLoad !== false) {
     args.push('--wait-for-load');
   }
@@ -283,7 +287,8 @@ export async function sleep(ms) {
 
 export async function waitForFunction(fn, timeout = 25000) {
   try {
-    await runCommand('wait', ['--fn', fn], { timeout });
+    const escapedFn = `'${fn.replace(/'/g, "'\\''")}'`;
+    await runCommand('wait', ['--fn', escapedFn], { timeout, throwOnError: false });
     return true;
   } catch (e) {
     return false;
@@ -714,13 +719,13 @@ export async function extractChildPricesPerTier(tierInfo = []) {
 export async function extractActivityPage(url, options = {}) {
   // Check if this is iVIVU and use specialized extraction
   if (url.includes('ivivu.com')) {
-    console.log('[Activity Scraper] Using iVIVU specialized extraction v2');
+    console.log('[Activity Scraper] Using iVIVU specialized extraction v3');
     return extractIvivuActivityPrices(url, options);
   }
   
   await initSession();
   try {
-    await openPage(url);
+    await openPage(url, { headed: options.headed });
     await waitForNetworkIdle(3000);
 
     // Accept cookie + scroll to reveal lazy content
@@ -901,23 +906,26 @@ function parsePricingFromRawText(text, tierName, index) {
 }
 
 /**
- * Extract iVIVU activity prices v2 — optimized with fast clicking and Node.js parsing.
+ * Extract iVIVU activity prices v3 — correct .ticket-item selectors with dynamic button waiting.
  *
- * Optimizations over v1:
- * - Native sleep (100ms) instead of agent-browser wait (2s) between buttons
- * - Single evaluate calls for scroll+click, btn-more, and extraction
- * - waitForSelector only on last button (not every button)
- * - Regex parsing in Node.js (avoids escaping issues in evaluate context)
- * - Chunked streaming via onChunk callback
- * - Parallel extraction support via buttonRange (startIndex/endIndex)
+ * DOM structure (iVIVU):
+ * - Container: .ticket-item (not card/item/package)
+ * - Title: .ticket-name
+ * - Price: .promo-price (adult price visible without interaction)
+ * - Desktop "Chọn" button: .button-choose .btn-action (15 desktop + 15 mobile duplicates)
+ * - After click: panel expands with calendar (.tkn__package--container) + quantity selectors
+ * - btn-more buttons appear inside ticket-item after expansion
+ * - .bkt__tag--time-available element populates after expansion
  *
  * Flow:
  * 1. Load page, dismiss cookie, scroll to reveal tickets
- * 2. Count all "Chọn" / btn-choose buttons
- * 3. For each button: scroll+click → 500ms wait → click btn-more → extract raw text
- * 4. Only on last button: poll for '.tkn__quantity--box .price-panel' selector
- * 5. Parse all prices in Node.js from raw text
- * 6. Stream chunks via onChunk callback every chunkSize tiers
+ * 2. Wait for "Chọn" buttons to appear dynamically
+ * 3. For each .ticket-item: extract tierName + adultPrice (already visible in .promo-price)
+ * 4. Click "Chọn" → wait 500ms → wait for .ticket-item .bkt__tag--time-available to have non-empty text
+ * 5. Click all btn-more buttons inside the ticket-item (single evaluate with sync clicks)
+ * 6. Wait 500ms for DOM to settle, extract full ticket-item innerText
+ * 7. Parse pricing in Node.js from the extracted text
+ * 8. Stream chunks via onChunk callback every chunkSize tiers
  *
  * @param {string} url - iVIVU activity URL
  * @param {Object} [options] - Extraction options
@@ -925,22 +933,31 @@ function parsePricingFromRawText(text, tierName, index) {
  * @param {number} [options.endIndex] - Last button index exclusive (defaults to all)
  * @param {number} [options.chunkSize=2] - Number of tiers per chunk callback
  * @param {Function} [options.onChunk] - Callback receiving partial pricing data chunks
+ * @param {boolean} [options.headed=false] - Show browser window for debugging
  * @returns {Promise<Object>} Extracted pricing data for all processed tiers
  */
 export async function extractIvivuActivityPrices(url, options = {}) {
   await initSession();
   const allPricingData = [];
-  const { startIndex = 0, endIndex, chunkSize = 2, onChunk } = options;
+  const { startIndex = 0, endIndex, chunkSize = 2, onChunk, headed = false } = options;
   const nativeSleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   try {
     // Phase 1: Load page and prepare
-    await openPage(url);
+    // Use stealth args to avoid bot detection (--disable-blink-features + real user-agent)
+    const stealthArgs = [
+      `--args "${'--disable-blink-features=AutomationControlled,--no-sandbox'}"`,
+      `--user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"`,
+      url,
+      '--wait-for-load',
+    ];
+    await runCommand('open', stealthArgs);
+    await runCommand('set', ['viewport', '1920', '1080']);
     await waitForNetworkIdle(5000);
     await clickByText('Đồng ý', { optional: true });
     await clickByText('Accept', { optional: true });
 
-    // Scroll thoroughly to reveal all ticket sections and lazy-loaded gallery images
+    // Scroll thoroughly to reveal all ticket sections and lazy-loaded content
     await runCommand('scroll', ['down', '1000']);
     await nativeSleep(2000);
     await runCommand('scroll', ['down', '1000']);
@@ -948,206 +965,166 @@ export async function extractIvivuActivityPrices(url, options = {}) {
     await runCommand('scroll', ['up', '2000']);
     await nativeSleep(1000);
 
-    // Phase 2: Count all "Chọn" buttons via single evaluate
-    const btnCountRaw = await evaluate(
-      '(function() {' +
-      'var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
-      'var count = 0;' +
-      'for (var i = 0; i < btns.length; i++) {' +
-      '  var t = (btns[i].textContent || "").trim();' +
-      '  var c = typeof btns[i].className === "string" && btns[i].className.includes("btn-choose");' +
-      '  if (t.startsWith("Chọn") || c) count++;' +
-      '}' +
-      'return count;' +
-      '})()'
+    // Phase 2: Wait for "Chọn" buttons to appear dynamically, then count ticket-items
+    await waitForFunction(
+      "document.querySelectorAll('.button-choose .btn-action').length > 0",
+      10000
     );
 
-    const totalBtns = parseInt(btnCountRaw, 10) || 0;
-    const effectiveEnd = endIndex !== undefined ? Math.min(endIndex, totalBtns) : totalBtns;
-    console.log(`[iVIVU v2] Found ${totalBtns} buttons, processing range [${startIndex}, ${effectiveEnd})`);
+    const itemCountRaw = await evaluate(
+      "(function(){return document.querySelectorAll('.ticket-item').length;})()"
+    );
+    const totalItems = parseInt(itemCountRaw, 10) || 0;
+    const effectiveEnd = endIndex !== undefined ? Math.min(endIndex, totalItems) : totalItems;
+    console.log('[iVIVU v3] Found ' + totalItems + ' ticket-items, processing range [' + startIndex + ', ' + effectiveEnd + ')');
 
-    if (totalBtns === 0) {
-      console.log('[iVIVU v2] No buttons found, returning empty pricing');
+    if (totalItems === 0) {
+      console.log('[iVIVU v3] No ticket-items found, returning empty pricing');
     }
 
-    // Phase 3: Process each button sequentially
+    // Phase 3: Process each ticket-item sequentially
     let chunkBuffer = [];
 
     for (let i = startIndex; i < effectiveEnd; i++) {
-      const btnNum = i + 1;
+      const itemNum = i + 1;
 
-      // Step A: Scroll to and click the ith "Chọn" button
-      const clickRes = await evaluate(
-        '(function() {' +
-        'var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
-        'var chooseBtns = [];' +
-        'for (var j = 0; j < btns.length; j++) {' +
-        '  var t = (btns[j].textContent || "").trim();' +
-        '  var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
-        '  if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
-        '}' +
-        'var target = chooseBtns[' + i + '];' +
-        'if (!target) return JSON.stringify({ status: "not-found" });' +
-        'target.scrollIntoView({ behavior: "instant", block: "center" });' +
-        'target.click();' +
-        'var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], .ivu-shadow") || target.parentElement;' +
-        'var titleEl = card ? card.querySelector("h3, h4, h5, [class*=\\"title\\"], [class*=\\"name\\"]") : null;' +
-        'return JSON.stringify({ status: "clicked", tierName: titleEl ? titleEl.textContent.trim() : "" });' +
-        '})()'
+      // Step A: Extract tier name and adult price (visible without clicking)
+      const infoRaw = await evaluate(
+        "(function(){" +
+        "var items=document.querySelectorAll('.ticket-item');" +
+        "var it=items[" + i + "];" +
+        "if(!it)return JSON.stringify({status:'not-found'});" +
+        "var tn=it.querySelector('.ticket-name');" +
+        "var pp=it.querySelector('.promo-price');" +
+        "return JSON.stringify({" +
+        "  tierName:tn?tn.innerText.trim():''," +
+        "  adultPriceText:pp?pp.innerText.trim():''" +
+        "});" +
+        "})()"
       );
 
-      let tierName = `Tier ${btnNum}`;
+      let tierName = 'Tier ' + itemNum;
+      let preAdultPrice = null;
       try {
-        let parsed = JSON.parse(clickRes || '{}');
+        let parsed = JSON.parse(infoRaw || '{}');
         if (typeof parsed === 'string') parsed = JSON.parse(parsed);
         if (parsed.status === 'not-found') {
-          console.log(`[iVIVU v2] Button ${btnNum} not found, skipping`);
+          console.log('[iVIVU v3] Ticket-item ' + itemNum + ' not found, skipping');
           continue;
         }
         if (parsed.tierName) tierName = parsed.tierName;
-      } catch (e) {
-        // Fallback
+        if (parsed.adultPriceText) {
+          preAdultPrice = parseInt(parsed.adultPriceText.replace(/[.,]/g, ''), 10);
+          if (isNaN(preAdultPrice)) preAdultPrice = null;
+        }
+      } catch (e) { /* fallback */ }
+
+      // Step B: Click the "Chọn" button for this ticket-item
+      await evaluate(
+        "(function(){" +
+        "var its=document.querySelectorAll('.ticket-item');" +
+        "var it=its[" + i + "];" +
+        "if(!it)return 'not-found';" +
+        "var btn=it.querySelector('.button-choose .btn-action');" +
+        "if(!btn)return 'no-btn';" +
+        "btn.scrollIntoView({behavior:'instant',block:'center'});" +
+        "btn.click();" +
+        "return 'clicked';" +
+        "})()"
+      );
+
+      // Step C: Wait 500ms for panel to start expanding
+      await nativeSleep(500);
+
+      // Step D: Wait for .bkt__tag--time-available to have non-empty text content
+      // (this element indicates the availability data has loaded)
+      await waitForFunction(
+        "(function(){" +
+        "var its=document.querySelectorAll('.ticket-item');" +
+        "var it=its[" + i + "];" +
+        "if(!it)return false;" +
+        "var bkt=it.querySelector('.bkt__tag--time-available');" +
+        "if(!bkt)return false;" +
+        "var txt=(bkt.textContent||bkt.innerText||'').trim();" +
+        "return txt.length>0;" +
+        "})()",
+        5000
+      );
+
+      // Step E: Inject data-agent into .panel-open for CDP-native clicks
+      const agentState = injectDataAgentSync();
+
+      // Step F: CDP-native clicks — btn-less first, then btn-more
+      if (agentState && agentState.hasDateToClick) {
+        await runCommand('click', ["[data-agent='target-date']"], { throwOnError: false, timeout: 5000 });
+        await nativeSleep(1000);
       }
 
-      // Step B: Wait for panel to expand
-      await nativeSleep(1000);
+      if (agentState && agentState.itemsToClick && agentState.itemsToClick.length > 0) {
+        for (const boxIdx of agentState.itemsToClick) {
+          // Click btn-less first (decrement về minimum)
+          await runCommand('click', [`"[data-agent='btn-less-${boxIdx}']"`], { throwOnError: false, timeout: 3000 });
+          await nativeSleep(500);
 
-      // Step C: Click the "Chọn" button to expand the card, then click btn-more inside
-      const clickResult = await evaluate(
-        '(function() {' +
-        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
-        '  var chooseBtns = [];' +
-        '  for (var j = 0; j < btns.length; j++) {' +
-        '    var t = (btns[j].textContent || "").trim();' +
-        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
-        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
-        '  }' +
-        '  var target = chooseBtns[' + i + '];' +
-        '  if (!target) return "not-found";' +
-        '  target.click();' +
-        '  return "clicked";' +
-        '})()'
-      );
-      
-      await nativeSleep(500);
-      
-      // Step D: Find and click btn-more buttons WITHIN the expanded card
-      await evaluate(
-        '(function() {' +
-        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
-        '  var chooseBtns = [];' +
-        '  for (var j = 0; j < btns.length; j++) {' +
-        '    var t = (btns[j].textContent || "").trim();' +
-        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
-        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
-        '  }' +
-        '  var target = chooseBtns[' + i + '];' +
-        '  if (!target) return "0";' +
-        '  ' +
-        '  // Find the parent card/container' +
-        '  var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], [class*=\\"tier\\"], .ivu-shadow") || target.parentElement.parentElement;' +
-        '  if (!card) return "0";' +
-        '  ' +
-        '  // Find btn-more buttons INSIDE this card' +
-        '  var mores = card.querySelectorAll(".btn-more, [class*=\\"btn-more\\"]");' +
-        '  var clicked = 0;' +
-        '  for (var k = 0; k < mores.length; k++) {' +
-        '    if (mores[k].offsetParent !== null) {' +
-        '      mores[k].click();' +
-        '      clicked++;' +
-        '    }' +
-        '  }' +
-        '  return String(clicked);' +
-        '})()'
-      );
-      
-      await nativeSleep(500);
-      
-      // Step E: Extract text from the expanded card
-      const tierText = await evaluate(
-        '(function() {' +
-        '  var btns = document.querySelectorAll("button, a, [role=\\"button\\"]");' +
-        '  var chooseBtns = [];' +
-        '  for (var j = 0; j < btns.length; j++) {' +
-        '    var t = (btns[j].textContent || "").trim();' +
-        '    var c = typeof btns[j].className === "string" && btns[j].className.includes("btn-choose");' +
-        '    if (t.startsWith("Chọn") || c) chooseBtns.push(btns[j]);' +
-        '  }' +
-        '  var target = chooseBtns[' + i + '];' +
-        '  if (!target) return "";' +
-        '  ' +
-        '  // Get expanded content - look for next sibling or parent container' +
-        '  var card = target.closest("[class*=\\"card\\"], [class*=\\"item\\"], [class*=\\"package\\"], [class*=\\"product\\"], [class*=\\"tier\\"], .ivu-shadow") || target.parentElement.parentElement;' +
-        '  if (card) {' +
-        '    // Check for expanded content in next sibling (accordion pattern)' +
-        '    var next = card.nextElementSibling;' +
-        '    if (next && next.innerText.length > card.innerText.length * 0.5) {' +
-        '      return card.innerText + "\\n" + next.innerText;' +
-        '    }' +
-        '    return card.innerText;' +
-        '  }' +
-        '  return "";' +
-        '})()'
-      );
+          // Click btn-more (increment lên 1) → trigger API price
+          await runCommand('click', [`"[data-agent='btn-more-${boxIdx}']"`], { throwOnError: false, timeout: 3000 });
+          await nativeSleep(3000);
+        }
+      }
 
-      // Step F: Parse pricing from expanded tier text using regex
-      let tierPricing = { index: i, tierName, adultPrice: null, childPrice: null, infantPrice: null, currency: 'VND' };
-      try {
-        const text = tierText || '';
-        
-        // Extract all price-like numbers (VND format: 1.254.000 or 986.000)
-        const priceMatches = text.match(/\d{1,3}(?:[.,]\d{3})+/g) || [];
-        const prices = priceMatches.map(p => parseInt(p.replace(/[.,]/g, ''), 10)).filter(p => p > 10000);
-        
-        // Remove duplicates and sort
-        const uniquePrices = [...new Set(prices)].sort((a, b) => a - b);
-        
-        // The main price is the one right before "Chọn" button
-        if (uniquePrices.length > 0) {
-          const chooseMatch = text.match(/(\d{1,3}(?:[.,]\d{3})+)\s*Chọn/);
-          if (chooseMatch) {
-            tierPricing.adultPrice = parseInt(chooseMatch[1].replace(/[.,]/g, ''), 10);
-          } else {
-            tierPricing.adultPrice = uniquePrices[0];
+      // Step G: Extract prices from .price-panel
+      const panelData = extractPricePanelSync();
+
+      // Step H: Map panel data to tier pricing
+      let tierPricing = parsePricingFromRawText('', tierName, i);
+      
+      if (panelData) {
+        // Map known key names to pricing fields
+        for (const [key, value] of Object.entries(panelData)) {
+          const normalizedKey = key.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          const priceVal = parseInt((value || '').replace(/[.\sđ]/g, ''), 10) || null;
+
+          if (normalizedKey.includes('nguoi lon') || normalizedKey.includes('adult')) {
+            tierPricing.adultPrice = priceVal;
+          } else if (normalizedKey.includes('tre em') || normalizedKey.includes('child') || normalizedKey.includes('tre')) {
+            tierPricing.childPrice = priceVal;
+          } else if (normalizedKey.includes('em be') || normalizedKey.includes('infant') || normalizedKey.includes('em')) {
+            tierPricing.infantPrice = priceVal;
           }
         }
-        
-        // Check for child/infant mentions and assign additional prices
-        const hasChild = /trẻ\s*em|100\s*-\s*140\s*cm/i.test(text);
-        const hasInfant = /em\s*bé|under\s*100|dưới\s*100|ngườí\s*lớn\s*tuổi|70\s*tuổi/i.test(text);
-        
-        if (uniquePrices.length > 1) {
-          // Additional prices after adult price
-          tierPricing.childPrice = uniquePrices[1];
-          if (uniquePrices.length > 2) {
-            tierPricing.infantPrice = uniquePrices[2];
-          }
-        }
-        
-      } catch (e) {
-        console.log(`[iVIVU v2] Parse error button ${btnNum}: ${e.message}`);
+      }
+
+      // Fallback: if adultPrice still null, use pre-extracted value from .promo-price
+      if (tierPricing.adultPrice === null && preAdultPrice !== null && preAdultPrice > 0) {
+        tierPricing.adultPrice = preAdultPrice;
       }
 
       allPricingData.push(tierPricing);
-      console.log(`[iVIVU v2] ${btnNum}/${effectiveEnd}: "${tierPricing.tierName}" — Adult: ${tierPricing.adultPrice}, Child: ${tierPricing.childPrice}, Infant: ${tierPricing.infantPrice}`);
+      console.log(
+        '[iVIVU v3] ' + itemNum + '/' + effectiveEnd + ': "' + tierPricing.tierName +
+        '" — Adult: ' + tierPricing.adultPrice +
+        ', Child: ' + tierPricing.childPrice +
+        ', Infant: ' + tierPricing.infantPrice
+      );
 
-      // Step G: Chunked streaming callback
+      // Step I: Chunked streaming callback
       chunkBuffer.push(tierPricing);
       if (onChunk && chunkBuffer.length >= chunkSize) {
         onChunk([...chunkBuffer]);
         chunkBuffer = [];
       }
 
-      // Step H: Close modal/popup if exists
+      // Step J: Close/collapse the expanded panel
       await evaluate(
-        '(function() {' +
-        'var closeBtn = document.querySelector("[class*=\\"close\\"], .btn-close, [aria-label=\\"Close\\"]");' +
-        'if (closeBtn) { closeBtn.click(); return "closed"; }' +
-        'document.body.click();' +
-        'return "body-clicked";' +
-        '})()'
+        "(function(){" +
+        "var cls=document.querySelectorAll('.btn-close, .close, .modal-close');" +
+        "for(var k=0;k<cls.length;k++){" +
+        "  if(cls[k].offsetParent!==null){cls[k].click();return 'closed';}" +
+        "}" +
+        "document.body.click();" +
+        "return 'body-clicked';" +
+        "})()"
       );
-
       await nativeSleep(500);
     }
 
@@ -1157,11 +1134,11 @@ export async function extractIvivuActivityPrices(url, options = {}) {
     }
 
     // Phase 4: Extract page info
-    const pageText = await evaluate('document.body.innerText');
-    const pageTitle = await evaluate('document.title');
-    const pageUrl = await evaluate('document.location.href');
+    const pageText = await evaluate("document.body.innerText");
+    const pageTitle = await evaluate("document.title");
+    const pageUrl = await evaluate("document.location.href");
 
-    console.log(`[iVIVU v2] Extraction complete: ${allPricingData.length} tiers extracted`);
+    console.log('[iVIVU v3] Extraction complete: ' + allPricingData.length + ' tiers extracted');
 
     return {
       url,
@@ -1176,6 +1153,107 @@ export async function extractIvivuActivityPrices(url, options = {}) {
   } finally {
     await closeSession();
   }
+}
+
+// ============================================================================
+// CDP-native click helpers (data-agent + eval --stdin pattern)
+// ============================================================================
+
+/**
+ * Pipe a JS script to agent-browser eval --stdin and get parsed JSON result.
+ * Uses --session flag explicitly for reliable session binding.
+ */
+export function runEvalStdinSync(jsCode, options = {}) {
+  const cmd = `agent-browser eval --stdin 2>/dev/null`;
+
+  try {
+    const stdout = execSync(cmd, {
+      input: jsCode,
+      encoding: 'utf-8',
+      timeout: options.timeout || 120000,
+      maxBuffer: 10 * 1024 * 1024,
+      shell: '/bin/bash',
+      env: {
+        ...process.env,
+        AGENT_BROWSER_SESSION_NAME: currentSession || process.env.AGENT_BROWSER_SESSION_NAME || generateSessionName(),
+      },
+    });
+    const trimmed = stdout.trim();
+    return trimmed ? JSON.parse(trimmed) : null;
+  } catch (e) {
+    const out = e.stdout || '';
+    if (out) {
+      try { return JSON.parse(out.trim()); } catch (_) {}
+    }
+    return null;
+  }
+}
+
+/**
+ * Inject data-agent attributes into .panel-open elements for CDP-native clicking.
+ * Returns { hasDateToClick, itemsToClick[] }.
+ */
+export function injectDataAgentSync() {
+  const script = `new Promise((resolve) => {
+    var state = { hasDateToClick: false, itemsToClick: [] };
+    var panel = document.querySelector('.panel-open');
+    if (!panel) return resolve(state);
+
+    var dateEl = panel.querySelector('.day-item.is-today')
+              || panel.querySelector('.day-item.is-start-date')
+              || panel.querySelector('.day-item:not(.is-disabled)');
+    if (dateEl) {
+      dateEl.setAttribute('data-agent', 'target-date');
+      state.hasDateToClick = true;
+    }
+
+    var boxes = panel.querySelectorAll('.tkn__quantity--box');
+    boxes.forEach(function(box, i) {
+      var btnMore = box.querySelector('.btn-more');
+      var btnLess = box.querySelector('.btn-less');
+      var priceEl = box.querySelector('.price-panel');
+      if (btnMore) btnMore.setAttribute('data-agent', 'btn-more-' + i);
+      if (btnLess) btnLess.setAttribute('data-agent', 'btn-less-' + i);
+      var priceText = priceEl ? priceEl.textContent.trim() : '';
+      if (priceText === '') state.itemsToClick.push(i);
+    });
+    resolve(state);
+  });`;
+  return runEvalStdinSync(script);
+}
+
+/**
+ * Snapshots .price-panel from all .tkn__quantity--box after CDP clicks.
+ * Falls back to dividing by qty if qty > 1 (btn-less disabled).
+ */
+export function extractPricePanelSync() {
+  const script = `new Promise((resolve) => {
+    function fmtPrice(n) {
+      return n.toString().replace(/(\\d)(?=(\\d{3})+(?!\\d))/g, '$1.') + ' ';
+    }
+    var data = {};
+    var boxes = document.querySelectorAll('.panel-open .tkn__quantity--box');
+    boxes.forEach(function(box) {
+      var nameEl = box.querySelector('.name');
+      var priceEl = box.querySelector('.price-panel');
+      var qtyEl = box.querySelector('.quantity');
+      if (nameEl && priceEl) {
+        var key = nameEl.textContent.trim().replace(/\\s+/g, ' ');
+        var value = priceEl.textContent.trim();
+        var qty = qtyEl ? parseInt(qtyEl.textContent.trim(), 10) : 1;
+        if (value && qty > 1) {
+          var m = value.match(/([\\d.]+)/);
+          if (m) {
+            var total = parseInt(m[1].replace(/\\./g, ''), 10);
+            if (total > 0) value = fmtPrice(Math.round(total / qty));
+          }
+        }
+        data[key] = value || 'Khong tai duoc gia';
+      }
+    });
+    resolve(data);
+  });`;
+  return runEvalStdinSync(script);
 }
 
 export async function healthCheck() {
@@ -1196,6 +1274,7 @@ export async function healthCheck() {
 export default {
   initSession,
   closeSession,
+  runCommand,
   openPage,
   getSnapshot,
   clickElement,
@@ -1230,5 +1309,8 @@ export default {
   extractIvivuActivityPrices,
   extractChildPricesPerTier,
   findAndClickPriceButtons,
+  runEvalStdinSync,
+  injectDataAgentSync,
+  extractPricePanelSync,
   healthCheck,
 };

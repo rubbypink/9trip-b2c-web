@@ -108,16 +108,10 @@ export async function writeJsonToTemp(data, slug, prefix) {
   return filepath;
 }
 
-/**
- * Read JSON data from .temp/ directory
- * @param {string} slug
- * @param {string} prefix
- * @returns {Promise<object|null>}
- */
+// readJsonFromTemp
 export async function readJsonFromTemp(slug, prefix) {
   const filepath = path.join(PROJECT_ROOT, '.temp', `${prefix}-${slug}.json`);
   if (!fs.existsSync(filepath)) return null;
-
   try {
     const content = fs.readFileSync(filepath, 'utf-8');
     return JSON.parse(content);
@@ -126,12 +120,7 @@ export async function readJsonFromTemp(slug, prefix) {
   }
 }
 
-/**
- * Clean up temp file
- * @param {string} slug
- * @param {string} prefix
- * @returns {Promise<void>}
- */
+// cleanTempFile
 export async function cleanTempFile(slug, prefix) {
   const filepath = path.join(PROJECT_ROOT, '.temp', `${prefix}-${slug}.json`);
   if (fs.existsSync(filepath)) {

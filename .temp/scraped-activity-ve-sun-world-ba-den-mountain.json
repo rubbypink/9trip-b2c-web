@@ -1,0 +1,153 @@
+{
+  "slug": "ve-sun-world-ba-den-mountain",
+  "title": "Vé Sun World Bà Đen Tây Ninh | Cáp Treo Núi Bà Đen Giá Tốt\"",
+  "excerpt": "",
+  "description": "",
+  "featuredImage": "",
+  "gallery": [],
+  "duration": "",
+  "durationDetail": "",
+  "location": "Phú Quốc",
+  "locationDetail": "",
+  "openingHours": "",
+  "capacity": null,
+  "highlights": [],
+  "included": [],
+  "excluded": [],
+  "categories": [
+    "Tour Trọn Gói",
+    "Du lịch Phú Quốc"
+  ],
+  "tags": [
+    "Phú Quốc",
+    "Tour",
+    "Tour Trọn Gói",
+    "Du lịch Phú Quốc"
+  ],
+  "pricing": {
+    "basePrice": 145000,
+    "adultPrice": 145000,
+    "childPrice": null,
+    "currency": "VND",
+    "tiers": [
+      {
+        "id": "price_ve-cap-treo-dinh-van-son-chua-hang-khu-hoi",
+        "name": "Vé Cáp Treo Đỉnh Vân Sơn & Chùa Hang (Khứ Hồi)",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_ve-cap-treo-dinh-van-son-khu-hoi",
+        "name": "Vé Cáp Treo Đỉnh Vân Sơn (Khứ Hồi)",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_ve-cap-treo-chua-hang-khu-hoi",
+        "name": "Vé Cáp Treo Chùa Hang (Khứ Hồi)",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_ve-cap-treo-chua-hang-1-chieu",
+        "name": "Vé Cáp Treo Chùa Hang (1 chiều)",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_trong-tuan-combo-cap-treo-dinh-van-son-buffet-trua-tu-1030-1200",
+        "name": "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_trong-tuan-combo-cap-treo-dinh-van-son-chua-hang-buffet-trua-tu-1030-1130",
+        "name": "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 11:30",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_trong-tuan-combo-cap-treo-dinh-van-son-chua-hang-buffet-trua-tu-1200-1400",
+        "name": "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_cuoi-tuan-ngay-le-combo-cap-treo-dinh-van-son-buffet-trua-tu-1030-1200",
+        "name": "[Cuối Tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_cuoi-tuan-ngay-le-combo-cap-treo-dinh-van-son-chua-hang-buffet-trua-tu-1030-1200",
+        "name": "[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 12:00",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_cuoi-tuan-ngay-le-combo-cap-treo-dinh-van-son-chua-hang-buffet-trua-tu-1200-1400",
+        "name": "[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00",
+        "description": "",
+        "adultPrice": 0,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      }
+    ]
+  },
+  "childrenPolicy": "",
+  "cancellationPolicy": "",
+  "recommendation": "",
+  "notes": [],
+  "purchaseGuide": [],
+  "faq": [],
+  "ratingAverage": 0,
+  "ratingCount": 0,
+  "map": null,
+  "phone": "",
+  "email": "",
+  "website": "",
+  "reviews": {},
+  "isFeatured": false,
+  "status": "active",
+  "createdAt": "2026-05-07T04:05:38.227Z",
+  "updatedAt": "2026-05-07T04:05:38.227Z",
+  "_sourceUrl": "https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3"
+}

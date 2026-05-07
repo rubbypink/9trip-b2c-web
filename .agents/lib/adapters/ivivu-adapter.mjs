@@ -555,31 +555,22 @@ export function processLazyContent(pageText) {
 // Enhanced Playwright Extraction
 // ============================================================================
 
-export function extractFromDOMPlaywright() {
-  const result = extractFromDOM();
-  const body = document.body.innerText;
-
-  // Map extraction
-  result.map = { lat: null, lng: null, embedUrl: null };
-  const mapIframe = document.querySelector('iframe[src*="google.com/maps"], iframe[src*="maps.google"]');
-  if (mapIframe?.src) {
-    result.map.embedUrl = mapIframe.src;
-    const coordMatch = mapIframe.src.match(/!2d(-?\d+\.?\d*)!3d(-?\d+\.?\d*)/);
-    if (coordMatch) {
-      result.map.lng = parseFloat(coordMatch[1]);
-      result.map.lat = parseFloat(coordMatch[2]);
-    }
-  }
-
-  // Contact info
-  result.contactInfo = { phone: '', email: '', bookingUrl: '' };
-  const phoneEl = document.querySelector('a[href^="tel:"]');
-  if (phoneEl) {
-    result.contactInfo.phone = phoneEl.href.replace('tel:', '');
-  }
-
-  return result;
-}
+// [DEAD CODE] — extractFromDOMPlaywright: Never imported by any skill script
+// export function extractFromDOMPlaywright() {
+//   const result = extractFromDOM();
+//   const body = document.body.innerText;
+//   result.map = { lat: null, lng: null, embedUrl: null };
+//   const mapIframe = document.querySelector('iframe[src*="google.com/maps"], iframe[src*="maps.google"]');
+//   if (mapIframe?.src) {
+//     result.map.embedUrl = mapIframe.src;
+//     const coordMatch = mapIframe.src.match(/!2d(-?\d+\.?\d*)!3d(-?\d+\.?\d*)/);
+//     if (coordMatch) { result.map.lng = parseFloat(coordMatch[1]); result.map.lat = parseFloat(coordMatch[2]); }
+//   }
+//   result.contactInfo = { phone: '', email: '', bookingUrl: '' };
+//   const phoneEl = document.querySelector('a[href^="tel:"]');
+//   if (phoneEl) result.contactInfo.phone = phoneEl.href.replace('tel:', '');
+//   return result;
+// }
 
 export default { 
   extractFromDOM, 

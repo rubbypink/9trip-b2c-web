@@ -38,6 +38,7 @@ export async function scrapeActivityFromUrl(url, options = {}) {
   if (options.endIndex !== undefined) extractionOpts.endIndex = options.endIndex;
   if (options.chunkSize !== undefined) extractionOpts.chunkSize = options.chunkSize;
   if (options.onChunk) extractionOpts.onChunk = options.onChunk;
+  if (options.headed !== undefined) extractionOpts.headed = options.headed;
 
   const extractResult = await extractActivityPage(url, extractionOpts);
 
@@ -85,7 +86,7 @@ export async function scrapeActivityFromUrl(url, options = {}) {
         id: `price_${slugify(p.tierName || `tier-${idx + 1}`)}`,
         name: p.tierName || `Gói ${idx + 1}`,
         description: p.description || '',
-        basePrice: p.adultPrice || 0,
+        adultPrice: p.adultPrice || 0,
         childPrice: p.childPrice !== null ? p.childPrice : 0,
         infantPrice: p.infantPrice !== null ? p.infantPrice : 0,
         currency: p.currency || 'VND'
@@ -96,8 +97,8 @@ export async function scrapeActivityFromUrl(url, options = {}) {
       // If we have more detailed pricing from iVIVU, use it
       if (scrapeResult.data.pricing.tiers.length === 0 || ivivuTiers.length >= scrapeResult.data.pricing.tiers.length) {
         scrapeResult.data.pricing.tiers = ivivuTiers;
-        // Update basePrice to lowest tier
-        const prices = ivivuTiers.map(t => t.basePrice).filter(p => p > 0);
+        // Update basePrice to lowest adult price
+        const prices = ivivuTiers.map(t => t.adultPrice).filter(p => p > 0);
         if (prices.length > 0) {
           scrapeResult.data.pricing.basePrice = Math.min(...prices);
         }
@@ -153,15 +154,15 @@ export async function scrapeActivityFromText(pageText, url, pageTitle = '', pric
           id: `price_${slugify(p.tierName || `tier-${idx + 1}`)}`,
           name: p.tierName || `Gói ${idx + 1}`,
           description: p.description || '',
-          basePrice: p.adultPrice || 0,
+          adultPrice: p.adultPrice || 0,
           childPrice: p.childPrice !== null ? p.childPrice : 0,
           infantPrice: p.infantPrice !== null ? p.infantPrice : 0,
           currency: p.currency || 'VND'
         })),
       currency: 'VND'
     };
-    // Set basePrice to lowest tier price
-    const prices = rawData.pricing.tiers.map(t => t.basePrice).filter(p => p > 0);
+    // Set basePrice to lowest adult price across tiers
+    const prices = rawData.pricing.tiers.map(t => t.adultPrice).filter(p => p > 0);
     if (prices.length > 0) {
       rawData.pricing.basePrice = Math.min(...prices);
     }

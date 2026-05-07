@@ -123,7 +123,6 @@ async function validateAndCheck(data) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     _sourceUrl: data._sourceUrl || '',
-    _firecrawlCredits: data._firecrawlCredits || 0,
   };
 
   return { activityData, activityId, errors, warnings };
@@ -346,7 +345,7 @@ export async function saveActivityData(inputData) {
     activitySlug: activityId,
     pricingTierCount: tierCount,
     reviewCount,
-    firecrawlCredits: data._firecrawlCredits || 0,
+    sourceUrl: data._sourceUrl || '',
     featuredImageUrl: featuredUrl,
     galleryCount: galleryUrls.length,
     errors: allErrors,
@@ -368,7 +367,6 @@ export async function saveActivityData(inputData) {
   console.log(`  🖼️  Gallery: ${galleryUrls.length} images`);
   console.log(`  💰 Pricing tiers: ${tierCount} (embedded)`);
   console.log(`  💬 Reviews: ${reviewCount}`);
-  console.log(`  🔥 FireCrawl credits: ${result.firecrawlCredits}`);
   console.log(`  ⏱  Time: ${result.timing.durationMs}ms`);
   console.log('='.repeat(60));
 

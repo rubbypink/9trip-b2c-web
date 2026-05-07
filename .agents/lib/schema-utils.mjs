@@ -181,31 +181,18 @@ export function fieldsToListExtractSchema(itemFields, listKey, options = {}) {
 	};
 }
 
-/**
- * Create a simple list item schema from field names.
- * Useful for creating list page schemas quickly.
- * 
- * @param {string[]} fieldNames - Array of field names to include
- * @param {Object} fieldDefinitions - Source field definitions (defaults to string type)
- * @returns {Object} Simple field definitions object
- * 
- * @example
- * const listItemFields = createListItemFields(
- *   ['title', 'url', 'price'],
- *   { title: { type: 'string', description: 'Item name' } }
- * );
- */
-export function createListItemFields(fieldNames, fieldDefinitions = {}) {
-	const fields = {};
-	for (const name of fieldNames) {
-		if (fieldDefinitions[name]) {
-			fields[name] = fieldDefinitions[name];
-		} else {
-			fields[name] = { type: 'string' };
-		}
-	}
-	return fields;
-}
+// [DEAD CODE] — createListItemFields: Never imported by any skill script
+// export function createListItemFields(fieldNames, fieldDefinitions = {}) {
+// 	const fields = {};
+// 	for (const name of fieldNames) {
+// 		if (fieldDefinitions[name]) {
+// 			fields[name] = fieldDefinitions[name];
+// 		} else {
+// 			fields[name] = { type: 'string' };
+// 		}
+// 	}
+// 	return fields;
+// }
 
 // ============================================================================
 // ALIAS EXPORTS (for consistency with new naming convention)
@@ -232,10 +219,11 @@ export const schemaToListExtractSchema = fieldsToListExtractSchema;
 // DEFAULT EXPORT
 // ============================================================================
 
-export default {
-	fieldsToExtractSchema,
-	fieldsToListExtractSchema,
-	createListItemFields,
-	schemaToExtractSchema,
-	schemaToListExtractSchema,
-};
+// [DEAD CODE] Default export — never imported as default by any skill
+// export default {
+// 	fieldsToExtractSchema,
+// 	fieldsToListExtractSchema,
+// 	createListItemFields,
+// 	schemaToExtractSchema,
+// 	schemaToListExtractSchema,
+// };

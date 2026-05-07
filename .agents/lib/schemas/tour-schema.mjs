@@ -653,16 +653,16 @@ export function MAP_TO_FIRESTORE(rawData) {
 // Alias export for convenience
 export { MAP_TO_FIRESTORE as mapTourToFirestore };
 
-// Default export
-export default {
-	TOUR_SCHEMA,
-	TOUR_REQUIRED_FIELDS,
-	TOUR_EXTRACT_SCHEMA,
-	TOUR_EXTRACT_SCHEMA_FLAT,
-	TOUR_LIST_EXTRACT_SCHEMA,
-	TOUR_PRICING_SCHEMA,
-	TOUR_AGENT_PROMPT,
-	MAP_TO_FIRESTORE,
-	mapTourToFirestore: MAP_TO_FIRESTORE,
-	generateSlug,
-};
+// [DEAD CODE] Default export — never imported as default by any skill
+// export default {
+// 	TOUR_SCHEMA,
+// 	TOUR_REQUIRED_FIELDS,
+// 	TOUR_EXTRACT_SCHEMA,
+// 	TOUR_EXTRACT_SCHEMA_FLAT,
+// 	TOUR_LIST_EXTRACT_SCHEMA,
+// 	TOUR_PRICING_SCHEMA,
+// 	TOUR_AGENT_PROMPT,
+// 	MAP_TO_FIRESTORE,
+// 	mapTourToFirestore: MAP_TO_FIRESTORE,
+// 	generateSlug,
+// };

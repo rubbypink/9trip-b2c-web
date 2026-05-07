@@ -2,7 +2,7 @@
  * Firebase Cloud Functions entry point.
  * Registers all function groups: payment webhooks, email notifications, scheduled tasks.
  */
-const dotenv = require('dotenv/config');
+require('dotenv/config');
 const { onRequest } = require('firebase-functions/v2/https');
 const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');

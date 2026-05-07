@@ -1,0 +1,113 @@
+{
+  "slug": "ve-sun-world-phu-quoc-hon-thom",
+  "title": "Đặt Vé Sun World Hòn Thơm – Cáp Treo, Công Viên Nước, Ưu Đãi 2026\"",
+  "excerpt": "",
+  "description": "",
+  "featuredImage": "",
+  "gallery": [],
+  "duration": "",
+  "durationDetail": "",
+  "location": "Phú Quốc",
+  "locationDetail": "",
+  "openingHours": "",
+  "capacity": null,
+  "highlights": [],
+  "included": [],
+  "excluded": [],
+  "categories": [
+    "Tour Trọn Gói",
+    "Du lịch Phú Quốc"
+  ],
+  "tags": [
+    "Phú Quốc",
+    "Tour",
+    "Tour Trọn Gói",
+    "Du lịch Phú Quốc"
+  ],
+  "pricing": {
+    "basePrice": 105000,
+    "adultPrice": 105000,
+    "childPrice": null,
+    "currency": "VND",
+    "tiers": [
+      {
+        "id": "price_cap-treo-khu-hoi-ve-cau-hon-mien-phi",
+        "name": "Cáp Treo Khứ Hồi + Vé Cầu Hôn Miễn Phí",
+        "description": "",
+        "adultPrice": 805000,
+        "childPrice": 670000,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_combo-ve-cap-treo-khu-hoi-buffet-trua-1100-1430-ve-cau-hon-mien-phi",
+        "name": "Combo Vé Cáp Treo Khứ Hồi + Buffet Trưa (11:00 - 14:30) + Vé Cầu Hôn Miễn Phí",
+        "description": "",
+        "adultPrice": 1035000,
+        "childPrice": 825000,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_ve-cau-hon-tu-0700-2300",
+        "name": "Vé Cầu Hôn từ 07:00 - 23:00",
+        "description": "",
+        "adultPrice": 105000,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_the-wow-pass-silver-bac-loi-di-uu-tien",
+        "name": "Thẻ WOW PASS Silver (Bạc) - Lối đi ưu tiên",
+        "description": "",
+        "adultPrice": 291000,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_the-wow-pass-gold-vang-dich-vu-uu-tien",
+        "name": "Thẻ WOW PASS Gold (Vàng) - Dịch vụ ưu tiên",
+        "description": "",
+        "adultPrice": 679000,
+        "childPrice": 0,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      },
+      {
+        "id": "price_buffet-trua-nha-hang-mango-1100-1430",
+        "name": "Buffet Trưa - Nhà Hàng Mango (11:00 - 14:30)",
+        "description": "",
+        "adultPrice": 378000,
+        "childPrice": 281000,
+        "currency": "VND",
+        "discountPercent": 0,
+        "included": []
+      }
+    ]
+  },
+  "childrenPolicy": "",
+  "cancellationPolicy": "",
+  "recommendation": "",
+  "notes": [],
+  "purchaseGuide": [],
+  "faq": [],
+  "ratingAverage": 0,
+  "ratingCount": 0,
+  "map": null,
+  "phone": "",
+  "email": "",
+  "website": "",
+  "reviews": {},
+  "isFeatured": false,
+  "status": "active",
+  "createdAt": "2026-05-07T10:14:58.395Z",
+  "updatedAt": "2026-05-07T10:14:58.395Z",
+  "_sourceUrl": "https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-phu-quoc-hon-thom/19"
+}

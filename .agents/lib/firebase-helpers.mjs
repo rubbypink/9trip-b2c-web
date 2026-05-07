@@ -27,8 +27,8 @@ const PROJECT_ROOT = path.resolve(__dirname, '../../');
  * @returns {string|undefined} Formatted key
  */
 function formatPrivateKey(key) {
-  if (!key) return undefined;
-  return key.replace(/\\n/g, '\n');
+	if (!key) return undefined;
+	return key.replace(/\\n/g, '\n');
 }
 
 /**
@@ -37,29 +37,28 @@ function formatPrivateKey(key) {
  * @returns {void}
  */
 export function loadEnvConfig() {
-  const envPath = path.resolve(PROJECT_ROOT, '.env.local');
-  if (!fs.existsSync(envPath)) return;
+	const envPath = path.resolve(PROJECT_ROOT, '.env.local');
+	if (!fs.existsSync(envPath)) return;
 
-  const envContent = fs.readFileSync(envPath, 'utf-8');
-  for (const line of envContent.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const eqIdx = trimmed.indexOf('=');
-    if (eqIdx === -1) continue;
+	const envContent = fs.readFileSync(envPath, 'utf-8');
+	for (const line of envContent.split('\n')) {
+		const trimmed = line.trim();
+		if (!trimmed || trimmed.startsWith('#')) continue;
+		const eqIdx = trimmed.indexOf('=');
+		if (eqIdx === -1) continue;
 
-    const key = trimmed.slice(0, eqIdx).trim();
-    let value = trimmed.slice(eqIdx + 1).trim();
+		const key = trimmed.slice(0, eqIdx).trim();
+		let value = trimmed.slice(eqIdx + 1).trim();
 
-    // Remove surrounding quotes
-    if ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
+		// Remove surrounding quotes
+		if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+			value = value.slice(1, -1);
+		}
 
-    if (!process.env[key]) {
-      process.env[key] = value;
-    }
-  }
+		if (!process.env[key]) {
+			process.env[key] = value;
+		}
+	}
 }
 
 /**
@@ -67,7 +66,7 @@ export function loadEnvConfig() {
  * @returns {string} Absolute path to service account JSON
  */
 function getServiceAccountPath() {
-  return path.resolve(PROJECT_ROOT, 'tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json');
+	return path.resolve(PROJECT_ROOT, 'tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json');
 }
 
 /**
@@ -76,28 +75,25 @@ function getServiceAccountPath() {
  * @returns {import('firebase-admin').app.App}
  */
 export function initFirebaseApp() {
-  if (admin.apps.length > 0) {
-    return admin.apps[0];
-  }
+	if (admin.apps.length > 0) {
+		return admin.apps[0];
+	}
 
-  const serviceAccountPath = getServiceAccountPath();
-  if (!fs.existsSync(serviceAccountPath)) {
-    throw new Error(`Service account not found: ${serviceAccountPath}`);
-  }
+	const serviceAccountPath = getServiceAccountPath();
+	if (!fs.existsSync(serviceAccountPath)) {
+		throw new Error(`Service account not found: ${serviceAccountPath}`);
+	}
 
-  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
+	const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  // Format private key if needed
-  if (serviceAccount.privateKey) {
-    serviceAccount.privateKey = formatPrivateKey(serviceAccount.privateKey);
-  }
+	// Format private key if needed
+	if (serviceAccount.privateKey) {
+		serviceAccount.privateKey = formatPrivateKey(serviceAccount.privateKey);
+	}
 
-  const app = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'tripphuquoc-db-fs.firebasestorage.app',
-  });
+	const app = admin.initializeApp({ credential: admin.credential.cert(serviceAccount), storageBucket: 'tripphuquoc-db-fs.firebasestorage.app' });
 
-  return app;
+	return app;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,8 +106,8 @@ export function initFirebaseApp() {
  * @returns {import('firebase-admin').firestore.Firestore}
  */
 export function getFirestore() {
-  initFirebaseApp();
-  return admin.firestore();
+	initFirebaseApp();
+	return admin.firestore();
 }
 
 /**
@@ -120,8 +116,8 @@ export function getFirestore() {
  * @returns {import('firebase-admin').storage.Bucket}
  */
 export function getBucket() {
-  initFirebaseApp();
-  return admin.storage().bucket();
+	initFirebaseApp();
+	return admin.storage().bucket();
 }
 
 /**
@@ -131,14 +127,14 @@ export function getBucket() {
  * @returns {Promise<{exists: boolean, id?: string, data?: object}>}
  */
 export async function docExists(collection, slug) {
-  const db = getFirestore();
-  const docRef = db.collection(collection).doc(slug);
-  const snapshot = await docRef.get();
+	const db = getFirestore();
+	const docRef = db.collection(collection).doc(slug);
+	const snapshot = await docRef.get();
 
-  if (snapshot.exists) {
-    return { exists: true, id: slug, data: snapshot.data() };
-  }
-  return { exists: false };
+	if (snapshot.exists) {
+		return { exists: true, id: slug, data: snapshot.data() };
+	}
+	return { exists: false };
 }
 
 /**
@@ -150,60 +146,40 @@ export async function docExists(collection, slug) {
  * @returns {Promise<void>}
  */
 export async function setDoc(collection, docId, data) {
-  const db = getFirestore();
+	const db = getFirestore();
 
-  const docData = {
-    ...data,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
+	const docData = { ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
 
-  // Only add createdAt if document doesn't exist
-  const existing = await db.collection(collection).doc(docId).get();
-  if (!existing.exists) {
-    docData.createdAt = admin.firestore.FieldValue.serverTimestamp();
-  }
+	// Only add createdAt if document doesn't exist
+	const existing = await db.collection(collection).doc(docId).get();
+	if (!existing.exists) {
+		docData.createdAt = admin.firestore.FieldValue.serverTimestamp();
+	}
 
-  await db.collection(collection).doc(docId).set(docData);
+	await db.collection(collection).doc(docId).set(docData);
 }
 
-/**
- * Update an existing document in Firestore.
- * Only updates provided fields, preserves existing data.
- * @param {string} collection - Collection name
- * @param {string} docId - Document ID
- * @param {object} data - Fields to update
- * @returns {Promise<void>}
- */
-export async function updateDoc(collection, docId, data) {
-  const db = getFirestore();
+// [DEAD CODE] — updateDoc: Never imported by any skill script (save scripts use setDoc instead)
+// export async function updateDoc(collection, docId, data) {
+//   const db = getFirestore();
+//   const updateData = {
+//     ...data,
+//     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+//   };
+//   await db.collection(collection).doc(docId).update(updateData);
+// }
 
-  const updateData = {
-    ...data,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
-
-  await db.collection(collection).doc(docId).update(updateData);
-}
-
-/**
- * Find a document by slug field.
- * Queries the collection where slug equals the provided value.
- * @param {string} collection - Collection name
- * @param {string} slug - Slug value to search
- * @returns {Promise<{id: string, data: object}|null>}
- */
-export async function getDocBySlug(collection, slug) {
-  const db = getFirestore();
-  const snapshot = await db.collection(collection)
-    .where('slug', '==', slug)
-    .limit(1)
-    .get();
-
-  if (snapshot.empty) return null;
-
-  const doc = snapshot.docs[0];
-  return { id: doc.id, data: doc.data() };
-}
+// [DEAD CODE] — getDocBySlug: Never imported by any skill script
+// export async function getDocBySlug(collection, slug) {
+//   const db = getFirestore();
+//   const snapshot = await db.collection(collection)
+//     .where('slug', '==', slug)
+//     .limit(1)
+//     .get();
+//   if (snapshot.empty) return null;
+//   const doc = snapshot.docs[0];
+//   return { id: doc.id, data: doc.data() };
+// }
 
 /**
  * Set a document in a subcollection.
@@ -215,18 +191,11 @@ export async function getDocBySlug(collection, slug) {
  * @returns {Promise<void>}
  */
 export async function setSubcollection(parentCollection, parentId, subCollection, docId, data) {
-  const db = getFirestore();
+	const db = getFirestore();
 
-  const docData = {
-    ...data,
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
+	const docData = { ...data, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
 
-  await db.collection(parentCollection)
-    .doc(parentId)
-    .collection(subCollection)
-    .doc(docId)
-    .set(docData);
+	await db.collection(parentCollection).doc(parentId).collection(subCollection).doc(docId).set(docData);
 }
 
 /**
@@ -234,5 +203,5 @@ export async function setSubcollection(parentCollection, parentId, subCollection
  * @returns {import('firebase-admin').firestore.FieldValue}
  */
 export function serverTimestamp() {
-  return admin.firestore.FieldValue.serverTimestamp();
+	return admin.firestore.FieldValue.serverTimestamp();
 }

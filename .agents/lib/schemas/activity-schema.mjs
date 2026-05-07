@@ -149,11 +149,11 @@ export const ACTIVITY_SCHEMA = {
 export const ACTIVITY_REQUIRED_FIELDS = ['slug', 'title'];
 
 // ============================================================================
-// FIRECRAWL EXTRACTION SCHEMA
+// EXTRACTION SCHEMA (for agent-browser based extraction)
 // ============================================================================
 
 /**
- * JSON Schema for Firecrawl activity extraction
+ * JSON Schema for activity extraction
  * Generated from ACTIVITY_SCHEMA
  * @constant {Object}
  */
@@ -176,7 +176,7 @@ const ACTIVITY_LIST_ITEM_SCHEMA = {
 };
 
 /**
- * JSON Schema for Firecrawl activity list page extraction
+ * JSON Schema for activity list page extraction
  * Generated from ACTIVITY_LIST_ITEM_SCHEMA
  * @constant {Object}
  */
@@ -191,7 +191,8 @@ export const ACTIVITY_LIST_EXTRACT_SCHEMA = schemaToListExtractSchema(
 // ============================================================================
 
 /**
- * Agent prompt for Firecrawl activity extraction
+ * Agent extraction configuration for activity data
+ * Defines the fields to extract using agent-browser automation
  * @constant {string}
  */
 export const ACTIVITY_AGENT_PROMPT = `Role: You are a 9Trip B2C activity/tourist attraction data extraction specialist. Extract structured data from this activity page.
@@ -472,7 +473,7 @@ export function MAP_TO_FIRESTORE(rawData) {
 		updatedAt: rawData.updatedAt || new Date().toISOString(),
 
 		// Internal tracking
-		_firecrawlCredits: rawData._firecrawlCredits || 0,
+		_sourceUrl: rawData._sourceUrl || '',
 	};
 
 	return doc;
@@ -481,14 +482,14 @@ export function MAP_TO_FIRESTORE(rawData) {
 // Alias export for convenience
 export { MAP_TO_FIRESTORE as mapActivityToFirestore };
 
-// Default export
-export default {
-	ACTIVITY_SCHEMA,
-	ACTIVITY_REQUIRED_FIELDS,
-	ACTIVITY_EXTRACT_SCHEMA,
-	ACTIVITY_LIST_EXTRACT_SCHEMA,
-	ACTIVITY_AGENT_PROMPT,
-	MAP_TO_FIRESTORE,
-	mapActivityToFirestore: MAP_TO_FIRESTORE,
-	generateSlug,
-};
+// [DEAD CODE] Default export — never imported as default by any skill
+// export default {
+// 	ACTIVITY_SCHEMA,
+// 	ACTIVITY_REQUIRED_FIELDS,
+// 	ACTIVITY_EXTRACT_SCHEMA,
+// 	ACTIVITY_LIST_EXTRACT_SCHEMA,
+// 	ACTIVITY_AGENT_PROMPT,
+// 	MAP_TO_FIRESTORE,
+// 	mapActivityToFirestore: MAP_TO_FIRESTORE,
+// 	generateSlug,
+// };

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * Comprehensive test script for activity-scraper skill (v2).
+ * Comprehensive test script for activity-scraper skill (v3).
  *
  * Covers the FULL pipeline:
- *   Phase 1: Browser extraction (scrapeActivityFromUrl with v2 fast clicking)
+ *   Phase 1: Browser extraction (scrapeActivityFromUrl with v3 .ticket-item selectors)
  *   Phase 2: Data validation (pricing tiers, gallery, metadata)
  *   Phase 3: Image download + WebP conversion (sample of 3 images)
  *   Phase 4: Content sanitization (competitor info replacement)
  *   Phase 5: Firestore save (if Firebase credentials available)
  *
  * Usage:
- *   node test-activity-scraper.mjs [url] [--skip-save] [--skip-images] [--verbose]
+ *   node test-activity-scraper.mjs [url] [--skip-save] [--skip-images] [--verbose] [--no-headed]
  *
  * @module test-activity-scraper
  */
@@ -39,6 +39,7 @@ const url = positional[0] || 'https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun
 const skipSave = args['skip-save'] || false;
 const skipImages = args['skip-images'] || false;
 const verbose = args['verbose'] || false;
+const headed = args['no-headed'] ? false : true;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -74,12 +75,12 @@ function section(title) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 console.log('='.repeat(60));
-console.log('  🧪 Activity Scraper — Comprehensive Test (v2)');
+console.log('  🧪 Activity Scraper — Comprehensive Test (v3)');
 console.log('='.repeat(60));
 console.log(`  URL: ${url}`);
 console.log(`  Skip Save: ${skipSave}`);
 console.log(`  Skip Images: ${skipImages}`);
-console.log(`  Verbose: ${verbose}`);
+console.log(`  Headed: ${headed}`);
 console.log('');
 
 const globalStart = Date.now();
@@ -88,7 +89,7 @@ const globalStart = Date.now();
 // Phase 1: Browser Extraction
 // ═══════════════════════════════════════════════════════════════════════════
 
-section('Phase 1: Browser Extraction (scrapeActivityFromUrl v2)');
+section('Phase 1: Browser Extraction (scrapeActivityFromUrl v3)');
 
 let result;
 const chunks = [];
@@ -97,6 +98,7 @@ const phase1Start = Date.now();
 try {
   result = await scrapeActivityFromUrl(url, {
     chunkSize: 2,
+    headed,
     onChunk: (chunk) => {
       chunks.push(chunk);
       if (verbose) {

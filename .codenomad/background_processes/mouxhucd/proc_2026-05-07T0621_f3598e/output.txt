@@ -1,0 +1,15 @@
+============================================================
+Ivivu Price Extractor
+============================================================
+URL: https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3
+
+[1] Opening page...
+✗ Element not found. Verify the selector is correct and the element exists in the DOM.
+    Cookie accepted
+    Scrolling...
+
+[2] Waiting for buttons...
+
+[3] Counting buttons...
+    Found 0 buttons
+No buttons found!

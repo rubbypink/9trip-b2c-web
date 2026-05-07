@@ -1,0 +1,10 @@
+[
+  {
+    "tierName": "Người lớn",
+    "adultPrice": 625000
+  },
+  {
+    "tierName": "Trẻ em",
+    "adultPrice": 485000
+  }
+]

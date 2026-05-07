@@ -1,0 +1,139 @@
+Ivivu Price Extractor --stdin
+==================================================
+URL: https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3
+Opening...
+✗ Element not found. Verify the selector is correct and the element exists in the DOM.
+Found 10 tickets
+
+[1/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"Vé Cáp Treo Đỉnh Vân Sơn & Chùa Hang (Khứ Hồi)\",\"pp\":\"625.000\"}"
+
+  ✓ Tier 1
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[2/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"Vé Cáp Treo Đỉnh Vân Sơn (Khứ Hồi)\",\"pp\":\"435.000\"}"
+
+  ✓ Tier 2
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[3/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"Vé Cáp Treo Chùa Hang (Khứ Hồi)\",\"pp\":\"240.000\"}"
+
+  ✓ Tier 3
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[4/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"Vé Cáp Treo Chùa Hang (1 chiều)\",\"pp\":\"145.000\"}"
+
+  ✓ Tier 4
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[5/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00\",\"pp\":\"630.000\"}"
+
+  ✓ Tier 5
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[6/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 11:30\",\"pp\":\"780.000\"}"
+
+  ✓ Tier 6
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[7/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00\",\"pp\":\"780.000\"}"
+
+  ✓ Tier 7
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[8/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Cuối Tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00\",\"pp\":\"680.000\"}"
+
+  ✓ Tier 8
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[9/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 12:00\",\"pp\":\"820.000\"}"
+
+  ✓ Tier 9
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+[10/10] Processing...
+  Stdin: {
+  "Người lớn": "",
+  "Trẻ em": ""
+}
+
+  Base: "{\"tn\":\"[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00\",\"pp\":\"820.000\"}"
+
+  ✓ Tier 10
+    Adult: N/Ađ
+    Child: N/Ađ
+    Infant: N/Ađ
+
+Done. 10 tiers - Adult:0 Child:0 Infant:0
+Report: .temp/ivivu-report.json

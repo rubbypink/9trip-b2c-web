@@ -1,0 +1,129 @@
+============================================================
+Ivivu Price Extractor
+============================================================
+URL: https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3
+
+[1] Opening page...
+✗ Operation timed out. The page may still be loading or the element may not exist.
+✗ Element not found. Verify the selector is correct and the element exists in the DOM.
+    Cookie accepted
+    Scrolling...
+
+[2] Waiting for buttons...
+    Counting buttons...
+    Found 10 buttons
+
+[4] Extracting 10 tickets...
+
+[1] Processing ticket...
+  [1] Clicking "Chọn" button...
+  [1] "ok"
+  [1] Raw: "{\"tierName\":\"Vé Cáp Treo Đỉnh Vân Sơn & Chùa Hang (Khứ Hồi)\",\"promoPrice\":\"625.000\",\"adultPrice\":\"625.000\",\"index\":0}"
+...
+  [1] Tier: "?", Price: "?"
+  [1] ✓ Tier 1
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2674ms
+
+[2] Processing ticket...
+  [2] Clicking "Chọn" button...
+  [2] "ok"
+  [2] Raw: "{\"tierName\":\"Vé Cáp Treo Đỉnh Vân Sơn (Khứ Hồi)\",\"promoPrice\":\"435.000\",\"adultPrice\":\"435.000\",\"index\":1}"
+...
+  [2] Tier: "?", Price: "?"
+  [2] ✓ Tier 2
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2612ms
+
+[3] Processing ticket...
+  [3] Clicking "Chọn" button...
+  [3] "ok"
+  [3] Raw: "{\"tierName\":\"Vé Cáp Treo Chùa Hang (Khứ Hồi)\",\"promoPrice\":\"240.000\",\"adultPrice\":\"240.000\",\"index\":2}"
+...
+  [3] Tier: "?", Price: "?"
+  [3] ✓ Tier 3
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2620ms
+
+[4] Processing ticket...
+  [4] Clicking "Chọn" button...
+  [4] "ok"
+  [4] Raw: "{\"tierName\":\"Vé Cáp Treo Chùa Hang (1 chiều)\",\"promoPrice\":\"145.000\",\"adultPrice\":\"145.000\",\"index\":3}"
+...
+  [4] Tier: "?", Price: "?"
+  [4] ✓ Tier 4
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2611ms
+
+[5] Processing ticket...
+  [5] Clicking "Chọn" button...
+  [5] "ok"
+  [5] Raw: "{\"tierName\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00\",\"promoPrice\":\"630.000\",\"adultPrice\":\"630.000\",\"inde...
+  [5] Tier: "?", Price: "?"
+  [5] ✓ Tier 5
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2605ms
+
+[6] Processing ticket...
+  [6] Clicking "Chọn" button...
+  [6] "ok"
+  [6] Raw: "{\"tierName\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 11:30\",\"promoPrice\":\"780.000\",\"adultPrice\":\"780....
+  [6] Tier: "?", Price: "?"
+  [6] ✓ Tier 6
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2635ms
+
+[7] Processing ticket...
+  [7] Clicking "Chọn" button...
+  [7] "ok"
+  [7] Raw: "{\"tierName\":\"[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00\",\"promoPrice\":\"780.000\",\"adultPrice\":\"780....
+  [7] Tier: "?", Price: "?"
+  [7] ✓ Tier 7
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2605ms
+
+[8] Processing ticket...
+  [8] Clicking "Chọn" button...
+  [8] "ok"
+  [8] Raw: "{\"tierName\":\"[Cuối Tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00\",\"promoPrice\":\"680.000\",\"adultPrice\":\"680.000...
+  [8] Tier: "?", Price: "?"
+  [8] ✓ Tier 8
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2611ms
+
+[9] Processing ticket...
+  [9] Clicking "Chọn" button...
+  [9] "ok"
+  [9] Raw: "{\"tierName\":\"[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 12:00\",\"promoPrice\":\"820.000\",\"adultPrice...
+  [9] Tier: "?", Price: "?"
+  [9] ✓ Tier 9
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2609ms
+
+[10] Processing ticket...
+  [10] Clicking "Chọn" button...
+  [10] "ok"
+  [10] Raw: "{\"tierName\":\"[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00\",\"promoPrice\":\"820.000\",\"adultPrice...
+  [10] Tier: "?", Price: "?"
+  [10] ✓ Tier 10
+      Adult: N/Ađ
+      Child: N/Ađ
+      Time: 2622ms
+
+============================================================
+COMPLETE
+============================================================
+Total: 10 tiers
+With adult price: 0
+With child price: 0
+Duration: 94.2s
+Report: .temp/ivivu-extraction-report.json

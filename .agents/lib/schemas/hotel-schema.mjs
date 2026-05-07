@@ -475,15 +475,15 @@ export function MAP_TO_FIRESTORE(rawData) {
 // Alias export for convenience
 export { MAP_TO_FIRESTORE as mapHotelToFirestore };
 
-// Default export
-export default {
-	HOTEL_SCHEMA,
-	HOTEL_REQUIRED_FIELDS,
-	HOTEL_EXTRACT_SCHEMA,
-	HOTEL_AGENT_PROMPT,
-	HOTEL_ROOM_SCHEMA,
-	HOTEL_REVIEW_SCHEMA,
-	MAP_TO_FIRESTORE,
-	mapHotelToFirestore: MAP_TO_FIRESTORE,
-	generateSlug,
-};
+// [DEAD CODE] Default export — never imported as default by any skill
+// export default {
+// 	HOTEL_SCHEMA,
+// 	HOTEL_REQUIRED_FIELDS,
+// 	HOTEL_EXTRACT_SCHEMA,
+// 	HOTEL_AGENT_PROMPT,
+// 	HOTEL_ROOM_SCHEMA,
+// 	HOTEL_REVIEW_SCHEMA,
+// 	MAP_TO_FIRESTORE,
+// 	mapHotelToFirestore: MAP_TO_FIRESTORE,
+// 	generateSlug,
+// };

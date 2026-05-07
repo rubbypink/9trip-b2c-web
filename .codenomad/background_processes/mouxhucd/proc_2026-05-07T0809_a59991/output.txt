@@ -1,0 +1,133 @@
+============================================================
+Ivivu Price Extractor - Clean v2
+============================================================
+URL: https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-den-mountain/3
+
+[1] Opening page...
+✗ Element not found. Verify the selector is correct and the element exists in the DOM.
+    Cookie accepted
+    Scrolling...
+
+[2] Counting buttons...
+    Found 10 buttons
+
+[3] Extracting 10 tickets...
+
+[1] Processing ticket 1/0...
+  [1] Clicking "Chọn"...
+  [1] Extracting via --stdin...
+  [1] Result: {}
+
+  [1] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[2] Processing ticket 2/1...
+  [2] Clicking "Chọn"...
+  [2] Extracting via --stdin...
+  [2] Result: {}
+
+  [2] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[3] Processing ticket 3/2...
+  [3] Clicking "Chọn"...
+  [3] Extracting via --stdin...
+  [3] Result: {}
+
+  [3] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[4] Processing ticket 4/3...
+  [4] Clicking "Chọn"...
+  [4] Extracting via --stdin...
+  [4] Result: {}
+
+  [4] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[5] Processing ticket 5/4...
+  [5] Clicking "Chọn"...
+  [5] Extracting via --stdin...
+  [5] Result: {}
+
+  [5] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[6] Processing ticket 6/5...
+  [6] Clicking "Chọn"...
+  [6] Extracting via --stdin...
+  [6] Result: {}
+
+  [6] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[7] Processing ticket 7/6...
+  [7] Clicking "Chọn"...
+  [7] Extracting via --stdin...
+  [7] Result: {}
+
+  [7] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[8] Processing ticket 8/7...
+  [8] Clicking "Chọn"...
+  [8] Extracting via --stdin...
+  [8] Result: {}
+
+  [8] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[9] Processing ticket 9/8...
+  [9] Clicking "Chọn"...
+  [9] Extracting via --stdin...
+  [9] Result: {}
+
+  [9] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+[10] Processing ticket 10/9...
+  [10] Clicking "Chọn"...
+  [10] Extracting via --stdin...
+  [10] Result: {}
+
+  [10] ✓ undefined
+      Adult: N/Ađ
+      Child: N/Ađ
+      Infant: N/Ađ
+      Raw: {}
+
+============================================================
+COMPLETE
+============================================================
+Total: 10 tiers
+With adult price: 0
+With child price: 0
+Duration: 62.6s
+Report: .temp/ivivu-extraction-report.json

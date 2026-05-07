@@ -32,11 +32,9 @@ export function initFirecrawl(apiKey) {
 }
 
 /**
- * Scrape a URL using Firecrawl extract() — cheap, LLM-powered structured extraction.
- *
- * Best for static pages where content is available in the HTML. Does NOT do
- * browser automation (no clicking, scrolling, gallery expansion).
- * Costs ~5-15 credits per page.
+ * [DEAD CODE] — scrapeWithExtract: Never imported by any skill script.
+ * The only consumer (getHotelImages.mjs) imports a non-existent 'firecrawl-agent.mjs' path
+ * and only uses initFirecrawl + scrapeWithAgent.
  *
  * @param {Firecrawl} firecrawl - Initialized Firecrawl client
  * @param {string} url - URL to scrape
@@ -45,27 +43,12 @@ export function initFirecrawl(apiKey) {
  * @param {{pollInterval?: number, timeout?: number}} [options]
  * @returns {Promise<{data: object, creditsUsed: number}>}
  */
-export async function scrapeWithExtract(firecrawl, url, prompt, schema, options = {}) {
-  const { pollInterval = 5, timeout = 120 } = options;
-
-  // extract() convenience: starts extract, polls, returns final result
-  const result = await firecrawl.extract({
-    urls: [url],
-    prompt,
-    schema,
-    pollInterval,  // seconds
-    timeout,       // seconds
-  });
-
-  if (!result.success) {
-    throw new Error(`Extract failed: ${result.error || 'Unknown error'}`);
-  }
-
-  return {
-    data: result.data,
-    creditsUsed: result.creditsUsed || 0,
-  };
-}
+// export async function scrapeWithExtract(firecrawl, url, prompt, schema, options = {}) {
+//   const { pollInterval = 5, timeout = 120 } = options;
+//   const result = await firecrawl.extract({ urls: [url], prompt, schema, pollInterval, timeout });
+//   if (!result.success) throw new Error(`Extract failed: ${result.error || 'Unknown error'}`);
+//   return { data: result.data, creditsUsed: result.creditsUsed || 0 };
+// }
 
 /**
  * Scrape a URL using Firecrawl Agent — full browser automation.
@@ -123,10 +106,7 @@ export async function scrapeWithAgent(firecrawl, url, prompt, schema, options = 
   }
 }
 
-/**
- * Get the raw Firecrawl client for advanced usage
- * @returns {Firecrawl}
- */
-export function getFirecrawlClient() {
-  return _instance;
-}
+// [DEAD CODE] — getFirecrawlClient: Never imported by any skill script
+// export function getFirecrawlClient() {
+//   return _instance;
+// }

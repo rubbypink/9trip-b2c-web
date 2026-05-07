@@ -1,0 +1,16 @@
+Ivivu Price Extractor
+==================================================
+Found 10 tickets
+
+[1/10] "Vé Cáp Treo Đỉnh Vân Sơn & Chùa Hang (Khứ Hồi)": 625.000đ
+[2/10] "Vé Cáp Treo Đỉnh Vân Sơn (Khứ Hồi)": 435.000đ
+[3/10] "Vé Cáp Treo Chùa Hang (Khứ Hồi)": 240.000đ
+[4/10] "Vé Cáp Treo Chùa Hang (1 chiều)": 145.000đ
+[5/10] "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00": 630.000đ
+[6/10] "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 11:30": 780.000đ
+[7/10] "[Trong tuần] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00": 780.000đ
+[8/10] "[Cuối Tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn & Buffet Trưa Từ 10:30 -12:00": 680.000đ
+[9/10] "[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 10:30 - 12:00": 820.000đ
+[10/10] "[Cuối tuần & Ngày Lễ] Combo Cáp Treo Đỉnh Vân Sơn, Chùa Hang & Buffet Trưa Từ 12:00 - 14:00": 820.000đ
+
+Done: 10 tickets, 10 with adult price. Report: .temp/ivivu-report.json

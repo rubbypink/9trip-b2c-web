@@ -3,30 +3,19 @@
  * @module pricing-extractor
  */
 
-/**
- * @constant {RegExp}
- * Pattern for matching VND prices in various formats.
- * Matches: "7.590.000 đ", "7590000", "1,500,000 VND", etc.
- */
-export const VND_PATTERN = /(?:Từ\s+)?([\d.,]+)\s*(?:đ|VND)?/gi;
+// [DEAD CODE] — VND_PATTERN: Never imported by any skill script (extractPricing uses its own inline patterns)
+// export const VND_PATTERN = /(?:Từ\s+)?([\d.,]+)\s*(?:đ|VND)?/gi;
 
-/**
- * @constant {RegExp[]}
- * Array of regex patterns for detecting child pricing.
- * Covers multiple languages and formats:
- * - "trẻ em", "trẻ", "em bé" (Vietnamese)
- * - "child", "children", "kids" (English)
- * - "Kid's price", "Child price", etc.
- */
-export const CHILD_PRICE_PATTERNS = [
-  /trẻ\s*em[:\s]*([\d.,]+)/gi,
-  /trẻ[:\s]*([\d.,]+)/gi,
-  /em\s*bé[:\s]*([\d.,]+)/gi,
-  /child(?:ren)?[:\s]*([\d.,]+)/gi,
-  /kid(?:'s|s)?\s*price[:\s]*([\d.,]+)/gi,
-  /giá\s*(?:trẻ\s*em|em\s*bé)[:\s]*([\d.,]+)/gi,
-  /\((?:trẻ\s*em|em\s*bé|child|children|kid)\s*[:\s]*([\d.,]+)/gi,
-];
+// [DEAD CODE] — CHILD_PRICE_PATTERNS: Never imported by any skill script (extractChildPricing uses strategyMap instead)
+// export const CHILD_PRICE_PATTERNS = [
+//   /trẻ\s*em[:\s]*([\d.,]+)/gi,
+//   /trẻ[:\s]*([\d.,]+)/gi,
+//   /em\s*bé[:\s]*([\d.,]+)/gi,
+//   /child(?:ren)?[:\s]*([\d.,]+)/gi,
+//   /kid(?:'s|s)?\s*price[:\s]*([\d.,]+)/gi,
+//   /giá\s*(?:trẻ\s*em|em\s*bé)[:\s]*([\d.,]+)/gi,
+//   /\((?:trẻ\s*em|em\s*bé|child|children|kid)\s*[:\s]*([\d.,]+)/gi,
+// ];
 
 /**
  * Extracts pricing data from raw input for a specific type.
@@ -281,12 +270,3 @@ export function normalizePrice(priceText) {
   // Return as integer
   return Math.floor(normalizedValue);
 }
-
-// Default export for convenience
-export default {
-  extractPricing,
-  extractChildPricing,
-  normalizePrice,
-  VND_PATTERN,
-  CHILD_PRICE_PATTERNS,
-};

@@ -493,63 +493,37 @@ export function processLazyContent(pageText) {
   return result;
 }
 
-/**
- * Enhanced DOM extraction for use after agent-browser interactions
- * Extracts room details from expanded/collapsed sections
- */
-export function extractFromDOMEnhanced() {
-  const result = extractFromDOM();
-  
-  // Extract additional room details from opened popups
-  const roomDetails = [];
-  const detailBlocks = document.querySelectorAll('[data-testid="room-popover"], [class*="room-details"], [class*="room-modal"]');
-  
-  detailBlocks.forEach((block) => {
-    const room = {};
-    
-    // Room name from popup
-    const nameEl = block.querySelector('h2, h3, [class*="title"]');
-    room.name = nameEl?.textContent?.trim() || '';
-    
-    // Extended gallery from popup
-    const gallery = [];
-    block.querySelectorAll('img').forEach((img) => {
-      const src = img.src || img.getAttribute('data-src') || '';
-      if (src.includes('bstatic.com')) {
-        gallery.push(src.replace(/-\d+x\d+\./, '-max.'));
-      }
-    });
-    room.gallery = [...new Set(gallery)];
-    
-    // Room description from popup
-    const descEl = block.querySelector('[class*="description"], p');
-    room.description = descEl?.textContent?.trim() || '';
-    
-    // Room facilities from popup
-    const facilities = [];
-    block.querySelectorAll('[class*="facility"], [class*="amenity"]').forEach((el) => {
-      const text = el.textContent?.trim();
-      if (text && text.length > 2) {
-        facilities.push(text);
-      }
-    });
-    room.facilities = facilities;
-    
-    if (room.name) {
-      roomDetails.push(room);
-    }
-  });
-  
-  if (roomDetails.length > 0) {
-    result.roomsEnhanced = roomDetails;
-  }
-  
-  return result;
-}
+// [DEAD CODE] — extractFromDOMEnhanced: Never imported by any skill script
+// export function extractFromDOMEnhanced() {
+//   const result = extractFromDOM();
+//   const roomDetails = [];
+//   const detailBlocks = document.querySelectorAll('[data-testid="room-popover"], [class*="room-details"], [class*="room-modal"]');
+//   detailBlocks.forEach((block) => {
+//     const room = {};
+//     const nameEl = block.querySelector('h2, h3, [class*="title"]');
+//     room.name = nameEl?.textContent?.trim() || '';
+//     const gallery = [];
+//     block.querySelectorAll('img').forEach((img) => {
+//       const src = img.src || img.getAttribute('data-src') || '';
+//       if (src.includes('bstatic.com')) gallery.push(src.replace(/-\d+x\d+\./, '-max.'));
+//     });
+//     room.gallery = [...new Set(gallery)];
+//     const descEl = block.querySelector('[class*="description"], p');
+//     room.description = descEl?.textContent?.trim() || '';
+//     const facilities = [];
+//     block.querySelectorAll('[class*="facility"], [class*="amenity"]').forEach((el) => {
+//       const text = el.textContent?.trim();
+//       if (text && text.length > 2) facilities.push(text);
+//     });
+//     room.facilities = facilities;
+//     if (room.name) roomDetails.push(room);
+//   });
+//   if (roomDetails.length > 0) result.roomsEnhanced = roomDetails;
+//   return result;
+// }
 
 export default { 
   extractFromDOM, 
-  extractFromDOMEnhanced,
   getLazyRenderingSteps,
   processLazyContent,
 };

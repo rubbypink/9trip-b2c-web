@@ -84,6 +84,7 @@ agent-browser wait --fn "window.appReady === true"
 
 # Chờ text cụ thể biến mất
 agent-browser wait --fn "!document.body.innerText.includes('Loading...')"
+agent-browser wait --fn "!document.querySelector('app-loading')"
 ```
 
 ### `wait --text "..."` — Chờ text xuất hiện trên trang
@@ -368,6 +369,131 @@ agent-browser click @e3
 ```
 
 **Tại sao:** @ref dựa trên accessibility tree, ổn định hơn CSS selector khi class thay đổi. Chỉ dùng CSS selector khi không thể snapshot (ví dụ trong batch script cố định).
+
+---
+
+## 7. Dynamic Angular/Vue Price Extraction (CDP-native clicks)
+
+Pattern chuyên sâu cho các trang web dùng Angular/Vue/React render động, đặc biệt là các trang booking có giá ẩn trong panel popup, cần tương tác click để hiển thị giá (ivivu.com, booking.com, etc.).
+
+### Vấn đề
+
+- `element.click()` trong JavaScript (`evaluate`) không trigger đúng Angular change detection
+- Bot detection (DataDome, Cloudflare) chặn API khi phát hiện headless
+- Giá chỉ hiển thị sau khi tăng số lượng (qty > 0) nhưng biến mất nếu reset về 0
+- `MouseEvent` dispatch không qua được CDP layer
+
+### Giải pháp: data-agent attributes + CDP native clicks
+
+**Nguyên lý:** Dùng `eval --stdin` để gắn `data-agent` attribute vào DOM, sau đó dùng `agent-browser click` (Chrome DevTools Protocol) để click — đảm bảo event propagation giống người dùng thật.
+
+### Các bước thực hiện
+
+#### Bước 0: Anti-detection + Viewport
+
+```bash
+# Disable AutomationControlled flag + set user-agent thật
+agent-browser --args "--disable-blink-features=AutomationControlled,--no-sandbox" \
+  --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" \
+  open https://example.com --wait-for-load
+
+# Set viewport giống desktop thật
+agent-browser set viewport 1920 1080
+```
+
+#### Bước 1: Inject `data-agent` attributes
+
+Dùng `eval --stdin` (heredoc) để gắn attribute vào element cần click:
+
+```bash
+cat <<'SCRIPT' | agent-browser eval --stdin
+var panel = document.querySelector('.panel-open');
+if (!panel) { /* error */ }
+
+// Gắn data-agent cho ngày cần chọn
+var dateEl = panel.querySelector('.day-item.is-today');
+if (dateEl) dateEl.setAttribute('data-agent', 'target-date');
+
+// Gắn data-agent cho từng nút + / - trong quantity box
+var boxes = panel.querySelectorAll('.tkn__quantity--box');
+boxes.forEach(function(box, i) {
+  var btnMore = box.querySelector('.btn-more');
+  var btnLess = box.querySelector('.btn-less');
+  if (btnMore) btnMore.setAttribute('data-agent', 'btn-more-' + i);
+  if (btnLess) btnLess.setAttribute('data-agent', 'btn-less-' + i);
+});
+SCRIPT
+```
+
+#### Bước 2: CDP-native click
+
+Dùng `agent-browser click` với CSS selector `[data-agent=...]`:
+
+```bash
+# Click btn-less trước (decrement về 0) //hoặc các class/id tương tự (ví dụ minus, icon fa-minus...)
+agent-browser click "[data-agent='btn-less-0']"
+
+# Click btn-more (increment lên 1) → trigger API price //hoặc các class/id tương tự (ví dụ plus, icon fa-plus...)
+agent-browser click "[data-agent='btn-more-0']"
+
+# Chờ API trả dữ liệu
+agent-browser wait 3000
+```
+
+#### Bước 3: Snapshot DOM
+
+Dùng `eval --stdin` để đọc element data `.price-panel` sau khi data đã load:
+
+```bash
+cat <<'SCRIPT' | agent-browser eval --stdin
+var boxes = document.querySelectorAll('.panel-open .tkn__quantity--box');
+var data = {};
+boxes.forEach(function(box) {
+  var nameEl = box.querySelector('.name');
+  var priceEl = box.querySelector('.price-panel');
+  var qtyEl = box.querySelector('.quantity');
+  
+  if (nameEl && priceEl) {
+    var key = nameEl.textContent.trim().replace(/\s+/g, ' ');
+    var value = priceEl.textContent.trim();
+    var qty = qtyEl ? parseInt(qtyEl.textContent.trim(), 10) : 1;
+    
+    // Fallback: nếu qty > 1 (btn-less bị disable), chia price/qty ra đơn giá
+    if (value && qty > 1) {
+      var m = value.match(/([\d.]+)/);
+      if (m) {
+        var total = parseInt(m[1].replace(/\./g, ''), 10);
+        if (total > 0) {
+          value = Math.round(total / qty).toString()
+            .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') + ' ';
+        }
+      }
+    }
+    data[key] = value || 'Khong tai duoc gia';
+  }
+});
+console.log(JSON.stringify(data));
+SCRIPT
+```
+
+### Quy tắc vàng cho Dynamic Price Extraction
+
+| Rule | Giải thích |
+|------|-----------|
+| **Luôn click btn-less trước, btn-more sau** | Đảm bảo qty reset về minimum rồi increment lên 1 → giá hiển thị là đơn giá |
+| **Không click btn-less nếu nó bị disable** | `agent-browser click` tự handle lỗi, không crash |
+| **Đọc price SAU KHI click btn-more, TRƯỚC KHI click btn-less** | `.price-panel` chỉ hiển thị khi qty > 0 |
+| **Fallback: qty > 1 → price / qty** | Nếu btn-less bị chặn, chia price cho số lượng ra đơn giá |
+| **Luôn dùng CDP click, không dùng evaluate()** | CDP click qua `agent-browser click` trigger đúng event lifecycle của Angular |
+| **Anti-detection: --args + --user-agent** | Ẩn `navigator.webdriver`, set user-agent trình duyệt thật |
+| **`eval --stdin` cho script phức tạp** | Heredoc tránh lỗi escape quote trong inline eval |
+
+### Ví dụ Node.js hoàn chỉnh
+
+Xem file `ivivu-test.mjs` ở thư mục `.agents/skills/activity-scape/ — implement đầy đủ flow này với:
+- `run()` function cho agent-browser CLI commands
+- `runEvalStdin()` function cho eval --stdin với JSON response
+- Step 6A: Inject data-agent → Step 6B: CDP clicks → Step 6C: Snapshot DOM
 
 ### ❌ Không xử lý lỗi trong automation scripts
 

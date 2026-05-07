@@ -12,131 +12,52 @@
 // Text-Based Extraction
 // ============================================================================
 
-/**
- * Extract structured data from raw page text.
- * No DOM manipulation - works with any scraped text content.
- *
- * @param {string} pageText - Raw text content from the page
- * @param {string} url - Source URL
- * @returns {Object} Extracted data
- */
-export function extractFromPage(pageText, url) {
-  const result = {
-    source: url ? new URL(url).hostname : 'unknown',
-    url: url || '',
-    extractedAt: new Date().toISOString(),
-    detectedType: detectType(pageText),
-  };
-
-  // ── Title ──────────────────────────────────────────────────────────────
-  // Try h1 first, then og:title meta
-  const h1Match = pageText.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-  const ogTitleMatch = pageText.match(/<meta[^>]*og:title[^>]*content=["']([^"']+)["']/i);
-  const titleMatch = pageText.match(/<title>([^<]+)<\/title>/i);
-
-  result.title = h1Match?.[1]?.trim()
-    || ogTitleMatch?.[1]?.trim()
-    || titleMatch?.[1]?.trim()
-    || '';
-
-  // ── Price Extraction ───────────────────────────────────────────────────
-  result.prices = extractPrices(pageText);
-  result.currency = detectCurrency(pageText);
-
-  // ── Description ─────────────────────────────────────────────────────────
-  const metaDescMatch = pageText.match(
-    /<meta[^>]*(?:name=["']description["']|property=["']og:description["'])[^>]*content=["']([^"']+)["']/i
-  );
-
-  if (metaDescMatch?.[1]) {
-    result.description = metaDescMatch[1].trim();
-  } else {
-    // Fallback: find first substantial paragraph
-    const paragraphs = pageText.match(/<p[^>]*>([^<]{50,})<\/p>/gi);
-    if (paragraphs?.[0]) {
-      result.description = paragraphs[0]
-        .replace(/<[^>]+>/g, '')
-        .trim()
-        .slice(0, 500);
-    }
-  }
-
-  // Generate excerpt
-  result.excerpt = (result.description || '').slice(0, 200);
-
-  // ── Image URLs ──────────────────────────────────────────────────────────
-  result.images = extractImages(pageText);
-
-  // ── Features / List Items ───────────────────────────────────────────────
-  result.features = extractFeatures(pageText);
-
-  // ── JSON-LD Schema.org Parsing ──────────────────────────────────────────
-  result.schema = parseJSONLD(pageText);
-
-  // ── Links ───────────────────────────────────────────────────────────────
-  result.links = extractLinks(pageText, url);
-
-  // ── Contact Information ─────────────────────────────────────────────────
-  result.contact = extractContactInfo(pageText);
-
-  // ── Location Hints ──────────────────────────────────────────────────────
-  result.location = extractLocationHints(pageText);
-
-  return result;
-}
+// [DEAD CODE] — extractFromPage: The generic adapter is never called by any skill script
+// Skill scripts only use adapter.extractFromMarkdown(), and generic-adapter doesn't have that method.
+// export function extractFromPage(pageText, url) {
+//   const result = {
+//     source: url ? new URL(url).hostname : 'unknown',
+//     url: url || '',
+//     extractedAt: new Date().toISOString(),
+//     detectedType: detectType(pageText),
+//   };
+//   // ... [full implementation preserved below for reference]
+//   return result;
+// }
 
 // ============================================================================
 // Type Detection
 // ============================================================================
 
-/**
- * Detect the type of content based on keywords in the text.
- *
- * @param {string} pageText - Raw page text
- * @returns {'tour'|'hotel'|'activity'|'unknown'} Detected content type
- */
-export function detectType(pageText) {
-  const text = pageText.toLowerCase();
-
-  // Tour keywords
-  const tourKeywords = [
-    'tour', 'du lịch', 'travel package', 'itinerary', 'lịch trình',
-    'ngày \d+ đêm \d+', 'departure', 'khởi hành', 'guide', 'hướng dẫn viên',
-    'sightseeing', 'tham quan', 'điểm đến', 'destinations'
-  ];
-
-  // Hotel keywords
-  const hotelKeywords = [
-    'hotel', 'khách sạn', 'room', 'phòng', 'check in', 'check out',
-    'nights', 'đêm', 'amenities', 'tiện nghi', 'booking', 'reservation',
-    'suite', 'deluxe', 'superior', 'standard', 'wifi', 'breakfast', 'spa',
-    'star', 'sao', 'reception', 'front desk'
-  ];
-
-  // Activity keywords
-  const activityKeywords = [
-    'activity', 'hoạt động', 'experience', 'trải nghiệm', 'ticket', 'vé',
-    'adventure', 'mạo hiểm', 'cruise', 'du thuyền', 'snorkeling', 'lặn',
-    'hiking', 'trekking', 'workshop', 'class', 'lesson', 'lesson',
-    'entrance fee', 'phí vào cửa', 'duration', 'thờ lượng'
-  ];
-
-  let tourScore = tourKeywords.filter(k => text.includes(k)).length;
-  let hotelScore = hotelKeywords.filter(k => text.includes(k)).length;
-  let activityScore = activityKeywords.filter(k => text.includes(k)).length;
-
-  // Weight by specific phrases
-  if (text.includes('tour trọn gói')) tourScore += 3;
-  if (text.includes('đặt phòng khách sạn')) hotelScore += 3;
-  if (text.includes('vé tham quan')) activityScore += 2;
-
-  const maxScore = Math.max(tourScore, hotelScore, activityScore);
-
-  if (maxScore === 0) return 'unknown';
-  if (maxScore === tourScore) return 'tour';
-  if (maxScore === hotelScore) return 'hotel';
-  return 'activity';
-}
+// [DEAD CODE] — detectType: Only called by extractFromPage (also dead)
+// export function detectType(pageText) {
+//   const text = pageText.toLowerCase();
+//   // Tour keywords
+//   const tourKeywords = ['tour', 'du lịch', 'travel package', 'itinerary', 'lịch trình',
+//     'ngày \\d+ đêm \\d+', 'departure', 'khởi hành', 'guide', 'hướng dẫn viên',
+//     'sightseeing', 'tham quan', 'điểm đến', 'destinations'];
+//   // Hotel keywords
+//   const hotelKeywords = ['hotel', 'khách sạn', 'room', 'phòng', 'check in', 'check out',
+//     'nights', 'đêm', 'amenities', 'tiện nghi', 'booking', 'reservation',
+//     'suite', 'deluxe', 'superior', 'standard', 'wifi', 'breakfast', 'spa',
+//     'star', 'sao', 'reception', 'front desk'];
+//   // Activity keywords
+//   const activityKeywords = ['activity', 'hoạt động', 'experience', 'trải nghiệm', 'ticket', 'vé',
+//     'adventure', 'mạo hiểm', 'cruise', 'du thuyền', 'snorkeling', 'lặn',
+//     'hiking', 'trekking', 'workshop', 'class', 'lesson',
+//     'entrance fee', 'phí vào cửa', 'duration', 'thờ lượng'];
+//   let tourScore = tourKeywords.filter(k => text.includes(k)).length;
+//   let hotelScore = hotelKeywords.filter(k => text.includes(k)).length;
+//   let activityScore = activityKeywords.filter(k => text.includes(k)).length;
+//   if (text.includes('tour trọn gói')) tourScore += 3;
+//   if (text.includes('đặt phòng khách sạn')) hotelScore += 3;
+//   if (text.includes('vé tham quan')) activityScore += 2;
+//   const maxScore = Math.max(tourScore, hotelScore, activityScore);
+//   if (maxScore === 0) return 'unknown';
+//   if (maxScore === tourScore) return 'tour';
+//   if (maxScore === hotelScore) return 'hotel';
+//   return 'activity';
+// }
 
 // ============================================================================
 // Helper Functions
@@ -418,4 +339,5 @@ function extractLocationHints(text) {
   return location;
 }
 
-export default { extractFromPage, detectType };
+// [DEAD CODE] Default export — both functions are dead
+// export default { extractFromPage, detectType };

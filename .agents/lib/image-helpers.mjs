@@ -181,88 +181,7 @@ export async function uploadToStorage(bucket, path, buffer, contentType = DEFAUL
   return `https://storage.googleapis.com/${bucket.name}/${path}`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Pipeline Functions
-// ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Full pipeline: download → WebP → upload.
- * Downloads image from URL, converts to WebP, uploads to Storage.
- *
- * @param {string} url - Image URL to process
- * @param {string} storagePath - Path in Storage (e.g., 'hotels/my-hotel/featured.webp')
- * @param {import('firebase-admin').storage.Bucket} bucket - Storage bucket
- * @param {object} [options] - Conversion options
- * @param {number} [options.quality=85] - WebP quality
- * @param {number} [options.maxWidth=1920] - Max width for resize
- * @returns {Promise<string>} Public URL of uploaded image
- * @throws {Error} If any step fails
- */
-export async function processAndUploadImage(url, storagePath, bucket, options = {}) {
-  // Download
-  const rawBuffer = await downloadFile(url);
-
-  // Convert to WebP
-  const webpBuffer = await toWebP(rawBuffer, options);
-
-  // Upload
-  const publicUrl = await uploadToStorage(bucket, storagePath, webpBuffer);
-
-  return publicUrl;
-}
-
-/**
- * Process multiple gallery images with concurrency control.
- * Uses Promise.allSettled to continue even if some images fail.
- *
- * @param {string[]} urls - Array of image URLs
- * @param {string} storageDir - Storage directory (e.g., 'hotels/my-hotel/gallery')
- * @param {import('firebase-admin').storage.Bucket} bucket - Storage bucket
- * @param {object} [options] - Processing options
- * @param {number} [options.maxImages=50] - Maximum number of images to process
- * @param {number} [options.quality=85] - WebP quality
- * @param {number} [options.concurrency=5] - Number of concurrent uploads
- * @returns {Promise<string[]>} Array of successfully uploaded URLs
- */
-export async function processGalleryImages(urls, storageDir, bucket, options = {}) {
-  const {
-    maxImages = 50,
-    quality = 85,
-    concurrency = 5,
-  } = options;
-
-  // Limit number of images
-  const limitedUrls = urls.slice(0, maxImages);
-
-  const results = [];
-
-  // Process in batches to control concurrency
-  for (let i = 0; i < limitedUrls.length; i += concurrency) {
-    const batch = limitedUrls.slice(i, i + concurrency);
-    const batchPromises = batch.map((url, batchIndex) => {
-      const index = i + batchIndex;
-      const paddedIndex = String(index + 1).padStart(2, '0');
-      const storagePath = `${storageDir}/${paddedIndex}.webp`;
-
-      return processAndUploadImage(url, storagePath, bucket, { quality })
-        .then((publicUrl) => ({ success: true, url: publicUrl, index }))
-        .catch((error) => ({ success: false, error: error.message, index }));
-    });
-
-    const batchResults = await Promise.all(batchPromises);
-
-    for (const result of batchResults) {
-      if (result.success) {
-        results[result.index] = result.url;
-      } else {
-        console.warn(`   ⚠️ Gallery image ${result.index + 1} failed: ${result.error}`);
-      }
-    }
-  }
-
-  // Filter out undefined entries (failed uploads)
-  return results.filter(Boolean);
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // URL Utilities
@@ -350,31 +269,15 @@ export function deduplicateByContent(urls) {
   return [...imgMap.values()].map((v) => v.url);
 }
 
-/**
- * Default pattern for extracting booking.com image URLs.
- * Matches cf.bstatic.com/xdata/images URLs.
- */
-const DEFAULT_IMAGE_PATTERN = /https:\/\/cf\.bstatic\.com\/xdata\/images[^\s"'<>]+/g;
-
-/**
- * ivivu.com image URL pattern.
- */
-const IVIVU_IMAGE_PATTERN = /https:\/\/cdn\d*\.ivivu\.com\/[^\s"'<>]+\.(?:gif|jpg|jpeg|png|webp)/g;
-
-/**
- * Extract image URLs from text/markdown.
- * Searches for common image URL patterns in the provided text.
- *
- * @param {string} text - Text containing image URLs
- * @param {RegExp} [pattern] - Custom regex pattern (default: cf.bstatic.com URLs)
- * @returns {string[]} Array of extracted URLs
- */
-export function extractImageUrls(text, pattern = DEFAULT_IMAGE_PATTERN) {
-  if (!text || typeof text !== 'string') return [];
-
-  const matches = text.match(pattern);
-  return matches || [];
-}
+// [DEAD CODE] — DEFAULT_IMAGE_PATTERN, IVIVU_IMAGE_PATTERN, extractImageUrls:
+// Never imported by any skill script (skills define their own local extractImageUrls)
+// const DEFAULT_IMAGE_PATTERN = /https:\/\/cf\.bstatic\.com\/xdata\/images[^\s"'<>]+/g;
+// const IVIVU_IMAGE_PATTERN = /https:\/\/cdn\d*\.ivivu\.com\/[^\s"'<>]+\.(?:gif|jpg|jpeg|png|webp)/g;
+// export function extractImageUrls(text, pattern = DEFAULT_IMAGE_PATTERN) {
+//   if (!text || typeof text !== 'string') return [];
+//   const matches = text.match(pattern);
+//   return matches || [];
+// }
 
 /**
  * Remove duplicate URLs from an array.
@@ -395,26 +298,66 @@ export function deduplicateUrls(urls) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Batch Processing Helpers
+// Pipeline Functions
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Process images with individual error handling.
- * Similar to processGalleryImages but returns detailed results.
+ * Full pipeline: download → WebP → upload.
+ * Downloads image from URL, converts to WebP, uploads to Storage.
  *
- * @param {string[]} urls - Array of image URLs
- * @param {string} storageDir - Storage directory
+ * @param {string} url - Image URL to process
+ * @param {string} storagePath - Path in Storage (e.g., 'hotels/my-hotel/featured.webp')
  * @param {import('firebase-admin').storage.Bucket} bucket - Storage bucket
- * @param {object} [options] - Processing options
- * @returns {Promise<{url: string, success: boolean, error?: string}[]>} Detailed results
+ * @param {object} [options] - Conversion options
+ * @param {number} [options.quality=85] - WebP quality
+ * @param {number} [options.maxWidth=1920] - Max width for resize
+ * @returns {Promise<string>} Public URL of uploaded image
+ * @throws {Error} If any step fails
  */
+export async function processAndUploadImage(url, storagePath, bucket, options = {}) {
+  // Download
+  const rawBuffer = await downloadFile(url);
+
+  // Convert to WebP
+  const webpBuffer = await toWebP(rawBuffer, options);
+
+  // Upload
+  const publicUrl = await uploadToStorage(bucket, storagePath, webpBuffer);
+
+  return publicUrl;
+}
+
+export async function processGalleryImages(urls, storageDir, bucket, options = {}) {
+  const { maxImages = 50, quality = 85, concurrency = 5 } = options;
+  const limitedUrls = urls.slice(0, maxImages);
+  const results = [];
+  for (let i = 0; i < limitedUrls.length; i += concurrency) {
+    const batch = limitedUrls.slice(i, i + concurrency);
+    const batchPromises = batch.map((url, batchIndex) => {
+      const index = i + batchIndex;
+      const paddedIndex = String(index + 1).padStart(2, '0');
+      const storagePath = `${storageDir}/${paddedIndex}.webp`;
+      return processAndUploadImage(url, storagePath, bucket, { quality })
+        .then((publicUrl) => ({ success: true, url: publicUrl, index }))
+        .catch((error) => ({ success: false, error: error.message, index }));
+    });
+    const batchResults = await Promise.all(batchPromises);
+    for (const result of batchResults) {
+      if (result.success) results[result.index] = result.url;
+      else console.warn(`   ⚠️ Gallery image ${result.index + 1} failed: ${result.error}`);
+    }
+  }
+  return results.filter(Boolean);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Batch Processing Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 export async function processImagesWithResults(urls, storageDir, bucket, options = {}) {
   const { quality = 85 } = options;
-
   const promises = urls.map(async (url, index) => {
     const paddedIndex = String(index + 1).padStart(2, '0');
     const storagePath = `${storageDir}/${paddedIndex}.webp`;
-
     try {
       const publicUrl = await processAndUploadImage(url, storagePath, bucket, { quality });
       return { url: publicUrl, success: true };
@@ -422,6 +365,5 @@ export async function processImagesWithResults(urls, storageDir, bucket, options
       return { url: null, success: false, error: error.message };
     }
   });
-
   return Promise.all(promises);
 }

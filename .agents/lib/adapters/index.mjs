@@ -49,55 +49,28 @@ export async function findAdapter(url) {
   return null;
 }
 
-/**
- * Check if a domain has a dedicated adapter.
- * @param {string} url - Source URL
- * @returns {boolean}
- */
-export function hasAdapter(url) {
-  try {
-    const hostname = new URL(url).hostname.replace(/^www\./, '');
-    return Object.keys(ADAPTER_REGISTRY).some((d) => hostname.includes(d));
-  } catch {
-    return false;
-  }
-}
+// [DEAD CODE] — hasAdapter: Never imported by any skill script
+// export function hasAdapter(url) {
+//   try {
+//     const hostname = new URL(url).hostname.replace(/^www\./, '');
+//     return Object.keys(ADAPTER_REGISTRY).some((d) => hostname.includes(d));
+//   } catch {
+//     return false;
+//   }
+// }
 
-/**
- * Get interaction steps for a URL.
- * Returns a sequence of actions to perform before extraction.
- *
- * @param {string} url - Target URL
- * @returns {Promise<Array<{action: string, selector: string, value?: string, description: string}>>}
- */
-export async function getInteractionSteps(url) {
-  const adapter = await findAdapter(url);
+// [DEAD CODE] — getInteractionSteps: Never imported by any skill script (skills use getLazyRenderingSteps from adapters directly)
+// export async function getInteractionSteps(url) {
+//   const adapter = await findAdapter(url);
+//   if (adapter?.getInteractionSteps) {
+//     return adapter.getInteractionSteps();
+//   }
+//   return [
+//     { action: 'wait', selector: 'body', value: '2000', description: 'Wait for page to fully load' },
+//     { action: 'scroll', selector: 'body', value: '500', description: 'Scroll to trigger lazy loading' },
+//     { action: 'scroll', selector: 'body', value: '1000', description: 'Scroll further for more content' },
+//   ];
+// }
 
-  if (adapter?.getInteractionSteps) {
-    return adapter.getInteractionSteps();
-  }
-
-  // Default interaction steps for any site
-  return [
-    {
-      action: 'wait',
-      selector: 'body',
-      value: '2000',
-      description: 'Wait for page to fully load',
-    },
-    {
-      action: 'scroll',
-      selector: 'body',
-      value: '500',
-      description: 'Scroll to trigger lazy loading',
-    },
-    {
-      action: 'scroll',
-      selector: 'body',
-      value: '1000',
-      description: 'Scroll further for more content',
-    },
-  ];
-}
-
-export default { ADAPTER_REGISTRY, findAdapter, hasAdapter, getInteractionSteps };
+// [DEAD CODE] Default export — never imported as default
+// export default { ADAPTER_REGISTRY, findAdapter, hasAdapter, getInteractionSteps };
