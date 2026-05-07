@@ -8,19 +8,22 @@ import EmptyState from "@/components/shared/EmptyState";
 export default function FeaturedTours({ tours }) {
   if (!tours || tours.length === 0) {
     return (
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <EmptyState
-          title="Chưa có tour nào"
-          message="Hiện tại chưa có tour nổi bật. Vui lòng quay lại sau."
-        />
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <EmptyState
+            title="Chưa có tour nào"
+            message="Hiện tại chưa có tour nổi bật. Vui lòng quay lại sau."
+          />
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+    <section className="py-16 bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
         <div>
           <span className="text-blue-600 text-xs font-semibold uppercase tracking-wider">
             Khám phá
@@ -43,11 +46,13 @@ export default function FeaturedTours({ tours }) {
         </a>
       </div>
 
-      {/* Tour Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {tours.map((tour) => (
-          <TourCard key={tour.id} tour={tour} />
-        ))}
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 scrollbar-hide">
+          {tours.map((tour) => (
+            <div key={tour.id} className="shrink-0 snap-start w-[280px] md:w-[320px]">
+              <TourCard tour={tour} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

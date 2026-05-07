@@ -121,12 +121,7 @@ export default function HotelCard({ hotel, item, isFeatured = false, className }
         
         <div className="flex items-center gap-1 mb-3 h-5">
           {ratingAvg > 0 ? (
-            <>
-              <StarRating rating={ratingAvg} size="sm" />
-              <span className="text-xs text-muted-foreground">
-                ({ratingCount} đánh giá)
-              </span>
-            </>
+            <StarRating rating={ratingAvg} count={ratingCount} size="sm" variant="compact" />
           ) : data.starRating ? (
             <span className="text-xs text-muted-foreground">{data.starRating} sao</span>
           ) : (

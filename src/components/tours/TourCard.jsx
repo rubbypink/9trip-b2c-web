@@ -131,7 +131,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
           </div>
           <div className="flex items-center justify-between">
             {avgRating > 0 ? (
-              <StarRating rating={avgRating} count={reviewCount} size="sm" />
+              <StarRating rating={avgRating} count={reviewCount} size="sm" variant="compact" />
             ) : (
               <span className="text-xs text-muted-foreground">Chưa có đánh giá</span>
             )}
@@ -199,7 +199,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
         )}
         <div className="flex items-center justify-between">
           {avgRating > 0 ? (
-            <StarRating rating={avgRating} count={reviewCount} size="sm" />
+            <StarRating rating={avgRating} count={reviewCount} size="sm" variant="compact" />
           ) : (
             <span className="text-xs text-muted-foreground">Chưa có đánh giá</span>
           )}

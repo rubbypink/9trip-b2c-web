@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { useBooking } from "@/hooks/useBooking";
 import CustomerForm from "@/components/checkout/CustomerForm";
 import CartSummary from "@/components/checkout/CartSummary";
 import CouponInput from "@/components/checkout/CouponInput";
@@ -12,8 +13,9 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 export default function CheckoutPageClient() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { items, subtotal, tax, grandTotal, couponDiscount, couponData, clearCart } = useCart();
+  const { confirmBooking } = useBooking();
   
   const [step, setStep] = useState(1);
   const [contactInfo, setContactInfo] = useState(null);
@@ -69,6 +71,23 @@ export default function CheckoutPageClient() {
   const handleFinalizeBooking = async () => {
     setIsLoading(true);
     setErrorMsg(null);
+
+    if (gateway === "CASH" || gateway === "BANK_TRANSFER") {
+      try {
+        const id = await confirmBooking(contactInfo, gateway);
+        if (id) {
+          router.push(`/booking/confirmation/${id}`);
+        } else {
+          setErrorMsg("Có lỗi xảy ra khi tạo booking.");
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error("Lỗi khi tạo booking:", err);
+        setErrorMsg("Mất kết nối đến máy chủ. Vui lòng thử lại!");
+        setIsLoading(false);
+      }
+      return;
+    }
 
     const bookingData = {
       userId: user?.uid || null,
@@ -156,7 +175,7 @@ export default function CheckoutPageClient() {
             {step === 1 && (
               <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
                 <h2 className="text-xl font-bold text-foreground mb-6">Thông tin liên lạc</h2>
-                <CustomerForm onSubmit={handleInfoSubmit} initialData={user} />
+                <CustomerForm onSubmit={handleInfoSubmit} initialData={profile || user} />
                 <div className="mt-8 pt-6 border-t border-border flex justify-end">
                   <button
                     type="submit"
@@ -193,6 +212,35 @@ export default function CheckoutPageClient() {
                         <input type="radio" name="gateway" value="PAYPAL" checked={gateway === 'PAYPAL'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
                         <span className="font-bold text-foreground">Thanh toán qua PayPal</span>
                     </label>
+
+                    <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'CASH' ? 'border-emerald-500 bg-emerald-50' : 'border-border'}`}>
+                        <input type="radio" name="gateway" value="CASH" checked={gateway === 'CASH'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
+                        <span className="font-bold text-foreground">Thanh toán tiền mặt tại văn phòng</span>
+                    </label>
+
+                    <div className={`flex flex-col border rounded-xl transition-colors ${gateway === 'BANK_TRANSFER' ? 'border-emerald-500 bg-emerald-50' : 'border-border'}`}>
+                        <label className="flex items-center p-4 cursor-pointer">
+                            <input type="radio" name="gateway" value="BANK_TRANSFER" checked={gateway === 'BANK_TRANSFER'} onChange={(e) => setGateway(e.target.value)} className="mr-3 w-5 h-5" />
+                            <span className="font-bold text-foreground">Chuyển khoản ngân hàng (QR Code)</span>
+                        </label>
+                        {gateway === 'BANK_TRANSFER' && (
+                            <div className="px-4 pb-4 pt-0">
+                                <div className="bg-white p-4 rounded-lg border border-emerald-100 flex flex-col md:flex-row gap-4 items-center">
+                                    <div className="w-32 h-32 bg-muted rounded border flex items-center justify-center shrink-0">
+                                      <svg className="w-12 h-12 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-5m-2.5 0c2.071.816 4.014 1.2 6.5 1.2s4.429-.384 6.5-1.2M21 10c0 4.556-4.03 8.25-9 8.25s-9-3.694-9-8.25V7c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v3z" />
+                                      </svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm">Ngân hàng: Vietcombank</p>
+                                        <p className="font-bold text-sm">Số tài khoản: 0123456789</p>
+                                        <p className="font-bold text-sm">Chủ tài khoản: CÔNG TY TNHH 9 TRIP</p>
+                                        <p className="text-xs text-muted-foreground mt-2">Vui lòng quét mã QR hoặc chuyển khoản với nội dung: <br/><strong className="text-foreground">Thanh toan 9TRIP {contactInfo?.phone}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {errorMsg && (

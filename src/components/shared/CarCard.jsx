@@ -34,8 +34,11 @@ export default function CarCard({ car, item }) {
           <span className="flex items-center gap-1">⚙️ {data.transmission === 'automatic' ? 'Tự động' : 'Số sàn'}</span>
         </div>
         <div className="flex items-center gap-1 mb-3">
-          <StarRating rating={data.ratingAverage} size="xs" />
-          <span className="text-xs text-muted-foreground">({data.ratingCount})</span>
+          {data.ratingAverage > 0 ? (
+            <StarRating rating={data.ratingAverage} count={data.ratingCount} size="xs" variant="compact" />
+          ) : (
+            <span className="text-xs text-muted-foreground italic">Chưa có đánh giá</span>
+          )}
         </div>
         <div className="flex items-center justify-between border-t border-border pt-3">
           <PriceDisplay price={data.pricing?.basePrice} currency="VND" size="sm" label="Từ " />

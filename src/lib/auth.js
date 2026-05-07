@@ -49,6 +49,10 @@ async function forwardToERP(event, payload) {
  * @property {string} photoURL
  * @property {string} phone
  * @property {string} address
+ * @property {string} dateOfBirth
+ * @property {string} cccd
+ * @property {string} cccdIssueDate
+ * @property {string} nationality
  * @property {string[]} wishlist
  */
 

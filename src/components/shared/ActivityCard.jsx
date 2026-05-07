@@ -120,7 +120,7 @@ export default function ActivityCard({ activity, item }) {
         )}
         <div className="flex items-center gap-1 mb-3">
           {avgRating > 0 ? (
-            <StarRating rating={avgRating} count={reviewCount} size="sm" />
+            <StarRating rating={avgRating} count={reviewCount} size="sm" variant="compact" />
           ) : (
             <span className="text-xs text-muted-foreground">
               Chưa có đánh giá

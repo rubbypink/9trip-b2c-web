@@ -71,7 +71,7 @@ export default function LatestNews({ posts: initialPosts }) {
 
   if (loading) {
     return (
-      <section className="py-16 bg-background">
+      <section className="py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="h-10 w-64 bg-muted animate-pulse mx-auto mb-4 rounded-lg" />
@@ -98,7 +98,7 @@ export default function LatestNews({ posts: initialPosts }) {
   if (!posts || posts.length === 0) return null;
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">

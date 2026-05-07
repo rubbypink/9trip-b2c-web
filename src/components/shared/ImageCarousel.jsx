@@ -89,6 +89,9 @@ export default function ImageCarousel({
       behavior: "smooth"
     });
     setCurrentIndex(idx);
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
   }, []);
 
   // Reset index when images change

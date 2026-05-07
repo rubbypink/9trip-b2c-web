@@ -19,6 +19,7 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
       email: initialData.email || "",
       phone: initialData.phone || "",
       specialRequests: "",
+      dateOfBirth: initialData.dateOfBirth || "",
       cccd: initialData.cccd || "",
       cccdIssueDate: initialData.cccdIssueDate || "",
       address: initialData.address || "",
@@ -121,16 +122,18 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Địa chỉ thường trú *</label>
-          <textarea
-            {...register("address", { required: "Vui lòng nhập địa chỉ thường trú" })}
-            className={`customer-address w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none ${
-              errors.address ? "border-red-500" : "border-border"
+          <label className="block text-sm font-medium text-foreground mb-1">Ngày sinh *</label>
+          <input
+            type="date"
+            {...register("dateOfBirth", {
+              required: "Vui lòng nhập ngày sinh",
+              validate: (v) => new Date(v) <= new Date() || "Ngày sinh không thể là tương lai",
+            })}
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none ${
+              errors.dateOfBirth ? "border-red-500" : "border-border"
             }`}
-            rows={2}
-            placeholder="VD: 123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
-          ></textarea>
-          {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
+          />
+          {errors.dateOfBirth && <p className="mt-1 text-xs text-red-500">{errors.dateOfBirth.message}</p>}
         </div>
 
         <div>
@@ -156,6 +159,19 @@ export default function CustomerForm({ onSubmit, initialData = {} }) {
           </select>
           {errors.nationality && <p className="mt-1 text-xs text-red-500">{errors.nationality.message}</p>}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">Địa chỉ thường trú *</label>
+        <textarea
+          {...register("address", { required: "Vui lòng nhập địa chỉ thường trú" })}
+          className={`customer-address w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none ${
+            errors.address ? "border-red-500" : "border-border"
+          }`}
+          rows={2}
+          placeholder="VD: 123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
+        ></textarea>
+        {errors.address && <p className="mt-1 text-xs text-red-500">{errors.address.message}</p>}
       </div>
 
       <div>
