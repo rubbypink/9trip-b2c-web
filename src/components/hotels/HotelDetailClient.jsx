@@ -178,60 +178,64 @@ export default function HotelDetailClient({
             </div>
 
             {/* 2. Info Badges */}
-            <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
-              {starRating > 0 && (
-                <Badge icon="/icons/star.svg" label="Xếp hạng" value={`${starRating} sao`} />
-              )}
-              {address?.city && (
-                <Badge icon="/icons/location.svg" label="Địa điểm" value={address.city} />
-              )}
-              {avgRating > 0 && (
-                <Badge icon="/icons/star.svg" label="Đánh giá" value={`${avgRating.toFixed(1)} (${totalRating} đánh giá)`} />
-              )}
-              {lowestPrice > 0 && (
-                <Badge icon="/icons/tag.svg" label="Giá" value={`Từ ${formatCurrency(lowestPrice, "VND")}/đêm`} highlight />
-              )}
+            <div className="bg-card rounded-xl border border-border p-4">
+              <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
+                {starRating > 0 && (
+                  <Badge icon="/icons/star.svg" label="Xếp hạng" value={`${starRating} sao`} />
+                )}
+                {address?.city && (
+                  <Badge icon="/icons/location.svg" label="Địa điểm" value={address.city} />
+                )}
+                {avgRating > 0 && (
+                  <Badge icon="/icons/star.svg" label="Đánh giá" value={`${avgRating.toFixed(1)} (${totalRating} đánh giá)`} />
+                )}
+                {lowestPrice > 0 && (
+                  <Badge icon="/icons/tag.svg" label="Giá" value={`Từ ${formatCurrency(lowestPrice, "VND")}/đêm`} highlight />
+                )}
+              </div>
             </div>
 
             {/* 3. Title + Meta */}
-            <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{name}</h1>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  {address?.city && (
-                    <span className="inline-flex items-center gap-1">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {[address.street, address.city, address.country].filter(Boolean).join(", ")}
-                    </span>
-                  )}
-                  {avgRating > 0 && (
-                    <span className="inline-flex items-center gap-1 text-muted-foreground">
-                      <span className="text-muted-foreground">|</span>
-                      <span className="text-yellow-500">★</span>
-                      <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
-                      {totalRating > 0 && <span>({totalRating})</span>}
-                    </span>
-                  )}
+            <div className="bg-card rounded-xl border border-border p-6">
+              <div className="flex flex-col md:flex-row items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{name}</h1>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                    {address?.city && (
+                      <span className="inline-flex items-center gap-1">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {[address.street, address.city, address.country].filter(Boolean).join(", ")}
+                      </span>
+                    )}
+                    {avgRating > 0 && (
+                      <span className="inline-flex items-center gap-1 text-muted-foreground">
+                        <span className="text-muted-foreground">|</span>
+                        <span className="text-yellow-500">★</span>
+                        <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
+                        {totalRating > 0 && <span>({totalRating})</span>}
+                      </span>
+                    )}
+                  </div>
+                  {excerpt && <p className="text-muted-foreground mt-3 line-clamp-2">{excerpt}</p>}
                 </div>
-                {excerpt && <p className="text-muted-foreground mt-3 line-clamp-2">{excerpt}</p>}
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="flex items-center gap-2">
-                  <WishlistButton hotelId={hotel.id} />
-                  <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={name} />
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                  <div className="flex items-center gap-2">
+                    <WishlistButton hotelId={hotel.id} />
+                    <ShareButton url={typeof window !== "undefined" ? window.location.href : ""} title={name} />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBookNow}
+                    className="w-full sm:w-auto rounded-xl bg-primary text-white text-sm font-semibold px-6 py-2.5 shadow-sm hover:bg-primary-dark transition-colors"
+                  >
+                    Đặt ngay
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleBookNow}
-                  className="w-full sm:w-auto rounded-xl bg-primary text-white text-sm font-semibold px-6 py-2.5 shadow-sm hover:bg-primary-dark transition-colors"
-                >
-                  Đặt ngay
-                </button>
               </div>
             </div>
 
@@ -291,7 +295,7 @@ export default function HotelDetailClient({
                 ))}
               </div>
 
-              <div className="min-h-[300px] pt-6">
+              <div className="min-h-[300px] pt-6 bg-card rounded-xl border border-border p-6 shadow-sm">
                 <div data-tab-panel="overview" className={activeTab === "overview" ? "" : "hidden"}>
                   <OverviewPanel hotel={hotel} />
                 </div>
@@ -326,7 +330,7 @@ export default function HotelDetailClient({
 
             {/* 6. Related Hotels */}
             {relatedHotels.length > 0 && (
-              <div className="pt-10 border-t border-border">
+              <div className="pt-10 border-t border-border bg-card rounded-xl border border-border p-6">
                 <h3 className="text-xl font-bold text-foreground mb-5">Khách sạn tương tự</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {relatedHotels.map((h) => (

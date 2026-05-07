@@ -114,7 +114,7 @@ export function AuthProvider({ children }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, userName: displayName }),
-    }).catch(() => {});
+    }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
     return cred.user;
   }, []);
 

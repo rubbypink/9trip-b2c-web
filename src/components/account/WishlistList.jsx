@@ -170,10 +170,10 @@ export default function WishlistList() {
                   >
                     {item.typeLabel}
                   </span>
-                  {item?.rating && (
+                  {item?.rating && typeof item.rating === 'object' && typeof item.rating.average === 'number' && (
                     <span className="flex items-center gap-0.5 text-xs text-amber-500">
                       <Star className="w-3 h-3 fill-current" />
-                      {item.rating?.average?.toFixed(1) || 0} ({item.rating?.count || 0} đánh giá)
+                      {item.rating.average.toFixed(1)} ({item.rating.count || 0} đánh giá)
                     </span>
                   )}
                 </div>

@@ -661,11 +661,11 @@ export async function searchActivities(filters = {}) {
   try {
     let q = activitiesCol();
     if (locationId) q = q.where('locationId', '==', locationId);
-    if (categoryId) q = q.where('categoryId', '==', categoryId);
+    if (categoryId) q = q.where('categories', 'array-contains', categoryId);
 
     let countQ = activitiesCol();
     if (locationId) countQ = countQ.where('locationId', '==', locationId);
-    if (categoryId) countQ = countQ.where('categoryId', '==', categoryId);
+    if (categoryId) countQ = countQ.where('categories', 'array-contains', categoryId);
     const countSnap = await countQ.count().get();
     const totalCount = countSnap.data().count;
 
@@ -675,24 +675,29 @@ export async function searchActivities(filters = {}) {
       default: q = q.orderBy('createdAt', 'desc');
     }
 
-    q = page > 1 && !cursor ? q.limit(page * pageSize) : q.limit(pageSize);
+    // Fetch enough items to cover requested page when using offset-based pagination
+    const limit = page > 1 && !cursor ? page * pageSize : pageSize;
+    q = q.limit(limit);
     if (cursor) q = q.startAfter(cursor);
 
     const snap = await q.get();
     let activities = serializeDocs(snap);
 
+    // Client-side price filtering — Firestore requires composite indexes for
+    // range filters on different fields combined with ordering, so we filter
+    // in JS. This means totalCount may be slightly off when price filters are active.
     if (minPrice != null && minPrice !== '') activities = activities.filter((a) => a.pricing?.basePrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') activities = activities.filter((a) => a.pricing?.basePrice <= Number(maxPrice));
+
+    // Slice for current page when using limit-based pagination without cursor
+    if (page > 1 && !cursor) {
+      activities = activities.slice((page - 1) * pageSize, page * pageSize);
+    }
 
     return { activities, totalCount, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchActivities] Error:', error.message);
-    try {
-      const snap = await activitiesCol().orderBy('createdAt', 'desc').limit(pageSize).get();
-      return { activities: serializeDocs(snap), totalCount: snap.size, lastVisible: snap.docs[snap.docs.length - 1] || null };
-    } catch {
-      return { activities: [], totalCount: 0, lastVisible: null };
-    }
+    return { activities: [], totalCount: 0, lastVisible: null };
   }
 }
 

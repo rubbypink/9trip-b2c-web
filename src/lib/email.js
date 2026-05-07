@@ -17,6 +17,10 @@ const SMTP_CONFIG = {
   },
 };
 
+if (!SMTP_CONFIG.auth.pass) {
+  console.warn("[Email] Warning: SMTP_PASS is empty. Email sending will fail. Set SMTP_PASS in your environment.");
+}
+
 const FROM_ADDRESS = process.env.SMTP_FROM || process.env.SMTP_USER || "info@9tripphuquoc.com";
 
 /** @type {import("nodemailer").Transporter|null} */

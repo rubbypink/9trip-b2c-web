@@ -132,13 +132,25 @@ async function logPaymentEvent(logData) {
  */
 async function sendConfirmationEmail(bookingId) {
   try {
-    const bookingSnap = await adminDb.collection('bookings').doc(bookingId).get();
+    const bookingRef = adminDb.collection('bookings').doc(bookingId);
+    const bookingSnap = await bookingRef.get();
     if (!bookingSnap.exists) return;
     const booking = { id: bookingId, ...bookingSnap.data() };
     if (booking.paymentStatus !== 'PAID') return;
+
+    // Idempotency check — prevent duplicate emails from VNPay GET+POST
+    if (booking.confirmationEmailSent) {
+      console.log(`[Payment Webhook] Confirmation email already sent for booking ${bookingId}, skipping.`);
+      return;
+    }
+
     const result = await sendPaymentConfirmation(booking);
     if (result.success) {
       console.log(`[Payment Webhook] ✅ Confirmation email sent for booking ${bookingId}`);
+      await bookingRef.update({
+        confirmationEmailSent: true,
+        confirmationEmailSentAt: new Date(),
+      });
     } else {
       console.error(`[Payment Webhook] Failed to send confirmation email for booking ${bookingId}:`, result.error);
     }
@@ -157,9 +169,12 @@ async function sendFailureEmail(bookingId) {
     const bookingSnap = await adminDb.collection('bookings').doc(bookingId).get();
     if (!bookingSnap.exists) return;
     const booking = { id: bookingId, ...bookingSnap.data() };
-    sendPaymentFailed(booking).catch(err =>
-      console.error('[Payment Webhook] Failure email error:', err.message)
-    );
+    const result = await sendPaymentFailed(booking);
+    if (result.success) {
+      console.log(`[Payment Webhook] ✅ Failure email sent for booking ${bookingId}`);
+    } else {
+      console.error(`[Payment Webhook] Failed to send failure email for booking ${bookingId}:`, result.error);
+    }
   } catch (err) {
     console.error(`[Payment Webhook] Error sending failure email for ${bookingId}:`, err.message);
   }
@@ -211,7 +226,9 @@ export async function GET(request) {
       await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, gateway.toUpperCase());
       await releaseInventoryHold(verifyResult.orderId);
       await forwardToERP(verifyResult.orderId);
-      sendConfirmationEmail(verifyResult.orderId);
+      sendConfirmationEmail(verifyResult.orderId).catch(err =>
+        console.error('[Payment Webhook] Confirmation email error:', err.message)
+      );
 
       await logPaymentEvent({
         gateway,
@@ -224,7 +241,9 @@ export async function GET(request) {
     }
 
     const fallbackId = verifyResult.orderId || 'unknown';
-    sendFailureEmail(fallbackId);
+    sendFailureEmail(fallbackId).catch(err =>
+      console.error('[Payment Webhook] Failure email error:', err.message)
+    );
     await logPaymentEvent({
       gateway,
       bookingId: fallbackId,
@@ -267,14 +286,18 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'VNPAY');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
-          sendConfirmationEmail(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId).catch(err =>
+            console.error('[Payment Webhook] Confirmation email error:', err.message)
+          );
           // VNPay expects specific IPN response format
           return NextResponse.json({
             RspCode: '00',
             Message: 'Confirm Success',
           });
         }
-        sendFailureEmail(verifyResult.orderId);
+        sendFailureEmail(verifyResult.orderId).catch(err =>
+          console.error('[Payment Webhook] Failure email error:', err.message)
+        );
         return NextResponse.json({
           RspCode: '99',
           Message: 'Verify signature failed',
@@ -286,7 +309,9 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'MOMO');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
-          sendConfirmationEmail(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId).catch(err =>
+            console.error('[Payment Webhook] Confirmation email error:', err.message)
+          );
         }
         return new NextResponse(null, { status: 204 }); // MoMo expects 204 No Content
 
@@ -297,7 +322,9 @@ export async function POST(request) {
           await updateBookingAfterPayment(verifyResult.orderId, verifyResult.transactionId, 'PAYPAL');
           await releaseInventoryHold(verifyResult.orderId);
           await forwardToERP(verifyResult.orderId);
-          sendConfirmationEmail(verifyResult.orderId);
+          sendConfirmationEmail(verifyResult.orderId).catch(err =>
+            console.error('[Payment Webhook] Confirmation email error:', err.message)
+          );
         }
         return NextResponse.json({ received: true });
 

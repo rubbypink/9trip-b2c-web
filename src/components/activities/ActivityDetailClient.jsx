@@ -142,73 +142,77 @@ export default function ActivityDetailClient({
           </div>
 
           {/* Product Info Badges */}
-          <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
-            {(typeof duration === "object" && (days || hours)) ? (
-              <Badge icon="/icons/time.svg" label="Thời gian" value={
-                days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`
-              } />
-            ) : activity.duration ? (
-              <Badge icon="/icons/time.svg" label="Thời gian" value={activity.duration} />
-            ) : null}
-            {discountPct > 0 && (
-              <Badge
-                icon="/icons/ticket.svg"
-                label="Ưu đãi"
-                value={`Giảm ${discountPct}%`}
-                highlight
-              />
-            )}
-            {openingHours && (
-              <Badge icon="/icons/clock.svg" label="Giờ diễn" value={openingHours} />
-            )}
-            {locationName && (
-              <Badge icon="/icons/location.svg" label="Địa điểm" value={locationName} />
-            )}
-            {capacity > 0 && (
-              <Badge icon="/icons/users.svg" label="Sức chứa" value={`${capacity.toLocaleString()} người`} />
-            )}
+          <div className="bg-card rounded-xl border border-border p-4">
+            <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
+              {(typeof duration === "object" && (days || hours)) ? (
+                <Badge icon="/icons/time.svg" label="Thởi gian" value={
+                  days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`
+                } />
+              ) : activity.duration ? (
+                <Badge icon="/icons/time.svg" label="Thởi gian" value={activity.duration} />
+              ) : null}
+              {discountPct > 0 && (
+                <Badge
+                  icon="/icons/ticket.svg"
+                  label="Ưu đãi"
+                  value={`Giảm ${discountPct}%`}
+                  highlight
+                />
+              )}
+              {openingHours && (
+                <Badge icon="/icons/clock.svg" label="Giở diễn" value={openingHours} />
+              )}
+              {locationName && (
+                <Badge icon="/icons/location.svg" label="Địa điểm" value={locationName} />
+              )}
+              {capacity > 0 && (
+                <Badge icon="/icons/users.svg" label="Sức chứa" value={`${capacity.toLocaleString()} ngưởi`} />
+              )}
+            </div>
           </div>
 
           {/* Title + Meta */}
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {locationName && (
-                <span className="inline-flex items-center gap-1">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {locationName}
-                </span>
-              )}
-              {(days > 0 || hours > 0) && (
-                <span>
-                  {days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`}
-                </span>
-              )}
-              <StarRating rating={avgRating} showCount reviewCount={totalRating} />
-            </div>
-            {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
-
-            {/* Tags */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-block rounded-full bg-surface-1 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-                  >
-                    {tag}
+          <div className="bg-card rounded-xl border border-border p-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                {locationName && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {locationName}
                   </span>
-                ))}
+                )}
+                {(days > 0 || hours > 0) && (
+                  <span>
+                    {days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`}
+                  </span>
+                )}
+                <StarRating rating={avgRating} showCount reviewCount={totalRating} />
               </div>
-            )}
+              {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
+
+              {/* Tags */}
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {tags.map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-block rounded-full bg-surface-1 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Tabs */}
           <div>
-            <div className="flex border-b border-border overflow-x-auto scrollbar-hide">
+            <div className="flex border-b border-border overflow-x-auto scrollbar-hide bg-surface-1 rounded-t-xl">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -224,7 +228,7 @@ export default function ActivityDetailClient({
               ))}
             </div>
 
-            <div className="min-h-[300px] pt-6">
+            <div className="min-h-[300px] pt-6 bg-card rounded-xl border border-border p-6 shadow-sm">
               <div data-tab-panel="overview" className={activeTab === "overview" ? "" : "hidden"}>
                 {description || highlights.length > 0 ? (
                   <div className="space-y-6">
@@ -538,7 +542,7 @@ export default function ActivityDetailClient({
 
           {/* Related Activities */}
           {relatedActivities.length > 0 && (
-            <div className="pt-10 border-t border-border">
+            <div className="pt-10 border-t border-border bg-card rounded-xl border border-border p-6">
               <h3 className="text-xl font-bold text-foreground mb-5">Có thể bạn sẽ thích</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {relatedActivities.map((related) => (

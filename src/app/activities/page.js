@@ -35,11 +35,11 @@ export default async function ActivitiesPage({ searchParams }) {
   };
 
   const categories = [
-    { id: "sightseeing", name: "Tham quan" },
-    { id: "adventure", name: "Mạo hiểm" },
-    { id: "water-sports", name: "Thể thao dưới nước" },
-    { id: "eco-tour", name: "Sinh thái" },
-    { id: "workshop", name: "Lớp học & Workshop" },
+    { id: "Tham quan", name: "Tham quan" },
+    { id: "Mạo hiểm", name: "Mạo hiểm" },
+    { id: "Thể thao dưới nước", name: "Thể thao dưới nước" },
+    { id: "Sinh thái", name: "Sinh thái" },
+    { id: "Lớp học & Workshop", name: "Lớp học & Workshop" },
   ];
 
   const [{ activities: rawActivities, totalCount = 0 }, locations] = await Promise.all([
