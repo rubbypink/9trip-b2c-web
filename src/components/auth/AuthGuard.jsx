@@ -23,7 +23,7 @@ export default function AuthGuard({ children, fallback }) {
   if (loading || !user) {
     return (
       fallback || (
-        <div className="flex items-center justify-center min-h-screen bg-muted">
+        <div className="flex items-center justify-center min-h-screen bg-background">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-border border-t-orange-600" />
             <p className="mt-4 text-muted-foreground text-sm">Đang kiểm tra đăng nhập...</p>

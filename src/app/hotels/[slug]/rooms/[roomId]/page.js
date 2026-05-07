@@ -133,7 +133,7 @@ export default async function RoomDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted pb-16">
+    <div className="min-h-screen bg-background pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -179,17 +179,17 @@ export default async function RoomDetailPage({ params }) {
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {room.maxAdults > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-surface-1 border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   👤 {room.maxAdults} người lớn{room.maxChildren > 0 ? ` + ${room.maxChildren} trẻ em` : ""}
                 </span>
               )}
               {room.bedType && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-surface-1 border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   🛏️ {room.bedType}
                 </span>
               )}
               {room.roomSize && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-surface-1 border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   📐 {room.roomSize}m²
                 </span>
               )}
@@ -227,7 +227,7 @@ export default async function RoomDetailPage({ params }) {
                 <div className="overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-muted border-b border-border">
+                      <tr className="bg-surface-1 border-b border-border">
                         <th className="text-left px-4 py-3 font-semibold text-foreground">Gói giá</th>
                         <th className="text-right px-4 py-3 font-semibold text-foreground">Giá bán</th>
                         <th className="text-right px-4 py-3 font-semibold text-foreground">Nhà cung cấp</th>
@@ -235,7 +235,7 @@ export default async function RoomDetailPage({ params }) {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {pricingTiers.map((tier) => (
-                        <tr key={tier.id} className="hover:bg-muted transition-colors">
+                        <tr key={tier.id} className="hover:bg-surface-2 transition-colors">
                           <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
                           <td className="px-4 py-3 text-right font-semibold text-blue-600">
                             {tier.sellPrice > 0 ? formatCurrency(tier.sellPrice, currency) : "Liên hệ"}

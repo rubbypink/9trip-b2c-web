@@ -43,7 +43,7 @@ export default function ReviewsPanel({ ratingAverage = 0, ratingCount = 0, revie
   return (
     <div>
       {/* Rating Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 rounded-xl border border-border bg-muted/50">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 rounded-xl border border-border bg-surface-1/50">
         {/* Average score */}
         <div className="text-center">
           <div className="text-4xl font-bold text-foreground">{ratingAverage.toFixed(1)}</div>
@@ -111,7 +111,7 @@ export default function ReviewsPanel({ ratingAverage = 0, ratingCount = 0, revie
             <div className="text-center pt-2">
               <button
                 onClick={handleLoadMore}
-                className="rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                className="rounded-lg border border-border px-6 py-2.5 text-sm font-medium text-foreground hover:bg-surface-1 transition-colors"
               >
                 Xem thêm ({totalReviews - visibleCount} đánh giá)
               </button>

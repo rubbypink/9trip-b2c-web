@@ -197,7 +197,7 @@ export default function ActivityDetailClient({
                 {tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                    className="inline-block rounded-full bg-surface-1 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
                   >
                     {tag}
                   </span>
@@ -262,7 +262,7 @@ export default function ActivityDetailClient({
                       <div className="overflow-x-auto rounded-xl border border-border">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="bg-muted border-b border-border">
+                            <tr className="bg-surface-1 border-b border-border">
                               <th className="text-left px-4 py-3 font-semibold text-foreground">Gói dịch vụ</th>
                               <th className="text-left px-4 py-3 font-semibold text-foreground">Mô tả</th>
                               <th className="text-right px-4 py-3 font-semibold text-foreground">Người lớn</th>
@@ -271,7 +271,7 @@ export default function ActivityDetailClient({
                           </thead>
                           <tbody className="divide-y divide-border">
                             {pricingTiers.map((tier) => (
-                              <tr key={tier.id} className="hover:bg-muted transition-colors">
+                              <tr key={tier.id} className="hover:bg-surface-2 transition-colors">
                                 <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
                                 <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate" title={tier.description}>{tier.description || "—"}</td>
                                 <td className="px-4 py-3 text-right font-semibold text-blue-600">
@@ -291,7 +291,7 @@ export default function ActivityDetailClient({
                         <div className="space-y-3">
                           <h3 className="text-lg font-semibold text-foreground">Bao gồm theo gói</h3>
                           {pricingTiers.filter((t) => t.included?.length > 0).map((tier) => (
-                            <div key={tier.id} className="bg-muted rounded-xl p-4">
+                            <div key={tier.id} className="bg-surface-1 rounded-xl p-4">
                               <h4 className="font-medium text-foreground text-sm mb-2">{tier.name}</h4>
                               <ul className="space-y-1">
                                 {tier.included.map((item, idx) => (
@@ -492,7 +492,7 @@ export default function ActivityDetailClient({
                         <StarRating rating={avgRating} showCount reviewCount={totalRating} />
                       </div>
                       {reviews.map((review) => (
-                        <div key={review.id} className="bg-muted rounded-xl p-4">
+                        <div key={review.id} className="bg-surface-1 rounded-xl p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="font-medium text-sm text-foreground">{review.userName || "Khách hàng"}</span>
                             <StarRating rating={review.rating} />
@@ -518,7 +518,7 @@ export default function ActivityDetailClient({
                     <div className="space-y-2">
                       {faq.map((item, idx) => (
                         <details key={idx} className="group rounded-xl border border-border">
-                          <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-muted rounded-xl group-open:rounded-b-none">
+                          <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-surface-1 rounded-xl group-open:rounded-b-none">
                             {item.question}
                             <svg className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -575,7 +575,7 @@ export default function ActivityDetailClient({
  */
 function PolicyCard({ icon, title, content }) {
   return (
-    <div className="bg-muted rounded-xl p-4">
+    <div className="bg-surface-1 rounded-xl p-4">
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">{icon}</div>
         <div>
@@ -593,7 +593,7 @@ function PolicyCard({ icon, title, content }) {
  */
 function ScheduleCard({ label, value }) {
   return (
-    <div className="bg-muted rounded-xl p-4 border border-border">
+    <div className="bg-surface-1 rounded-xl p-4 border border-border">
       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">{label}</p>
       <p className="text-sm font-medium text-foreground">{value}</p>
     </div>

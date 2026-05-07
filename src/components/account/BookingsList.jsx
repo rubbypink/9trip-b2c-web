@@ -154,7 +154,7 @@ export default function BookingsList({ onReviewRequest }) {
           <button
             type="button"
             onClick={handleClearFilter}
-            className="booking-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-muted/80 transition-colors"
+            className="booking-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-surface-1/80 transition-colors"
           >
             Xóa bộ lọc
           </button>

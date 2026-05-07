@@ -3,7 +3,7 @@
  */
 export default function BlogListLoading() {
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-background">
       <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="h-8 bg-muted rounded-lg w-32 animate-pulse mb-2" />

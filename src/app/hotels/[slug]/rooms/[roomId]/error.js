@@ -7,7 +7,7 @@
  */
 export default function RoomDetailError({ error, reset }) {
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
           <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

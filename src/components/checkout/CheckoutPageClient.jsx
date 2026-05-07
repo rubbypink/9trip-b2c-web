@@ -122,7 +122,7 @@ export default function CheckoutPageClient() {
 
   if (isRedirecting) {
     return (
-      <div className="min-h-screen bg-muted flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
         <LoadingSpinner className="w-12 h-12 text-primary-600 mb-4" />
         <h2 className="text-2xl font-bold text-foreground mb-2">Đang kết nối cổng thanh toán...</h2>
         <p className="text-muted-foreground">Vui lòng không đóng trình duyệt trong lúc này.</p>
@@ -132,7 +132,7 @@ export default function CheckoutPageClient() {
 
   if (showEmptyCart) {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <h2 className="text-2xl font-bold text-foreground mb-2">Giỏ hàng trống</h2>
           <p className="text-muted-foreground mb-8">Hãy khám phá các tour và khách sạn của chúng tôi.</p>
@@ -145,7 +145,7 @@ export default function CheckoutPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-muted py-10">
+    <div className="min-h-screen bg-background py-10">
       <div className="container mx-auto px-4 max-w-6xl">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-foreground">Thanh toán 9 TRIP</h1>
@@ -208,7 +208,7 @@ export default function CheckoutPageClient() {
                   <button
                     onClick={handleFinalizeBooking}
                     disabled={isLoading || isValidatingPrice}
-                    className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:bg-muted flex items-center gap-2"
+                    className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:bg-surface-1 flex items-center gap-2"
                   >
                     {isLoading && <LoadingSpinner className="w-5 h-5 border-white" />}
                     {isLoading ? "Đang xử lý..." : `Thanh toán ${realGrandTotal.toLocaleString('vi-VN')} đ`}

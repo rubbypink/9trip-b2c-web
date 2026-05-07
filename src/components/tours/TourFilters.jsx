@@ -92,7 +92,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
                 "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
                 minRating === String(star)
                   ? "bg-primary/10 text-primary font-medium"
-                  : "text-muted-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:bg-surface-2"
               )}
             >
               <span className="flex items-center gap-0.5 text-secondary">
@@ -125,7 +125,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
                   "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
                   tourTypeId === type.id
                     ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:bg-muted"
+                    : "text-muted-foreground hover:bg-surface-2"
                 )}
               >
                 {type.name}
@@ -152,7 +152,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
                   "flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm transition-colors",
                   locationId === loc.id
                     ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:bg-muted"
+                    : "text-muted-foreground hover:bg-surface-2"
                 )}
               >
                 {loc.name}
@@ -169,7 +169,7 @@ export default function TourFilters({ locations = [], tourTypes = [], priceRange
       {/* Mobile Toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted mb-4"
+        className="lg:hidden flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-1 mb-4"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />

@@ -123,7 +123,7 @@ export default async function ActivityDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="min-h-screen bg-muted pb-16">
+      <div className="min-h-screen bg-background pb-16">
         <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },

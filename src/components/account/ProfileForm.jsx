@@ -103,7 +103,7 @@ export default function ProfileForm() {
           type="email"
           value={profile.email || ""}
           disabled
-          className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted text-muted-foreground cursor-not-allowed"
+          className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface-1 text-muted-foreground cursor-not-allowed"
         />
         <p className="mt-1 text-xs text-muted-foreground">Email không thể thay đổi.</p>
       </div>

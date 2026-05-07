@@ -26,7 +26,7 @@ function OverviewPanel({ hotel }) {
           <h3 className="text-lg font-semibold text-foreground mb-4">Điểm nổi bật</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {hotel.highlights.map((item, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-muted">
+              <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-surface-1">
                 <span className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
                   {idx + 1}
                 </span>

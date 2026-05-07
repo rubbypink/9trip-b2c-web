@@ -89,7 +89,7 @@ export default async function RentalDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted pb-16">
+    <div className="min-h-screen bg-background pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -130,7 +130,7 @@ export default async function RentalDetailPage({ params }) {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">{displayName}</h1>
               <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
-                {rentalType && <span className="bg-muted px-2.5 py-1 rounded-full">{rentalType}</span>}
+                {rentalType && <span className="bg-surface-1 px-2.5 py-1 rounded-full">{rentalType}</span>}
                 {location && (
                   <span className="inline-flex items-center gap-1">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

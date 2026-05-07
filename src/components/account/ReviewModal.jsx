@@ -86,7 +86,7 @@ export default function ReviewModal({ booking, onClose }) {
           <h3 className="font-bold text-foreground">Viết đánh giá</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+            className="p-1 rounded-full hover:bg-surface-1 text-muted-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -152,7 +152,7 @@ export default function ReviewModal({ booking, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-muted transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border text-muted-foreground font-medium hover:bg-surface-1 transition-colors"
             >
               Hủy
             </button>

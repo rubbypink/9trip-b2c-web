@@ -150,7 +150,7 @@ export default async function TourDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted pb-16">
+    <div className="min-h-screen bg-background pb-16">
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"

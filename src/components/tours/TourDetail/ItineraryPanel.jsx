@@ -35,7 +35,7 @@ export default function ItineraryPanel({ itinerary = [] }) {
               onClick={() => toggleDay(idx)}
               className={cn(
                 "w-full flex items-center gap-4 px-5 py-4 text-left transition-colors",
-                isExpanded ? "bg-primary/5" : "bg-card hover:bg-muted"
+                isExpanded ? "bg-primary/5" : "bg-card hover:bg-surface-2"
               )}
             >
               <span

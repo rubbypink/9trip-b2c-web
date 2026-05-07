@@ -158,12 +158,12 @@ export default function UserReviewsList() {
           <button
             type="button"
             onClick={handleClearFilter}
-            className="review-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-muted/80 transition-colors"
+            className="review-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-surface-1/80 transition-colors"
           >
             Xóa bộ lọc
           </button>
         </div>
-        <div className="text-center py-16 px-4 bg-muted rounded-2xl">
+        <div className="text-center py-16 px-4 bg-surface-1 rounded-2xl">
           <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-1">Không tìm thấy đánh giá</h3>
           <p className="text-sm text-muted-foreground">
@@ -176,7 +176,7 @@ export default function UserReviewsList() {
 
   if (!isFilterActive && reviews.length === 0) {
     return (
-      <div className="text-center py-16 px-4 bg-muted rounded-2xl">
+      <div className="text-center py-16 px-4 bg-surface-1 rounded-2xl">
         <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-1">Chưa có đánh giá nào</h3>
         <p className="text-sm text-muted-foreground">
@@ -215,7 +215,7 @@ export default function UserReviewsList() {
           <button
             type="button"
             onClick={handleClearFilter}
-            className="review-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-muted/80 transition-colors"
+            className="review-clear-filter shrink-0 px-4 py-2.5 bg-muted text-muted-foreground text-sm font-medium rounded-lg hover:bg-surface-1/80 transition-colors"
           >
             Xóa bộ lọc
           </button>

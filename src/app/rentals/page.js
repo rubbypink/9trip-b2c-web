@@ -53,7 +53,7 @@ export default async function RentalsPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted pb-16">
+    <div className="min-h-screen bg-background pb-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[
@@ -81,7 +81,7 @@ export default async function RentalsPage({ searchParams }) {
                     <Link 
                       key={t}
                       href={`/rentals?type=${t}`}
-                      className={`block px-3 py-2 rounded-lg text-sm ${params.type === t ? 'bg-blue-50 text-blue-600 font-medium' : 'text-muted-foreground hover:bg-muted'}`}
+                      className={`block px-3 py-2 rounded-lg text-sm ${params.type === t ? 'bg-blue-50 text-blue-600 font-medium' : 'text-muted-foreground hover:bg-surface-2'}`}
                     >
                       {t}
                     </Link>

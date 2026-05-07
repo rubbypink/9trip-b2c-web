@@ -154,7 +154,7 @@ export default function SearchFormPopup({ type = "tour", locations = [], current
               <button
                 type="button"
                 onClick={handleReset}
-                className="flex-1 px-3 py-2 text-sm font-medium text-muted-foreground bg-muted rounded-lg hover:bg-muted transition-colors"
+                className="flex-1 px-3 py-2 text-sm font-medium text-muted-foreground bg-muted rounded-lg hover:bg-surface-1 transition-colors"
               >
                 Xóa bộ lọc
               </button>

@@ -280,7 +280,7 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
                               type="button"
                               onClick={() => updateRoomQty(room.roomId, -1)}
                               disabled={qty === 0}
-                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
                             >
                               −
                             </button>
@@ -291,7 +291,7 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
                               type="button"
                               onClick={() => updateRoomQty(room.roomId, 1)}
                               disabled={qty >= (room.totalRooms || 10)}
-                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
+                              className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm"
                             >
                               +
                             </button>

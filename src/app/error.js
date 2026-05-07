@@ -6,7 +6,7 @@
  */
 export default function GlobalError({ error, reset }) {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted px-4">
+    <div className="flex items-center justify-center min-h-screen bg-background px-4">
       <div className="text-center max-w-md">
         <div className="mx-auto h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
           <svg className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

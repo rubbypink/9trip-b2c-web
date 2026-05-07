@@ -180,7 +180,7 @@ export default function ActivityBookingWidget({
                         className={`w-full text-left rounded-lg px-3 py-2.5 text-sm border transition-all ${
                           selectedTierId === tier.id
                             ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
-                            : "border-border text-muted-foreground hover:border-border hover:bg-muted"
+                            : "border-border text-muted-foreground hover:border-border hover:bg-surface-2"
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -211,7 +211,7 @@ export default function ActivityBookingWidget({
               <button
                 onClick={() => handleAdultsChange(-1)}
                 disabled={adults <= 1}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Giảm số người lớn"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -224,7 +224,7 @@ export default function ActivityBookingWidget({
               <button
                 onClick={() => handleAdultsChange(1)}
                 disabled={adults >= 99}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Tăng số người lớn"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -252,7 +252,7 @@ export default function ActivityBookingWidget({
               <button
                 onClick={() => handleChildrenChange(-1)}
                 disabled={children <= 0}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Giảm số trẻ em"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -265,7 +265,7 @@ export default function ActivityBookingWidget({
               <button
                 onClick={() => handleChildrenChange(1)}
                 disabled={children >= 99}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Tăng số trẻ em"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -282,7 +282,7 @@ export default function ActivityBookingWidget({
         </div>
 
         {/* Total */}
-        <div className="bg-muted rounded-xl p-4 -mx-1">
+        <div className="bg-surface-1 rounded-xl p-4 -mx-1">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">Tổng cộng</span>
             <span className="text-xl font-bold text-foreground">
@@ -299,7 +299,7 @@ export default function ActivityBookingWidget({
           <button
             onClick={handleBookNow}
             disabled={!selectedDate || adults + children === 0}
-            className="w-full rounded-lg bg-blue-600 text-white font-semibold px-6 py-3 hover:bg-blue-700 disabled:bg-muted disabled:cursor-not-allowed transition-colors"
+            className="w-full rounded-lg bg-blue-600 text-white font-semibold px-6 py-3 hover:bg-blue-700 disabled:bg-surface-1 disabled:cursor-not-allowed transition-colors"
           >
             Thanh toán ngay
           </button>

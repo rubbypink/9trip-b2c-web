@@ -26,7 +26,7 @@ export default function BackToTop() {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-24 right-6 z-50 w-12 h-12 bg-card border border-border rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-muted transition-all hover:scale-110"
+      className="fixed bottom-24 right-6 z-50 w-12 h-12 bg-card border border-border rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-surface-2 transition-all hover:scale-110"
       aria-label="Lên đầu trang"
       title="Lên đầu trang"
     >

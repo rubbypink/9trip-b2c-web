@@ -47,7 +47,7 @@ export default function CheckoutPayment({ orderId, amount }) {
             
             {/* Lựa chọn Cổng thanh toán */}
             <div className="flex flex-col gap-3 mb-6">
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-border hover:bg-muted'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-border hover:bg-surface-2'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 
@@ -59,7 +59,7 @@ export default function CheckoutPayment({ orderId, amount }) {
                     <span className="font-medium text-foreground">VNPay (Thẻ ATM/QR Code)</span>
                 </label>
 
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-border hover:bg-muted'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'MOMO' ? 'border-pink-500 bg-pink-50' : 'border-border hover:bg-surface-2'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 
@@ -71,7 +71,7 @@ export default function CheckoutPayment({ orderId, amount }) {
                     <span className="font-medium text-foreground">Ví MoMo</span>
                 </label>
 
-                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-border hover:bg-muted'}`}>
+                <label className={`flex items-center p-3 border rounded cursor-pointer transition-colors ${gateway === 'PAYPAL' ? 'border-blue-700 bg-blue-50' : 'border-border hover:bg-surface-2'}`}>
                     <input 
                         type="radio" 
                         name="gateway" 

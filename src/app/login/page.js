@@ -138,7 +138,7 @@ function LoginForm() {
 							type="button"
 							onClick={() => handleSocialLogin('google')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-surface-1 transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -168,7 +168,7 @@ function LoginForm() {
 							type="button"
 							onClick={() => handleSocialLogin('facebook')}
 							disabled={!!socialLoading}
-							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-muted transition text-sm font-medium text-foreground"
+							className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-xl hover:bg-surface-1 transition text-sm font-medium text-foreground"
 						>
 							<svg
 								className="w-5 h-5"

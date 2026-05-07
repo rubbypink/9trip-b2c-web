@@ -57,7 +57,7 @@ function AmenitiesPanel({ hotel }) {
             </SectionHeading>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {items.map((amenity, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-sm text-foreground p-2 rounded-lg bg-muted">
+                <div key={idx} className="flex items-center gap-2 text-sm text-foreground p-2 rounded-lg bg-surface-1">
                   <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>

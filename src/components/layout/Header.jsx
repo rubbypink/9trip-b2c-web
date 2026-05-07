@@ -135,18 +135,18 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border py-2 z-50">
-                    <Link href="/account/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                    <Link href="/account/profile" className="block px-4 py-2 text-sm text-foreground hover:bg-surface-1" onClick={() => setIsUserMenuOpen(false)}>
                       Tài khoản
                     </Link>
-                    <Link href="/account/bookings" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                    <Link href="/account/bookings" className="block px-4 py-2 text-sm text-foreground hover:bg-surface-1" onClick={() => setIsUserMenuOpen(false)}>
                       Lịch sử đặt
                     </Link>
-                    <Link href="/account/wishlist" className="block px-4 py-2 text-sm text-foreground hover:bg-muted" onClick={() => setIsUserMenuOpen(false)}>
+                    <Link href="/account/wishlist" className="block px-4 py-2 text-sm text-foreground hover:bg-surface-1" onClick={() => setIsUserMenuOpen(false)}>
                       Yêu thích
                     </Link>
                     <hr className="my-1" />
                     <button
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-muted"
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-surface-1"
                       onClick={() => { logout(); setIsUserMenuOpen(false); }}
                     >
                       Đăng xuất
@@ -218,7 +218,7 @@ export default function Header() {
                         <div className="flex items-center justify-between mt-1">
                           <div className="cart-item-qty flex items-center gap-1">
                             <button
-                              className={`w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm transition-colors ${isMinQty ? "text-muted-foreground cursor-not-allowed" : "text-foreground hover:bg-muted"}`}
+                              className={`w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm transition-colors ${isMinQty ? "text-muted-foreground cursor-not-allowed" : "text-foreground hover:bg-surface-2"}`}
                               onClick={() => !isMinQty && handleQtyChange(idx, -1)}
                               disabled={isMinQty}
                               aria-label="Giảm số lượng"
@@ -227,7 +227,7 @@ export default function Header() {
                             </button>
                             <span className="text-sm font-medium text-foreground w-6 text-center">{qty}</span>
                             <button
-                              className="w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm text-foreground hover:bg-muted transition-colors"
+                              className="w-6 h-6 min-w-[44px] min-h-[44px] lg:min-w-0 lg:min-h-0 flex items-center justify-center rounded border border-border text-sm text-foreground hover:bg-surface-2 transition-colors"
                               onClick={() => handleQtyChange(idx, 1)}
                               aria-label="Tăng số lượng"
                             >

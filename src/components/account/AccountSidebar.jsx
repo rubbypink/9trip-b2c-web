@@ -85,7 +85,7 @@ export default function AccountSidebar() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
                 isActive
                   ? "bg-orange-50 text-orange-600"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
               }`}
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -147,7 +147,7 @@ export default function AccountSidebar() {
               <button
                 type="button"
                 onClick={closeMobile}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-muted-foreground hover:bg-muted transition-colors"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-muted-foreground hover:bg-surface-1 transition-colors"
                 aria-label="Đóng menu"
               >
                 <X className="h-5 w-5" />

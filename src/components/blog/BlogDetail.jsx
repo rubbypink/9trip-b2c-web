@@ -110,7 +110,7 @@ export default function BlogDetail({ post, relatedPosts = [] }) {
           <div className="mt-10 pt-6 border-t border-border flex flex-wrap gap-2">
             <span className="text-sm font-medium text-muted-foreground mr-2 flex items-center">Tags:</span>
             {post.tags.map((tag, idx) => (
-              <span key={idx} className="px-3 py-1 bg-muted text-muted-foreground text-sm rounded-full">
+              <span key={idx} className="px-3 py-1 bg-surface-1 text-muted-foreground text-sm rounded-full">
                 #{tag}
               </span>
             ))}
@@ -140,7 +140,7 @@ export default function BlogDetail({ post, relatedPosts = [] }) {
             </button>
             <button
               onClick={handleCopyLink}
-              className="p-2 rounded-full bg-muted text-foreground hover:bg-muted-foreground/20 transition-colors flex items-center gap-2"
+              className="p-2 rounded-full bg-muted text-foreground hover:bg-surface-1-foreground/20 transition-colors flex items-center gap-2"
               aria-label="Copy link"
             >
               {copied ? <Check className="w-4 h-4 text-green-600" /> : <LinkIcon className="w-4 h-4" />}

@@ -15,7 +15,7 @@ export const metadata = {
 export default function AccountLayout({ children }) {
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen bg-background">
         <AccountSidebar />
         {/* Offset content to account for fixed desktop sidebar */}
         <main className="lg:ml-64 min-h-screen p-6">

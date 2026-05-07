@@ -67,7 +67,7 @@ export default async function HotelDetailPage({ params }) {
 
   if (!rawHotel) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen bg-background">
         <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },
@@ -131,7 +131,7 @@ export default async function HotelDetailPage({ params }) {
   };
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumb
         items={[

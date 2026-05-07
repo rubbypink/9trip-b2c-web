@@ -204,7 +204,7 @@ export function ReviewSummaryCompact({ reviews = [], avgRating = 0, totalRating 
       {reviews.length > 0 && (
         <div className="w-full mt-4 space-y-2 max-h-[120px] overflow-y-auto">
           {reviews.slice(0, 2).map((review, i) => (
-            <div key={i} className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
+            <div key={i} className="text-xs text-muted-foreground bg-surface-1 rounded-lg px-3 py-2">
               <div className="flex items-center gap-1 mb-0.5">
                 {Array.from({ length: 5 }).map((_, s) => (
                   <svg

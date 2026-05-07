@@ -72,7 +72,7 @@ export default function HotelSearchForm({ locations = [] }) {
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             >
               {destinations.map((d) => (
                 <option key={d.value} value={d.value}>
@@ -107,7 +107,7 @@ export default function HotelSearchForm({ locations = [] }) {
               value={checkin}
               min={today}
               onChange={(e) => setCheckin(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function HotelSearchForm({ locations = [] }) {
               value={checkout}
               min={checkin || today}
               onChange={(e) => setCheckout(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function HotelSearchForm({ locations = [] }) {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            <div className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground">
+            <div className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground">
               <span>
                 {adults + children} khách
                 {children > 0 && ` (${adults} NL, ${children} TE)`}
@@ -177,7 +177,7 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setAdults(Math.max(1, adults - 1))}
-            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-surface-2 flex items-center justify-center text-sm"
           >
             −
           </button>
@@ -185,7 +185,7 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setAdults(Math.min(10, adults + 1))}
-            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-surface-2 flex items-center justify-center text-sm"
           >
             +
           </button>
@@ -195,7 +195,7 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setChildren(Math.max(0, children - 1))}
-            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-surface-2 flex items-center justify-center text-sm"
           >
             −
           </button>
@@ -205,7 +205,7 @@ export default function HotelSearchForm({ locations = [] }) {
           <button
             type="button"
             onClick={() => setChildren(Math.min(5, children + 1))}
-            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-muted flex items-center justify-center text-sm"
+            className="w-7 h-7 rounded-full bg-muted text-muted-foreground hover:bg-surface-2 flex items-center justify-center text-sm"
           >
             +
           </button>

@@ -108,7 +108,7 @@ export default function CartItem({ item, index, onRemove, onUpdateQuantity }) {
                 type="button"
                 onClick={() => handleQuantityChange(-1)}
                 disabled={quantity <= 1}
-                className="w-7 h-7 rounded border border-border flex items-center justify-center text-sm text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-7 h-7 rounded border border-border flex items-center justify-center text-sm text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 −
               </button>
@@ -117,7 +117,7 @@ export default function CartItem({ item, index, onRemove, onUpdateQuantity }) {
                 type="button"
                 onClick={() => handleQuantityChange(1)}
                 disabled={quantity >= 10}
-                className="w-7 h-7 rounded border border-border flex items-center justify-center text-sm text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-7 h-7 rounded border border-border flex items-center justify-center text-sm text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 +
               </button>

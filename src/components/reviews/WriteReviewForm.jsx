@@ -169,7 +169,7 @@ export default function WriteReviewForm({ serviceId, serviceType, onReviewSubmit
       <button
         type="submit"
         disabled={submitting || rating === 0 || !comment.trim()}
-        className="w-full sm:w-auto px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+        className="w-full sm:w-auto px-6 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark disabled:bg-surface-1 disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
       >
         {submitting ? "Đang gửi..." : "Gửi đánh giá"}
       </button>

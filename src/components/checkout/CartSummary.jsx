@@ -14,7 +14,7 @@ export default function CartSummary() {
 
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-      <div className="p-4 border-b border-border bg-muted/50">
+      <div className="p-4 border-b border-border bg-surface-1/50">
         <h3 className="font-bold text-foreground">Chi tiết đơn hàng</h3>
       </div>
       
@@ -49,7 +49,7 @@ export default function CartSummary() {
         ))}
       </div>
 
-      <div className="p-4 bg-muted/50 border-t border-border space-y-2">
+      <div className="p-4 bg-surface-1/50 border-t border-border space-y-2">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Tạm tính</span>
           <span className="text-foreground font-medium">{formatCurrency(subtotal)}</span>

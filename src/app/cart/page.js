@@ -36,7 +36,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -89,7 +89,7 @@ export default function CartPage() {
                     onChange={(e) => setCouponInput(e.target.value)}
                     placeholder="Nhập mã giảm giá"
                     disabled={!!couponCode}
-                    className="flex-1 rounded-lg border border-border px-4 py-2 text-sm outline-none focus:border-orange-500 disabled:bg-muted"
+                    className="flex-1 rounded-lg border border-border px-4 py-2 text-sm outline-none focus:border-orange-500 disabled:bg-surface-1"
                   />
                   {couponCode ? (
                     <button

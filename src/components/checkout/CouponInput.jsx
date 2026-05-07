@@ -65,7 +65,7 @@ export default function CouponInput() {
           <button
             onClick={handleApply}
             disabled={loading || !code}
-            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary-dark disabled:bg-muted transition-colors"
+            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary-dark disabled:bg-surface-1 transition-colors"
           >
             {loading ? "..." : "Áp dụng"}
           </button>

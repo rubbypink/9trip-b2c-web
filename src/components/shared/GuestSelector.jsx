@@ -50,7 +50,7 @@ export default function GuestSelector({ adults = 1, children = 0, infants = 0, o
                   type="button"
                   onClick={() => handleChange(type, -1)}
                   disabled={(type === "adults" && adults <= 1) || (type !== "adults" && { adults, children, infants }[type] <= 0)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   −
                 </button>
@@ -58,7 +58,7 @@ export default function GuestSelector({ adults = 1, children = 0, infants = 0, o
                 <button
                   type="button"
                   onClick={() => handleChange(type, 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-muted"
+                  className="w-8 h-8 flex items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-surface-2"
                 >
                   +
                 </button>

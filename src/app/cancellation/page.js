@@ -11,7 +11,7 @@ export const metadata = {
  */
 export default function CancellationPage() {
   return (
-    <div className="min-h-screen bg-muted pb-16">
+    <div className="min-h-screen bg-background pb-16">
       <Breadcrumb
         items={[
           { label: "Trang chủ", href: "/" },

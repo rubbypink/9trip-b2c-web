@@ -7,7 +7,7 @@ export const metadata = { title: "Không tìm thấy — 9 Trip" };
  */
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center max-w-md px-4">
         <div className="text-8xl font-bold text-muted-foreground mb-4">404</div>
         <h1 className="text-2xl font-bold text-foreground mb-2">Không tìm thấy trang</h1>

@@ -3,7 +3,7 @@
  */
 export default function RoomDetailLoading() {
   return (
-    <div className="min-h-screen bg-muted animate-pulse">
+    <div className="min-h-screen bg-background animate-pulse">
       {/* Breadcrumb skeleton */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex gap-2">

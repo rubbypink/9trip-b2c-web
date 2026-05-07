@@ -163,7 +163,7 @@ export default function TourBookingWidget({
                   className={`w-full text-left rounded-lg px-3 py-2.5 text-sm border transition-all ${
                     selectedTierId === tier.id
                       ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
-                      : "border-border text-foreground hover:border-border hover:bg-muted"
+                      : "border-border text-foreground hover:border-border hover:bg-surface-2"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -188,13 +188,13 @@ export default function TourBookingWidget({
             <label className="block text-sm font-medium text-foreground mb-1.5">Người lớn</label>
             <div className="flex items-center gap-3">
               <button onClick={() => handleAdultsChange(-1)} disabled={adults <= 1}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Giảm số người lớn">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
               </button>
               <span className="w-10 text-center font-semibold text-foreground text-lg tabular-nums">{String(adults).padStart(2, "0")}</span>
               <button onClick={() => handleAdultsChange(1)} disabled={adults >= 99}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Tăng số người lớn">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               </button>
@@ -207,13 +207,13 @@ export default function TourBookingWidget({
             <label className="block text-sm font-medium text-foreground mb-1.5">Trẻ em</label>
             <div className="flex items-center gap-3">
               <button onClick={() => handleChildrenChange(-1)} disabled={children <= 0}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Giảm số trẻ em">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
               </button>
               <span className="w-10 text-center font-semibold text-foreground text-lg tabular-nums">{String(children).padStart(2, "0")}</span>
               <button onClick={() => handleChildrenChange(1)} disabled={children >= 99}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Tăng số trẻ em">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               </button>
@@ -226,13 +226,13 @@ export default function TourBookingWidget({
             <label className="block text-sm font-medium text-foreground mb-1.5">Em bé</label>
             <div className="flex items-center gap-3">
               <button onClick={() => handleInfantsChange(-1)} disabled={infants <= 0}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Giảm số em bé">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
               </button>
               <span className="w-10 text-center font-semibold text-foreground text-lg tabular-nums">{String(infants).padStart(2, "0")}</span>
               <button onClick={() => handleInfantsChange(1)} disabled={infants >= 99}
-                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Tăng số em bé">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               </button>
@@ -242,7 +242,7 @@ export default function TourBookingWidget({
         </div>
 
         {/* Total */}
-        <div className="bg-muted rounded-xl p-4 -mx-1">
+        <div className="bg-surface-1 rounded-xl p-4 -mx-1">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">Tổng cộng</span>
             <span className="text-xl font-bold text-foreground">{formatCurrency(total, tierCurrency)}</span>
@@ -257,7 +257,7 @@ export default function TourBookingWidget({
           <button
             onClick={handleBookNow}
             disabled={!selectedDate || adults + children + infants === 0}
-            className="w-full rounded-lg bg-blue-600 text-white font-semibold px-6 py-3 hover:bg-blue-700 disabled:bg-muted disabled:cursor-not-allowed transition-colors"
+            className="w-full rounded-lg bg-blue-600 text-white font-semibold px-6 py-3 hover:bg-blue-700 disabled:bg-surface-1 disabled:cursor-not-allowed transition-colors"
           >
             Đặt ngay
           </button>

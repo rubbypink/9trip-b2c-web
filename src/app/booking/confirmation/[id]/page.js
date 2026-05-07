@@ -53,7 +53,7 @@ export default function BookingConfirmationPage({ params }) {
     // 2. NẾU THANH TOÁN THÀNH CÔNG
     if (status === "success") {
         return (
-            <div className="min-h-screen bg-muted py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+            <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
                 <div className="max-w-md w-full bg-card rounded-2xl shadow-xl p-8 text-center border border-green-100">
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ export default function BookingConfirmationPage({ params }) {
                     <h2 className="text-3xl font-extrabold text-foreground mb-2">Thanh toán thành công!</h2>
                     <p className="text-muted-foreground mb-6">Cảm ơn bạn đã tin tưởng 9TRIP. Vé điện tử đã được gửi vào email của bạn.</p>
                     
-                    <div className="bg-muted rounded-xl p-4 mb-8 text-left border border-border">
+                    <div className="bg-surface-1 rounded-xl p-4 mb-8 text-left border border-border">
                         <p className="text-sm text-muted-foreground mb-1">Mã đơn hàng của bạn:</p>
                         <p className="font-mono font-bold text-lg text-foreground">{bookingId}</p>
                     </div>
@@ -77,7 +77,7 @@ export default function BookingConfirmationPage({ params }) {
     }
     if (status === "failed") {
         return (
-            <div className="min-h-screen bg-muted py-12 px-4 flex items-center justify-center">
+            <div className="min-h-screen bg-background py-12 px-4 flex items-center justify-center">
                 <div className="max-w-md w-full bg-card rounded-2xl shadow-xl p-8 text-center border border-red-100">
                     {/* ... (Phần icon X đỏ và text báo lỗi giữ nguyên) ... */}
                     <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -104,7 +104,7 @@ export default function BookingConfirmationPage({ params }) {
                             ) : "Sửa đơn & Thanh toán lại"}
                         </button>
 
-                        <Link href="/contact" className="w-full py-3 px-4 bg-card text-foreground border border-border rounded-xl font-bold hover:bg-muted transition-colors">
+                        <Link href="/contact" className="w-full py-3 px-4 bg-card text-foreground border border-border rounded-xl font-bold hover:bg-surface-1 transition-colors">
                             Liên hệ hỗ trợ
                         </Link>
                     </div>

@@ -202,7 +202,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                       <div className="overflow-x-auto rounded-xl border border-border">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="bg-muted border-b border-border">
+                            <tr className="bg-surface-1 border-b border-border">
                               <th className="text-left px-4 py-3 font-semibold text-foreground">Gói dịch vụ</th>
                               <th className="text-right px-4 py-3 font-semibold text-foreground">Người lớn</th>
                               <th className="text-right px-4 py-3 font-semibold text-foreground">Trẻ em</th>
@@ -211,7 +211,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                           </thead>
                           <tbody className="divide-y divide-border">
                             {pricingTiers.map((tier) => (
-                              <tr key={tier.id} className="hover:bg-muted transition-colors">
+                              <tr key={tier.id} className="hover:bg-surface-2 transition-colors">
                                 <td className="px-4 py-3 font-medium text-foreground">{tier.name}</td>
                                 <td className="px-4 py-3 text-right font-semibold text-blue-600">
                                   {tier.adultPrice > 0 ? formatCurrency(tier.adultPrice, tier.currency || "VND") : "Liên hệ"}
@@ -307,7 +307,7 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
                   <div className="space-y-2">
                     {tour.faq.map((item, idx) => (
                       <details key={idx} className="group rounded-xl border border-border">
-                        <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-muted rounded-xl group-open:rounded-b-none">
+                        <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-foreground hover:bg-surface-1 rounded-xl group-open:rounded-b-none">
                           {item.question}
                           <svg className="h-4 w-4 text-muted-foreground group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

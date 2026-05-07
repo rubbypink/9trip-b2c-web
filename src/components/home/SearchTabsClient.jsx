@@ -22,7 +22,7 @@ export default function SearchTabsClient({ locations }) {
   return (
     <div className="p-4 sm:p-5">
       {/* Tab Headers */}
-      <div className="flex gap-1 bg-muted p-1 rounded-xl mb-5" role="tablist">
+      <div className="flex gap-1 bg-surface-1 p-1 rounded-xl mb-5" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -101,7 +101,7 @@ function TourSearchForm({ locations }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
             <select
-              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             >
@@ -127,7 +127,7 @@ function TourSearchForm({ locations }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -135,7 +135,7 @@ function TourSearchForm({ locations }) {
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">Khoảng giá</label>
           <select
-            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
           >
@@ -214,7 +214,7 @@ function ActivitySearchForm({ locations }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
             <select
-              className="w-full pl-9 pr-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             >
@@ -237,7 +237,7 @@ function ActivitySearchForm({ locations }) {
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">Thể loại</label>
           <select
-            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -253,7 +253,7 @@ function ActivitySearchForm({ locations }) {
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">Khoảng giá</label>
           <select
-            className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
+            className="w-full px-4 py-2.5 bg-surface-1 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer"
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
           >

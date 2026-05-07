@@ -107,7 +107,7 @@ export default function ReviewCard({ review, showImages = true, compact = false 
               {tags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full"
+                  className="text-xs bg-surface-1 text-muted-foreground px-2 py-0.5 rounded-full"
                 >
                   {tag}
                 </span>
