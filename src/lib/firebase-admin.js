@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import {} from 'dotenv/config';
 import admin from 'firebase-admin';
 
 // ──────────────────────────────────────────────

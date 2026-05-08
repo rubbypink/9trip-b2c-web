@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import {} from 'dotenv/config';
 import { SITE, SITE_DESCRIPTION, PAGE_SIZE } from '@/lib/constants';
 // import { searchTours, countTours, searchHotels, searchActivities } from '@/lib/firestore-admin';
 // import { getStorageImageUrl } from '@/lib/storage-admin';
