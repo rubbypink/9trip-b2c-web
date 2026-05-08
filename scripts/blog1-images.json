@@ -1,0 +1,68 @@
+{
+  "results": [
+    {
+      "placeholder": "[IMG-01-URL]",
+      "storageUrl": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-01.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785505&Signature=x1qm3g5rgVaC8i2NKYWjk9VqbZzOVF2BfVF7wGIjOOJBOLeZ3%2B1oAcq%2FpA5PjtbWFXcVuZqmvE65ZDMBTLP7ZeHf1Qzy44d1Fkv31C7f%2B9baWXX2r6EdG96cHet9Pts9KQA0TmM6mM0sRLsEoLtVoxUrGgjwKGgZhcdeC0K%2FJfr1ySsbP9fuwDZIGpQOAohdRG3UhkF2JTOm1%2BOnYZFkb0UaVicPybJhZ4CNFPjXFj9F9uE8w0Z1%2B060OiWZ7X11W%2B%2Bok%2F9uo6qK6dUZuhmzocAD%2B0r2R9jxwCwIu8L0IKdX4K%2FUvpQg7iwbnQBslp86yIRfE4we4BHSXwFodkry%2BQ%3D%3D",
+      "storagePath": "blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-01.webp",
+      "role": "featured",
+      "alt": "Toàn cảnh Nam đảo Phú Quốc nhìn từ trên cao — Thị trấn Hoàng Hôn rực rỡ bên bờ biển xanh ngọc bích",
+      "stats": {
+        "outputSizeKB": 119,
+        "inputSizeKB": 1179,
+        "compressionRatio": 90
+      }
+    },
+    {
+      "placeholder": "[IMG-02-URL]",
+      "storageUrl": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-02.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785506&Signature=ijHGCV1Wi%2Fxavy2TX6FvJgJrVNpYi1EMFC951%2Bx9hsUDn5ixUEaIx4Wj%2B%2BcBHF73wv5JZz8WeDMyrVHQzsJFwS%2B935eXNIi5%2BWpbSAhU6EHYE5QdQBK8gbYPMAu%2Fb7h84SL1xbDwDbL0HikEdsKl5Rcsdf1ar7MOfdW7Vz9NXg62YsQk%2FC7289XfsPc0IU7wQXh1gibb5MfmRlqRNt2ML9h%2BRSQr6v%2F2O47XkbQDTvEz3awpUIDHcZPPFb0KYBtR392Tm19MYOjwGG88c8S5YrQKZNZtfDtRsJshiOFL68xtHf6KS3wRg8wU4CAAlfM3LKeYGdX4C53%2BvmVh8fFBsg%3D%3D",
+      "storagePath": "blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-02.webp",
+      "role": "inline",
+      "alt": "Xe điện buggy đưa đón du khách dạo quanh những con đường rực rỡ sắc màu tại Thị trấn Hoàng Hôn",
+      "stats": {
+        "outputSizeKB": 116,
+        "inputSizeKB": 374,
+        "compressionRatio": 69
+      }
+    },
+    {
+      "placeholder": "[IMG-03-URL]",
+      "storageUrl": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-03.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785507&Signature=Vxf1rHxJPUyFv1gEAoyV85e8bVYOKHSt5AquhtLOCCsYxFW8h7bFyhnK%2BidfoVqwAARU27G%2BIBE18pn6NlCSk3fHwDiQe%2F41B2T8uZTWHjC%2F3MorokvZEpQPtWB7JfGjQCPU%2FNiGjY0MiAmEQf%2Bsr2Ct66t1LZazxj7TmvD77j7nK6yp%2FkRTmBysr3KChVQa2IG%2BOsK5s3flIFT0kbbWzH7RU9mFxAdqqcQZzkrew6PESSPzyF3DoZFPHUxBljYih%2BiKLpOAdkViVSHaSyawym0LoYgq1tUtFD9SM7EwrMg2DGdMbI954bkxt%2BQIyR%2BTCezo8aya9%2BxP%2F4Dhwctbdg%3D%3D",
+      "storagePath": "blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-03.webp",
+      "role": "inline",
+      "alt": "Hoàng hôn rực đỏ trên Cầu Hôn — hai nhánh cầu chạm nhau tạo khoảnh khắc lãng mạn khó quên giữa biển trời Phú Quốc",
+      "stats": {
+        "outputSizeKB": 106,
+        "inputSizeKB": 314,
+        "compressionRatio": 66
+      }
+    },
+    {
+      "placeholder": "[IMG-04-URL]",
+      "storageUrl": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-04.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785508&Signature=eyr%2BaSH6AFic3GuSeMNDA9KTlXwRgPw0de6ooPEQGgeeKUIoVt5QfEtEBv570%2FHZGWCZ0Z3NWPu1B3wtb%2B74zND3zdvndvKEZ0oSbawXzJLg1Gjd1nsq1TX2Ubn1z6MYnNVycuK8dQBWNesiR%2FqjvWxONNnF16vX%2F6v9%2FEZfqd524Em4GNsWjlYKT%2BUlmyZ4ktD%2F%2FAzYYGMg3WueaPCk59a7NN9JxdbpGdVCWhV0xvUBLORjh2G6p3k3aS9srWRp3LQ%2Fi3TEyXO%2FeDzlNIUU7yMTejUJZhJfTZA3H7do%2BewTNETwMO5o7hIano4MUlANx1H2XALDsLmYa0G5p9XxEw%3D%3D",
+      "storagePath": "blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-04.webp",
+      "role": "inline",
+      "alt": "Chợ đêm VuiFest Bazaar rực rỡ ánh đèn ven biển tại Sunset Town — thiên đường ẩm thực và mua sắm về đêm",
+      "stats": {
+        "outputSizeKB": 89,
+        "inputSizeKB": 1258,
+        "compressionRatio": 93
+      }
+    },
+    {
+      "placeholder": "[IMG-05-URL]",
+      "storageUrl": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-05.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785509&Signature=P%2B3DnLRVpfQJH9syppIRbEMtZKIcPiy5SzDhEaxRGCgRDPJw%2BEXz3xJy%2FJxihoqsil06h9ypJx2fP%2FaWQWzkwiK0ce53Vw0b8EwUKht0dPFLy6hORKE402Da6BTqxIR09KRK8EO3%2BqmS%2B7qm8D%2FPcI7ZITPSjMu1UsXzwnzIvNYJcWC%2FR3ioOjAqOMEw3r60%2B1nJVg%2F%2BDZPcTDNfm2fuHiH9AipXswDcghuWwYR6219QkJgQ7YlhwzqinEUAI175azbkb6igDPpRyVnGDKmjMzArHm5PN%2FZ%2B7LaDbG4ySYhkkJedNK8ce90qTZrTgPu0jK0BWa1j8JeE5xVDJzbMJw%3D%3D",
+      "storagePath": "blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-05.webp",
+      "role": "inline",
+      "alt": "Du khách dạo bước trên bãi cát trắng hoang sơ tại Hòn Mây Rút — một trong những hòn đảo đẹp nhất quần đảo An Thới",
+      "stats": {
+        "outputSizeKB": 73,
+        "inputSizeKB": 1033,
+        "compressionRatio": 93
+      }
+    }
+  ],
+  "featuredImage": {
+    "url": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/blogs/cam-nang-du-lich-nam-dao-phu-quoc-2026/img-01.webp?GoogleAccessId=firebase-adminsdk-fbsvc%40tripphuquoc-db-fs.iam.gserviceaccount.com&Expires=1809785505&Signature=x1qm3g5rgVaC8i2NKYWjk9VqbZzOVF2BfVF7wGIjOOJBOLeZ3%2B1oAcq%2FpA5PjtbWFXcVuZqmvE65ZDMBTLP7ZeHf1Qzy44d1Fkv31C7f%2B9baWXX2r6EdG96cHet9Pts9KQA0TmM6mM0sRLsEoLtVoxUrGgjwKGgZhcdeC0K%2FJfr1ySsbP9fuwDZIGpQOAohdRG3UhkF2JTOm1%2BOnYZFkb0UaVicPybJhZ4CNFPjXFj9F9uE8w0Z1%2B060OiWZ7X11W%2B%2Bok%2F9uo6qK6dUZuhmzocAD%2B0r2R9jxwCwIu8L0IKdX4K%2FUvpQg7iwbnQBslp86yIRfE4we4BHSXwFodkry%2BQ%3D%3D",
+    "alt": "Toàn cảnh Nam đảo Phú Quốc nhìn từ trên cao — Thị trấn Hoàng Hôn rực rỡ bên bờ biển xanh ngọc bích"
+  }
+}

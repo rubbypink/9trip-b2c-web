@@ -25,10 +25,10 @@ export default async function FlashDealsServer() {
   if (!tours || tours.length === 0) return null;
 
   return (
-    <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-yellow-50">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-8 lg:py-10 bg-primary-50/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6">
           <span className="text-orange-600 font-semibold text-sm uppercase tracking-wider">
             🔥 Ưu đãi sốc
           </span>

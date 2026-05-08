@@ -24,7 +24,7 @@ export default function HeroBanner() {
         </div>
 
         {/* Search Box */}
-        <div className="max-w-3xl mx-auto bg-card/90 backdrop-blur-sm rounded-2xl shadow-xl border border-border/60 p-1">
+        <div className="max-w-3xl mx-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl shadow-black/10 border border-white/80 p-1 ring-1 ring-primary-100/50">
           <SearchTabs />
         </div>
 

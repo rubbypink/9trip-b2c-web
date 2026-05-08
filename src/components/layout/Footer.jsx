@@ -71,7 +71,7 @@ export default function Footer() {
               <li><Link href="/tours" className="hover:text-primary-400 transition-colors">Tour du lịch</Link></li>
               <li><Link href="/hotels" className="hover:text-primary-400 transition-colors">Khách sạn</Link></li>
               <li><Link href="/activities" className="hover:text-primary-400 transition-colors">Hoạt động</Link></li>
-              <li><Link href="/search" className="hover:text-primary-400 transition-colors">Tìm kiếm</Link></li>
+              <li><Link href="/tours" className="hover:text-primary-400 transition-colors">Tìm kiếm</Link></li>
             </ul>
           </div>
 

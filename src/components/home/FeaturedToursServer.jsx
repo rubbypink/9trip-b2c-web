@@ -9,7 +9,7 @@ import FeaturedTours from "@/components/home/FeaturedTours";
 export default async function FeaturedToursServer() {
   let tours = [];
   try {
-    const rawTours = await getFeaturedTours(8);
+    const rawTours = await getFeaturedTours(4);
     tours = await resolveDocsImages(rawTours);
   } catch {
     // Firestore unavailable — render empty gracefully

@@ -2,13 +2,42 @@ import admin from 'firebase-admin';
 import { logger } from './logger';
 
 /**
- * Format private key từ env var (Vercel hay escape \n thành literal "\n").
- * @param {string|undefined} key
- * @returns {string|undefined}
+ * Format private key từ env var — xử lý các edge case phổ biến:
+ *   1. Literal "\n" thay vì actual newline (Vercel, Render, .env single-line)
+ *   2. Double-escape "\\n" (Vercel raw editor, JSON config)
+ *   3. Surrounding quotes (một số platform wrap env var trong "")
+ *   4. Trailing/leading whitespace mỗi dòng PEM
+ *
+ * Lỗi `error:1E08010C:DECODER routines::unsupported` từ OpenSSL xảy ra khi
+ * google-auth-library cố ký JWT với private key sai định dạng PEM.
+ *
+ * @param {string|undefined} key - FIREBASE_PRIVATE_KEY từ process.env
+ * @returns {string|undefined} PEM-formatted private key, hoặc undefined
  */
 const formatPrivateKey = (key) => {
 	if (!key) return undefined;
-	return key.replace(/\\n/g, '\n');
+
+	let cleaned = key.trim();
+
+	// 1. Strip surrounding quotes (phổ biến khi env var được wrap trong "")
+	if ((cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+		(cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+		cleaned = cleaned.slice(1, -1).trim();
+	}
+
+	// 2. Double-escape → single-escape (VD: Vercel raw editor lưu "\\n" thành "\\\\n")
+	cleaned = cleaned.replace(/\\\\n/g, '\\n');
+
+	// 3. Replace literal "\n" → actual newline (trường hợp phổ biến nhất)
+	cleaned = cleaned.replace(/\\n/g, '\n');
+
+	// 4. Clean extra whitespace trên từng dòng (giữ nguyên cấu trúc PEM)
+	cleaned = cleaned.split('\n')
+		.map((line) => line.trim())
+		.join('\n');
+
+	// 5. Đảm bảo kết thúc bằng 1 newline (chuẩn PEM)
+	return cleaned.trimEnd() + '\n';
 };
 
 /**

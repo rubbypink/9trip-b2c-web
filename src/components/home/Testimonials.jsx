@@ -44,10 +44,10 @@ export default async function Testimonials() {
 	if (!reviews || reviews.length === 0) return null;
 
 	return (
-		<section className="py-16 bg-surface-1">
+		<section className="py-8 lg:py-10 bg-surface-1">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				{/* Section Header */}
-				<div className="text-center mb-12">
+				<div className="text-center mb-8">
 					<span className="text-purple-600 font-semibold text-sm uppercase tracking-wider">Đánh giá</span>
 					<h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2">Khách hàng nói gì về chúng tôi</h2>
 					<p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">Hàng nghìn khách hàng đã tin tưởng và có những trải nghiệm tuyệt vời cùng 9 Trip Phú Quốc.</p>

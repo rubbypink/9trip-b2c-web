@@ -48,10 +48,10 @@ const REASONS = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-16 bg-white">
+    <section className="py-8 lg:py-10 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">
             Vì sao nên chọn 9 Trip?
           </h2>

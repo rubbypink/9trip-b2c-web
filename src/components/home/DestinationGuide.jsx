@@ -51,10 +51,10 @@ export default function DestinationGuide() {
   ];
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-8 lg:py-10 bg-surface-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider">
             Khám phá
           </span>

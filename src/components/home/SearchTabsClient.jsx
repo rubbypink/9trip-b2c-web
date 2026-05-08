@@ -22,7 +22,7 @@ export default function SearchTabsClient({ locations }) {
   return (
     <div className="p-4 sm:p-5">
       {/* Tab Headers */}
-      <div className="flex gap-1 bg-surface-1 p-1 rounded-xl mb-5" role="tablist">
+      <div className="flex gap-1 bg-gray-100/80 p-1 rounded-xl mb-5" role="tablist">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -31,8 +31,8 @@ export default function SearchTabsClient({ locations }) {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-200 ${
               activeTab === tab.key
-                ? "bg-background text-blue-600 shadow-sm ring-1 ring-border/60"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white text-primary-700 shadow-sm ring-1 ring-primary-200/50"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/50"
             }`}
           >
             <span className="text-base">{tab.icon}</span>

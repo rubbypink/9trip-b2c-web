@@ -8,8 +8,8 @@ import EmptyState from "@/components/shared/EmptyState";
 export default function FeaturedTours({ tours }) {
   if (!tours || tours.length === 0) {
     return (
-      <section className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-8 lg:py-10 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <EmptyState
             title="Chưa có tour nào"
             message="Hiện tại chưa có tour nổi bật. Vui lòng quay lại sau."
@@ -20,37 +20,34 @@ export default function FeaturedTours({ tours }) {
   }
 
   return (
-    <section className="py-16 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-        <div>
-          <span className="text-blue-600 text-xs font-semibold uppercase tracking-wider">
-            Khám phá
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-            Tour nổi bật
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md">
-            Những tour du lịch được yêu thích nhất, đặt ngay kẻo hết chỗ!
-          </p>
+    <section className="py-8 lg:py-10 bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-3">
+          <div>
+            <span className="text-primary-600 text-xs font-semibold uppercase tracking-wider">
+              Khám phá
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
+              Tour nổi bật
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-md">
+              Những tour du lịch được yêu thích nhất, đặt ngay kẻo hết chỗ!
+            </p>
+          </div>
+          <a
+            href="/tours"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors shrink-0"
+          >
+            Xem tất cả
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
-        <a
-          href="/search?featured=true"
-          className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors shrink-0"
-        >
-          Xem tất cả
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 scrollbar-hide">
-          {tours.map((tour) => (
-            <div key={tour.id} className="shrink-0 snap-start w-[280px] md:w-[320px]">
-              <TourCard tour={tour} />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+          {tours.slice(0, 4).map((tour) => (
+            <TourCard key={tour.id} tour={tour} />
           ))}
         </div>
       </div>
