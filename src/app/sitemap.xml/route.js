@@ -26,8 +26,7 @@ export async function GET() {
   let dynamicUrls = [];
 
   try {
-    const { getFirestore, collection, getDocs, query, limit } = await import("firebase/firestore");
-    const { db } = await import("@/lib/firebase");
+    const { adminDb } = await import("@/lib/firebase-admin");
 
     const collectionsToSitemap = ["tours", "hotels", "activities", "cars", "rentals"];
     const slugs = new Set();
@@ -35,9 +34,7 @@ export async function GET() {
     await Promise.all(
       collectionsToSitemap.map(async (colName) => {
         try {
-          const col = collection(db, colName);
-          const q = query(col, limit(500));
-          const snap = await getDocs(q);
+          const snap = await adminDb.collection(colName).limit(500).get();
           snap.docs.forEach((doc) => {
             const data = doc.data();
             const slug = data.slug;

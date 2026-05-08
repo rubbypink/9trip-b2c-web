@@ -1,18 +1,16 @@
-import { getDocs, query, collection, where, orderBy, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { mockTestimonials } from "@/lib/mockData";
+import { adminDb } from '@/lib/firebase-admin';
+import { mockTestimonials } from '@/lib/mockData';
 
 /**
- * Serialize Firestore doc to plain object — local helper since serializeDoc is module-private.
- * @param {import("firebase/firestore").DocumentSnapshot} snap
+ * Serialize Firestore Admin doc to plain object.
+ * @param {import("firebase-admin/firestore").DocumentSnapshot} snap
  * @returns {{ id: string, [key: string]: any }}
  */
 function serializeDoc(snap) {
   const data = snap.data();
   const result = { id: snap.id };
   for (const [key, value] of Object.entries(data)) {
-    // Convert Firestore Timestamps to ISO strings
-    if (value && typeof value === "object" && "toDate" in value) {
+    if (value && typeof value === 'object' && typeof value.toDate === 'function') {
       result[key] = value.toDate().toISOString();
     } else {
       result[key] = value;
@@ -25,21 +23,20 @@ const MAX_REVIEWS = 6;
 
 /**
  * Testimonials — Server component hiển thị đánh giá từ khách hàng.
- * Fetch approved reviews từ Firestore, sau đó bổ sung mock data
+ * Fetch approved reviews từ Firestore (Admin SDK), sau đó bổ sung mock data
  * vào cuối danh sách nếu chưa đủ MAX_REVIEWS items.
  */
 export default async function Testimonials() {
   let reviews = [];
   try {
-    const q = query(
-      collection(db, "reviews"),
-      where("status", "==", "approved"),
-      where("rating", ">=", 4),
-      orderBy("rating", "desc"),
-      orderBy("createdAt", "desc"),
-      limit(8)
-    );
-    const snap = await getDocs(q);
+    const snap = await adminDb
+      .collection('reviews')
+      .where('status', '==', 'approved')
+      .where('rating', '>=', 4)
+      .orderBy('rating', 'desc')
+      .orderBy('createdAt', 'desc')
+      .limit(8)
+      .get();
     reviews = snap.docs.map((d) => serializeDoc(d));
   } catch {
     // Firestore unavailable — fallback to mock data
