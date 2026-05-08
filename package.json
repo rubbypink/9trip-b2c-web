@@ -1,40 +1,41 @@
 {
-  "name": "tripphuquoc-db-fs-web",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbo",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "dependencies": {
-    "firebase": "^12.12.1",
-    "firebase-admin": "^13.8.0",
-    "lucide-react": "^1.11.0",
-    "next": "16.2.4",
-    "nodemailer": "^8.0.7",
-    "postcss": "^8.5.12",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-hook-form": "^7.74.0",
-    "sharp": "^0.34.5",
-    "sweetalert2": "^11.26.24",
-    "zustand": "^5.0.12"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.59.1",
-    "@tailwindcss/postcss": "^4.2.4",
-    "@testing-library/react": "^16.3.2",
-    "@vitejs/plugin-react": "4",
-    "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.4",
-    "jsdom": "^29.1.1",
-    "tailwindcss": "^4.2.4",
-    "vite": "5",
-    "vitest": "1"
-  }
+	"name": "tripphuquoc-db-fs-web",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev --turbo",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"dotenv": "^17.4.2",
+		"firebase": "^12.12.1",
+		"firebase-admin": "^13.8.0",
+		"lucide-react": "^1.11.0",
+		"next": "16.2.4",
+		"nodemailer": "^8.0.7",
+		"postcss": "^8.5.12",
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
+		"react-hook-form": "^7.74.0",
+		"sharp": "^0.34.5",
+		"sweetalert2": "^11.26.24",
+		"zustand": "^5.0.12"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.59.1",
+		"@tailwindcss/postcss": "^4.2.4",
+		"@testing-library/react": "^16.3.2",
+		"@vitejs/plugin-react": "4",
+		"babel-plugin-react-compiler": "1.0.0",
+		"eslint": "^9",
+		"eslint-config-next": "16.2.4",
+		"jsdom": "^29.1.1",
+		"tailwindcss": "^4.2.4",
+		"vite": "5",
+		"vitest": "1"
+	}
 }
