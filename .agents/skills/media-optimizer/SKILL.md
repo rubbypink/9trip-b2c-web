@@ -1,324 +1,509 @@
 ---
 name: media-optimizer
-description: Nhận danh sách ảnh từ media-finder skill, download từ WordPress cũ, xóa/thay logo, chuyển đổi sang WebP, tối ưu kích thước, upload lên Firebase Storage và cập nhật URL trong Firestore documents.
-applyTo: "src/**"
+description: Download và tối ưu ảnh/video từ URL, local file, hoặc input từ media-finder. Resize, convert format (WebP/AVIF), tối ưu chất lượng theo schema chuẩn từng nền tảng. Dùng Gemini Flash để phân tích và quyết định thông minh. Tự động upload Firebase Storage hoặc trả về local. Luôn dùng skill này khi cần xử lý, resize, convert, optimize ảnh/video, upload Storage, hoặc nhận output từ media-finder.
+applyTo: '**'
 ---
 
-# Media Optimizer — Image Processing & Upload Agent
+# Media Optimizer — Universal Media Processing & Delivery Agent
 
-**Role**: Image Processing Specialist
+**Role**: Media Processing Specialist
 
-Agent chuyên trách nhận ảnh từ `media-finder` skill, xử lý (logo, format, kích thước), upload lên Firebase Storage, và cập nhật Firestore.
+Agent chuyên trách tiếp nhận media từ nhiều nguồn, xử lý tối ưu theo schema chuẩn của nền tảng đích, và phân phối kết quả qua Firebase Storage hoặc local download.
 
-## Workflow Overview
+---
 
-```
-audit-report.json → Download Images → Remove Old Logo → Add 9Trip Logo
-    → Convert WebP → Optimize Size → Upload to Storage → Update Firestore
-```
+## Input Handling
 
-## Prerequisites
+### Input Types
 
-- `media-finder` skill đã chạy và tạo `audit-report.json`
-- Có quyền đọc/ghi Firebase Storage (service account)
-- Node.js với thư viện `sharp` (cài: `npm install sharp`)
-- Thư mục tạm `temp/` để xử lý file
+| Type                                 | Cách xử lý                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------------- |
+| **URL** (`https://...`)              | Download bằng `webfetch` hoặc `bash` (curl/wget). Ưu tiên stream download. |
+| **Local path** (`/path/to/file.jpg`) | Đọc trực tiếp từ filesystem                                                |
+| **Base64 data URI**                  | Decode → buffer → process                                                  |
+| **media-finder output**              | JSON có `items[].source_url` + `target_schema`                             |
+| **Multiple items**                   | Auto-detect là batch → chạy pipeline song song                             |
 
-## Storage Directory Structure
+### URL Validation Before Download
 
-```
-/storage/
-  /gallery/
-    /tours/{tourId}/
-    /hotels/{hotelId}/
-    /rooms/{roomId}/
-    /activities/{activityId}/
-    /cars/{carId}/
-  /avatars/{userId}/
-  /reviews/{reviewId}/
-  /settings/
-```
-
-## Execution Steps
-
-### Step 1: Đọc audit-report.json
-
-Đọc danh sách URL ảnh từ báo cáo, lọc theo priority:
-1. 🔴 `broken` — Cần tìm ảnh thay thế trước
-2. 🟠 `placeholder` — picsum.photos → download ảnh thật
-3. 🟡 `wordpress-url` — Có thể download từ WordPress
-
-### Step 2: Download Ảnh từ WordPress
-
-```javascript
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
-
-async function downloadImage(url, destPath) {
-  return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(destPath);
-    https.get(url, (response) => {
-      if (response.statusCode !== 200) {
-        reject(new Error(`Download failed: ${response.statusCode}`));
-        return;
-      }
-      response.pipe(file);
-      file.on('finish', () => {
-        file.close();
-        resolve(destPath);
-      });
-    }).on('error', reject);
-  });
+```js
+// Kiểm tra nhanh trước khi download
+function canDownload(url) {
+	if (!url || typeof url !== 'string') return false;
+	if (url.startsWith('data:')) return true; // base64 inline
+	if (url.startsWith('http://') || url.startsWith('https://')) return true;
+	if (url.startsWith('gs://')) return true; // Firebase Storage internal
+	return false;
 }
 ```
 
-**Lưu ý:** Nếu WordPress không còn online, dùng ảnh từ Firebase Storage cũ (nếu có) hoặc báo cáo lại cho user.
+---
 
-### Step 3: Xử Lý Logo
+## Processing Pipeline
 
-#### 3a. Phát hiện logo
-Dùng OCR heuristic hoặc AI (Gemini API nếu có) để detect logo region trong ảnh.
-
-#### 3b. Xóa logo cũ
-Dùng sharp để inpainting hoặc crop vùng logo:
-
-```javascript
-const sharp = require('sharp');
-
-async function removeLogo(imagePath, logoRegion) {
-  // logoRegion: { x, y, width, height } — vùng chứa logo
-  // Có thể:
-  // 1. Blur vùng logo
-  // 2. Overlay màu nền
-  // 3. Crop bỏ vùng logo nếu ở biên
-  
-  const metadata = await sharp(imagePath).metadata();
-  
-  if (logoRegion) {
-    // Blur region
-    // ... implementation depends on UI requirements
-  }
-  
-  return imagePath;
-}
+```
+Input → Download → Analyze → Transform → Optimize → Output
+  │        │          │          │           │          │
+  │        │          │          │           │          ├─ Firebase Storage (default)
+  │        │          │          │           │          └─ Local download
+  │        │          │          │           │
+  │        │          │          │           └─ Compress (WebP/AVIF)
+  │        │          │          │              - quality tuning
+  │        │          │          │              - metadata stripping
+  │        │          │          │
+  │        │          │          └─ Resize / Crop
+  │        │          │             - fit: cover/contain/inside/fill
+  │        │          │             - position: center/top/attention
+  │        │          │             - responsive breakpoints
+  │        │          │
+  │        │          └─ AI Analysis (Gemini Flash)
+  │        │             - Detect content type
+  │        │             - Assess quality
+  │        │             - Suggest optimal crop
+  │        │             - Generate alt text
+  │        │
+  │        └─ Download to temp
+  │           - temp dir: /tmp/media-optimizer/
+  │           - cleanup sau khi xong
+  │
+  └─ Validate input → xác định pipeline phù hợp
 ```
 
-#### 3c. Thêm logo 9Trip
+---
 
-```javascript
-async function addWatermark(imagePath, logoPath, position = 'bottom-right') {
-  const { width } = await sharp(imagePath).metadata();
-  const logoSize = Math.round(width * 0.15); // Logo 15% chiều rộng ảnh
-  
-  return sharp(imagePath)
-    .composite([{
-      input: logoPath,
-      top: position === 'bottom-right' ? null : 0,
-      left: position === 'bottom-right' ? null : 0,
-      gravity: position === 'bottom-right' ? 'southeast' : 'northwest',
-    }])
-    .toFile(imagePath.replace(/\.[^.]+$/, '_with_logo.webp'));
-}
+## AI-Assisted Processing (Gemini Flash)
+
+Sử dụng Gemini Flash (`generate_image` tool + prompt analysis) để:
+
+### 1. Quality Assessment
+
+Đánh giá chất lượng ảnh đầu vào trước khi xử lý:
+
+- Blur detection (ảnh có bị mờ không?)
+- Noise level
+- Exposure (quá tối / quá sáng?)
+- Compression artifacts
+- Watermark detection
+
+### 2. Smart Crop Suggestion
+
+Khi cần crop ảnh (ví dụ 16:9 → 1:1), dùng AI để xác định vùng quan trọng:
+
+```
+Prompt: "Analyze this image. Identify the main subject and the optimal crop region
+for a {target_width}x{target_height} {aspect_ratio} composition.
+Return crop coordinates: {x, y, width, height}."
 ```
 
-### Step 4: Convert WebP & Tối Ưu
+### 3. Alt Text Generation
 
-```javascript
-async function optimizeImage(inputPath, outputPath, options = {}) {
-  const {
-    width = 1920,      // Max width
-    height = null,      // Auto aspect ratio
-    quality = 80,       // WebP quality (0-100)
-    fit = 'inside',     // Contain inside bounds
-  } = options;
+Tự động sinh alt text SEO-friendly (cho Google Images, accessibility):
 
-  const pipeline = sharp(inputPath)
-    .resize(width, height, { fit, withoutReduction: false })
-    .webp({ quality, effort: 6 }); // effort 0-6 (6 = slowest/best)
-
-  await pipeline.toFile(outputPath);
-}
+```
+Prompt: "Generate a concise, descriptive alt text for this image in Vietnamese.
+Focus on: main subject, action, setting, mood. Max 125 characters.
+Example: 'Bãi Sao Phú Quốc với cát trắng mịn và nước biển xanh ngọc dưới ánh hoàng hôn'"
 ```
 
-**Size guidelines per service type:**
-| Type | Max Width | Quality |
-|------|-----------|---------|
-| featuredImage | 1920px | 80 |
-| gallery | 1200px | 80 |
-| avatar | 200px | 85 |
-| logo | 400px | 90 |
+### 4. Content Filtering
 
-### Step 5: Upload Firebase Storage
+Kiểm tra ảnh có phù hợp không (NSFW, violent, brand-inappropriate).
 
-```javascript
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('./src/lib/firebase');
+---
+
+## Platform Schema Compliance
+
+Khi nhận được `target_schema`, áp dụng chính xác các thông số từ **media-finder schema library**. Mapping:
+
+### Schema → Processing Parameters
+
+| Target Schema              | Resize               | Format   | Quality | Special                                        |
+| -------------------------- | -------------------- | -------- | ------- | ---------------------------------------------- |
+| `website.hero_banner`      | 1920x1080, fit=cover | webp     | 80      | Tạo responsive variants: 640w, 1024w, 1920w    |
+| `website.hero_mobile`      | 750x1334, fit=cover  | webp     | 75      | —                                              |
+| `website.card_thumbnail`   | 400x300, fit=cover   | webp     | 80      | Crop center                                    |
+| `website.gallery`          | 1200x800, fit=inside | webp     | 80      | Giữ aspect ratio gốc nếu đẹp hơn               |
+| `website.logo_header`      | 200x60, fit=inside   | svg/webp | 90      | Ưu tiên SVG, nếu raster thì resize + pad       |
+| `website.og_image`         | 1200x630, fit=cover  | jpg      | 80      | Text-safe zone: 15% margins                    |
+| `website.seo_schema`       | 1200x900, fit=inside | webp     | 80      | —                                              |
+| `facebook.feed_image`      | 1200x630             | jpg      | 80      | Text ratio < 20%                               |
+| `facebook.story`           | 1080x1920            | jpg      | 80      | Safe zone 250px top/bottom                     |
+| `facebook.profile_picture` | 320x320              | jpg      | 85      | Crop vuông từ tâm                              |
+| `facebook.cover_photo`     | 820x312              | jpg      | 85      | —                                              |
+| `facebook.ad_image`        | 1200x628             | jpg      | 80      | Text < 20%                                     |
+| `tiktok.video_feed`        | 1080x1920            | mp4      | —       | H.264, bitrate 2500kbps                        |
+| `tiktok.profile_photo`     | 200x200              | webp     | 85      | —                                              |
+| `tiktok.cover_image`       | 1080x1920            | webp     | 80      | —                                              |
+| `instagram.square_post`    | 1080x1080            | jpg      | 85      | Crop vuông                                     |
+| `instagram.portrait_post`  | 1080x1350            | jpg      | 85      | —                                              |
+| `instagram.story`          | 1080x1920            | jpg      | 85      | Safe zones                                     |
+| `blog.featured_image`      | 1200x630             | webp     | 80      | —                                              |
+| `blog.inline_content`      | 800w (auto height)   | webp     | 82      | Giữ aspect ratio                               |
+| `blog.author_avatar`       | 100x100              | webp     | 85      | Crop vuông                                     |
+| `youtube.thumbnail`        | 1280x720             | jpg      | 85      | Text readable                                  |
+| `email.header_image`       | 600x200              | jpg      | 80      | —                                              |
+| `9trip.featured_image`     | 1920x1080            | webp     | 80      | Upload path: `{type}s/{id}/featured.webp`      |
+| `9trip.gallery`            | 1200x800             | webp     | 80      | Upload path: `{type}s/{id}/gallery/{pad}.webp` |
+| `9trip.logo`               | 400x120              | svg/webp | 90      | Upload path: `settings/logo.webp`              |
+| `9trip.avatar`             | 200x200              | webp     | 85      | Upload path: `avatars/{id}/avatar.webp`        |
+
+---
+
+## Image Transformation Reference
+
+### Sharp Operations (via bash)
+
+```bash
+# Resize with cover (crop to fill)
+sharp --input input.jpg --resize 1200 630 --fit cover --position center --output output.webp
+
+# Resize with inside (contain within bounds, no crop)
+sharp --input input.jpg --resize 1200 800 --fit inside --output output.webp
+
+# Convert to WebP with quality
+sharp --input input.jpg --webp quality=80 effort=6 --output output.webp
+
+# Create responsive variants
+sharp --input input.jpg --resize 640 --webp --output hero-640w.webp
+sharp --input input.jpg --resize 1024 --webp --output hero-1024w.webp
+sharp --input input.jpg --resize 1920 --webp --output hero-1920w.webp
+
+# Strip metadata (privacy + size)
+sharp --input input.jpg --strip --output output.webp
+
+# Generate blur placeholder (LQIP)
+sharp --input input.jpg --resize 20 --blur 10 --webp --output placeholder.webp
+```
+
+### AVIF (optional, better compression)
+
+```bash
+sharp --input input.jpg --avif quality=50 effort=4 --output output.avif
+```
+
+### Video Processing (ffmpeg)
+
+```bash
+# Resize video to 1080x1920 (TikTok/Story)
+ffmpeg -i input.mp4 -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2" \
+  -c:v libx264 -b:v 2500k -c:a aac -b:a 128k output.mp4
+
+# Extract thumbnail from video
+ffmpeg -i input.mp4 -ss 00:00:01 -vframes 1 -q:v 2 thumb.jpg
+```
+
+---
+
+## Firebase Storage Integration
+
+### Storage Path Convention
+
+Dựa trên schema `src/lib/storage.js`:
+
+```
+# Service images
+{serviceType}s/{docId}/featured.webp
+{serviceType}s/{docId}/gallery/01.webp      # 01, 02, 03...
+
+# Room images (hotels only)
+hotels/{hotelId}/rooms/{roomId}/featured.webp
+hotels/{hotelId}/rooms/{roomId}/gallery/01.webp
+
+# Settings
+settings/logo.webp
+
+# User avatars
+avatars/{userId}/avatar.webp
+
+# Other
+pictures/{timestamp}_{random}.webp
+```
+
+Service type mapping: `tour`→`tours`, `hotel`→`hotels`, `activity`→`activities`, `car`→`cars`, `rental`→`rentals`, `image` → `pictures`, `picture` → `pictures`
+
+### Upload Flow (Client SDK)
+
+```js
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 
 async function uploadToStorage(localPath, storagePath) {
-  const fileBuffer = fs.readFileSync(localPath);
-  const storageRef = ref(storage, storagePath);
-  
-  const snapshot = await uploadBytes(storageRef, fileBuffer, {
-    contentType: 'image/webp',
-    cacheControl: 'public, max-age=31536000, immutable',
-  });
-  
-  return getDownloadURL(snapshot.ref);
+	// Đọc file từ local
+	const fileBuffer = await fs.promises.readFile(localPath);
+
+	// Upload với metadata chuẩn
+	const storageRef = ref(storage, storagePath);
+	const snapshot = await uploadBytes(storageRef, fileBuffer, { contentType: 'image/webp', cacheControl: 'public, max-age=31536000, immutable' });
+
+	return getDownloadURL(snapshot.ref);
 }
 ```
 
-### Step 6: Cập Nhật Firestore
+### Upload Flow (Admin SDK — cho scripts)
 
-```javascript
-const { doc, updateDoc } = require('firebase/firestore');
-const { db } = require('./src/lib/firebase');
+```js
+import admin from 'firebase-admin';
 
-async function updateDocumentUrl(collection, docId, field, newUrl, index = null) {
-  const ref = doc(db, collection, docId);
-  
-  if (index !== null && Array.isArray(field)) {
-    // Update array element
-    const data = {};
-    data[field] = admin.firestore.FieldValue.arrayRemove(...);
-    // ...
-  } else {
-    // Update simple field
-    await updateDoc(ref, { [field]: newUrl });
-  }
+async function uploadToStorageAdmin(localPath, storagePath) {
+	const bucket = admin.storage().bucket();
+	await bucket.upload(localPath, { destination: storagePath, metadata: { contentType: 'image/webp', cacheControl: 'public, max-age=31536000, immutable' } });
+
+	const [url] = await bucket.file(storagePath).getSignedUrl({ action: 'read', expires: Date.now() + 365 * 24 * 60 * 60 * 1000 });
+
+	return url;
 }
 ```
 
-## Full Processing Pipeline
+### Update Firestore (nếu cần)
 
-```javascript
-async function processImage(item, options = {}) {
-  const {
-    collection,
-    docId,
-    field,
-    url,
-    type,
-  } = item;
-  
-  const tempDir = path.join(__dirname, 'temp');
-  const tempFile = path.join(tempDir, `${collection}_${docId}_${Date.now()}`);
-  const ext = path.extname(new URL(url).pathname) || '.jpg';
-  const downloadPath = `${tempFile}${ext}`;
-  const outputPath = `${tempFile}.webp`;
-  
-  try {
-    // 1. Download
-    await downloadImage(url, downloadPath);
-    
-    // 2. Determine storage path
-    const serviceType = collection.replace(/s$/, ''); // 'tours' → 'tour'
-    const isFeatured = field === 'featuredImage';
-    let storagePath;
-    
-    if (isFeatured) {
-      storagePath = `${serviceType}s/${docId}/featured.webp`;
-    } else if (field.startsWith('gallery')) {
-      const idx = field.match(/\[(\d+)\]/)?.[1] || '00';
-      storagePath = `${serviceType}s/${docId}/gallery/${idx.padStart(2, '0')}.webp`;
-    } else if (collection === 'settings' && field === 'logo') {
-      storagePath = `settings/logo.webp`;
-    } else if (collection === 'users') {
-      storagePath = `avatars/${docId}/avatar.webp`;
-    } else {
-      storagePath = `${serviceType}s/${docId}/${field}.webp`;
-    }
-    
-    // 3. Process: Remove old logo → Add 9Trip logo → WebP → Optimize
-    await removeLogo(downloadPath, null); // Pass logoRegion if known
-    await optimizeImage(downloadPath, outputPath, getSizeOptions(field));
-    
-    // 4. Upload
-    const downloadUrl = await uploadToStorage(outputPath, storagePath);
-    
-    // 5. Update Firestore
-    await updateDocumentUrl(collection, docId, field, downloadUrl);
-    
-    // 6. Cleanup temp files
-    fs.unlinkSync(downloadPath);
-    fs.unlinkSync(outputPath);
-    
-    return { success: true, docId, field, newUrl: downloadUrl };
-  } catch (error) {
-    console.error(`[media-optimizer] Failed: ${collection}/${docId}/${field}`, error.message);
-    return { success: false, docId, field, error: error.message };
-  }
+```js
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+async function updateFirestoreImage(collection, docId, field, newUrl) {
+	await updateDoc(doc(db, collection, docId), { [field]: newUrl });
 }
 ```
 
-## Batch Processing
+---
 
-Process nhiều ảnh song song (tối đa 5 concurrent):
+## Batch Processing Strategy
 
-```javascript
-async function processBatch(items, concurrency = 5) {
-  const results = [];
-  const queue = [...items];
-  
-  async function worker() {
-    while (queue.length > 0) {
-      const item = queue.shift();
-      const result = await processImage(item);
-      results.push(result);
-    }
-  }
-  
-  const workers = Array(concurrency).fill(null).map(() => worker());
-  await Promise.all(workers);
-  
-  return results;
+### Concurrency Model
+
+```js
+/**
+ * Process multiple media items with controlled concurrency.
+ * @param {Object[]} items - Array of { source_url, target_schema, ... }
+ * @param {Object} options
+ * @param {number} options.concurrency - Max parallel tasks (default: 5)
+ * @param {string} options.outputMode - "firebase_storage" | "local_download" | "both"
+ * @returns {Promise<Object[]>} Results array
+ */
+async function processBatch(items, options = {}) {
+	const { concurrency = 5, outputMode = 'firebase_storage' } = options;
+	const results = [];
+	const queue = [...items];
+
+	async function worker(id) {
+		while (queue.length > 0) {
+			const item = queue.shift();
+			if (!item) break;
+
+			try {
+				const result = await processSingle(item, { outputMode });
+				results.push({ ...result, workerId: id, status: 'success' });
+			} catch (error) {
+				results.push({ source_url: item.source_url, status: 'failed', error: error.message, workerId: id });
+			}
+		}
+	}
+
+	const workers = Array.from({ length: concurrency }, (_, i) => worker(i + 1));
+	await Promise.all(workers);
+
+	return { total: items.length, success: results.filter((r) => r.status === 'success').length, failed: results.filter((r) => r.status === 'failed').length, results };
 }
 ```
 
-## Output
+### Batch Considerations
 
-Tạo báo cáo kết quả:
+- **Concurrency = 5**: tối ưu cho Firebase Storage rate limits
+- **Retry logic**: retry 2 lần với exponential backoff cho download/upload thất bại
+- **Progress tracking**: log mỗi 5 items đã xử lý
+- **Memory**: giới hạn 10 items trong queue worker để tránh OOM với ảnh lớn
+- **Temp cleanup**: xóa temp files mỗi 10 items thay vì chờ batch hoàn tất
+
+---
+
+## Single Item Processing
+
+```js
+/**
+ * Process a single media item through the full pipeline.
+ * @param {Object} item
+ * @param {string} item.source_url - URL or local path
+ * @param {string} item.target_schema - e.g. "website.hero_banner"
+ * @param {string} [item.storage_path] - Custom Firebase Storage path (optional)
+ * @param {string} [item.doc_id] - Firestore doc ID for auto path generation
+ * @param {string} [item.service_type] - "tour" | "hotel" | ...
+ * @param {Object} options
+ * @returns {Promise<Object>} Processing result
+ */
+async function processSingle(item, options = {}) {
+	const { outputMode = 'firebase_storage' } = options;
+	const tempDir = '/tmp/media-optimizer';
+	const ts = Date.now();
+
+	// 1. Validate input
+	if (!item.source_url || !canDownload(item.source_url)) {
+		throw new Error(`Invalid source: ${item.source_url}`);
+	}
+
+	// 2. Download to temp
+	const ext = getExtension(item.source_url) || 'jpg';
+	const tempPath = `${tempDir}/${ts}_input.${ext}`;
+	await downloadFile(item.source_url, tempPath);
+
+	// 3. Analyze with metadata
+	const meta = await getImageMetadata(tempPath);
+
+	// 4. Determine schema params
+	const schema = resolveSchema(item.target_schema);
+
+	// 5. Transform
+	const outputExt = schema.formats[0]; // webp, jpg, avif, etc.
+	const outputPath = `${tempDir}/${ts}_output.${outputExt}`;
+
+	await transformImage(tempPath, outputPath, { width: schema.width, height: schema.height, fit: schema.fit || 'cover', format: outputExt, quality: schema.quality || 80, strip: true });
+
+	// 6. Generate responsive variants (web only)
+	const variants = [];
+	if (schema.responsive_breakpoints) {
+		for (const bp of schema.responsive_breakpoints) {
+			const variantPath = `${tempDir}/${ts}_${bp}w.${outputExt}`;
+			await transformImage(tempPath, variantPath, { width: bp, format: outputExt, quality: schema.quality || 80 });
+			variants.push({ width: bp, path: variantPath });
+		}
+	}
+
+	// 7. Calculate stats
+	const outputStats = await getFileStats(outputPath);
+	const inputStats = await getFileStats(tempPath);
+
+	// 8. Output
+	let finalUrl = null;
+	if (outputMode === 'firebase_storage' || outputMode === 'both') {
+		const storagePath = item.storage_path || generateStoragePath(item);
+		finalUrl = await uploadToStorage(outputPath, storagePath);
+	}
+
+	// 9. Cleanup
+	await cleanupTemp([tempPath, outputPath, ...variants.map((v) => v.path)]);
+
+	return {
+		source_url: item.source_url,
+		status: 'success',
+		output_url: finalUrl || outputPath,
+		output_mode: outputMode,
+		original: { width: meta.width, height: meta.height, format: meta.format, size_kb: inputStats.size_kb },
+		optimized: { width: schema.width, height: schema.height, format: outputExt, size_kb: outputStats.size_kb, compression_ratio: `${Math.round((1 - outputStats.size_kb / inputStats.size_kb) * 100)}%` },
+		variants: variants.map((v) => ({ width: v.width })),
+	};
+}
+```
+
+---
+
+## Output Format
+
+### Success Response
 
 ```json
 {
-  "processedAt": "2026-04-29T...",
-  "total": 50,
-  "success": 48,
-  "failed": 2,
-  "results": [
-    { "success": true, "docId": "tour_abc", "field": "featuredImage", "newUrl": "https://storage.googleapis.com/..." },
-    { "success": false, "docId": "hotel_xyz", "field": "gallery[2]", "error": "Download failed: 404" }
-  ],
-  "failures": [
-    { "docId": "hotel_xyz", "field": "gallery[2]", "reason": "WordPress image not found" }
-  ]
+	"processed_at": "2026-05-07T10:35:00Z",
+	"pipeline": "media-optimizer",
+	"batch_summary": { "total": 5, "success": 5, "failed": 0, "total_input_size_kb": 14200, "total_output_size_kb": 1240, "overall_compression": "91.3%" },
+	"results": [
+		{
+			"source_url": "https://images.unsplash.com/photo-xxx",
+			"status": "success",
+			"output_url": "https://storage.googleapis.com/tripphuquoc-db-fs.firebasestorage.app/tours/abc123/featured.webp",
+			"original": { "width": 5472, "height": 3648, "format": "jpg", "size_kb": 2840 },
+			"optimized": { "width": 1920, "height": 1080, "format": "webp", "size_kb": 186, "compression_ratio": "93.5%" },
+			"variants": [
+				{ "width": 640, "size_kb": 32 },
+				{ "width": 1024, "size_kb": 72 },
+				{ "width": 1920, "size_kb": 186 }
+			],
+			"storage_path": "tours/abc123/featured.webp",
+			"alt_text": "Bãi Sao Phú Quốc với cát trắng mịn và nước biển xanh ngọc dưới ánh hoàng hôn"
+		}
+	]
 }
 ```
 
-## Error Handling
+### Failure Response
 
-| Error | Cause | Action |
-|-------|-------|--------|
-| Download 404 | WordPress ảnh không còn | Tìm ảnh thay thế từ Google hoặc báo user |
-| Sharp error | File corrupt hoặc unsupported format | Try another format or skip |
-| Upload failed | Storage permission hoặc network | Retry with exponential backoff |
-| Firestore update | Document không tồn tại | Kiểm tra collection + docId |
-
-## Integration
-
-```
-media-finder (phát hiện ảnh)
-    │
-    ▼
-media-optimizer (skill này)
-    │
-    ├── download → process → upload → update
-    │
-    └── output: processing-report.json
+```json
+{ "source_url": "https://broken-site.com/img.jpg", "status": "failed", "error": "Download failed: HTTP 404", "retry_attempted": true, "suggestion": "Source URL không tồn tại. Kiểm tra lại URL hoặc tìm nguồn thay thế qua media-finder." }
 ```
 
-## Dependencies
+---
 
-- `sharp` — Image processing (npm i sharp)
-- `firebase-admin` — Đã có trong project
-- Node.js built-in `https`, `fs`, `path` — Standard library
+## Integration with media-finder
+
+### Contract: media-finder → media-optimizer
+
+Khi nhận input từ media-finder, optimizer KHÔNG cần tìm kiếm lại — chỉ xử lý:
+
+```json
+// Input từ media-finder
+{
+	"source": "media-finder",
+	"target_schema": "website.hero_banner",
+	"output_preference": "firebase_storage",
+	"items": [{ "source_url": "https://images.unsplash.com/photo-xxx", "rank": 1, "score": 94, "optimization_suggestions": ["Resize to target 1200x800 (crop center, maintain ratio)", "Convert to WebP quality 80 → ước tính ~180KB"] }],
+	"context": { "service_type": "tour", "doc_id": "abc123", "platform": "website" }
+}
+```
+
+### Auto-Pipeline Mode
+
+Khi user yêu cầu "tìm và xử lý ảnh cho X":
+
+```
+1. Invoke media-finder → kết quả tìm kiếm
+2. Nếu có kết quả score ≥ 70 → auto-feed vào media-optimizer
+3. Nếu không đủ kết quả → báo cáo + hỏi user: mở rộng tìm kiếm hay AI generate?
+4. Media-optimizer xử lý batch → upload Storage → trả về final URLs
+```
+
+---
+
+## Cost Optimization
+
+### Prompt Design Principles cho AI Models
+
+1. **Gemini Flash cho phân tích** — rẻ hơn Pro, đủ cho quality assessment, crop suggestion, alt text
+2. **Batch prompt khi có thể** — gửi nhiều ảnh trong 1 prompt thay vì N prompts riêng
+3. **Cache intermediate results** — nếu cùng schema, cache quyết định transform
+4. **Lazy AI analysis** — chỉ gọi Gemini khi cần crop thông minh hoặc alt text, không gọi cho mọi ảnh
+5. **Pre-compute metadata** — dùng `sharp` để lấy dimensions/exif trước, chỉ gọi AI khi thực sự cần
+
+### Cost-Effective Prompt Template
+
+```
+SYSTEM: You are a media quality analyzer. Analyze the following images and return JSON.
+
+For each image, provide:
+1. quality_score (1-10): overall visual quality
+2. is_blurry (boolean)
+3. has_watermark (boolean)
+4. main_subject (string): 1-3 words describing the main subject
+5. crop_suggestion (object|null): {x, y, width, height} for optimal crop to {target_ratio}
+6. alt_text (string): descriptive alt text, max 125 chars
+
+IMAGE: {base64_image}
+
+Respond with valid JSON only. No explanation.
+```
+
+---
+
+## Error Recovery
+
+| Error                  | Cause                          | Recovery                                                     |
+| ---------------------- | ------------------------------ | ------------------------------------------------------------ |
+| Download timeout       | Slow source server             | Retry with longer timeout (30s → 120s), try mirror CDN       |
+| Corrupt image          | Truncated download, bad source | Skip item, log, try next in batch                            |
+| sharp processing fail  | Unsupported format             | Thử ffmpeg/ImageMagick fallback, hoặc skip                   |
+| Firebase upload reject | Rate limit, permission         | Exponential backoff: 1s, 2s, 4s, 8s. Max 3 retries.          |
+| Storage quota exceeded | Bucket full                    | Báo cáo, chuyển sang local download mode                     |
+| AI analysis timeout    | Gemini API slow                | Fallback về heuristic-based crop (center) + generic alt text |
+
+---
+
+**Pipeline mode reminder**: Khi nhận output từ `media-finder`, tự động kích hoạt batch processing với concurrency=5. Nếu input là single URL, process nhanh và trả về kết quả. Luôn ưu tiên `firebase_storage` output trừ khi user yêu cầu local download.
+
+**Final note**: Skill này có thể hoạt động độc lập hoặc như phần 2 của pipeline media-finder → media-optimizer. Khi hoạt động độc lập, user cung cấp URL + target schema. Khi trong pipeline, nhận JSON từ media-finder và xử lý tự động.

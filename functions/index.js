@@ -109,3 +109,21 @@ exports.cleanupExpiredHolds = onSchedule({ schedule: 'every 5 minutes', region: 
 exports.cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes', region: 'asia-southeast1' }, async () => {
 	await cancelAbandonedBookings(db);
 });
+
+// ─── Agent Task Executor ──────────────────────────────────────────────
+
+const { executeAgentTask } = require('./src/agents/executor');
+
+/**
+ * Agent task executor — listens for new agentTasks documents and executes them.
+ * Trigger: document created in agentTasks/{taskId}
+ *
+ * Handles both skill and flow execution:
+ *   - 'firestore-task' mode: executes directly (media-finder, orchestrator, etc.)
+ *   - 'agent-only' mode: leaves as 'queued_for_agent' for external AI agent
+ */
+exports.onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
+	const snap = event.data;
+	if (!snap) return;
+	await executeAgentTask(db, snap, event);
+});
