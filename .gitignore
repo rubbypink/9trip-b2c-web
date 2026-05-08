@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,20 +9,32 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-/.github/
+.github/
 
 # testing
 /coverage
-/playwright-report
-/test-results
 
+/test-results
+.temp/
 # next.js
 /.next/
 /out/
+/test*
 
 # production
 /build
 /functions/
+/playwright-*
+/.codenomad/
+/.report/
+/.sisyphus
+/playwright-*
+/test*
+.temp/
+.vscode/
+/snapshots/
+/.codenomad/
+
 # misc
 .DS_Store
 *.pem
@@ -38,8 +50,6 @@ yarn-error.log*
 .env*
 .env
 .env.local
-/_reference_wp
-/.vscode
 firebase-debug.log
 9trip-b2c-web.code-workspace
 tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
@@ -48,3 +58,5 @@ tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.gitignore
+.sisyphus/ralph-loop.local.md

@@ -39,12 +39,6 @@ const CATEGORIES = {
 /**
  * Full skill catalog. Each entry defines:
  * @typedef {Object} SkillDefinition
- * @property {string} name - Unique skill identifier (slug)
- * @property {string} displayName - Human-readable display name (Vietnamese/English)
- * @property {string} description - Short description (1 sentence)
- * @property {string} category - Category tag from CATEGORIES
- * @property {string} execMode - How this skill executes (from EXEC_MODES)
- * @property {string} scriptPath - Path to main CLI script (relative to project root)
  * @property {Object} params - Parameter schema (key → { type, required, description, example })
  * @property {string[]} triggers - Natural language trigger phrases
  * @property {string} [firestoreCollection] - Target Firestore collection (scrapers only)

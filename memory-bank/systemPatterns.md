@@ -14,12 +14,22 @@
 5. Log: Clear console errors (`console.error('[Module] Error:', err)`).
 6. Output: FULL code only. NO `// rest of code`.
 
-## Workflow
+## Memory Bank — How to Use
 
-- Read `directory-index.md` for project fastest index.
-- Read `projectContext.md` for project brief, tech patterns.
-- Read `activeContext.md` before coding.
-- Update `activeContext.md` after task completion.
+Project knowledge is split into **5 specialized files**. Each file has ONE clear purpose. Read only what you need:
+
+| File                | Purpose                                                                          | When to Read                                            |
+| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **projectContext**  | Tech stack, coding standards, constraints, env vars,project brief, tech patterns | Writing code — know WHAT tools and rules                |
+| **systemPatterns**  | Architectural patterns, data flow, auth, payments, SEO                           | Building a feature — know HOW the system works          |
+| **directory-index** | File finder — where everything lives, organized by purpose                       | Finding a specific file or understanding project layout |
+| **activeContext**   | Current work focus, recent changes, active decisions                             | Starting ANY work — ensure alignment with current state |
+| **progress**        | Phase tracking, milestones, known issues, decision history                       | Checking what's done or finding historical context      |
+
+**Quick lookup:** I need to fix this issue → Check `directory-index.md` section "Tìm file theo mục đích".
+
+**Priority order when starting work:** `systemPatterns` → `projectContext` -> `directory-index`
+**Priority order when continuing work:** `activeContext` → `progress` → `systemPatterns` → `projectContext` -> `directory-index`
 
 ## Active Decisions
 
