@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBlogBySlug, getRelatedBlogs } from "@/lib/firestore-admin";
-import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
+import { resolveDocImages, resolveDocsImages, resolveHtmlImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import BlogDetail from "@/components/blog/BlogDetail";
 import { logger } from "@/lib/logger";
@@ -73,6 +73,7 @@ export default async function BlogDetailPage({ params }) {
 
   let blog = rawBlog;
   let relatedBlogs = [];
+  let resolvedContent = rawBlog?.content || '';
   try {
     [blog, relatedBlogs] = await Promise.all([
       resolveDocImages(rawBlog),
@@ -81,6 +82,14 @@ export default async function BlogDetailPage({ params }) {
   } catch (error) {
     logger.error('[BlogDetailPage] Error resolving images:', error.message);
   }
+
+  try {
+    resolvedContent = await resolveHtmlImages(blog.content || '');
+  } catch (error) {
+    logger.error('[BlogDetailPage] Error resolving HTML images:', error.message);
+  }
+
+  blog = { ...blog, content: resolvedContent };
 
   // JSON-LD structured data for SEO (BlogPosting schema)
   const jsonLd = {

@@ -117,3 +117,78 @@ export async function resolveDocsImages(docs) {
   if (!Array.isArray(docs)) return docs;
   return Promise.all(docs.map((doc) => resolveDocImages(doc)));
 }
+
+// ─── HTML Content Image Resolution ─────────────────────────────────────
+
+/**
+ * Resolve Firebase Storage image URLs inside HTML content and add lazy loading.
+ *
+ * Scans an HTML string for <img> tags. For each tag:
+ *  1. If `src` points to a Storage path (gs:// or relative), resolves it to an
+ *     HTTPS download URL via the Admin SDK.
+ *  2. If `src` is already an HTTP URL, leaves it unchanged.
+ *  3. Adds `loading="lazy"` to every <img> that doesn't already have it.
+ *  4. Adds `decoding="async"` for non-blocking decode.
+ *
+ * This is designed for the blog `content` field which stores rich HTML that may
+ * embed Storage images inline.
+ *
+ * @param {string} htmlContent - Raw HTML string that may contain <img> tags
+ * @returns {Promise<string>} HTML string with resolved URLs and lazy-load attrs
+ * @updated 2025-05-08
+ */
+export async function resolveHtmlImages(htmlContent) {
+  if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+
+  const imgRegex = /<img\s+([^>]*?)>/gi;
+  const matches = [...htmlContent.matchAll(imgRegex)];
+
+  if (matches.length === 0) return htmlContent;
+
+  // Resolve each <img> tag in parallel
+  const processedTags = await Promise.all(
+    matches.map(async (match) => {
+      const attrs = match[1];
+
+      // Extract src value
+      const srcMatch = /src=["']([^"']+)["']/i.exec(attrs);
+      let newAttrs = attrs;
+
+      if (srcMatch) {
+        const originalSrc = srcMatch[1];
+
+        // Resolve non-HTTP Storage paths to signed HTTPS URLs
+        if (!originalSrc.startsWith('http://') && !originalSrc.startsWith('https://')) {
+          const resolvedUrl = await getStorageImageUrl(originalSrc);
+          if (resolvedUrl) {
+            newAttrs = newAttrs.replace(srcMatch[0], `src="${resolvedUrl}"`);
+          }
+        }
+      }
+
+      // Add lazy loading if not already present
+      if (!/loading\s*=/i.test(newAttrs)) {
+        newAttrs += ' loading="lazy"';
+      }
+
+      // Add async decoding for non-blocking image decode
+      if (!/decoding\s*=/i.test(newAttrs)) {
+        newAttrs += ' decoding="async"';
+      }
+
+      return `<img ${newAttrs}>`;
+    }),
+  );
+
+  // Rebuild HTML string, replacing each match at its original position
+  let result = '';
+  let lastIndex = 0;
+  for (let i = 0; i < matches.length; i++) {
+    result += htmlContent.slice(lastIndex, matches[i].index);
+    result += processedTags[i];
+    lastIndex = matches[i].index + matches[i][0].length;
+  }
+  result += htmlContent.slice(lastIndex);
+
+  return result;
+}
