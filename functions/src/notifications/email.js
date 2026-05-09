@@ -1,168 +1,219 @@
 /**
  * Email notification functions.
- * Sends booking confirmation and payment receipt emails using Nodemailer.
+ *
+ * Consumes {@link module:email-service} for pooled transporter + retry logic,
+ * and {@link module:templates} for HTML template generation.
+ *
+ * Every function throws {@link module:email-service.EmailMissingError}
+ * when no recipient address is available (instead of silently skipping).
+ *
+ * @module email
  */
 
-import nodemailer from "nodemailer";
+import { EmailMissingError, sendMailWithRetry } from "./email-service.js";
+import {
+	bookingConfirmationTemplate,
+	paymentReceiptTemplate,
+	welcomeTemplate,
+	passwordChangedTemplate,
+	bookingCancelledTemplate,
+	bookingModifiedTemplate,
+} from "./templates.js";
+
+// ─── Sender Helpers ────────────────────────────────────────────────────
 
 /**
- * Create email transporter.
- * Configure SMTP via environment variables.
- * @returns {nodemailer.Transporter}
+ * Default sender address — used when SMTP_FROM env var is not set.
+ * @type {string}
  */
-function createTransporter() {
-  // In production, use real SMTP credentials
-  if (process.env.SMTP_HOST) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || "587", 10),
-      secure: process.env.SMTP_SECURE === "true",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
-
-  // Fallback: log to console in development
-  console.warn("[email] No SMTP configured — emails will be logged only");
-  return {
-    sendMail: async (mailOptions) => {
-      console.log("[email] Would send:", {
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-      });
-      return { messageId: "dev-" + Date.now() };
-    },
-  };
-}
+const DEFAULT_FROM = `"9 Trip Phú Quốc" <info@9tripphuquoc.com>`;
 
 /**
- * Format currency for display in emails.
- * @param {number} amount
- * @param {string} currency
+ * Resolve the "from" address.
  * @returns {string}
  */
-function formatCurrency(amount, currency = "VND") {
-  if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  }
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(amount);
+function getFromAddress() {
+	return process.env.SMTP_FROM || DEFAULT_FROM;
 }
+
+/**
+ * Extract the user's email from a booking document.
+ * Checks common field names.
+ * @param {Object} booking
+ * @returns {string|undefined}
+ */
+function getBookingEmail(booking) {
+	return booking.userEmail || booking.email || booking.contactInfo?.email;
+}
+
+/**
+ * Extract the user's display name from a booking document.
+ * @param {Object} booking
+ * @returns {string}
+ */
+function getBookingName(booking) {
+	return booking.userName || booking.contactInfo?.fullName || "Quý khách";
+}
+
+// ─── Email Functions ───────────────────────────────────────────────────
 
 /**
  * Send booking confirmation email.
- * @param {FirebaseFirestore.Firestore} db
- * @param {Object} booking
- * @param {string} bookingId
+ *
+ * Triggered when a new booking document is created.
+ *
+ * @param {FirebaseFirestore.Firestore} db       - Firestore instance (unused, kept for signature compat)
+ * @param {Object}                      booking  - Booking document data
+ * @param {string}                      bookingId - Booking document ID
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no recipient email is found on the booking
  */
-async function sendBookingConfirmation(db, booking, bookingId) {
-  const transporter = createTransporter();
+export async function sendBookingConfirmation(db, booking, bookingId) {
+	const email = getBookingEmail(booking);
+	if (!email) {
+		throw new EmailMissingError(`sendBookingConfirmation(bookingId=${bookingId})`);
+	}
 
-  const userEmail = booking.userEmail || booking.email;
-  if (!userEmail) {
-    console.warn(`[email] No email for booking ${bookingId}, skipping`);
-    return;
-  }
+	const html = bookingConfirmationTemplate(booking);
+	const code = booking.bookingCode || bookingId;
 
-  const subject = `Xác nhận đặt dịch vụ #${booking.bookingCode || bookingId}`;
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #3b82f6; padding: 20px; text-align: center;">
-        <h2 style="color: white; margin: 0;">9 Trip Phú Quốc</h2>
-      </div>
-      <div style="padding: 20px; background: #f9fafb;">
-        <h3>Xin chào ${booking.userName || "Quý khách"},</h3>
-        <p>Cảm ơn bạn đã đặt dịch vụ tại 9 Trip Phú Quốc. Dưới đây là thông tin đặt dịch vụ của bạn:</p>
-        <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Mã đặt dịch vụ:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${booking.bookingCode || bookingId}</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Dịch vụ:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${booking.serviceName || booking.type || "—"}</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Tổng tiền:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${formatCurrency(booking.totalAmount || 0, booking.currency || "VND")}</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Trạng thái:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${booking.paymentStatus === "paid" ? "Đã thanh toán" : "Chờ thanh toán"}</td></tr>
-        </table>
-        <p>Vui lòng kiểm tra lại thông tin và liên hệ chúng tôi nếu có bất kỳ sai sót nào.</p>
-        <p>Hotline: 0877901901 | Email: info@9tripphuquoc.com</p>
-      </div>
-      <div style="background: #1f2937; padding: 16px; text-align: center;">
-        <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-          © 2026 Công ty TNHH 9 Trip Phú Quốc. Tất cả quyền được bảo lưu.<br/>
-          17 Chu Văn An, Khu Phố 5, đặc khu Phú Quốc, An Giang
-        </p>
-      </div>
-    </div>
-  `;
-
-  try {
-    await transporter.sendMail({
-      from: `"9 Trip Phú Quốc" <${process.env.SMTP_FROM || "info@9tripphuquoc.com"}>`,
-      to: userEmail,
-      subject,
-      html,
-    });
-    console.log(`[email] Booking confirmation sent to ${userEmail} for #${bookingId}`);
-  } catch (err) {
-    console.error(`[email] Failed to send confirmation for #${bookingId}:`, err);
-    throw err;
-  }
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: `Xác nhận đặt dịch vụ #${code}`,
+		html,
+	});
 }
 
 /**
- * Send payment receipt email when booking is paid.
- * @param {FirebaseFirestore.Firestore} db
- * @param {Object} booking
- * @param {string} bookingId
+ * Send payment receipt email when a booking is marked as paid.
+ *
+ * @param {FirebaseFirestore.Firestore} db       - Firestore instance
+ * @param {Object}                      booking  - Booking document data
+ * @param {string}                      bookingId - Booking document ID
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no recipient email is found
  */
-async function sendPaymentReceipt(db, booking, bookingId) {
-  const transporter = createTransporter();
+export async function sendPaymentReceipt(db, booking, bookingId) {
+	const email = getBookingEmail(booking);
+	if (!email) {
+		throw new EmailMissingError(`sendPaymentReceipt(bookingId=${bookingId})`);
+	}
 
-  const userEmail = booking.userEmail || booking.email;
-  if (!userEmail) {
-    console.warn(`[email] No email for booking ${bookingId}, skipping receipt`);
-    return;
-  }
+	const html = paymentReceiptTemplate(booking);
+	const code = booking.bookingCode || bookingId;
 
-  const subject = `Thanh toán thành công — Đặt dịch vụ #${booking.bookingCode || bookingId}`;
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #10b981; padding: 20px; text-align: center;">
-        <h2 style="color: white; margin: 0;">✅ Thanh toán thành công</h2>
-      </div>
-      <div style="padding: 20px; background: #f9fafb;">
-        <h3>Xin chào ${booking.userName || "Quý khách"},</h3>
-        <p>Chúng tôi đã nhận được thanh toán cho đặt dịch vụ của bạn:</p>
-        <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Mã đặt dịch vụ:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${booking.bookingCode || bookingId}</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Số tiền:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${formatCurrency(booking.paidAmount || booking.totalAmount || 0, booking.currency || "VND")}</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #e5e7eb;"><strong>Mã giao dịch:</strong></td><td style="padding: 8px; border: 1px solid #e5e7eb;">${booking.transactionId || "—"}</td></tr>
-        </table>
-        <p>Cảm ơn bạn đã tin tưởng sử dụng dịch vụ của 9 Trip Phú Quốc!</p>
-      </div>
-      <div style="background: #1f2937; padding: 16px; text-align: center;">
-        <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-          © 2026 Công ty TNHH 9 Trip Phú Quốc
-        </p>
-      </div>
-    </div>
-  `;
-
-  try {
-    await transporter.sendMail({
-      from: `"9 Trip Phú Quốc" <${process.env.SMTP_FROM || "info@9tripphuquoc.com"}>`,
-      to: userEmail,
-      subject,
-      html,
-    });
-    console.log(`[email] Payment receipt sent to ${userEmail} for #${bookingId}`);
-  } catch (err) {
-    console.error(`[email] Failed to send receipt for #${bookingId}:`, err);
-    throw err;
-  }
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: `Thanh toán thành công — Đặt dịch vụ #${code}`,
+		html,
+	});
 }
 
-export { sendBookingConfirmation, sendPaymentReceipt };
+/**
+ * Send welcome email to a newly registered user.
+ *
+ * @param {FirebaseFirestore.Firestore} db     - Firestore instance
+ * @param {Object}                      user   - User document data
+ * @param {string}                      userId - User document ID
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no email is found on the user document
+ */
+export async function sendWelcomeEmail(db, user, userId) {
+	const email = user.email || user.userEmail;
+	if (!email) {
+		throw new EmailMissingError(`sendWelcomeEmail(userId=${userId})`);
+	}
+
+	const name = user.displayName || user.name || "";
+	const html = welcomeTemplate(name);
+
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: `Chào mừng đến với 9 Trip Phú Quốc!`,
+		html,
+	});
+}
+
+/**
+ * Notify the user that their password has been changed.
+ *
+ * @param {FirebaseFirestore.Firestore} db       - Firestore instance
+ * @param {Object}                      user     - User document data
+ * @param {string}                      userId   - User document ID
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no email is found on the user document
+ */
+export async function sendPasswordChangedEmail(db, user, userId) {
+	const email = user.email || user.userEmail;
+	if (!email) {
+		throw new EmailMissingError(`sendPasswordChangedEmail(userId=${userId})`);
+	}
+
+	const name = user.displayName || user.name || "";
+	const changedAt = user.passwordChangedAt || new Date();
+	const html = passwordChangedTemplate(name, changedAt);
+
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: "Mật khẩu đã được thay đổi",
+		html,
+	});
+}
+
+/**
+ * Send booking cancellation confirmation email.
+ *
+ * @param {FirebaseFirestore.Firestore} db        - Firestore instance
+ * @param {Object}                      booking   - Booking document data
+ * @param {string}                      bookingId - Booking document ID
+ * @param {string}                      [reason]  - Optional cancellation reason
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no recipient email is found
+ */
+export async function sendBookingCancelledEmail(db, booking, bookingId, reason) {
+	const email = getBookingEmail(booking);
+	if (!email) {
+		throw new EmailMissingError(`sendBookingCancelledEmail(bookingId=${bookingId})`);
+	}
+
+	const html = bookingCancelledTemplate(booking, reason);
+	const code = booking.bookingCode || bookingId;
+
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: `Xác nhận hủy đơn hàng #${code}`,
+		html,
+	});
+}
+
+/**
+ * Notify the user that their booking has been modified.
+ *
+ * @param {FirebaseFirestore.Firestore} db        - Firestore instance
+ * @param {Object}                      booking   - Updated booking document data
+ * @param {string}                      bookingId - Booking document ID
+ * @param {Object}                      [changes] - Description of changes (e.g. { "Ngày bắt đầu": "01/03 → 05/03" })
+ * @returns {Promise<nodemailer.SentMessageInfo>}
+ * @throws {EmailMissingError} If no recipient email is found
+ */
+export async function sendBookingModifiedEmail(db, booking, bookingId, changes) {
+	const email = getBookingEmail(booking);
+	if (!email) {
+		throw new EmailMissingError(`sendBookingModifiedEmail(bookingId=${bookingId})`);
+	}
+
+	const html = bookingModifiedTemplate(booking, changes);
+	const code = booking.bookingCode || bookingId;
+
+	return sendMailWithRetry({
+		from: getFromAddress(),
+		to: email,
+		subject: `Cập nhật đơn hàng #${code}`,
+		html,
+	});
+}

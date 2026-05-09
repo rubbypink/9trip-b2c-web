@@ -187,7 +187,7 @@ export default function ChatWidget() {
 							<div className="flex items-start">
 								<div className="bg-white border border-gray-200 shadow-sm p-3 rounded-2xl rounded-tl-sm flex items-center space-x-2">
 									<Loader2 size={16} className="animate-spin text-blue-600" />
-									<span className="text-sm text-gray-500">Emily đang gõ...</span>
+									<span className="text-sm text-gray-500">Đang nhập...</span>
 								</div>
 							</div>
 						)}
