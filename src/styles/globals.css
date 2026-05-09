@@ -357,4 +357,20 @@
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+
+  /* ─── Blog Content — Native <img> inside rich HTML ─── */
+  .blog-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: var(--radius-xl);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .blog-content img[loaded],
+  .blog-content img.complete {
+    opacity: 1;
+  }
 }

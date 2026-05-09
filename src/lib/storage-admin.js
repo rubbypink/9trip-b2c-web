@@ -145,19 +145,14 @@ export async function resolveHtmlImages(htmlContent) {
 
   if (matches.length === 0) return htmlContent;
 
-  // Resolve each <img> tag in parallel
   const processedTags = await Promise.all(
     matches.map(async (match) => {
       const attrs = match[1];
-
-      // Extract src value
       const srcMatch = /src=["']([^"']+)["']/i.exec(attrs);
       let newAttrs = attrs;
 
       if (srcMatch) {
         const originalSrc = srcMatch[1];
-
-        // Resolve non-HTTP Storage paths to signed HTTPS URLs
         if (!originalSrc.startsWith('http://') && !originalSrc.startsWith('https://')) {
           const resolvedUrl = await getStorageImageUrl(originalSrc);
           if (resolvedUrl) {
@@ -166,12 +161,9 @@ export async function resolveHtmlImages(htmlContent) {
         }
       }
 
-      // Add lazy loading if not already present
       if (!/loading\s*=/i.test(newAttrs)) {
         newAttrs += ' loading="lazy"';
       }
-
-      // Add async decoding for non-blocking image decode
       if (!/decoding\s*=/i.test(newAttrs)) {
         newAttrs += ' decoding="async"';
       }
@@ -180,7 +172,6 @@ export async function resolveHtmlImages(htmlContent) {
     }),
   );
 
-  // Rebuild HTML string, replacing each match at its original position
   let result = '';
   let lastIndex = 0;
   for (let i = 0; i < matches.length; i++) {

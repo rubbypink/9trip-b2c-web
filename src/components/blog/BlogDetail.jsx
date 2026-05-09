@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, User, Share2, Link as LinkIcon, Check } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /**
  * Format date to Vietnamese locale.
@@ -30,10 +30,35 @@ function formatDate(dateString) {
 export default function BlogDetail({ post, relatedPosts = [] }) {
   const [copied, setCopied] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
+  const contentRef = useRef(null);
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
   }, []);
+
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    const imgs = container.querySelectorAll("img");
+    const handleLoad = (e) => {
+      e.target.style.opacity = "1";
+    };
+
+    imgs.forEach((img) => {
+      if (img.complete) {
+        img.style.opacity = "1";
+      } else {
+        img.addEventListener("load", handleLoad);
+      }
+    });
+
+    return () => {
+      imgs.forEach((img) => {
+        img.removeEventListener("load", handleLoad);
+      });
+    };
+  }, [post.content]);
 
   const handleCopyLink = async () => {
     try {
@@ -101,7 +126,8 @@ export default function BlogDetail({ post, relatedPosts = [] }) {
       {/* Content Section */}
       <div className="bg-background rounded-xl p-6 md:p-10 shadow-sm border border-border mb-10">
         <div
-          className="prose prose-lg max-w-none prose-headings:font-bold prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-xl"
+          ref={contentRef}
+          className="blog-content prose prose-lg max-w-none prose-headings:font-bold prose-a:text-primary hover:prose-a:text-primary/80 prose-img:rounded-xl prose-img:shadow-md"
           dangerouslySetInnerHTML={{ __html: post.content || "" }}
         />
 
