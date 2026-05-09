@@ -82,27 +82,29 @@ export function useBooking() {
     setError(null);
     
     try {
-      const item = items[0];
+      const itemsObject = items.reduce((acc, currentItem, index) => {
+        const id = currentItem.serviceId + "_" + index + "_" + Date.now();
+        const isPaidOrDeposited = ['VNPAY', 'MOMO', 'PAYPAL', 'BANK_TRANSFER'].includes(paymentGateway);
+        const policy = currentItem['cancel-policy'] || (isPaidOrDeposited ? 'non-refundable' : 'flexible');
+        
+        acc[id] = { ...currentItem, id, 'cancel-policy': policy };
+        return acc;
+      }, {});
+
       const bookingData = {
         userId: user.uid,
-        serviceId: item.serviceId,
-        serviceType: item.serviceType,
-        startDate: item.startDate,
-        endDate: item.endDate || null,
-        guests: {
-          adults: item.adults,
-          children: item.children,
-          infants: item.infants,
-        },
+        items: itemsObject,
         pricing: {
           subtotal,
           tax,
           discount: couponDiscount,
           total: grandTotal,
-          currency: item.currency || "VND",
+          currency: items[0]?.currency || "VND",
         },
         contactInfo,
         paymentGateway,
+        paymentStatus: 'pending',
+        bookingStatus: 'pending',
         inventoryHoldId: holdId,
         couponCode: couponData?.code || null,
       };

@@ -89,9 +89,18 @@ export default function CheckoutPageClient() {
       return;
     }
 
+    const itemsObject = items.reduce((acc, currentItem, index) => {
+      const id = currentItem.serviceId + "_" + index + "_" + Date.now();
+      const isPaidOrDeposited = ['VNPAY', 'MOMO', 'PAYPAL', 'BANK_TRANSFER'].includes(gateway);
+      const policy = currentItem['cancel-policy'] || (isPaidOrDeposited ? 'non-refundable' : 'flexible');
+      
+      acc[id] = { ...currentItem, id, 'cancel-policy': policy };
+      return acc;
+    }, {});
+
     const bookingData = {
       userId: user?.uid || null,
-      items: items,
+      items: itemsObject,
       pricing: {
         subtotal,
         tax,

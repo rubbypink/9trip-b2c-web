@@ -1,10 +1,9 @@
 /**
  * POST /api/bookings/[id]/cancel
- * Cancel a booking and send cancellation confirmation email to the customer.
+ * Cancel a booking. Emails are handled by Firebase Cloud Functions.
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { sendCancellationConfirmation } from '@/lib/email';
 
 export async function POST(request, { params }) {
   try {
@@ -30,10 +29,6 @@ export async function POST(request, { params }) {
       cancellationReason: reason || 'Không có lý do',
       updatedAt: new Date().toISOString(),
     });
-
-    sendCancellationConfirmation({ id, ...booking }, reason).catch(err =>
-      console.error('[Cancel] Cancellation email failed:', err.message)
-    );
 
     return NextResponse.json({ success: true, message: 'Booking cancelled successfully' });
   } catch (err) {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { getUserBookings, findBookingsByEmail, findBookingsByPhone } from "@/lib/firestore";
+import BookingDetailsModal from "@/components/account/BookingDetailsModal";
 
 /**
  * Detects whether a query string looks like an email address.
@@ -14,13 +15,12 @@ function isEmailLike(value) {
 }
 
 /**
- * Displays the current user's booking history grouped by status,
- * with an email/phone search filter above the list.
- * @param {Object} props
- * @param {Function} [props.onReviewRequest] - Callback when user wants to review a completed booking.
+ * Displays the current user's booking history grouped by status.
+ * Automatically fetches by user id, email, and phone.
+ * @param {{ onReviewRequest?: Function }} props
  */
 export default function BookingsList({ onReviewRequest }) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,6 +28,7 @@ export default function BookingsList({ onReviewRequest }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredBookings, setFilteredBookings] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [viewingBooking, setViewingBooking] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -38,8 +39,36 @@ export default function BookingsList({ onReviewRequest }) {
     let cancelled = false;
     async function load() {
       try {
+        const resultsMap = new Map();
+        
         const data = await getUserBookings(user.uid);
-        if (!cancelled) setBookings(data);
+        data.forEach(b => resultsMap.set(b.id, b));
+        
+        const emailsToSearch = new Set();
+        if (user.email) emailsToSearch.add(user.email);
+        
+        data.forEach(b => {
+          if (b.contactInfo?.email) emailsToSearch.add(b.contactInfo.email);
+        });
+
+        for (const email of emailsToSearch) {
+            const emailData = await findBookingsByEmail(email);
+            emailData.forEach(b => resultsMap.set(b.id, b));
+        }
+
+        const phonesToSearch = new Set();
+        data.forEach(b => {
+          if (b.contactInfo?.phone) phonesToSearch.add(b.contactInfo.phone);
+        });
+
+        for (const phone of phonesToSearch) {
+            const phoneData = await findBookingsByPhone(phone);
+            phoneData.forEach(b => resultsMap.set(b.id, b));
+        }
+
+        if (!cancelled) setBookings(Array.from(resultsMap.values()).sort((a,b) => {
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        }));
       } catch (err) {
         if (!cancelled) setError(err.message || "Không thể tải lịch sử đặt tour.");
       } finally {
@@ -50,12 +79,8 @@ export default function BookingsList({ onReviewRequest }) {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, profile]);
 
-  /**
-   * Search bookings by email or phone based on input type.
-   * If input contains "@" searches by email, otherwise by phone.
-   */
   const handleSearch = useCallback(async () => {
     const query = searchQuery.trim();
     if (!query) return;
@@ -73,11 +98,18 @@ export default function BookingsList({ onReviewRequest }) {
     }
   }, [searchQuery]);
 
-  /** Clear the search filter and return to the full bookings list. */
   const handleClearFilter = useCallback(() => {
     setSearchQuery("");
     setFilteredBookings(null);
   }, []);
+
+  const handleUpdateBooking = useCallback((updatedBooking) => {
+    setBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+    if (filteredBookings) {
+      setFilteredBookings(prev => prev.map(b => b.id === updatedBooking.id ? updatedBooking : b));
+    }
+    setViewingBooking(updatedBooking);
+  }, [filteredBookings]);
 
   const displayBookings = filteredBookings !== null ? filteredBookings : bookings;
   const isFilterActive = filteredBookings !== null;
@@ -100,10 +132,9 @@ export default function BookingsList({ onReviewRequest }) {
     );
   }
 
-  // Group bookings by status for visual sections
-  const upcoming = displayBookings.filter((b) => b.status === "confirmed" || b.status === "pending");
-  const completed = displayBookings.filter((b) => b.status === "completed");
-  const cancelled = displayBookings.filter((b) => b.status === "cancelled");
+  const upcoming = displayBookings.filter((b) => b.status === "confirmed" || b.status === "pending" || b.bookingStatus === 'pending');
+  const completed = displayBookings.filter((b) => b.status === "completed" || b.bookingStatus === "completed");
+  const cancelled = displayBookings.filter((b) => b.status === "cancelled" || b.bookingStatus === "cancelled");
 
   const statusBadge = (status) => {
     const map = {
@@ -180,7 +211,7 @@ export default function BookingsList({ onReviewRequest }) {
       ) : (
         <div className="space-y-10">
           {[
-            { title: "Sắp tới", items: upcoming },
+            { title: "Sắp tới / Chờ xác nhận", items: upcoming },
             { title: "Đã hoàn thành", items: completed },
             { title: "Đã hủy", items: cancelled },
           ]
@@ -189,43 +220,65 @@ export default function BookingsList({ onReviewRequest }) {
               <section key={group.title}>
                 <h3 className="text-lg font-semibold text-foreground mb-4">{group.title}</h3>
                 <div className="space-y-4">
-                  {group.items.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="booking-item flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-card border border-border rounded-xl hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-foreground truncate">
-                            {booking.tourName || booking.productName || "Tour"}
-                          </h4>
-                          {statusBadge(booking.status)}
+                  {group.items.map((booking) => {
+                    const firstItem = booking.items ? Object.values(booking.items)[0] : null;
+                    const displayTitle = firstItem ? firstItem.serviceTitle : (booking.tourName || booking.productName || "Dịch vụ");
+                    const totalVal = booking.pricing?.total !== undefined ? booking.pricing.total : booking.total;
+
+                    return (
+                      <div
+                        key={booking.id}
+                        className="booking-item flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-card border border-border rounded-xl hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-foreground truncate">
+                              {displayTitle}
+                            </h4>
+                            {statusBadge(booking.bookingStatus || booking.status)}
+                          </div>
+                          <div className="text-sm text-muted-foreground space-x-4">
+                            {booking.createdAt && <span>📅 {new Date(booking.createdAt).toLocaleDateString("vi-VN")}</span>}
+                            {totalVal != null && (
+                              <span className="font-medium text-foreground">
+                                💰 {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalVal)}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground space-x-4">
-                          {booking.date && <span>📅 {booking.date}</span>}
-                          {booking.guests && <span>👥 {booking.guests} khách</span>}
-                          {booking.total != null && (
-                            <span className="font-medium text-foreground">
-                              💰 {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(booking.total)}
-                            </span>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setViewingBooking(booking)}
+                            className="px-4 py-2 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors"
+                          >
+                            Xem Chi Tiết
+                          </button>
+                          {(booking.status === "completed" || booking.bookingStatus === "completed") && onReviewRequest && (
+                            <button
+                              type="button"
+                              onClick={() => onReviewRequest(booking)}
+                              className="px-4 py-2 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                            >
+                              ✍️ Viết đánh giá
+                            </button>
                           )}
                         </div>
                       </div>
-                      {booking.status === "completed" && onReviewRequest && (
-                        <button
-                          type="button"
-                          onClick={() => onReviewRequest(booking)}
-                          className="shrink-0 px-4 py-2 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                        >
-                          ✍️ Viết đánh giá
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
         </div>
+      )}
+
+      {viewingBooking && (
+        <BookingDetailsModal 
+          booking={viewingBooking} 
+          onClose={() => setViewingBooking(null)} 
+          onUpdateBooking={handleUpdateBooking}
+        />
       )}
     </div>
   );
