@@ -82,6 +82,51 @@ const notificationsCol = () => adminDb.collection('notifications');
 const inventoryHoldsCol = () => adminDb.collection('inventory_holds');
 const blogsCol = () => adminDb.collection('blogs');
 
+// ─── In-Memory Cache ─────────────────────────────────────────────────
+
+/** @type {{ LOCATIONS: number, COUNTS: number }} */
+const CACHE_TTL = {
+  /** 5 minutes — locations rarely change */
+  LOCATIONS: 5 * 60 * 1000,
+  /** 2 minutes — counts update when inventory changes */
+  COUNTS: 2 * 60 * 1000,
+};
+
+/** @type {Map<string, { value: any, expiresAt: number }>} */
+const _cache = new Map();
+
+/**
+ * Retrieve a value from cache if not expired.
+ * @param {string} key
+ * @returns {any|undefined}
+ */
+function _cacheGet(key) {
+  const entry = _cache.get(key);
+  if (entry && Date.now() <= entry.expiresAt) return entry.value;
+  if (entry) _cache.delete(key);
+  return undefined;
+}
+
+/**
+ * Store a value in cache with a TTL.
+ * @param {string} key
+ * @param {any} value
+ * @param {number} ttlMs
+ */
+function _cacheSet(key, value, ttlMs) {
+  _cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+}
+
+/**
+ * Build a cache key from a prefix and optional filter object.
+ * @param {string} prefix
+ * @param {Object} [filters={}]
+ * @returns {string}
+ */
+function _cacheKey(prefix, filters = {}) {
+  return `${prefix}:${JSON.stringify(filters)}`;
+}
+
 // ─── Generic Helpers ─────────────────────────────────────────────────
 
 /**
@@ -203,6 +248,10 @@ export async function searchTours(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countTours(filters = {}) {
+  const key = _cacheKey('countTours', filters);
+  const cached = _cacheGet(key);
+  if (cached !== undefined) return cached;
+
   const { locationId, tourTypeId, minRating } = filters;
   try {
     let q = toursCol();
@@ -210,7 +259,9 @@ export async function countTours(filters = {}) {
     if (tourTypeId) q = q.where('tourTypeId', '==', tourTypeId);
     if (minRating) q = q.where('ratingAverage', '>=', minRating);
     const snap = await q.count().get();
-    return snap.data().count;
+    const count = snap.data().count;
+    _cacheSet(key, count, CACHE_TTL.COUNTS);
+    return count;
   } catch (error) {
     console.error('[countTours] Error:', error.message);
     return 0;
@@ -368,12 +419,18 @@ export async function searchHotels(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countHotels(filters = {}) {
+  const key = _cacheKey('countHotels', filters);
+  const cached = _cacheGet(key);
+  if (cached !== undefined) return cached;
+
   const { locationId } = filters;
   try {
     let q = hotelsCol();
     if (locationId) q = q.where('address.cityId', '==', locationId);
     const snap = await q.count().get();
-    return snap.data().count;
+    const count = snap.data().count;
+    _cacheSet(key, count, CACHE_TTL.COUNTS);
+    return count;
   } catch (error) {
     console.error('[countHotels] Error:', error.message);
     return 0;
@@ -858,9 +915,14 @@ export async function countRentals(filters = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getLocations() {
+  const cached = _cacheGet('locations:all');
+  if (cached !== undefined) return cached;
+
   try {
     const snap = await locationsCol().orderBy('name', 'asc').get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    _cacheSet('locations:all', result, CACHE_TTL.LOCATIONS);
+    return result;
   } catch (error) {
     console.error('[getLocations] Error:', error.message);
     return [];

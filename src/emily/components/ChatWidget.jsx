@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, ExternalLink } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, ExternalLink, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToEmily } from '../services/chatService';
 
@@ -19,7 +19,7 @@ const WELCOME_MSG = {
  */
 export default function ChatWidget() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [sessionId] = useState(() => {
+	const [sessionId, setSessionId] = useState(() => {
 		if (typeof window !== 'undefined') {
 			try {
 				let sid = localStorage.getItem(SESSION_ID_KEY);
@@ -60,6 +60,13 @@ export default function ChatWidget() {
 			scrollToBottom();
 		}
 	}, [messages, isOpen]);
+
+	const clearChat = () => {
+		const newSessionId = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+		localStorage.setItem(SESSION_ID_KEY, newSessionId);
+		setSessionId(newSessionId);
+		setMessages([WELCOME_MSG]);
+	};
 
 	const handleSendMessage = async (e) => {
 		e?.preventDefault();
@@ -113,12 +120,21 @@ export default function ChatWidget() {
 								<p className="text-xs text-blue-200">Hỗ trợ khách hàng 9 Trip</p>
 							</div>
 						</div>
-						<button
-							onClick={() => setIsOpen(false)}
-							className="text-blue-100 hover:text-white hover:bg-blue-700 p-1 rounded-full transition-colors"
-						>
-							<X size={20} />
-						</button>
+						<div className="flex items-center space-x-1">
+							<button
+								onClick={clearChat}
+								className="text-blue-100 hover:text-white hover:bg-blue-700 p-1.5 rounded-full transition-colors"
+								title="Bắt đầu cuộc hội thoại mới"
+							>
+								<Trash2 size={18} />
+							</button>
+							<button
+								onClick={() => setIsOpen(false)}
+								className="text-blue-100 hover:text-white hover:bg-blue-700 p-1.5 rounded-full transition-colors"
+							>
+								<X size={20} />
+							</button>
+						</div>
 					</div>
 
 					<div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">

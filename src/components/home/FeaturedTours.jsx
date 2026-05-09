@@ -1,3 +1,4 @@
+import Link from "next/link";
 import TourCard from "@/components/tours/TourCard";
 import EmptyState from "@/components/shared/EmptyState";
 
@@ -34,7 +35,7 @@ export default function FeaturedTours({ tours }) {
               Những tour du lịch được yêu thích nhất, đặt ngay kẻo hết chỗ!
             </p>
           </div>
-          <a
+          <Link
             href="/tours"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors shrink-0"
           >
@@ -42,7 +43,7 @@ export default function FeaturedTours({ tours }) {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
