@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { sendMessageToEmily } from '../services/chatService';
 
 const STORAGE_KEY = 'emily-chat-history';
+const SESSION_ID_KEY = 'emily-session-id';
 
 const WELCOME_MSG = {
 	id: 'welcome',
@@ -18,6 +19,19 @@ const WELCOME_MSG = {
  */
 export default function ChatWidget() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [sessionId] = useState(() => {
+		if (typeof window !== 'undefined') {
+			try {
+				let sid = localStorage.getItem(SESSION_ID_KEY);
+				if (!sid) {
+					sid = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+					localStorage.setItem(SESSION_ID_KEY, sid);
+				}
+				return sid;
+			} catch (e) {}
+		}
+		return '';
+	});
 	const [messages, setMessages] = useState(() => {
 		if (typeof window !== 'undefined') {
 			try {
@@ -68,7 +82,7 @@ export default function ChatWidget() {
 			.filter((m) => m.id !== 'welcome')
 			.map((m) => ({ role: m.role, text: m.text }));
 
-		const response = await sendMessageToEmily(userMsg, history);
+		const response = await sendMessageToEmily(sessionId, userMsg, history);
 
 		const emilyMsg = {
 			id: (Date.now() + 1).toString(),

@@ -127,3 +127,9 @@ exports.onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}'
 	if (!snap) return;
 	await executeAgentTask(db, snap, event);
 });
+
+const { handleChat } = require('./emily');
+
+exports.chatWithEmily = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
+	await handleChat(req, res, db);
+});

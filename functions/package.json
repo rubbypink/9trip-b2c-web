@@ -14,6 +14,7 @@
 		"node": "24"
 	},
 	"dependencies": {
+		"@google/genai": "^2.0.1",
 		"dotenv": "^17.4.2",
 		"eslint": "^10.3.0",
 		"firebase-admin": "^13.8.0",
