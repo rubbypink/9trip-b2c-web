@@ -2,19 +2,23 @@
  * Firebase Cloud Functions entry point.
  * Registers all function groups: payment webhooks, email notifications, scheduled tasks.
  */
-require('dotenv/config');
-const { onRequest } = require('firebase-functions/v2/https');
-const { onDocumentCreated, onDocumentUpdated } = require('firebase-functions/v2/firestore');
-const { onSchedule } = require('firebase-functions/v2/scheduler');
+import 'dotenv/config';
+import { onRequest, onCall } from 'firebase-functions/v2/https';
+import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
+import admin from 'firebase-admin';
+import { handlePaymentWebhook } from './src/webhooks/payment.js';
+import { createMomoPayment as createMomo } from './src/payments/momo.js';
+import { sendBookingConfirmation, sendPaymentReceipt } from './src/notifications/email.js';
+import { cleanupExpiredHolds as cleanupHolds, cancelAbandonedBookings as cancelBookings } from './src/scheduled/cleanup.js';
+import { executeAgentTask } from './src/agents/executor.js';
+import { handleChat } from './emily/index.js';
 
 // Initialize Firebase Admin
-const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
 // ─── Payment Webhook ──────────────────────────────────────────────────
-
-const { handlePaymentWebhook } = require('./src/webhooks/payment');
 
 /**
  * Payment webhook — receives callbacks from payment gateways.
@@ -23,7 +27,7 @@ const { handlePaymentWebhook } = require('./src/webhooks/payment');
  *   - MoMo: POST with JSON body (IPN)
  *   - PayPal: POST with JSON body + headers (webhook)
  */
-exports.paymentWebhook = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
+export const paymentWebhook = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
 	try {
 		const result = await handlePaymentWebhook(req, db);
 		res.status(200).json(result);
@@ -35,8 +39,6 @@ exports.paymentWebhook = onRequest({ cors: true, region: 'asia-southeast1' }, as
 
 // ─── MoMo Payment Creation ────────────────────────────────────────────
 
-const { createMomoPayment } = require('./src/payments/momo');
-
 /**
  * Create MoMo payment — proxy for Next.js API route.
  * Trigger: HTTP POST /createMomoPayment
@@ -44,7 +46,7 @@ const { createMomoPayment } = require('./src/payments/momo');
  * MoMo API requires 30s timeout (exceeds Vercel Hobby 10s limit),
  * so this runs on Cloud Functions (9 min timeout).
  */
-exports.createMomoPayment = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
+export const createMomoPayment = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
 	try {
 		const { bookingId, amount, bookingCode, orderInfo } = req.body;
 
@@ -52,7 +54,7 @@ exports.createMomoPayment = onRequest({ cors: true, region: 'asia-southeast1' },
 			return res.status(400).json({ error: 'Missing bookingId or amount' });
 		}
 
-		const result = await createMomoPayment({ bookingId, amount, bookingCode, orderInfo });
+		const result = await createMomo({ bookingId, amount, bookingCode, orderInfo });
 
 		if (result.success) {
 			res.status(200).json(result);
@@ -67,12 +69,10 @@ exports.createMomoPayment = onRequest({ cors: true, region: 'asia-southeast1' },
 
 // ─── Email Notifications ──────────────────────────────────────────────
 
-const { sendBookingConfirmation, sendPaymentReceipt } = require('./src/notifications/email');
-
 /**
  * Send booking confirmation email when a new booking is created.
  */
-exports.onBookingCreated = onDocumentCreated({ document: 'bookings/{bookingId}', region: 'asia-southeast1' }, async (event) => {
+export const onBookingCreated = onDocumentCreated({ document: 'bookings/{bookingId}', region: 'asia-southeast1' }, async (event) => {
 	const booking = event.data.data();
 	if (!booking) return;
 	await sendBookingConfirmation(db, booking, event.params.bookingId);
@@ -81,7 +81,7 @@ exports.onBookingCreated = onDocumentCreated({ document: 'bookings/{bookingId}',
 /**
  * Send payment receipt when booking status changes to "paid".
  */
-exports.onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}', region: 'asia-southeast1' }, async (event) => {
+export const onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}', region: 'asia-southeast1' }, async (event) => {
 	const before = event.data.before.data();
 	const after = event.data.after.data();
 	if (!before || !after) return;
@@ -94,25 +94,21 @@ exports.onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}', re
 
 // ─── Scheduled Tasks ──────────────────────────────────────────────────
 
-const { cleanupExpiredHolds, cancelAbandonedBookings } = require('./src/scheduled/cleanup');
-
 /**
  * Cleanup expired inventory holds — every 5 minutes.
  */
-exports.cleanupExpiredHolds = onSchedule({ schedule: 'every 5 minutes', region: 'asia-southeast1' }, async () => {
-	await cleanupExpiredHolds(db);
+export const cleanupExpiredHolds = onSchedule({ schedule: 'every 5 minutes', region: 'asia-southeast1' }, async () => {
+	await cleanupHolds(db);
 });
 
 /**
  * Cancel abandoned unpaid bookings — every hour.
  */
-exports.cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes', region: 'asia-southeast1' }, async () => {
-	await cancelAbandonedBookings(db);
+export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes', region: 'asia-southeast1' }, async () => {
+	await cancelBookings(db);
 });
 
 // ─── Agent Task Executor ──────────────────────────────────────────────
-
-const { executeAgentTask } = require('./src/agents/executor');
 
 /**
  * Agent task executor — listens for new agentTasks documents and executes them.
@@ -122,14 +118,18 @@ const { executeAgentTask } = require('./src/agents/executor');
  *   - 'firestore-task' mode: executes directly (media-finder, orchestrator, etc.)
  *   - 'agent-only' mode: leaves as 'queued_for_agent' for external AI agent
  */
-exports.onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
+export const onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
 	const snap = event.data;
 	if (!snap) return;
 	await executeAgentTask(db, snap, event);
 });
 
-const { handleChat } = require('./emily');
+// ─── Emily Chat ───────────────────────────────────────────────────────
 
-exports.chatWithEmily = onRequest({ cors: true, region: 'asia-southeast1' }, async (req, res) => {
-	await handleChat(req, res, db);
+/**
+ * Emily chat — AI customer support chatbot.
+ * Trigger: Callable function (chatWithEmily)
+ */
+export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (request) => {
+  return await handleChat(request, db);
 });

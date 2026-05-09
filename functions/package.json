@@ -1,4 +1,5 @@
 {
+	"type": "module",
 	"name": "9trip-b2c-back-end",
 	"description": "Cloud Functions for 9 Trip Phú Quốc — payment webhooks, email notifications, scheduled cleanup",
 	"main": "index.js",

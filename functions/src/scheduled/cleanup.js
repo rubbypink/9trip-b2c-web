@@ -4,7 +4,7 @@
  * - Cancel abandoned unpaid bookings
  */
 
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
 /**
  * Release expired inventory holds.
@@ -82,4 +82,4 @@ async function cancelAbandonedBookings(db) {
   );
 }
 
-module.exports = { cleanupExpiredHolds, cancelAbandonedBookings };
+export { cleanupExpiredHolds, cancelAbandonedBookings };

@@ -1,7 +1,10 @@
-const CLOUD_FUNCTION_URL = process.env.NEXT_PUBLIC_CLOUD_FUNCTION_URL || 'https://asia-southeast1-tripphuquoc-db-fs.cloudfunctions.net';
-const CHAT_URL = `${CLOUD_FUNCTION_URL}/chatWithEmily`;
+import { functions } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+
+const chatWithEmily = httpsCallable(functions, 'chatWithEmily');
 
 /**
+ * Gửi tin nhắn đến Emily chatbot qua Firebase Callable Function.
  * @param {string} sessionId
  * @param {string} message
  * @param {{role: 'user'|'emily', text: string}[]} [history=[]]
@@ -9,17 +12,8 @@ const CHAT_URL = `${CLOUD_FUNCTION_URL}/chatWithEmily`;
  */
 export async function sendMessageToEmily(sessionId, message, history = []) {
 	try {
-		const res = await fetch(CHAT_URL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ sessionId, message, history }),
-		});
-
-		if (!res.ok) {
-			throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-		}
-
-		const data = await res.json();
+		const result = await chatWithEmily({ sessionId, message, history });
+		const data = result.data;
 		return {
 			text: data.text || 'Xin lỗi Anh/Chị, em chưa hiểu rõ ý của mình ạ.',
 			urls: data.urls || [],

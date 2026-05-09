@@ -3,7 +3,7 @@
  * Sends booking confirmation and payment receipt emails using Nodemailer.
  */
 
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
 /**
  * Create email transporter.
@@ -165,4 +165,4 @@ async function sendPaymentReceipt(db, booking, bookingId) {
   }
 }
 
-module.exports = { sendBookingConfirmation, sendPaymentReceipt };
+export { sendBookingConfirmation, sendPaymentReceipt };

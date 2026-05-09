@@ -7,7 +7,7 @@
  * Called by: Next.js API route /api/payments/momo/create (proxy)
  */
 
-const crypto = require("crypto");
+import crypto from "node:crypto";
 
 const MOMO_ENDPOINT = process.env.MOMO_ENDPOINT || "https://test-payment.momo.vn/v2/gateway/api/create";
 const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE || "";
@@ -84,4 +84,4 @@ async function createMomoPayment({ bookingId, amount, bookingCode, orderInfo }) 
   return { success: false, message: data.message || `MoMo error: resultCode=${data.resultCode}` };
 }
 
-module.exports = { createMomoPayment };
+export { createMomoPayment };

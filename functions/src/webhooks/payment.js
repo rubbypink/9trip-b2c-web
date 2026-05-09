@@ -5,7 +5,7 @@
  * Handles: VNPay (GET IPN), MoMo (POST IPN), PayPal (POST webhook)
  */
 
-const crypto = require("crypto");
+import crypto from "node:crypto";
 
 // ─── Configuration (from environment) ──────────────────────────────────
 
@@ -387,4 +387,4 @@ async function handlePaymentWebhook(req, db) {
   }
 }
 
-module.exports = { handlePaymentWebhook };
+export { handlePaymentWebhook };

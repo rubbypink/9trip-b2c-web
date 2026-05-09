@@ -2,6 +2,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
 /**
  * Firebase configuration object.
@@ -23,6 +24,7 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+const functions = getFunctions(app, 'asia-southeast1');
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 
@@ -30,4 +32,4 @@ const facebookProvider = new FacebookAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 facebookProvider.setCustomParameters({ display: "popup" });
 
-export { app, db, auth, storage, googleProvider, facebookProvider };
+export { app, db, auth, storage, functions, googleProvider, facebookProvider };
