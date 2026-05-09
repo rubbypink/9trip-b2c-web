@@ -4,8 +4,8 @@ import AuthWrapper from '@/components/auth/AuthWrapper';
 import { CartProvider } from '@/lib/cart';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import FloatButtonGroup from '@/components/shared/FloatButtonGroup';
 import BackToTop from '@/components/shared/BackToTop';
+import ChatWidget from '@/emily/components/ChatWidget';
 import ThemeProvider from '@/components/shared/ThemeProvider';
 import { SITE, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants';
 
@@ -74,8 +74,8 @@ export default function RootLayout({ children }) {
 							<Header />
 							<main className="flex-1">{children}</main>
 							<Footer />
-							<FloatButtonGroup />
 							<BackToTop />
+							<ChatWidget />
 						</CartProvider>
 					</AuthWrapper>
 				</ThemeProvider>
