@@ -41,7 +41,8 @@ export default function AccountSidebar() {
   const email = profile?.email || user?.email || "";
   const avatar = profile?.avatar || user?.photoURL || null;
 
-  const showImagesStudio = IMAGES_STUDIO_EMAILS.includes(email);
+  const normalizedEmail = email?.toLowerCase?.() || "";
+  const showImagesStudio = IMAGES_STUDIO_EMAILS.includes(normalizedEmail);
 
   function handleLogout() {
     setMobileOpen(false);

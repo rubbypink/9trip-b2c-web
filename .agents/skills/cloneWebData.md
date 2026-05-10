@@ -1,25 +1,32 @@
 ---
 name: clone-web-data
-description: Workflow sao chép dữ liệu từ web qua FireCrawl MCP, chuẩn hóa theo schema Firestore hiện tại, và gửi tới ERP Cloud Functions. Sử dụng prompt-engineer để tối ưu prompt và orchestrator để định dạng dữ liệu.
+description: Workflow sao chép dữ liệu từ web qua agent-browser CLI, chuẩn hóa theo schema Firestore hiện tại, và gửi tới ERP Cloud Functions. Sử dụng prompt-engineer để tối ưu prompt và orchestrator để định dạng dữ liệu.
 ---
 
 # Clone Web Data Workflow
 
 **Role**: Web Data Sync Orchestrator
 
-Quy trình tự động lấy dữ liệu từ URL bên ngoài, chuyển đổi sang cấu trúc chuẩn của hệ thống 9Trip B2C, và đồng bộ lên Firestore qua ERP Cloud Functions.
+Quy trình tự động lấy dữ liệu từ URL bên ngoài qua **agent-browser**, chuyển đổi sang cấu trúc chuẩn của hệ thống 9Trip B2C, và đồng bộ lên Firestore qua ERP Cloud Functions.
 
 ## Workflow Overview
 
 ```
-USER_URL → [Prompt Optimizer] → [FireCrawl MCP] → [Orchestrator Format] → [ERP Endpoint]
+USER_URL → [agent-browser Extract] → [AI Parse + Schema Map] → [Orchestrator Format] → [ERP Endpoint]
 ```
+
+1. **agent-browser** mở URL, chờ load, scroll kích hoạt lazy content, extract toàn bộ text/HTML
+2. **AI Parse** dùng prompt-engineer để parse raw text → structured JSON theo schema đích
+3. **Orchestrator** validate + transform + clean dữ liệu trước khi gửi
+4. **ERP Endpoint** nhận JSON đã chuẩn hóa → lưu Firestore
 
 ## Prerequisites
 
-- FireCrawl MCP server đã kết nối (cung cấp `firecrawl_scrape`, `firecrawl_map`, `firecrawl_search`)
+- **agent-browser CLI** đã được cài đặt và khả dụng trong PATH
 - User cung cấp URL nguồn dữ liệu
 - Xác định rõ loại service cần clone (Tour, Hotel, Room, Activity, Car, Rental, Location)
+
+> **Lưu ý:** Sử dụng **agent-browser** — CLI tự động hóa trình duyệt dành cho AI agents. Không dùng FireCrawl.
 
 ## Execution Steps
 
@@ -39,31 +46,55 @@ Hỏi user xác định loại dữ liệu cần clone. Mỗi loại service có
 
 Nếu user chưa cung cấp service type, **bắt buộc hỏi lại** trước khi tiếp tục.
 
-### Bước 2: Tối Ưu Prompt Với Prompt-Engineer
+### Bước 2: Chuẩn Bị Extraction Context Với Prompt-Engineer
 
-Sử dụng `prompt-engineer` skill để tạo prompt tối ưu cho FireCrawl MCP:
+Sử dụng `prompt-engineer` skill để tạo extraction prompt cho AI parse raw data từ agent-browser:
 
 1. **Xác định service type** → map tới schema chuẩn bên dưới
-2. **Inject schema context** vào prompt FireCrawl — chỉ include schema của service type được chọn
+2. **Inject schema context** vào extraction prompt — chỉ include schema của service type được chọn
 3. **Áp dụng prompt patterns**:
     - **Structured System Prompt**: Role = "9Trip Data Extractor", Context = schema fields, Output Format = JSON matching schema
     - **Few-Shot Examples**: Cung cấp 2-3 example documents đúng format
     - **Negative Instructions**: Nêu rõ những field KHÔNG được thêm vào (không tự ý thêm field ngoài schema)
 4. **Output requirement**: JSON array of objects, mỗi object map chính xác vào schema
 
-### Bước 3: Gọi FireCrawl MCP
+### Bước 3: Scrape Dữ Liệu Với agent-browser
 
-Sử dụng `firecrawl_scrape` hoặc `firecrawl_map` + `firecrawl_scrape` để lấy dữ liệu:
+Sử dụng **agent-browser CLI** để mở URL và extract toàn bộ nội dung:
 
-- **Single page**: Dùng `firecrawl_scrape` với format `json` và schema đã tối ưu
-- **Multiple pages**: Dùng `firecrawl_map` để discovery URLs → sau đó scrape từng page
-- **Search mode**: Dùng `firecrawl_search` nếu cần tìm kiếm trước khi scrape
+**Luồng cơ bản:**
 
-**Importan**: Luôn dùng `jsonOptions` với `prompt` và `schema` tối ưu từ Bước 2.
+```bash
+# 1. Mở trang nguồn
+agent-browser open {URL}
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 2. Scroll để kích hoạt lazy load (ảnh, pricing, content ẩn)
+agent-browser scroll down 500
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 3. Click accordion/tabs để reveal nội dung ẩn (nếu có)
+agent-browser click @e_show_more
+agent-browser wait --text "Chi tiết"
+agent-browser snapshot -i
+
+# 4. Extract toàn bộ text để parse
+agent-browser get text body
+```
+
+**Xử lý đa page:**
+
+- **Single page**: Extract trực tiếp từ URL được cung cấp
+- **Multiple pages (list)**: Mở list page → extract danh sách URL → lặp từng URL detail
+- **Pagination**: Scroll + wait networkidle → extract → repeat cho đến khi hết trang
+
+Sau khi có raw text từ agent-browser, dùng extraction prompt (Bước 2) để parse → structured JSON.
 
 ### Bước 4: Định Dạng Dữ Liệu Với Orchestrator
 
-Sau khi nhận data từ FireCrawl MCP, gọi `orchestrator` skill để:
+Sau khi nhận structured JSON từ AI parse (Bước 2+3), gọi `orchestrator` skill để:
 
 1. **Validate** — Kiểm tra từng document có đủ required fields không
 2. **Transform** — Chuẩn hóa field names, data types, formats:
@@ -105,7 +136,7 @@ Content-Type: application/json
 
 ## Collection Schema Reference
 
-Chỉ inject schema của service type được chọn vào prompt FireCrawl:
+Chỉ inject schema của service type được chọn vào extraction prompt:
 
 ### Tour Schema
 
@@ -287,20 +318,23 @@ Chỉ inject schema của service type được chọn vào prompt FireCrawl:
 }
 ```
 
-## FireCrawl Prompt Template
+## Extraction Prompt Template
 
-Khi gọi FireCrawl MCP, sử dụng template sau (đã được prompt-engineer tối ưu):
+Sau khi có raw text từ agent-browser, sử dụng template sau để parse → structured JSON (đã được prompt-engineer tối ưu):
 
 ```
-Role: You are a 9Trip B2C data extraction specialist. Your task is to extract structured data from the provided web page that matches the exact schema of our travel platform.
+Role: You are a 9Trip B2C data extraction specialist. Your task is to parse structured data from web page content that matches the exact schema of our travel platform.
 
 Context: The 9Trip platform manages {serviceType} data in Firestore with a strict schema. Every field in the output must conform to the schema below. Do NOT invent fields outside this schema.
 
 Schema to follow:
 {CHOSEN_SCHEMA_JSON}
 
+Source content from agent-browser:
+{RAW_TEXT_FROM_AGENT_BROWSER}
+
 Instructions:
-1. Extract ALL {serviceType} items found on the page
+1. Extract ALL {serviceType} items found in the page content
 2. For each item, map every available piece of information to the EXACT field names in the schema
 3. Generate slug from name/title: lowercase, remove special chars, replace spaces with hyphens
 4. Set pricing.currency to "VND" unless explicitly stated otherwise
@@ -321,6 +355,95 @@ Output Format: Return a valid JSON array of objects. Each object must strictly f
 
 Example of one correct output document:
 {EXAMPLE_DOCUMENT}
+```
+
+## agent-browser Command Reference
+
+Khi cần tương tác trình duyệt trực tiếp (scroll lazy load, click accordion, reveal nội dung ẩn), sử dụng **agent-browser CLI** thay vì sleep cố định.
+
+| Lệnh | Mô tả | Ví dụ |
+|------|--------|-------|
+| `open {URL}` | Mở trang web | `agent-browser open https://example.com/tours` |
+| `snapshot -i` | Chụp accessibility tree chỉ interactive elements | `agent-browser snapshot -i` |
+| `wait --fn "JS"` | Chờ JS expression trả về truthy | `agent-browser wait --fn "!document.querySelector('.spinner')"` |
+| `wait --text "..."` | Chờ text xuất hiện trên trang | `agent-browser wait --text "Kết quả"` |
+| `wait --load networkidle` | Chờ network idle (AJAX xong) | `agent-browser wait --load networkidle` |
+| `batch` | Chạy nhiều lệnh liên tiếp | `agent-browser batch "open URL" "snapshot -i"` |
+| `click @ref` | Click element theo @ref từ snapshot | `agent-browser click @e3` |
+| `scroll down {px}` | Scroll xuống để trigger lazy load | `agent-browser scroll down 500` |
+| `get text body` | Extract toàn bộ text từ body | `agent-browser get text body` |
+
+> **Tài liệu đầy đủ:** [`.agents/lib/agent-browser-guide.md`](../lib/agent-browser-guide.md)
+
+### Quy tắc vàng
+
+1. **Luôn `snapshot -i` trước khi tương tác** — @ref cũ không hợp lệ sau khi DOM thay đổi.
+2. **Dùng `wait --fn` hoặc `wait --text`** thay vì `sleep(ms)` — chờ điều kiện thực tế, không đoán thời gian.
+3. **Re-snapshot sau mỗi lần DOM thay đổi** (click, scroll, navigate).
+
+### Luồng khuyến nghị cho clone web data
+
+```bash
+# 1. Mở trang nguồn dữ liệu
+agent-browser open https://example.com/tours/phu-quoc
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 2. Scroll để kích hoạt lazy load (ảnh, pricing, content ẩn)
+agent-browser scroll down 500
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+
+# 3. Click "Xem thêm" / accordion để reveal nội dung ẩn (nếu có)
+agent-browser click @e_show_more
+agent-browser wait --text "Chi tiết"
+agent-browser snapshot -i
+
+# 4. Scroll tiếp nếu trang dài (pagination / infinite scroll)
+agent-browser scroll down 1000
+agent-browser wait --load networkidle
+
+# 5. Extract toàn bộ dữ liệu
+agent-browser get text body
+```
+
+### Pattern: Batch nhiều thao tác
+
+```bash
+agent-browser batch --bail \
+  "open https://example.com/tours" \
+  "wait --load networkidle" \
+  "snapshot -i" \
+  "scroll down 500" \
+  "wait --load networkidle" \
+  "snapshot -i" \
+  "click @e_tab_pricing" \
+  "wait --text 'Giá'" \
+  "snapshot -i" \
+  "get text body"
+```
+
+### Pattern: List Page → Detail Pages
+
+Khi clone từ list page, cần 2 pass:
+
+**Pass 1 — Extract danh sách URL detail:**
+```bash
+agent-browser open https://example.com/tours
+agent-browser wait --load networkidle
+agent-browser get text body
+# → Parse text để lấy danh sách URL detail
+```
+
+**Pass 2 — Scrape từng detail page:**
+```bash
+agent-browser open https://example.com/tour/item-1
+agent-browser wait --load networkidle
+agent-browser snapshot -i
+agent-browser scroll down 500
+agent-browser wait --load networkidle
+agent-browser get text body
+# → Repeat cho từng URL trong danh sách
 ```
 
 ## ERP Endpoint Specification
@@ -366,14 +489,46 @@ Error Response (4xx/5xx):
 ## Constraints
 
 - **KHÔNG tự ý thêm field** ngoài schema đã định nghĩa
-- **KHÔNG gọi FireCrawl** khi chưa xác định rõ service type
+- **KHÔNG scrape** khi chưa xác định rõ service type
 - **KHÔNG bỏ qua bước validate** dữ liệu trước khi gửi CF
+- **KHÔNG dùng `sleep(ms)`** cố định — dùng `wait --fn` hoặc `wait --text` để chờ điều kiện thực tế
 - **Hỏi user** nếu thiếu context về schema (vd: Room cần hotelId)
 - **DỪNG ngay** nếu API trả về lỗi — không retry
+- **Luôn `snapshot -i`** trước khi click — @ref cũ không hợp lệ sau khi DOM thay đổi
+
+## Troubleshooting
+
+### "agent-browser command failed"
+
+Chạy health check:
+```bash
+agent-browser doctor --quick
+```
+
+Nếu chưa install:
+```bash
+npm i -g agent-browser && agent-browser install
+```
+
+### "No data extracted from page"
+
+- Kiểm tra URL có truy cập được không
+- Thử `agent-browser open {URL}` → `agent-browser wait --load networkidle` → `agent-browser get text body`
+- Nếu trang dùng lazy rendering, đảm bảo scroll + wait trước khi extract
+- Nếu trang chặn bot, thử thêm `wait --fn "document.body.innerText.length > 100"`
+
+### "Schema mismatch — field bị bỏ qua"
+
+Đảm bảo extraction prompt đã inject đúng schema của service type. Chỉ dùng schema tương ứng, không trộn lẫn.
 
 ## Related Skills
 
-Sử dụng cùng: `prompt-engineer` (tối ưu prompt FireCrawl), `orchestrator` (định dạng & validate dữ liệu), `firebase-ai-logic` (nếu cần xử lý AI backend)
+Sử dụng cùng: `prompt-engineer` (tối ưu extraction prompt), `orchestrator` (định dạng & validate dữ liệu), `firebase-ai-logic` (nếu cần xử lý AI backend)
+
+Có thể kết hợp với các scraper chuyên biệt cho data phức tạp:
+- `tour-scraper` — Scrape tour với lazy rendering (ivivu.com, v.v.)
+- `booking-scraper` — Scrape khách sạn từ booking.com
+- `activity-scraper` — Scrape activity/điểm tham quan
 
 ## Triggers
 
