@@ -90,23 +90,36 @@ export default function HotelDetailClient({
 
   // ── Reactive pricing table (auto-recompute on date change) ─
   const pricingTable = useMemo(() => {
-    if (!hotel || !priceSchedule) return [];
-    const roomsMap = hotel.rooms || [];
-    // Đảm bảo mỗi room đều có ID nếu rooms được lưu dạng Map
-    const rooms = (Array.isArray(roomsMap) ? roomsMap : Object.entries(roomsMap).map(([id, r]) => ({ ...r, id: r.id || id }))).filter(r => r.isActive);
-    if (rooms.length === 0) return [];
-    return buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut);
+    try {
+      if (!hotel || !priceSchedule) return [];
+      const roomsMap = hotel?.rooms || [];
+      // Đảm bảo mỗi room đều có ID nếu rooms được lưu dạng Map
+      const rooms = (Array.isArray(roomsMap) 
+        ? roomsMap 
+        : Object.entries(roomsMap).map(([id, r]) => ({ ...(r || {}), id: r?.id || id }))
+      ).filter(r => r?.isActive);
+      if (rooms.length === 0) return [];
+      return buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) || [];
+    } catch (error) {
+      console.error('[HotelDetailClient] Error building pricingTable:', error);
+      return [];
+    }
   }, [priceSchedule, hotel?.rooms, checkIn, checkOut]);
 
   // ── Lowest price with safe fallback ──────────────────────
   const lowestPrice = useMemo(() => {
-    if (!pricingTable || pricingTable.length === 0) {
+    try {
+      if (!pricingTable || pricingTable.length === 0) {
+        return hotel?.pricing?.basePrice || 0;
+      }
+      const prices = pricingTable
+        .flatMap((r) => (Array.isArray(r?.rateTypes) ? r.rateTypes : []).map((rt) => rt?.avgSellPrice || 0))
+        .filter((p) => p > 0);
+      return prices.length > 0 ? Math.min(...prices) : (hotel?.pricing?.basePrice || 0);
+    } catch (error) {
+      console.error('[HotelDetailClient] Error calculating lowestPrice:', error);
       return hotel?.pricing?.basePrice || 0;
     }
-    const prices = pricingTable
-      .flatMap((r) => r.rateTypes.map((rt) => rt.avgSellPrice))
-      .filter((p) => p > 0);
-    return prices.length > 0 ? Math.min(...prices) : (hotel?.pricing?.basePrice || 0);
   }, [pricingTable, hotel]);
 
   const hasAnyBadge = starRating > 0 || !!address?.city || avgRating > 0 || lowestPrice > 0;

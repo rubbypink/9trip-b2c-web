@@ -235,45 +235,58 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
    * Tổng tiền tất cả selections từ active rooms.
    */
   const grandTotal = useMemo(() => {
-    let total = 0;
-    for (const room of pricingTable) {
-      if (!room.isActive) continue;
-      for (const rt of room.rateTypes) {
-        total += getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
+    try {
+      let total = 0;
+      for (const room of (pricingTable || [])) {
+        if (!room?.isActive) continue;
+        const rateTypes = Array.isArray(room?.rateTypes) ? room.rateTypes : [];
+        for (const rt of rateTypes) {
+          total += getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
+        }
       }
+      return total;
+    } catch (error) {
+      console.error('[RoomsPanel] Error calculating grandTotal:', error);
+      return 0;
     }
-    return total;
   }, [pricingTable, getLineTotal]);
 
   /**
    * Có ít nhất 1 selection từ active room.
    */
   const hasSelection = useMemo(() => {
-    return Object.entries(roomQuantities).some(([key, qty]) => qty > 0);
+    return Object.entries(roomQuantities || {}).some(([key, qty]) => qty > 0);
   }, [roomQuantities]);
 
   /**
    * Restore quantities from existing cart items on mount.
    */
   useEffect(() => {
-    for (const room of pricingTable) {
-      if (!room.isActive) continue;
-      for (const rt of room.rateTypes) {
-        const cartItem = cartItems.find(
-          (ci) =>
-            ci.serviceId === hotel.id &&
-            ci.roomId === room.roomId &&
-            ci.rateType === rt.rateType &&
-            ci.startDate === checkIn
-        );
-        if (cartItem && cartItem.rooms > 0) {
-          const key = `${room.roomId}_${rt.rateType}`;
-          const currentQty = roomQuantities[key] || 0;
-          if (currentQty !== cartItem.rooms) {
-             onRoomQuantityChange(room.roomId, rt.rateType, cartItem.rooms - currentQty, room.totalRooms || 10);
+    try {
+      for (const room of (pricingTable || [])) {
+        if (!room?.isActive) continue;
+        const rateTypes = Array.isArray(room?.rateTypes) ? room.rateTypes : [];
+        for (const rt of rateTypes) {
+          const cartItem = cartItems.find(
+            (ci) =>
+              ci.serviceId === hotel?.id &&
+              ci.roomId === room.roomId &&
+              ci.rateType === rt.rateType &&
+              ci.startDate === checkIn
+          );
+          if (cartItem && cartItem.rooms > 0) {
+            const key = `${room.roomId}_${rt.rateType}`;
+            const currentQty = roomQuantities[key] || 0;
+            if (currentQty !== cartItem.rooms) {
+               if (onRoomQuantityChange) {
+                 onRoomQuantityChange(room.roomId, rt.rateType, cartItem.rooms - currentQty, room.totalRooms || 10);
+               }
+            }
           }
         }
       }
+    } catch (error) {
+      console.error('[RoomsPanel] Error restoring cart quantities:', error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -283,21 +296,22 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
    */
   const handleConfirmSelection = useCallback(() => {
     try {
-      for (const room of pricingTable) {
-        if (!room.isActive) continue;
-        for (const rt of room.rateTypes) {
+      for (const room of (pricingTable || [])) {
+        if (!room?.isActive) continue;
+        const rateTypes = Array.isArray(room?.rateTypes) ? room.rateTypes : [];
+        for (const rt of rateTypes) {
           const key = `${room.roomId}_${rt.rateType}`;
           const qty = roomQuantities[key] || 0;
           const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
           if (qty > 0) {
             updateCartItem({
-              serviceId: hotel.id,
+              serviceId: hotel?.id,
               roomId: room.roomId,
               rateType: rt.rateType,
               serviceType: "hotel_room",
-              serviceTitle: `${hotel.name} — ${room.roomName}`,
-              featuredImage: room.featuredImage || hotel.featuredImage || "",
+              serviceTitle: `${hotel?.name || ''} — ${room.roomName || ''}`,
+              featuredImage: room.featuredImage || hotel?.featuredImage || "",
               startDate: checkIn || new Date().toISOString(),
               endDate: checkOut || "",
               adults: 2,
@@ -305,17 +319,17 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
               infants: 0,
               rooms: qty,
               basePrice: rt.avgSellPrice,
-              costPrice: rt.dailyPrices[0]?.costPrice || 0,
+              costPrice: rt.dailyPrices?.[0]?.costPrice || 0,
               discount: 0,
               total: lineTotal,
               currency: "VND",
-              hotelId: hotel.id,
-              hotelName: hotel.name,
+              hotelId: hotel?.id,
+              hotelName: hotel?.name,
               roomName: room.roomName,
             });
           } else {
             removeCartItemByKey({
-              serviceId: hotel.id,
+              serviceId: hotel?.id,
               roomId: room.roomId,
               rateType: rt.rateType,
               startDate: checkIn || new Date().toISOString(),
@@ -406,7 +420,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
 
             {/* Rate Type Rows */}
             <div className="divide-y divide-border">
-              {!isInactive && room.rateTypes.length > 0 ? (
+              {!isInactive && Array.isArray(room?.rateTypes) && room.rateTypes.length > 0 ? (
                 room.rateTypes.map((rt) => {
                   const key = `${room.roomId}_${rt.rateType}`;
                   const qty = roomQuantities[key] || 0;

@@ -653,51 +653,52 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
  * @returns {Array}
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
-  const roomsArr = Array.isArray(rooms) ? rooms : (rooms ? Object.values(rooms) : []);
-  if (roomsArr.length === 0) return [];
+  try {
+    const roomsArr = Array.isArray(rooms) ? rooms : (rooms ? Object.values(rooms) : []);
+    if (roomsArr.length === 0) return [];
 
-  const sortedRooms = [...roomsArr].sort((a, b) => {
-    const orderA = a.sortOrder ?? 999;
-    const orderB = b.sortOrder ?? 999;
-    if (orderA !== orderB) return orderA - orderB;
-    return (a.name || '').localeCompare(b.name || '');
-  });
-
-  function buildRoomRow(room, dates) {
-    if (!room.isActive) {
-      return { roomId: room.id, roomName: room.name, totalRooms: room.totalRooms || 0, maxGuests: room.maxGuests || 0, bedType: room.bedType || '', roomSize: room.roomSize || 0, description: room.description || '', amenities: room.amenities || [], included: room.included || [], featuredImage: room.featuredImage || '', gallery: room.gallery || [], isActive: false, sortOrder: room.sortOrder ?? 999, rateTypes: [] };
-    }
-
-    const rateTypeMap = {};
-    for (const date of dates) {
-      const pricing = resolveRoomPricing(priceSchedule, room.id, date);
-      for (const p of pricing) {
-        if (!rateTypeMap[p.rateType]) {
-          rateTypeMap[p.rateType] = { rateType: p.rateType, dailyPrices: [], avgSellPrice: 0 };
-        }
-        rateTypeMap[p.rateType].dailyPrices.push({ date, sellPrice: p.sellPrice, costPrice: p.costPrice });
-      }
-    }
-    const rateTypes = Object.values(rateTypeMap).map(rt => {
-      rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + d.sellPrice, 0) / (rt.dailyPrices.length || 1);
-      return rt;
+    const sortedRooms = [...roomsArr].sort((a, b) => {
+      const orderA = a?.sortOrder ?? 999;
+      const orderB = b?.sortOrder ?? 999;
+      if (orderA !== orderB) return orderA - orderB;
+      return (a?.name || '').localeCompare(b?.name || '');
     });
 
-    return { roomId: room.id, roomName: room.name, totalRooms: room.totalRooms || 0, maxGuests: room.maxGuests || 0, bedType: room.bedType || '', roomSize: room.roomSize || 0, description: room.description || '', amenities: room.amenities || [], included: room.included || [], featuredImage: room.featuredImage || '', gallery: room.gallery || [], isActive: true, sortOrder: room.sortOrder ?? 999, rateTypes };
+    function buildRoomRow(room, dates) {
+      if (!room) return null;
+      if (!room.isActive) {
+        return { roomId: room.id, roomName: room.name, totalRooms: room.totalRooms || 0, maxGuests: room.maxGuests || 0, bedType: room.bedType || '', roomSize: room.roomSize || 0, description: room.description || '', amenities: room.amenities || [], included: room.included || [], featuredImage: room.featuredImage || '', gallery: room.gallery || [], isActive: false, sortOrder: room.sortOrder ?? 999, rateTypes: [] };
+      }
+
+      const rateTypeMap = {};
+      for (const date of (dates || [])) {
+        const pricing = resolveRoomPricing(priceSchedule, room.id, date) || [];
+        for (const p of pricing) {
+          if (!rateTypeMap[p.rateType]) {
+            rateTypeMap[p.rateType] = { rateType: p.rateType, dailyPrices: [], avgSellPrice: 0 };
+          }
+          rateTypeMap[p.rateType].dailyPrices.push({ date, sellPrice: p.sellPrice || 0, costPrice: p.costPrice || 0 });
+        }
+      }
+      const rateTypes = Object.values(rateTypeMap).map(rt => {
+        rt.avgSellPrice = rt.dailyPrices.reduce((s, d) => s + (d.sellPrice || 0), 0) / (rt.dailyPrices.length || 1);
+        return rt;
+      });
+
+      return { roomId: room.id, roomName: room.name, totalRooms: room.totalRooms || 0, maxGuests: room.maxGuests || 0, bedType: room.bedType || '', roomSize: room.roomSize || 0, description: room.description || '', amenities: room.amenities || [], included: room.included || [], featuredImage: room.featuredImage || '', gallery: room.gallery || [], isActive: true, sortOrder: room.sortOrder ?? 999, rateTypes };
+    }
+
+    const ci = new Date(checkIn);
+    const co = new Date(checkOut);
+    const dates = [];
+    for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
+      dates.push(d.toISOString().split('T')[0]);
+    }
+    if (dates.length === 0) dates.push(checkIn);
+
+    return sortedRooms.map(room => buildRoomRow(room, dates)).filter(Boolean);
+  } catch (error) {
+    console.error('[firestore] Error in buildRoomPricingTable:', error);
+    return [];
   }
-
-  const ci = new Date(checkIn);
-  const co = new Date(checkOut);
-
-  if (isNaN(ci.getTime()) || isNaN(co.getTime()) || co <= ci) {
-    const today = new Date().toISOString().split('T')[0];
-    return sortedRooms.map(room => buildRoomRow(room, [today]));
-  }
-
-  const dates = [];
-  for (let d = new Date(ci); d < co; d.setDate(d.getDate() + 1)) {
-    dates.push(d.toISOString().split('T')[0]);
-  }
-
-  return sortedRooms.map(room => buildRoomRow(room, dates));
 }

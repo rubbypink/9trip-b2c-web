@@ -37,70 +37,85 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
   const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
 
   // ── Only show active rooms in widget ─────────────────────
-  const activeRooms = useMemo(() => pricingTable.filter((r) => r.isActive), [pricingTable]);
+  const activeRooms = useMemo(() => {
+    try {
+      return (pricingTable || []).filter((r) => r?.isActive);
+    } catch (e) {
+      console.error('[HotelBookingWidget] Error filtering activeRooms:', e);
+      return [];
+    }
+  }, [pricingTable]);
 
   // ── Per-room quantities helper ───────────────────────────
   // We use the first rateType as default for the widget
   const getFirstRateType = useCallback((room) => {
-    return room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0].rateType : 'standard';
+    return Array.isArray(room?.rateTypes) && room.rateTypes.length > 0 ? room.rateTypes[0].rateType : 'standard';
   }, []);
 
   const getRoomQty = useCallback((roomId, rateType) => {
     const key = `${roomId}_${rateType}`;
-    return roomQuantities[key] || 0;
+    return roomQuantities?.[key] || 0;
   }, [roomQuantities]);
 
   const updateRoomQty = useCallback((roomId, delta) => {
-    const room = pricingTable.find((r) => r.roomId === roomId);
-    if (!room) return;
-    const rateType = getFirstRateType(room);
-    const maxRooms = room.totalRooms || 10;
-    if (onRoomQuantityChange) {
-      onRoomQuantityChange(roomId, rateType, delta, maxRooms);
+    try {
+      const room = (pricingTable || []).find((r) => r?.roomId === roomId);
+      if (!room) return;
+      const rateType = getFirstRateType(room);
+      const maxRooms = room.totalRooms || 10;
+      if (onRoomQuantityChange) {
+        onRoomQuantityChange(roomId, rateType, delta, maxRooms);
+      }
+    } catch (e) {
+      console.error('[HotelBookingWidget] Error updating room qty:', e);
     }
   }, [pricingTable, onRoomQuantityChange, getFirstRateType]);
 
   // ── Cart sync: quantity change → auto-update cart ────────
   const syncCart = useCallback(() => {
-    if (!hotel.id) return;
-    for (const room of activeRooms) {
-      const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
-      const rateType = rt ? rt.rateType : 'standard';
-      const qty = getRoomQty(room.roomId, rateType);
-      const roomPrice = rt ? rt.avgSellPrice : 0;
-      const lineTotal = roomPrice * nights * qty;
+    try {
+      if (!hotel?.id) return;
+      for (const room of activeRooms) {
+        const rt = Array.isArray(room?.rateTypes) && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+        const rateType = rt ? rt.rateType : 'standard';
+        const qty = getRoomQty(room.roomId, rateType);
+        const roomPrice = rt ? rt.avgSellPrice : 0;
+        const lineTotal = roomPrice * nights * qty;
 
-      if (qty > 0 && rt) {
-        updateCartItem({
-          serviceId: hotel.id,
-          roomId: room.roomId,
-          rateType: rt.rateType,
-          serviceType: "hotel_room",
-          serviceTitle: `${hotel.name || ''} — ${room.roomName}`,
-          featuredImage: room.featuredImage || hotel.featuredImage || "",
-          startDate: checkIn || minDate,
-          endDate: checkOut || "",
-          adults: 2,
-          children: 0,
-          infants: 0,
-          rooms: qty,
-          basePrice: roomPrice,
-          costPrice: rt.dailyPrices?.[0]?.costPrice || 0,
-          discount: 0,
-          total: lineTotal,
-          currency: "VND",
-          hotelId: hotel.id,
-          hotelName: hotel.name || '',
-          roomName: room.roomName,
-        });
-      } else {
-        removeCartItemByKey({
-          serviceId: hotel.id,
-          roomId: room.roomId,
-          rateType: rateType,
-          startDate: checkIn || minDate,
-        });
+        if (qty > 0 && rt) {
+          updateCartItem({
+            serviceId: hotel.id,
+            roomId: room.roomId,
+            rateType: rt.rateType,
+            serviceType: "hotel_room",
+            serviceTitle: `${hotel.name || ''} — ${room.roomName || ''}`,
+            featuredImage: room.featuredImage || hotel.featuredImage || "",
+            startDate: checkIn || minDate,
+            endDate: checkOut || "",
+            adults: 2,
+            children: 0,
+            infants: 0,
+            rooms: qty,
+            basePrice: roomPrice,
+            costPrice: rt.dailyPrices?.[0]?.costPrice || 0,
+            discount: 0,
+            total: lineTotal,
+            currency: "VND",
+            hotelId: hotel.id,
+            hotelName: hotel.name || '',
+            roomName: room.roomName || '',
+          });
+        } else {
+          removeCartItemByKey({
+            serviceId: hotel.id,
+            roomId: room.roomId,
+            rateType: rateType,
+            startDate: checkIn || minDate,
+          });
+        }
       }
+    } catch (e) {
+      console.error('[HotelBookingWidget] Error syncing cart:', e);
     }
   }, [activeRooms, getRoomQty, nights, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, minDate]);
 
@@ -122,22 +137,31 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
 
   // ── Grand total ──────────────────────────────────────────
   const grandTotal = useMemo(() => {
-    let total = 0;
-    for (const room of activeRooms) {
-      const rateType = getFirstRateType(room);
-      const qty = getRoomQty(room.roomId, rateType);
-      if (qty === 0) continue;
-      const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
-      if (rt) {
-        total += rt.avgSellPrice * nights * qty;
+    try {
+      let total = 0;
+      for (const room of activeRooms) {
+        const rateType = getFirstRateType(room);
+        const qty = getRoomQty(room?.roomId, rateType);
+        if (qty === 0) continue;
+        const rt = Array.isArray(room?.rateTypes) && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+        if (rt) {
+          total += (rt.avgSellPrice || 0) * nights * qty;
+        }
       }
+      return total;
+    } catch (e) {
+      console.error('[HotelBookingWidget] Error calculating grandTotal:', e);
+      return 0;
     }
-    return total;
   }, [activeRooms, getRoomQty, nights, getFirstRateType]);
 
   // ── Has any selection ────────────────────────────────────
   const hasSelection = useMemo(() => {
-    return Object.keys(roomQuantities).some(k => roomQuantities[k] > 0);
+    try {
+      return Object.entries(roomQuantities || {}).some(([key, qty]) => qty > 0);
+    } catch (e) {
+      return false;
+    }
   }, [roomQuantities]);
 
   // ── Handle check-in change ───────────────────────────────
