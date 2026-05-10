@@ -287,7 +287,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
         if (!room.isActive) continue;
         for (const rt of room.rateTypes) {
           const key = `${room.roomId}_${rt.rateType}`;
-          const qty = quantities[key] || 0;
+          const qty = roomQuantities[key] || 0;
           const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
 
           if (qty > 0) {
@@ -327,7 +327,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
     } catch (error) {
       console.error('[RoomsPanel] Error confirming selection:', error.message);
     }
-  }, [pricingTable, quantities, getLineTotal, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, router]);
+  }, [pricingTable, roomQuantities, getLineTotal, updateCartItem, removeCartItemByKey, hotel, checkIn, checkOut, router]);
 
   if (pricingTable.length === 0) {
     return (
@@ -409,7 +409,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
               {!isInactive && room.rateTypes.length > 0 ? (
                 room.rateTypes.map((rt) => {
                   const key = `${room.roomId}_${rt.rateType}`;
-                  const qty = quantities[key] || 0;
+                  const qty = roomQuantities[key] || 0;
                   const lineTotal = getLineTotal(room.roomId, rt.rateType, rt.avgSellPrice);
                   const isSelected = qty > 0;
 
