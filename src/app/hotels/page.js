@@ -1,10 +1,12 @@
 import { searchHotels, getLocations, countHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
+import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
 import SearchFormPopup from "@/components/shared/SearchFormPopup";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Khách Sạn & Nghỉ Dưỡng — 9 Trip",
@@ -19,7 +21,24 @@ export const metadata = {
   alternates: { canonical: "/hotels" },
 };
 
-export const revalidate = 3600;
+const getCachedHotelData = unstable_cache(
+  async (filters) => {
+    const [{ hotels: rawHotels }, locations, totalCount] = await Promise.all([
+      searchHotels(filters),
+      getLocations(),
+      countHotels({ locationId: filters.locationId || "" }),
+    ]);
+
+    let hotels = await resolveDocsImages(rawHotels);
+    hotels = await enrichHotelsWithLowestPrices(hotels);
+    return { hotels, locations, totalCount };
+  },
+  ['hotels-list-query'],
+  {
+    revalidate: 3600,
+    tags: ['hotels-data']
+  }
+);
 
 export default async function HotelsPage({ searchParams }) {
   const params = await searchParams;
@@ -36,14 +55,9 @@ export default async function HotelsPage({ searchParams }) {
     page,
   };
 
-  const [{ hotels: rawHotels }, locations, totalCount] = await Promise.all([
-    searchHotels(filters),
-    getLocations(),
-    countHotels({ locationId: params.locationId || "" }),
-  ]);
+  const { hotels: rawCachedHotels, locations, totalCount } = await getCachedHotelData(filters);
 
-  let hotels = await resolveDocsImages(rawHotels);
-  hotels = await enrichHotelsWithLowestPrices(hotels);
+  let hotels = [...rawCachedHotels];
 
   if (filters.minPrice != null) {
     hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) >= filters.minPrice);

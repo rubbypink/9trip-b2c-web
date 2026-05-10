@@ -13,6 +13,7 @@ import {
   X,
   ChevronRight,
   CircleUserRound,
+  Images,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
@@ -21,6 +22,11 @@ const NAV_ITEMS = [
   { href: "/account/bookings", label: "Đơn hàng của tôi", icon: Calendar },
   { href: "/account/wishlist", label: "Danh sách yêu thích", icon: Heart },
   { href: "/account/reviews", label: "Đánh giá của tôi", icon: Star },
+];
+
+const IMAGES_STUDIO_EMAILS = [
+  "tranthuaanh90@gmail.com",
+  "9tripphuquoc@gmail.com",
 ];
 
 /**
@@ -34,6 +40,8 @@ export default function AccountSidebar() {
   const displayName = profile?.displayName || user?.displayName || "Người dùng";
   const email = profile?.email || user?.email || "";
   const avatar = profile?.avatar || user?.photoURL || null;
+
+  const showImagesStudio = IMAGES_STUDIO_EMAILS.includes(email);
 
   function handleLogout() {
     setMobileOpen(false);
@@ -96,6 +104,23 @@ export default function AccountSidebar() {
             </Link>
           );
         })}
+        {showImagesStudio && (
+          <Link
+            href="/account/images-studio"
+            onClick={closeMobile}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+              pathname === "/account/images-studio"
+                ? "bg-orange-50 text-orange-600"
+                : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+            }`}
+          >
+            <Images className="h-5 w-5 shrink-0" />
+            <span>Images Studio</span>
+            {pathname === "/account/images-studio" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-orange-400" />
+            )}
+          </Link>
+        )}
       </nav>
 
       {/* Logout */}

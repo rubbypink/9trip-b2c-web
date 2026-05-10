@@ -1,5 +1,6 @@
 import { searchTours, getLocations, countTours } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
+import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
@@ -19,7 +20,23 @@ export const metadata = {
   alternates: { canonical: "/tours" },
 };
 
-export const revalidate = 3600;
+const getCachedTourData = unstable_cache(
+  async (filters) => {
+    const [{ tours: rawTours }, locations, totalCount] = await Promise.all([
+      searchTours(filters),
+      getLocations(),
+      countTours(filters),
+    ]);
+
+    const tours = await resolveDocsImages(rawTours);
+    return { tours, locations, totalCount };
+  },
+  ['tours-list-query'],
+  {
+    revalidate: 3600,
+    tags: ['tours-data']
+  }
+);
 
 export default async function ToursPage({ searchParams }) {
   const params = await searchParams;
@@ -35,13 +52,8 @@ export default async function ToursPage({ searchParams }) {
     page,
   };
 
-  const [{ tours: rawTours }, locations, totalCount] = await Promise.all([
-    searchTours(filters),
-    getLocations(),
-    countTours(filters),
-  ]);
+  const { tours, locations, totalCount } = await getCachedTourData(filters);
 
-  const tours = await resolveDocsImages(rawTours);
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const jsonLd = {

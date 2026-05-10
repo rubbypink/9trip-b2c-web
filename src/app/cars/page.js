@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { searchCars, countCars } from "@/lib/firestore-admin";
+import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import CarFilters from "@/components/cars/CarFilters";
@@ -18,7 +19,20 @@ export const metadata = {
   alternates: { canonical: "/cars" },
 };
 
-export const revalidate = 3600;
+const getCachedCarData = unstable_cache(
+  async (filters) => {
+    const [{ cars }, totalCount] = await Promise.all([
+      searchCars(filters),
+      countCars({ carType: filters.carType || "", transmission: filters.transmission || "" }),
+    ]);
+    return { cars, totalCount };
+  },
+  ['cars-list-query'],
+  {
+    revalidate: 3600,
+    tags: ['cars-data']
+  }
+);
 
 export default async function CarsPage({ searchParams }) {
   const params = await searchParams;
@@ -32,10 +46,7 @@ export default async function CarsPage({ searchParams }) {
     page,
   };
 
-  const [{ cars }, totalCount] = await Promise.all([
-    searchCars(filters),
-    countCars({ carType: params.carType || "", transmission: params.transmission || "" }),
-  ]);
+  const { cars, totalCount } = await getCachedCarData(filters);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
