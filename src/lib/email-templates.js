@@ -119,9 +119,10 @@ function badge(text, color = SUCCESS, bg = "#dcfce7") {
  * @returns {string}
  */
 export function bookingConfirmationTemplate(booking) {
-  const statusText = booking.paymentStatus === "paid" ? "Đã thanh toán" : "Chờ thanh toán";
-  const statusColor = booking.paymentStatus === "paid" ? SUCCESS : "#f59e0b";
-  const statusBg = booking.paymentStatus === "paid" ? "#dcfce7" : "#fef3c7";
+  const isPaid = booking.status === "paid";
+  const statusText = isPaid ? "Đã thanh toán" : "Chờ thanh toán";
+  const statusColor = isPaid ? SUCCESS : "#f59e0b";
+  const statusBg = isPaid ? "#dcfce7" : "#fef3c7";
 
   const content = `
     <p style="font-size:15px;color:${TEXT};line-height:1.6;margin:0 0 8px 0;">
@@ -138,7 +139,7 @@ export function bookingConfirmationTemplate(booking) {
             ${infoRow("Mã đơn hàng", `<strong style="font-size:16px;">${booking.bookingCode || booking.id}</strong>`)}
             ${infoRow("Trạng thái", badge(statusText, statusColor, statusBg))}
             ${infoRow("Ngày đặt", formatDate(booking.createdAt || new Date()))}
-            ${infoRow("Phương thức TT", (booking.paymentGateway || "N/A").toUpperCase())}
+            ${infoRow("Phương thức TT", ((booking.payment?.gate) || "N/A").toUpperCase())}
           </table>
         </td>
       </tr>
@@ -164,13 +165,13 @@ export function bookingConfirmationTemplate(booking) {
         <td style="padding:12px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             ${infoRow("Tạm tính", formatCurrency(booking.pricing?.subtotal))}
-            ${booking.pricing?.discount > 0 ? infoRow("Giảm giá", `-${formatCurrency(booking.pricing.discount)}`) : ""}
+            ${(booking.pricing?.discount || 0) > 0 ? infoRow("Giảm giá", `-${formatCurrency(booking.pricing.discount)}`) : ""}
             ${infoRow("Thuế (10%)", formatCurrency(booking.pricing?.tax))}
             <tr>
               <td colspan="2" style="padding-top:10px;border-top:2px solid #e2e8f0;">
                 <table width="100%"><tr>
                   <td style="font-size:15px;color:${DARK};font-weight:700;">Tổng cộng</td>
-                  <td align="right" style="font-size:18px;color:${PRIMARY};font-weight:700;">${formatCurrency(booking.pricing?.total)}</td>
+                  <td align="right" style="font-size:18px;color:${PRIMARY};font-weight:700;">${formatCurrency(booking.payment?.total || booking.pricing?.total)}</td>
                 </tr></table>
               </td>
             </tr>
@@ -212,9 +213,9 @@ export function paymentConfirmationTemplate(booking) {
         <td style="padding:12px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             ${infoRow("Mã giao dịch", booking.transactionId || "N/A")}
-            ${infoRow("Số tiền", `<strong>${formatCurrency(booking.pricing?.total)}</strong>`)}
-            ${infoRow("Cổng thanh toán", (booking.paymentGateway || "").toUpperCase())}
-            ${infoRow("Thời gian", formatDate(booking.paidAt || new Date()))}
+            ${infoRow("Số tiền", `<strong>${formatCurrency(booking.payment?.total || booking.pricing?.total)}</strong>`)}
+            ${infoRow("Cổng thanh toán", (booking.payment?.gate || "N/A").toUpperCase())}
+            ${infoRow("Thời gian", formatDate(booking.payment?.date || booking.paidAt || new Date()))}
           </table>
         </td>
       </tr>

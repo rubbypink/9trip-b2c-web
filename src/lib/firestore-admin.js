@@ -230,7 +230,7 @@ export async function getFeaturedTours(count = 8) {
  * @returns {Promise<{tours: Object[]}>}
  */
 export async function searchTours(filters = {}) {
-  const { locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy = 'newest', pageSize = 12, page = 1 } = filters;
+  const { locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
     let q = toursCol();
     if (locationId) q = q.where('locationId', '==', locationId);
@@ -244,22 +244,23 @@ export async function searchTours(filters = {}) {
       default: q = q.orderBy('createdAt', 'desc');
     }
 
-    const limitVal = page > 1 ? page * pageSize : pageSize;
+    const limitVal = cursor ? pageSize : (page > 1 ? page * pageSize : pageSize);
     q = q.limit(limitVal);
+    if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
     let tours = serializeDocs(snap);
 
     if (minPrice != null && minPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice <= Number(maxPrice));
 
-    return { tours };
+    return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchTours] Error:', error.message);
     try {
-      const snap = await toursCol().orderBy('createdAt', 'desc').limit(page * pageSize).get();
-      return { tours: serializeDocs(snap) };
+      const snap = await toursCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
+      return { tours: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
-      return { tours: [] };
+      return { tours: [], lastVisible: null };
     }
   }
 }
@@ -334,7 +335,7 @@ export async function getTourPricing(tourId) {
   try {
     const snap = await adminDb.collection('tours').doc(tourId).collection('tourPricing')
       .where('isActive', '==', true).orderBy('sortOrder', 'asc').get();
-    return serializeDocs(snap);
+    return serializeDocs(snap).map(tier => ({ ...tier, prepaid: tier.prepaid ?? 50 }));
   } catch (error) {
     console.error('[getTourPricing] Error:', error.message);
     return [];
@@ -387,7 +388,7 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
 export async function searchHotels(filters = {}) {
   const { locationId, starRating, minPrice, maxPrice, amenities, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
-    const fetchLimit = page > 1 ? (page + 1) * pageSize : pageSize * 2;
+    const fetchLimit = cursor ? pageSize : (page > 1 ? (page + 1) * pageSize : pageSize * 2);
     let q = hotelsCol();
     if (locationId) q = q.where('address.cityId', '==', locationId);
     q = q.orderBy('createdAt', 'desc').limit(fetchLimit);
@@ -421,8 +422,10 @@ export async function searchHotels(filters = {}) {
       case 'rating': hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0)); break;
     }
 
-    const startIdx = (page - 1) * pageSize;
-    hotels = hotels.slice(startIdx, startIdx + pageSize);
+    if (!cursor) {
+      const startIdx = (page - 1) * pageSize;
+      hotels = hotels.slice(startIdx, startIdx + pageSize);
+    }
     return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchHotels] Error:', error.message);
@@ -585,6 +588,7 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
           endDate: pricing.endDate,
           supplier: pricing.supplier || '',
           periodKey,
+          prepaid: Number(pricing.prepaid) || 100,
         });
       }
     }
@@ -723,7 +727,7 @@ export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
     let q = activitiesCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = activitiesCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { activities: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    return { activities: serializeDocs(snap).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[getActivitiesList] Error:', error.message);
     return { activities: [], lastVisible: null };
@@ -760,7 +764,7 @@ export async function searchActivities(filters = {}) {
     if (cursor) q = q.startAfter(cursor);
 
     const snap = await q.get();
-    let activities = serializeDocs(snap);
+    let activities = serializeDocs(snap).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } }));
 
     // Client-side price filtering — Firestore requires composite indexes for
     // range filters on different fields combined with ordering, so we filter
@@ -788,6 +792,7 @@ export async function searchActivities(filters = {}) {
 export async function getActivityBySlug(slug) {
   try {
     const activity = await getDocBySlug('activities', slug);
+    if (activity) activity.pricing = { ...(activity.pricing || {}), prepaid: activity.pricing?.prepaid ?? 0 };
     return { activity };
   } catch (error) {
     console.error('[getActivityBySlug] Error:', error.message);
@@ -806,7 +811,7 @@ export async function getRelatedActivities(slug, count = 4) {
     const activity = await getDocBySlug('activities', slug);
     if (!activity || !activity.locationId) return { activities: [] };
     const snap = await activitiesCol().where('locationId', '==', activity.locationId).orderBy('createdAt', 'desc').limit(count * 2).get();
-    const activities = serializeDocs(snap).filter((a) => a.id !== activity.id).slice(0, count);
+    const activities = serializeDocs(snap).filter((a) => a.id !== activity.id).slice(0, count).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } }));
     return { activities };
   } catch (error) {
     console.error('[getRelatedActivities] Error:', error.message);
@@ -824,7 +829,7 @@ export async function getRelatedActivities(slug, count = 4) {
 export async function searchCars(filters = {}) {
   const { carType, transmission, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
-    const limitVal = page > 1 ? page * pageSize : pageSize;
+    const limitVal = cursor ? pageSize : (page > 1 ? page * pageSize : pageSize);
     let q = carsCol();
     if (carType) q = q.where('carType', '==', carType);
     if (transmission) q = q.where('transmission', '==', transmission);
@@ -836,17 +841,19 @@ export async function searchCars(filters = {}) {
     q = q.limit(limitVal);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
-    let cars = serializeDocs(snap);
+    let cars = serializeDocs(snap).map(c => ({ ...c, pricing: { ...(c.pricing || {}), prepaid: c.pricing?.prepaid ?? 0 } }));
     if (minPrice != null && minPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') cars = cars.filter((c) => c.pricing?.basePrice <= Number(maxPrice));
-    const startIdx = (page - 1) * pageSize;
-    cars = cars.slice(startIdx, startIdx + pageSize);
+    if (!cursor) {
+      const startIdx = (page - 1) * pageSize;
+      cars = cars.slice(startIdx, startIdx + pageSize);
+    }
     return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchCars] Error:', error.message);
     try {
-      const snap = await carsCol().orderBy('createdAt', 'desc').limit(pageSize).get();
-      return { cars: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+      const snap = await carsCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
+      return { cars: serializeDocs(snap).map(c => ({ ...c, pricing: { ...(c.pricing || {}), prepaid: c.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
       return { cars: [], lastVisible: null };
     }
@@ -882,7 +889,7 @@ export async function countCars(filters = {}) {
 export async function searchRentals(filters = {}) {
   const { type, locationId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
   try {
-    const limitVal = page > 1 ? page * pageSize : pageSize;
+    const limitVal = cursor ? pageSize : (page > 1 ? page * pageSize : pageSize);
     let q = rentalsCol();
     if (type) q = q.where('type', '==', type);
     if (locationId) q = q.where('locationId', '==', locationId);
@@ -894,17 +901,19 @@ export async function searchRentals(filters = {}) {
     q = q.limit(limitVal);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
-    let rentals = serializeDocs(snap);
+    let rentals = serializeDocs(snap).map(r => ({ ...r, pricing: { ...(r.pricing || {}), prepaid: r.pricing?.prepaid ?? 0 } }));
     if (minPrice != null && minPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') rentals = rentals.filter((r) => r.pricing?.basePrice <= Number(maxPrice));
-    const startIdx = (page - 1) * pageSize;
-    rentals = rentals.slice(startIdx, startIdx + pageSize);
+    if (!cursor) {
+      const startIdx = (page - 1) * pageSize;
+      rentals = rentals.slice(startIdx, startIdx + pageSize);
+    }
     return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[searchRentals] Error:', error.message);
     try {
-      const snap = await rentalsCol().orderBy('createdAt', 'desc').limit(pageSize).get();
-      return { rentals: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+      const snap = await rentalsCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
+      return { rentals: serializeDocs(snap).map(r => ({ ...r, pricing: { ...(r.pricing || {}), prepaid: r.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
       return { rentals: [], lastVisible: null };
     }
@@ -1049,12 +1058,22 @@ export async function getUserReviews(userId) {
 // ─── Users ───────────────────────────────────────────────────────────
 
 /**
- * Fetch user profile by UID.
- * @param {string} uid
+ * Fetch user profile by Firebase Auth UID.
+ * Queries by the `uid` field inside the document (sequential ID pattern),
+ * with legacy fallback to direct doc-by-UID lookup for pre-migration users.
+ * @param {string} uid - Firebase Auth UID
  * @returns {Promise<Object|null>}
  */
 export async function getUserProfile(uid) {
-  return getDocById('users', uid);
+  try {
+    const snap = await usersCol().where('uid', '==', uid).limit(1).get();
+    if (!snap.empty) return serializeSnap(snap.docs[0]);
+    // Legacy fallback: doc ID might still be Auth UID (pre-migration)
+    return getDocById('users', uid);
+  } catch (error) {
+    console.error('[getUserProfile] Error:', error.message);
+    return null;
+  }
 }
 
 /**
@@ -1114,7 +1133,7 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
     const bookingsSnap = await bookingsCol()
       .where('serviceId', '==', serviceId)
       .where('startDate', '==', startDate)
-      .where('bookingStatus', '==', 'confirmed')
+      .where('status', '==', 'confirmed')
       .get();
     const bookedCount = bookingsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
 

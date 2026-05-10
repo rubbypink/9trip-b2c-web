@@ -109,9 +109,9 @@ export function AuthProvider({ children }) {
   const register = useCallback(async (email, password, displayName) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName });
-    await upsertUserProfile(cred.user.uid, { email, displayName });
+    const result = await upsertUserProfile(cred.user.uid, { email, displayName });
     // Notify ERP — new customer
-    forwardToERP('new-customer', { id: cred.user.uid, email, displayName, createdAt: new Date().toISOString() });
+    forwardToERP('new-customer', { id: result.id, email, displayName, createdAt: new Date().toISOString() });
     // Send welcome email (fire-and-forget)
     fetch('/api/auth/welcome-email', {
       method: 'POST',
@@ -127,12 +127,19 @@ export function AuthProvider({ children }) {
   const loginWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
     const cred = await signInWithPopup(auth, provider);
-    await upsertUserProfile(cred.user.uid, {
+    const result = await upsertUserProfile(cred.user.uid, {
       email: cred.user.email,
       displayName: cred.user.displayName,
       avatar: cred.user.photoURL,
     });
-    forwardToERP('update-account', { id: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName, provider: 'google' });
+    if (result.isNew) {
+      fetch('/api/auth/welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cred.user.email, userName: cred.user.displayName }),
+      }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
+    }
+    forwardToERP('update-account', { id: result.id, email: cred.user.email, displayName: cred.user.displayName, provider: 'google' });
     return cred.user;
   }, []);
 
@@ -142,12 +149,19 @@ export function AuthProvider({ children }) {
   const loginWithFacebook = useCallback(async () => {
     const provider = new FacebookAuthProvider();
     const cred = await signInWithPopup(auth, provider);
-    await upsertUserProfile(cred.user.uid, {
+    const result = await upsertUserProfile(cred.user.uid, {
       email: cred.user.email,
       displayName: cred.user.displayName,
       avatar: cred.user.photoURL,
     });
-    forwardToERP('update-account', { id: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName, provider: 'facebook' });
+    if (result.isNew) {
+      fetch('/api/auth/welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cred.user.email, userName: cred.user.displayName }),
+      }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
+    }
+    forwardToERP('update-account', { id: result.id, email: cred.user.email, displayName: cred.user.displayName, provider: 'facebook' });
     return cred.user;
   }, []);
 
@@ -172,9 +186,9 @@ export function AuthProvider({ children }) {
    */
   const updateProfileData = useCallback(async (data) => {
     if (!user) return;
-    await upsertUserProfile(user.uid, data);
+    const result = await upsertUserProfile(user.uid, data);
     setProfile((prev) => ({ ...prev, ...data }));
-    forwardToERP('update-account', { id: user.uid, ...data });
+    forwardToERP('update-account', { id: result.id || user.uid, ...data });
   }, [user]);
 
   /**

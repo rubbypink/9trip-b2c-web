@@ -23,29 +23,22 @@ export async function POST(request, { params }) {
     const updatedItems = { ...booking.items };
     delete updatedItems[itemId];
     
-    let newSubtotal = 0;
-    Object.values(updatedItems).forEach(item => {
-      newSubtotal += item.total || 0;
-    });
-    
-    const newTax = newSubtotal * 0.08; 
-    const newTotal = newSubtotal + newTax - (booking.pricing?.discount || 0);
-
-    const updatedPricing = {
-      ...booking.pricing,
-      subtotal: newSubtotal,
-      tax: newTax,
-      total: Math.max(0, newTotal)
-    };
+    const newTotal = Object.values(updatedItems).reduce((sum, item) => sum + (item.total || 0), 0);
+    const newDeposit = Object.values(updatedItems).reduce((sum, item) => {
+      return sum + (item.total || 0) * (item.prepaid || 0) / 100;
+    }, 0);
+    const newBalance = newTotal - newDeposit;
 
     const updateData = {
       items: updatedItems,
-      pricing: updatedPricing,
+      'payment.total': Math.round(newTotal),
+      'payment.deposit': Math.round(newDeposit),
+      'payment.balance': Math.round(newBalance),
       updatedAt: new Date().toISOString()
     };
     
     if (Object.keys(updatedItems).length === 0) {
-      updateData.bookingStatus = 'cancelled';
+      updateData.status = 'canceled';
     }
 
     await bookingRef.update(updateData);

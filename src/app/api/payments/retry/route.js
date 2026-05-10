@@ -22,17 +22,18 @@ export async function POST(req) {
         const bookingData = bookingDoc.data();
 
         // Check xem có người táy máy gửi request bậy bạ không
-        if (bookingData.paymentStatus === 'PAID') {
+        if (bookingData.status === 'paid') {
             return NextResponse.json({ success: false, message: 'Đơn hàng này đã được thanh toán!' }, { status: 400 });
         }
 
         // 2. Lấy số tiền và cổng thanh toán
         // Nếu khách muốn đổi từ VNPay sang MoMo, mình cập nhật luôn
-        const gatewayToUse = newGateway || bookingData.paymentGateway;
-        const amount = bookingData.pricing.total; // Trỏ đúng vào đường dẫn pricing.total lúc lưu
+        const paymentInfo = bookingData.payment || {};
+        const gatewayToUse = newGateway || paymentInfo.gate;
+        const amount = paymentInfo.total || bookingData.pricing?.total;
 
-        if (newGateway && newGateway !== bookingData.paymentGateway) {
-            await bookingRef.update({ paymentGateway: newGateway.toUpperCase() });
+        if (newGateway && newGateway !== paymentInfo.gate) {
+            await bookingRef.update({ 'payment.gate': newGateway.toUpperCase() });
         }
 
         // 3. Sinh link thanh toán mới

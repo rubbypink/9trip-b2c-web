@@ -29,9 +29,8 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({
       bookingId: id,
-      paymentStatus: booking.paymentStatus || "pending",
-      bookingStatus: booking.bookingStatus || "pending",
-      paymentGateway: booking.paymentGateway || null,
+      status: booking.status || "pending",
+      payment: booking.payment || null,
     });
   } catch (err) {
     console.error("[BookingStatus] Error:", err.message);

@@ -48,14 +48,13 @@ function paramsToObject(url) {
 async function updateBookingAfterPayment(bookingId, transactionId, gateway) {
   try {
     await adminDb.collection('bookings').doc(bookingId).update({
-      paymentStatus: 'PAID',
-      bookingStatus: 'confirmed',
+      status: 'paid',
       transactionId: transactionId || '',
-      paymentGateway: gateway,
-      paidAt: new Date().toISOString(),
+      'payment.date': new Date().toISOString(),
+      'payment.gate': gateway,
       updatedAt: new Date().toISOString(),
     });
-    console.log(`[Payment Webhook] ✅ Booking ${bookingId} updated to PAID`);
+    console.log(`[Payment Webhook] ✅ Booking ${bookingId} updated to paid`);
   } catch (error) {
     console.error(`[Payment Webhook] Failed to update booking ${bookingId}:`, error.message);
   }
@@ -136,7 +135,7 @@ async function sendConfirmationEmail(bookingId) {
     const bookingSnap = await bookingRef.get();
     if (!bookingSnap.exists) return;
     const booking = { id: bookingId, ...bookingSnap.data() };
-    if (booking.paymentStatus !== 'PAID') return;
+    if (booking.status !== 'paid') return;
 
     // Idempotency check — prevent duplicate emails from VNPay GET+POST
     if (booking.confirmationEmailSent) {

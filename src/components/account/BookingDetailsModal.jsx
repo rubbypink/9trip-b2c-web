@@ -117,7 +117,7 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
             </div>
             <div>
               <p className="text-muted-foreground">Trạng thái thanh toán:</p>
-              <p className="font-medium">{booking.paymentStatus === 'completed' ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
+              <p className="font-medium">{booking.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
             </div>
           </div>
 
@@ -129,7 +129,7 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
               ) : items.map(item => {
                 const isNonRefundable = item['cancel-policy'] === 'non-refundable';
                 const isPast = new Date(item.startDate) <= new Date();
-                const canModifyCancel = !isNonRefundable && !isPast && booking.bookingStatus !== 'cancelled';
+                const canModifyCancel = !isNonRefundable && !isPast && booking.status !== 'canceled' && booking.status !== 'cancelled';
 
                 return (
                   <div key={item.id} className="p-4 border border-border rounded-xl bg-surface-1/50 flex flex-col sm:flex-row gap-4 justify-between">

@@ -15,7 +15,7 @@
  * @see firestore-admin.js for the Admin SDK equivalent
  */
 
-import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc, runTransaction } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase';
 import { logger } from './logger';
 
@@ -181,8 +181,55 @@ export async function deleteDocById(colName, id) {
  */
 export async function createBooking(bookingData) {
   try {
+    const rawItems = bookingData.items || [];
+    const items = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
+
+    const total = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    const deposit = items.reduce((sum, item) => {
+      const prepaidPct = item.prepaid || 0;
+      return sum + (item.total || 0) * prepaidPct / 100;
+    }, 0);
+    const balance = total - deposit;
+
+    const allOrder = items.length > 0 && items.every(item => (item.prepaid || 0) === 0);
+    const prepaidType = allOrder ? 'order' : (deposit >= total ? 'full' : 'deposit');
+    const status = allOrder ? 'ordered' : 'pending';
+
+    let dueDate = null;
+    if (allOrder) {
+      dueDate = items[0]?.startDate || null;
+    } else {
+      dueDate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    }
+
+    const contactInfo = {
+      fullName: bookingData.contactInfo?.fullName || '',
+      email: bookingData.contactInfo?.email || '',
+      phone: bookingData.contactInfo?.phone || '',
+      specialRequests: bookingData.contactInfo?.specialRequests || ''
+    };
+
     const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
-    const id = await createDoc('bookings', { bookingCode, ...bookingData, bookingStatus: 'pending', paymentStatus: 'pending', erpSyncStatus: 'pending' });
+
+    // Strip old schema fields before creating
+    const { paymentStatus, bookingStatus, paymentGateway, pricing, ...cleanData } = bookingData;
+
+    const id = await createDoc('bookings', {
+      ...cleanData,
+      bookingCode,
+      payment: {
+        prepaid: prepaidType,
+        total: Math.round(total),
+        deposit: Math.round(deposit),
+        balance: Math.round(balance),
+        gate: (bookingData.paymentGateway || 'CASH').toUpperCase(),
+        date: null,
+        dueDate: dueDate
+      },
+      status: status,
+      contactInfo: contactInfo,
+      erpSyncStatus: 'pending'
+    });
     return id;
   } catch (error) {
     logger.error('[createBooking] Error:', error.message);
@@ -306,39 +353,93 @@ export async function findReviewsByEmail(email) {
 // ─── Users ────────────────────────────────────────────────────────────
 
 /**
- * Create or update user profile.
- * @param {string} uid
- * @param {Object} profileData
- * @returns {Promise<Object>}
+ * Find a user document by Firebase Auth UID (uid field).
+ * Falls back to legacy doc-by-UID pattern for pre-migration users.
+ * @param {string} uid - Firebase Auth UID
+ * @returns {Promise<{docId: string, data: Object}|null>}
  */
-export async function upsertUserProfile(uid, profileData) {
-  const ref = doc(db, 'users', uid);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    await updateDoc(ref, { ...profileData, updatedAt: serverTimestamp() });
-  } else {
-    await setDoc(ref, { ...profileData, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+async function getUserByUid(uid) {
+  const q = query(usersCol, where('uid', '==', uid), limit(1));
+  const snap = await getDocs(q);
+  if (!snap.empty) {
+    return { docId: snap.docs[0].id, data: serializeDoc(snap.docs[0]) };
   }
-  return { id: uid, ...profileData };
+  // Legacy fallback: user doc ID might still be Auth UID (pre-migration)
+  const legacyRef = doc(db, 'users', uid);
+  const legacySnap = await getDoc(legacyRef);
+  if (legacySnap.exists()) {
+    return { docId: uid, data: serializeDoc(legacySnap) };
+  }
+  return null;
 }
 
 /**
- * Fetch user profile by UID.
- * @param {string} uid
+ * Create or update user profile.
+ * Uses sequential ID (via generateNextId) for new users and stores
+ * the Firebase Auth UID inside the document as the `uid` field.
+ * On subsequent calls, finds the existing user by `uid` field and updates it.
+ * Also handles legacy users whose doc ID equals their Auth UID.
+ * @param {string} uid - Firebase Auth UID
+ * @param {Object} profileData
+ * @returns {Promise<{id: string, uid: string, isNew: boolean, ...profileData}>}
+ */
+export async function upsertUserProfile(uid, profileData) {
+  try {
+    const existing = await getUserByUid(uid);
+    if (existing) {
+      await updateDoc(doc(db, 'users', existing.docId), { ...profileData, updatedAt: serverTimestamp() });
+      return { id: existing.docId, uid, isNew: false, ...profileData };
+    }
+
+    // Create new user with sequential ID
+    const id = await generateNextId('users');
+    await setDoc(doc(db, 'users', id), {
+      ...profileData,
+      id,
+      uid,
+      role: 'customer',
+      status: 'active',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return { id, uid, isNew: true, ...profileData };
+  } catch (error) {
+    logger.error(`[upsertUserProfile] Error for uid=${uid}:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Fetch user profile by Firebase Auth UID.
+ * Queries by the `uid` field inside the document, with legacy fallback
+ * to direct doc-by-UID lookup for pre-migration users.
+ * @param {string} uid - Firebase Auth UID
  * @returns {Promise<Object|null>}
  */
 export async function getUserProfile(uid) {
-  return getDocById('users', uid);
+  try {
+    const result = await getUserByUid(uid);
+    return result ? result.data : null;
+  } catch (error) {
+    logger.error(`[getUserProfile] Error for uid=${uid}:`, error.message);
+    return null;
+  }
 }
 
 /**
  * Toggle wishlist item for a user.
- * @param {string} uid
+ * Finds the user by `uid` field first, then updates wishlist.
+ * @param {string} uid - Firebase Auth UID
  * @param {string} serviceId
  * @param {boolean} isAdding
  */
 export async function toggleWishlist(uid, serviceId, isAdding) {
-  const ref = doc(db, 'users', uid);
+  const existing = await getUserByUid(uid);
+  if (!existing) {
+    logger.error(`[toggleWishlist] User not found for uid=${uid}`);
+    return;
+  }
+  const ref = doc(db, 'users', existing.docId);
   if (isAdding) {
     await updateDoc(ref, { wishlist: arrayUnion(serviceId) });
   } else {
@@ -348,7 +449,7 @@ export async function toggleWishlist(uid, serviceId, isAdding) {
 
 /**
  * Remove an item from user's wishlist.
- * @param {string} uid
+ * @param {string} uid - Firebase Auth UID
  * @param {string} serviceId
  */
 export async function removeFromWishlist(uid, serviceId) {
@@ -357,7 +458,7 @@ export async function removeFromWishlist(uid, serviceId) {
 
 /**
  * Fetch detailed wishlist items for a user.
- * @param {string} uid
+ * @param {string} uid - Firebase Auth UID
  * @returns {Promise<Object[]>}
  */
 export async function getUserWishlist(uid) {
@@ -438,7 +539,7 @@ export async function releaseInventoryHold(holdId) {
  * @returns {Promise<number>}
  */
 export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
-  const bookingsQ = query(bookingsCol, where('serviceId', '==', serviceId), where('startDate', '==', startDate), where('bookingStatus', '==', 'confirmed'));
+  const bookingsQ = query(bookingsCol, where('serviceId', '==', serviceId), where('startDate', '==', startDate), where('status', '==', 'confirmed'));
   const bookingsSnap = await getDocs(bookingsQ);
   const bookedCount = bookingsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
 
@@ -505,7 +606,7 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
     for (const [periodKey, pricing] of Object.entries(periods)) {
       if (!pricing || typeof pricing !== 'object') continue;
       if (pricing.startDate && pricing.endDate && date >= pricing.startDate && date <= pricing.endDate) {
-        result.push({ rateType, costPrice: Number(pricing.costPrice) || 0, sellPrice: Number(pricing.sellPrice) || 0, startDate: pricing.startDate, endDate: pricing.endDate, supplier: pricing.supplier || '', periodKey });
+        result.push({ rateType, costPrice: Number(pricing.costPrice) || 0, sellPrice: Number(pricing.sellPrice) || 0, startDate: pricing.startDate, endDate: pricing.endDate, supplier: pricing.supplier || '', periodKey, prepaid: Number(pricing.prepaid) || 100 });
       }
     }
   }

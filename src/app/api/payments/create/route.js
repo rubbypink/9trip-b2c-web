@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PaymentService } from '@/lib/payments/payment'; 
-// Gọi adminDb từ file mới tạo
-import { adminDb } from '@/lib/firebase-admin'; 
+import { PaymentService } from '@/lib/payments/payment';
+import { adminDb, generateNextId } from '@/lib/firebase-admin';
+import { sendBookingConfirmation } from '@/lib/email';
 
 export async function POST(req) {
     try {
@@ -12,19 +12,82 @@ export async function POST(req) {
             return NextResponse.json({ success: false, message: 'Thiếu thông tin bắt buộc' }, { status: 400 });
         }
 
-        // 1. LƯU BOOKING VÀO FIRESTORE BẰNG ADMIN SDK
-        const bookingRef = adminDb.collection('bookings').doc();
-        const orderId = bookingRef.id; 
+        // 1. TAO BOOKING ID SEQUENTIAL
+        const orderId = await generateNextId('bookings');
+        const bookingRef = adminDb.collection('bookings').doc(orderId);
 
-        await bookingRef.set({
-            ...bookingData,
+        // 2. TINH TOAN PAYMENT
+        const rawItems = bookingData.items || [];
+        const items = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
+
+        const total = items.reduce((sum, item) => sum + (item.total || 0), 0);
+
+        // Calculate deposit from item prepaid percentages
+        const deposit = items.reduce((sum, item) => {
+            const prepaidPct = item.prepaid || 0;
+            return sum + (item.total || 0) * prepaidPct / 100;
+        }, 0);
+
+        const balance = total - deposit;
+
+        // Determine prepaid type
+        const allOrder = items.length > 0 && items.every(item => (item.prepaid || 0) === 0);
+        const prepaidType = allOrder ? 'order' : (deposit >= total ? 'full' : 'deposit');
+
+        // Determine status
+        const status = allOrder ? 'ordered' : 'pending';
+
+        // Due date calculation
+        let dueDate = null;
+        if (allOrder) {
+            dueDate = items[0]?.startDate || null;
+        } else {
+            // Default due date: 60 minutes from now for payment
+            dueDate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        }
+
+        // 3. CLEAN CONTACT INFO - strip Firebase Auth tokens
+        const cleanContactInfo = {
+            fullName: bookingData.contactInfo?.fullName || '',
+            email: bookingData.contactInfo?.email || '',
+            phone: bookingData.contactInfo?.phone || '',
+            specialRequests: bookingData.contactInfo?.specialRequests || ''
+        };
+
+        // 4. BUILD BOOKING DOCUMENT
+        const bookingDoc = {
             id: orderId,
-            paymentGateway: gateway.toUpperCase(),
-            paymentStatus: 'PENDING',
+            userId: bookingData.userId || '',
+            bookingCode: bookingData.bookingCode || `9T-${orderId}`,
+            items: items,
+            payment: {
+                prepaid: prepaidType,
+                total: Math.round(total),
+                deposit: Math.round(deposit),
+                balance: Math.round(balance),
+                gate: gateway.toUpperCase(),
+                date: null,
+                dueDate: dueDate
+            },
+            status: status,
+            contactInfo: cleanContactInfo,
+            couponCode: bookingData.couponCode || null,
+            erpSyncStatus: 'pending',
             createdAt: new Date().toISOString(),
-        });
+            updatedAt: new Date().toISOString()
+        };
 
-        // 2. TẠO LINK THANH TOÁN
+        // 5. SAVE
+        await bookingRef.set(bookingDoc);
+
+        // 6. SEND CONFIRMATION EMAIL if ordered
+        if (status === 'ordered') {
+            sendBookingConfirmation(bookingDoc).catch(err =>
+                console.error('[Email] Booking confirmation failed:', err.message)
+            );
+        }
+
+        // 7. CREATE PAYMENT URL
         let paymentUrl = '';
         const paymentPayload = { amount, orderId, bookingData };
 
@@ -39,7 +102,7 @@ export async function POST(req) {
                 paymentUrl = await PaymentService.createPayPalUrl(paymentPayload);
                 break;
             default:
-                await bookingRef.delete(); // Rollback nếu lỗi
+                await bookingRef.delete();
                 return NextResponse.json({ success: false, message: 'Cổng thanh toán không hợp lệ' }, { status: 400 });
         }
 

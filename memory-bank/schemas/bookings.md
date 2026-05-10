@@ -44,6 +44,10 @@ This document defines the structure of the Booking document in the Firestore `bo
     infants: number,
     /** @type {number} Base price per unit */
     basePrice: number,
+    /** @type {number} Total price for child */
+    childPrice: number,
+    /** @type {number} Total price for infant */
+    infantPrice: number,
     /** @type {number} Total price for this item */
     total: number,
     /** @type {string} "VND", "USD" */
@@ -86,6 +90,11 @@ This document defines the structure of the Booking document in the Firestore `bo
     /** @type {string} Any special requests (empty string if none) */
     specialRequests: string
   },
+
+  /** @type {number} no of adults */
+  adults: number,
+  /** @type {number} no of child */
+  children: number,
 
   /** @type {string | null} Applied coupon code, null if none */
   couponCode: string | null,

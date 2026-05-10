@@ -153,5 +153,34 @@ function createAuthProxy() {
 	);
 }
 
+/**
+ * Generate next sequential ID for a Firestore collection.
+ * Uses a `counters/{colName}` document to track the sequence.
+ * Starts from 10000 if no counter exists.
+ *
+ * @param {string} colName - Collection name
+ * @returns {Promise<string>} Next sequential ID as string (e.g., "10000")
+ */
+export async function generateNextId(colName) {
+  try {
+    const counterRef = adminDb.collection('counters').doc(colName);
+    const nextId = await adminDb.runTransaction(async (transaction) => {
+      const snap = await transaction.get(counterRef);
+      if (!snap.exists) {
+        transaction.set(counterRef, { seq: 10000 });
+        return '10000';
+      }
+      const currentSeq = snap.data().seq;
+      const nextSeq = currentSeq + 1;
+      transaction.update(counterRef, { seq: nextSeq });
+      return String(nextSeq);
+    });
+    return nextId;
+  } catch (error) {
+    logger.error(`[generateNextId] Error for ${colName}:`, error.message);
+    throw error;
+  }
+}
+
 export const adminDb = createFirestoreProxy();
 export const adminAuth = createAuthProxy();

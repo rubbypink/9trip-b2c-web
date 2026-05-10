@@ -94,17 +94,8 @@ export function useBooking() {
       const bookingData = {
         userId: user.uid,
         items: itemsObject,
-        pricing: {
-          subtotal,
-          tax,
-          discount: couponDiscount,
-          total: grandTotal,
-          currency: items[0]?.currency || "VND",
-        },
         contactInfo,
-        paymentGateway,
-        paymentStatus: 'pending',
-        bookingStatus: 'pending',
+        gateway: paymentGateway,
         inventoryHoldId: holdId,
         couponCode: couponData?.code || null,
       };

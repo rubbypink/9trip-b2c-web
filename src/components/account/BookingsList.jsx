@@ -132,9 +132,9 @@ export default function BookingsList({ onReviewRequest }) {
     );
   }
 
-  const upcoming = displayBookings.filter((b) => b.status === "confirmed" || b.status === "pending" || b.bookingStatus === 'pending');
-  const completed = displayBookings.filter((b) => b.status === "completed" || b.bookingStatus === "completed");
-  const cancelled = displayBookings.filter((b) => b.status === "cancelled" || b.bookingStatus === "cancelled");
+  const upcoming = displayBookings.filter((b) => b.status === "confirmed" || b.status === "pending" || b.status === "ordered");
+  const completed = displayBookings.filter((b) => b.status === "completed" || b.status === "paid");
+  const cancelled = displayBookings.filter((b) => b.status === "canceled" || b.status === "cancelled");
 
   const statusBadge = (status) => {
     const map = {
@@ -235,7 +235,7 @@ export default function BookingsList({ onReviewRequest }) {
                             <h4 className="font-semibold text-foreground truncate">
                               {displayTitle}
                             </h4>
-                            {statusBadge(booking.bookingStatus || booking.status)}
+                            {statusBadge(booking.status || booking.bookingStatus)}
                           </div>
                           <div className="text-sm text-muted-foreground space-x-4">
                             {booking.createdAt && <span>📅 {new Date(booking.createdAt).toLocaleDateString("vi-VN")}</span>}
@@ -254,7 +254,7 @@ export default function BookingsList({ onReviewRequest }) {
                           >
                             Xem Chi Tiết
                           </button>
-                          {(booking.status === "completed" || booking.bookingStatus === "completed") && onReviewRequest && (
+                          {(booking.status === "completed") && onReviewRequest && (
                             <button
                               type="button"
                               onClick={() => onReviewRequest(booking)}
