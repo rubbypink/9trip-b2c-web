@@ -5,8 +5,6 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourDetailClient from "@/components/tours/TourDetailClient";
 import { logger } from "@/lib/logger";
 
-export const revalidate = 3600; // ISR: revalidate sau 1h
-
 /**
  * generateMetadata — dynamic metadata cho SEO.
  * Dùng title, excerpt, featuredImage từ tour để tạo meta tags.

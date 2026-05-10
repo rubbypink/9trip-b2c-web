@@ -4,8 +4,6 @@ import { resolveDocImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "@/components/activities/ActivityDetailClient";
 
-export const revalidate = 3600;
-
 /**
  * generateMetadata — SEO cho activity.
  */

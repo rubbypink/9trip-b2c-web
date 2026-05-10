@@ -17,8 +17,6 @@ export const metadata = {
   alternates: { canonical: "/blog" },
 };
 
-export const revalidate = 3600;
-
 /**
  * Blog List Page — Server Component (ISR).
  * Hiển thị danh sách bài viết blog đã xuất bản.

@@ -9,8 +9,6 @@ import {
 } from "@/lib/firestore-admin";
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
 
-export const revalidate = 3600;
-
 /**
  * generateStaticParams — no pre-build, render on-demand.
  */

@@ -4,8 +4,6 @@ import { getDocBySlug } from "@/lib/firestore-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import { formatCurrency } from "@/lib/utils";
 
-export const revalidate = 3600;
-
 /**
  * generateMetadata — SEO cho car detail.
  */
