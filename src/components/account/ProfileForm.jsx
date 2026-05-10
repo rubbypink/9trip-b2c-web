@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
+import PasswordChangeModal from "./PasswordChangeModal";
 
 /**
  * Profile edit form. Reads current profile from auth context,
@@ -11,6 +12,11 @@ export default function ProfileForm() {
   const { profile, updateProfileData, user } = useAuth();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const hasPasswordProvider = user?.providerData?.some(
+    (p) => p.providerId === "password"
+  );
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -48,6 +54,7 @@ export default function ProfileForm() {
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
       {/* Avatar + name header */}
       <div className="flex items-center gap-4">
@@ -216,6 +223,27 @@ export default function ProfileForm() {
         </div>
       </div>
 
+      {hasPasswordProvider && (
+        <div className="border-t border-border pt-6">
+          <h3 className="text-base font-semibold text-foreground mb-1">Mật khẩu</h3>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground tracking-widest">
+              ● ● ● ● ● ● ● ●
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowPasswordModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-accent transition-colors text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
+              Đổi mật khẩu
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Submit */}
       <button
         type="submit"
@@ -235,5 +263,15 @@ export default function ProfileForm() {
         )}
       </button>
     </form>
+
+      {showPasswordModal && (
+        <PasswordChangeModal
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={() => {
+            setMessage({ type: "success", text: "Mật khẩu đã được thay đổi thành công!" });
+          }}
+        />
+      )}
+    </>
   );
 }

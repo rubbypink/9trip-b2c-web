@@ -368,6 +368,48 @@ export function welcomeTemplate(userName) {
 }
 
 /**
+ * Password changed confirmation email.
+ * @param {string} userName - User's display name
+ * @returns {string}
+ */
+export function passwordChangedTemplate(userName) {
+  const content = `
+    <p style="font-size:15px;color:${TEXT};line-height:1.6;margin:0 0 8px 0;">
+      Xin chào <strong>${userName || "Quý khách"}</strong>,
+    </p>
+    <p style="font-size:14px;color:${TEXT};line-height:1.6;margin:0 0 20px 0;">
+      Mật khẩu tài khoản của bạn tại <strong>${SITE_NAME}</strong> vừa được thay đổi thành công.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:${LIGHT_BG};border-radius:8px;padding:16px;margin-bottom:24px;">
+      <tr>
+        <td style="padding:12px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="padding:6px 0;font-size:14px;color:${MUTED};width:140px;vertical-align:top;">Thời gian</td>
+              <td style="padding:6px 0;font-size:14px;color:${DARK};font-weight:500;">${new Date().toLocaleString("vi-VN")}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:56px;height:56px;background-color:#dcfce7;border-radius:50%;display:inline-block;line-height:56px;font-size:28px;">&#10003;</div>
+    </div>
+
+    <p style="font-size:13px;color:${MUTED};line-height:1.5;margin:0 0 8px 0;">
+      Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ ngay với chúng tôi qua &#128231; <a href="mailto:${SITE.email}" style="color:${PRIMARY};">${SITE.email}</a> hoặc gọi &#128222; ${SITE.phone}.
+    </p>
+    <p style="font-size:13px;color:${MUTED};line-height:1.5;margin:0;">
+      Đây là email tự động, vui lòng không trả lời trực tiếp.
+    </p>
+  `;
+
+  return baseLayout({ title: "Mật khẩu đã được thay đổi", content });
+}
+
+/**
  * Password reset email with link.
  * @param {string} resetLink
  * @returns {string}

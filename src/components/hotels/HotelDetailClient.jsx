@@ -73,7 +73,6 @@ export default function HotelDetailClient({
 
   const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
   const hasMap = hotelMap?.lat && hotelMap?.lng;
-  const hasAnyBadge = starRating > 0 || !!address?.city || avgRating > 0 || lowestPrice > 0;
 
   // ── Date state (reactive pricing) ────────────────────────
   const [checkIn, setCheckIn] = useState(() => new Date().toISOString().split("T")[0]);
@@ -109,6 +108,8 @@ export default function HotelDetailClient({
       .filter((p) => p > 0);
     return prices.length > 0 ? Math.min(...prices) : (hotel?.pricing?.basePrice || 0);
   }, [pricingTable, hotel]);
+
+  const hasAnyBadge = starRating > 0 || !!address?.city || avgRating > 0 || lowestPrice > 0;
 
   const handleTabChange = useCallback((tabId) => {
     setActiveTab(tabId);

@@ -20,7 +20,7 @@ import { extractPricing } from '../../../lib/pricing-extractor.mjs';
 import {
   TOUR_SCHEMA,
   mapTourToFirestore,
-} from '../../../lib/schemas/tour-schema.mjs';
+} from '../../../lib/scape-schemas.mjs';
 import { sanitizeScrapedData } from '../../../lib/sanitize-data.mjs';
 import { writeJsonToTemp, slugify } from '../../../lib/scrape-helpers.mjs';
 import { normalizeImageUrl, deduplicateUrls } from '../../../lib/image-helpers.mjs';

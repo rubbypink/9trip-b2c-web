@@ -10,7 +10,7 @@
 import { findAdapter } from '../../../lib/adapters/index.mjs';
 import { markdownToJson } from '../../../lib/markdown-to-json.mjs';
 import { extractPricing } from '../../../lib/pricing-extractor.mjs';
-import { mapHotelToFirestore } from '../../../lib/schemas/hotel-schema.mjs';
+import { mapHotelToFirestore } from '../../../lib/scape-schemas.mjs';
 import { sanitizeScrapedData } from '../../../lib/sanitize-data.mjs';
 import { writeJsonToTemp, slugify } from '../../../lib/scrape-helpers.mjs';
 import { normalizeImageUrl, deduplicateUrls } from '../../../lib/image-helpers.mjs';

@@ -17,6 +17,9 @@ import {
   FacebookAuthProvider,
   signInWithPopup,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "firebase/auth";
 import { app } from "./firebase";
 import { getUserProfile, upsertUserProfile } from "./firestore";
@@ -174,6 +177,49 @@ export function AuthProvider({ children }) {
     forwardToERP('update-account', { id: user.uid, ...data });
   }, [user]);
 
+  /**
+   * Change password for email/password users.
+   * Handles re-authentication if session is stale.
+   * Sends email notification on success.
+   * @param {string} currentPassword - User's current password
+   * @param {string} newPassword - New password (min 6 chars)
+   * @returns {Promise<{ success: boolean }>}
+   * @throws {Error} With Firebase error message if operation fails
+   */
+  const changePassword = useCallback(async (currentPassword, newPassword) => {
+    if (!user || !user.email) {
+      throw new Error("Không có người dùng nào đang đăng nhập.");
+    }
+
+    try {
+      // Try direct update first
+      await updatePassword(user, newPassword);
+    } catch (err) {
+      // Stale session — need re-authentication
+      if (err.code === "auth/requires-recent-login") {
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        // Retry after reauth
+        await updatePassword(user, newPassword);
+      } else {
+        // Re-throw other Firebase errors
+        throw err;
+      }
+    }
+
+    // Send email notification (fire-and-forget)
+    fetch("/api/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        template: "password-changed",
+        data: { to: user.email, userName: user.displayName || user.email },
+      }),
+    }).catch((err) => console.error("[Auth] Password changed email failed:", err.message));
+
+    return { success: true };
+  }, [user]);
+
   const value = {
     user,
     profile,
@@ -185,6 +231,7 @@ export function AuthProvider({ children }) {
     logout,
     resetPassword,
     updateProfileData,
+    changePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -203,6 +250,7 @@ export function AuthProvider({ children }) {
  *   logout: Function,
  *   resetPassword: Function,
  *   updateProfileData: Function,
+ *   changePassword: Function,
  * }}
  */
 export function useAuth() {

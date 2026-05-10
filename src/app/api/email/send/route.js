@@ -15,6 +15,7 @@ import {
   sendCancellationConfirmation,
   sendContactNotification,
   sendPasswordReset,
+  sendPasswordChangedEmail,
 } from "@/lib/email";
 
 /** @type {Object<string, Function>} */
@@ -25,6 +26,7 @@ const TEMPLATE_HANDLERS = {
   cancellation: (data) => sendCancellationConfirmation(data.booking, data.reason),
   "contact-form": (data) => sendContactNotification(data),
   "password-reset": (data) => sendPasswordReset(data.to, data.resetLink),
+  "password-changed": (data) => sendPasswordChangedEmail(data.to, data.userName),
 };
 
 export async function POST(request) {

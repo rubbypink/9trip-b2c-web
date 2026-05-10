@@ -163,6 +163,23 @@ export async function sendCancellationConfirmation(booking, reason) {
 }
 
 /**
+ * Send password changed confirmation email to the user.
+ * @param {string} to - Recipient email
+ * @param {string} userName - User's display name
+ * @returns {Promise<{ success: boolean, messageId?: string }>}
+ */
+export async function sendPasswordChangedEmail(to, userName) {
+  const { passwordChangedTemplate } = await import("./email-templates");
+  const html = passwordChangedTemplate(userName);
+
+  return sendEmail({
+    to,
+    subject: "Mật khẩu đã được thay đổi — 9 Trip Phú Quốc",
+    html,
+  });
+}
+
+/**
  * Send contact form notification to the admin.
  * @param {Object} data - Contact form data
  * @param {string} data.name

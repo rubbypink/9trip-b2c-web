@@ -181,18 +181,17 @@ export function fieldsToListExtractSchema(itemFields, listKey, options = {}) {
 	};
 }
 
-// [DEAD CODE] — createListItemFields: Never imported by any skill script
-// export function createListItemFields(fieldNames, fieldDefinitions = {}) {
-// 	const fields = {};
-// 	for (const name of fieldNames) {
-// 		if (fieldDefinitions[name]) {
-// 			fields[name] = fieldDefinitions[name];
-// 		} else {
-// 			fields[name] = { type: 'string' };
-// 		}
-// 	}
-// 	return fields;
-// }
+export function createListItemFields(fieldNames, fieldDefinitions = {}) {
+	const fields = {};
+	for (const name of fieldNames) {
+		if (fieldDefinitions[name]) {
+			fields[name] = fieldDefinitions[name];
+		} else {
+			fields[name] = { type: 'string' };
+		}
+	}
+	return fields;
+}
 
 // ============================================================================
 // ALIAS EXPORTS (for consistency with new naming convention)

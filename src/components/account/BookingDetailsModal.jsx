@@ -18,7 +18,10 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
 
   if (!booking) return null;
 
-  const items = booking.items ? Object.values(booking.items) : [];
+  // Support both object/map and array formats for booking.items
+  const items = booking.items
+    ? (Array.isArray(booking.items) ? booking.items : Object.values(booking.items))
+    : [];
 
   const handleCancelItem = async (itemId) => {
     if (!confirm("Bạn có chắc chắn muốn hủy dịch vụ này?")) return;
@@ -128,21 +131,23 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
                 return (
                   <div key={item.id} className="p-4 border border-border rounded-xl bg-surface-1/50 flex flex-col sm:flex-row gap-4 justify-between">
                     <div>
-                      <h4 className="font-semibold text-foreground">{item.serviceTitle || item.title || item.name}</h4>
+                      <h4 className="font-semibold text-foreground">{item.serviceTitle || item.title || item.name || item.serviceName || 'Không có tên'}</h4>
                       <p className="text-xs text-muted-foreground mt-1">
                         {item.startDate && formatDate(item.startDate)} 
                         {item.endDate && ` - ${formatDate(item.endDate)}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {item.serviceType === 'hotel_room' || item.serviceType === 'hotel' ? (
-                          `Số lượng: ${item.rooms || 1} phòng`
+                          `Số lượng: ${item.rooms || item.adults || 1} phòng`
                         ) : item.serviceType === 'activity' ? (
                           `Số lượng: ${item.adults || 1} vé`
+                        ) : item.serviceType === 'car' || item.serviceType === 'rental' ? (
+                          `Số lượng: ${item.adults || 1} xe`
                         ) : (
                           `Số lượng: ${item.adults || 1} người lớn${item.children > 0 ? `, ${item.children} trẻ em` : ''}${item.infants > 0 ? `, ${item.infants} em bé` : ''}`
                         )}
                       </p>
-                      <p className="font-medium text-primary-600 mt-2">{formatCurrency(item.total || item.baseTotal || 0)}</p>
+                      <p className="font-medium text-primary-600 mt-2">{formatCurrency(item.total || item.baseTotal || item.basePrice || 0)}</p>
                     </div>
                     
                     {canModifyCancel && (
@@ -180,7 +185,7 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
 
         {modifyingItem && (
           <div className="absolute inset-0 bg-card rounded-2xl p-6 flex flex-col z-20">
-            <h3 className="font-bold text-lg mb-4">Sửa dịch vụ: {modifyingItem.serviceTitle}</h3>
+            <h3 className="font-bold text-lg mb-4">Sửa dịch vụ: {modifyingItem.serviceTitle || modifyingItem.title || modifyingItem.name || modifyingItem.serviceName || 'Không có tên'}</h3>
             
             <div className="space-y-4 flex-1">
               <div>
