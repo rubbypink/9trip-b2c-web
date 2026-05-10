@@ -1,17 +1,16 @@
-import { getDocs, query, collection, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { adminDb } from '@/lib/firebase-admin';
 import { mockTestimonials } from '@/lib/mockData';
 
 /**
  * Serialize Firestore doc to plain object — local helper since serializeDoc is module-private.
- * @param {import("firebase/firestore").DocumentSnapshot} snap
+ * @param {import("firebase-admin/firestore").DocumentSnapshot} snap
  * @returns {{ id: string, [key: string]: any }}
  */
 function serializeDoc(snap) {
 	const data = snap.data();
 	const result = { id: snap.id };
 	for (const [key, value] of Object.entries(data)) {
-		// Convert Firestore Timestamps to ISO strings
+		// Convert Firestore Admin Timestamps to ISO strings
 		if (value && typeof value === 'object' && 'toDate' in value) {
 			result[key] = value.toDate().toISOString();
 		} else {
@@ -31,10 +30,15 @@ const MAX_REVIEWS = 6;
 export default async function Testimonials() {
 	let reviews = [];
 	try {
-		const q = query(collection(db, 'reviews'), where('status', '==', 'approved'), where('rating', '>=', 4), orderBy('rating', 'desc'), orderBy('createdAt', 'desc'), limit(8));
-		const snap = await getDocs(q);
+		const snap = await adminDb.collection('reviews')
+			.where('status', '==', 'approved')
+			.where('rating', '>=', 4)
+			.orderBy('rating', 'desc')
+			.orderBy('createdAt', 'desc')
+			.limit(8)
+			.get();
 		reviews = snap.docs.map((d) => serializeDoc(d));
-	} catch {
+	} catch (error) {
 		// Firestore unavailable — fallback to mock data
 	}
 

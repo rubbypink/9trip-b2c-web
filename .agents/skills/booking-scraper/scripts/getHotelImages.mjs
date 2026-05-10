@@ -483,14 +483,10 @@ export async function scrapeHotelFromUrl(targetUrl) {
     await clickByText('Xem chi tiết', { optional: true, timeout: 5000 });
     await waitForNetworkIdle(2000);
 
-    // ── Step 3: Open gallery to ensure photo URLs load ──────────────
-    log('info', 'Step 3/5: Opening gallery to load photo URLs...');
-    await clickByText('Photos', { optional: true, timeout: 5000 });
-    await waitForText('×', 3000).catch(() => {});
-    await new Promise((r) => setTimeout(r, 1500));
-
-    // ── Step 4: Extract structured data from DOM ────────────────────
-    log('info', 'Step 4/5: Extracting structured data from DOM...');
+    // ── Step 3: Extract structured data from DOM (BEFORE gallery) ────
+    // IMPORTANT: Must extract data BEFORE opening gallery overlay,
+    // because the gallery overlay hides hotel page content.
+    log('info', 'Step 3/5: Extracting structured data from DOM...');
 
     /**
      * Safely evaluate a single extraction expression, returning null on failure.
@@ -512,38 +508,38 @@ export async function scrapeHotelFromUrl(targetUrl) {
 
     // --- Name ---
     extracted.name = (await safeEval(
-      `(function(){var s=["h2.pp-header__title","[data-testid=\"header-title\"]","h1.hp__hotel-title","[data-testid=\"property-header\"] h1","h2[data-testid=\"property-name\"]","h2"];for(var i=0;i<s.length;i++){var el=document.querySelector(s[i]);if(el&&el.textContent)return JSON.stringify(el.textContent.trim())}var t=document.title.split(" - ")[0].split("|")[0];return JSON.stringify(t?t.trim():"");})()`
+      `(function(){var el=document.querySelector("h2");if(el&&el.textContent)return JSON.stringify(el.textContent.trim());return JSON.stringify(document.title.split(" - ")[0].split("|")[0].trim());})()`
     )) || '';
 
     if (typeof extracted.name === 'string') extracted.name = extracted.name.replace(/^"|"$/g, '');
 
     // --- Star Rating ---
     extracted.starRating = await safeEval(
-      `(function(){var c=document.querySelector("[data-testid=\"rating-stars\"],.b6f6d8ad57");if(c){var n=c.querySelectorAll("span,svg,i[class*=\"star\"]").length;return JSON.stringify(n||0)}var s=document.querySelectorAll("[class*=\"star\"]:not([class*=\"empty\"])");return JSON.stringify(s.length>0?s.length:null);})()`
+      `(function(){var c=document.querySelector("[data-testid='rating-stars'],.b6f6d8ad57");if(c){var n=c.querySelectorAll("span,svg,i[class*='star']").length;return JSON.stringify(n||0)}var s=document.querySelectorAll("[class*='star']:not([class*='empty'])");return JSON.stringify(s.length>0?s.length:null);})()`
     );
 
     // --- Address ---
     extracted.address = (await safeEval(
-      `(function(){var el=document.querySelector("[data-testid=\"property-address\"],.hp__address,[data-testid=\"header-address\"]");return JSON.stringify(el?el.textContent.trim():"");})()`
+      `(function(){var el=document.querySelector("[data-testid='property-address'],.hp__address,[data-testid='header-address']");return JSON.stringify(el?el.textContent.trim():"");})()`
     )) || '';
 
     // --- Description ---
     extracted.description = (await safeEval(
-      `(function(){var el=document.querySelector("[data-testid=\"property-description\"],#property_description_content,.hp__hotel_desc,[data-testid=\"property-description-content\"]");if(el)return JSON.stringify(el.textContent.trim());var m=document.querySelector("meta[name=\"description\"]");return JSON.stringify(m?m.content:"");})()`
+      `(function(){var el=document.querySelector("[data-testid='property-description'],#property_description_content,.hp__hotel_desc,[data-testid='property-description-content']");if(el)return JSON.stringify(el.textContent.trim());var m=document.querySelector("meta[name='description']");return JSON.stringify(m?m.content:"");})()`
     )) || '';
 
     // --- Policies (check-in/check-out) ---
     const policyText = (await safeEval(
-      `(function(){var el=document.querySelector("[data-testid=\"checkin-policy\"],.hp__hotel_policy");return JSON.stringify(el?el.textContent:"");})()`
+      `(function(){var el=document.querySelector("[data-testid='checkin-policy'],.hp__hotel_policy");return JSON.stringify(el?el.textContent:"");})()`
     )) || '';
-    const ciMatch = policyText.match(/check[\s-]*in[\s:]*(\\d{1,2}:?\\d{0,2})/i);
+    const ciMatch = policyText.match(/check[\s-]*in[\s:]*(\d{1,2}:?\d{0,2})/i);
     extracted.checkIn = ciMatch ? ciMatch[1] : '';
-    const coMatch = policyText.match(/check[\s-]*out[\s:]*(\\d{1,2}:?\\d{0,2})/i);
+    const coMatch = policyText.match(/check[\s-]*out[\s:]*(\d{1,2}:?\d{0,2})/i);
     extracted.checkOut = coMatch ? coMatch[1] : '';
 
     // --- Amenities ---
     const amenitiesRaw = await safeEval(
-      `(function(){var items=[];var sels=["[data-testid=\"property-most-popular-facilities\"] li","[data-testid=\"property-facilities\"] li",".hp__hotel_facilities li",".facility-list li","[data-testid=\"facility-group\"] li"];for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var t=els[j].textContent.trim();if(t&&items.indexOf(t)===-1)items.push(t)}}return JSON.stringify(items.slice(0,40));})()`
+      `(function(){var items=[];var sels=["[data-testid='property-most-popular-facilities'] li","[data-testid='property-facilities'] li",".hp__hotel_facilities li",".facility-list li","[data-testid='facility-group'] li"];for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var t=els[j].textContent.trim();if(t&&items.indexOf(t)===-1)items.push(t)}}return JSON.stringify(items.slice(0,40));})()`
     );
     extracted.amenities = Array.isArray(amenitiesRaw) ? amenitiesRaw : [];
 
@@ -554,21 +550,21 @@ export async function scrapeHotelFromUrl(targetUrl) {
 
     // --- Phone / Website ---
     extracted.phone = (await safeEval(
-      `(function(){var el=document.querySelector("[data-testid=\"property-phone\"],a[href^=\"tel:\"]");return JSON.stringify(el?(el.href?el.href.replace("tel:",""):el.textContent.trim()):"");})()`
+      `(function(){var el=document.querySelector("[data-testid='property-phone'],a[href^='tel:']");return JSON.stringify(el?(el.href?el.href.replace("tel:",""):el.textContent.trim()):"");})()`
     )) || '';
     extracted.website = (await safeEval(
-      `(function(){var el=document.querySelector("a[href*=\"website\"],[class*=\"website\"] a");return JSON.stringify(el?el.href:"");})()`
+      `(function(){var el=document.querySelector("a[href*='website'],[class*='website'] a");return JSON.stringify(el?el.href:"");})()`
     )) || '';
 
     // --- Rooms ---
     const roomsRaw = await safeEval(
-      `(function(){var rooms=[];var rows=document.querySelectorAll("[data-testid=\"room-row\"],.room_list tr,.room-block,table.hprt-table tbody tr");if(rows.length===0){rows=document.querySelectorAll("[data-testid=\"property-card\"]")}rows.forEach(function(row){var r={};var n=row.querySelector("h3,[data-testid=\"room-name\"],.room-name");r.name=n?n.textContent.trim():"";if(!r.name)return;var d=row.querySelector("[data-testid=\"room-description\"],.room_desc");r.description=d?d.textContent.trim():"";var b=row.querySelector("[data-testid=\"bed-type\"]");r.bedType=b?b.textContent.trim():"";var g=row.querySelectorAll("img");r.gallery=[];for(var i=0;i<g.length;i++){var src=g[i].src||g[i].getAttribute("data-src")||"";if(src.indexOf("bstatic.com")!==-1)r.gallery.push(src)}rooms.push(r)});return JSON.stringify(rooms);})()`
+      `(function(){var rooms=[];var rows=document.querySelectorAll("[data-testid='room-row'],.room_list tr,.room-block,table.hprt-table tbody tr");if(rows.length===0){rows=document.querySelectorAll("[data-testid='property-card']")}rows.forEach(function(row){var r={};var n=row.querySelector("h3,[data-testid='room-name'],.room-name");r.name=n?n.textContent.trim():"";if(!r.name)return;var d=row.querySelector("[data-testid='room-description'],.room_desc");r.description=d?d.textContent.trim():"";var b=row.querySelector("[data-testid='bed-type']");r.bedType=b?b.textContent.trim():"";var g=row.querySelectorAll("img");r.gallery=[];for(var i=0;i<g.length;i++){var src=g[i].src||g[i].getAttribute("data-src")||"";if(src.indexOf("bstatic.com")!==-1)r.gallery.push(src)}rooms.push(r)});return JSON.stringify(rooms);})()`
     );
     extracted.rooms = Array.isArray(roomsRaw) ? roomsRaw : [];
 
     // --- Reviews ---
     const reviewsRaw = await safeEval(
-      `(function(){var reviews=[];var blocks=document.querySelectorAll("[data-testid=\"review-card\"],.review_list .review-block,.review-card");var count=0;blocks.forEach(function(block){if(count>=25)return;var r={};var n=block.querySelector("[class*=\"reviewer\"]");r.reviewerName=n?n.textContent.trim():"";var s=block.querySelector("[class*=\"score\"]");if(s){var m=s.textContent.match(/([0-9][.,]?[0-9]*)/);r.rating=m?parseFloat(m[1].replace(",",".")):null}var t=block.querySelector("[class*=\"review-text\"],[class*=\"review-content\"]");r.text=t?t.textContent.trim():"";var d=block.querySelector("[class*=\"date\"]");r.date=d?d.textContent.trim():"";if(r.text){reviews.push(r);count++}});return JSON.stringify(reviews);})()`
+      `(function(){var reviews=[];var blocks=document.querySelectorAll("[data-testid='review-card'],.review_list .review-block,.review-card");var count=0;blocks.forEach(function(block){if(count>=25)return;var r={};var n=block.querySelector("[class*='reviewer']");r.reviewerName=n?n.textContent.trim():"";var s=block.querySelector("[class*='score']");if(s){var m=s.textContent.match(/([0-9][.,]?[0-9]*)/);r.rating=m?parseFloat(m[1].replace(",",".")):null}var t=block.querySelector("[class*='review-text'],[class*='review-content']");r.text=t?t.textContent.trim():"";var d=block.querySelector("[class*='date']");r.date=d?d.textContent.trim():"";if(r.text){reviews.push(r);count++}});return JSON.stringify(reviews);})()`
     );
     extracted.reviews = Array.isArray(reviewsRaw) ? reviewsRaw : [];
 
@@ -578,13 +574,22 @@ export async function scrapeHotelFromUrl(targetUrl) {
 
     log('info', `Extracted: "${extracted.name}" — ${Array.isArray(extracted.rooms) ? extracted.rooms.length : 0} rooms`);
 
+    // ── Step 4: Open gallery to load photo URLs ──────────────────────
+    log('info', 'Step 4/5: Opening gallery for image URLs...');
+    await clickByText('Photos', { optional: true, timeout: 5000 });
+    await waitForText('×', 3000).catch(() => {});
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Re-extract page HTML after gallery opened (photos now loaded)
+    const galleryHtml = await evaluate('document.documentElement.outerHTML');
+
     // Close gallery
     await clickByText('Close', { optional: true, timeout: 3000 });
     await clickByText('×', { optional: true, timeout: 3000 });
 
     // ── Step 5: Extract & process images ────────────────────────────
     log('info', 'Step 5/5: Processing image URLs...');
-    let rawUrls = extractImageUrls(pageHtml);
+    let rawUrls = extractImageUrls(galleryHtml);
     rawUrls = rawUrls.map((u) => normalizeImageUrl(u));
     rawUrls = deduplicateByImageId(rawUrls);
 
