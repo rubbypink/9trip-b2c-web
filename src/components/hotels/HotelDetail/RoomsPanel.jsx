@@ -270,7 +270,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
           const key = `${room.roomId}_${rt.rateType}`;
           const currentQty = roomQuantities[key] || 0;
           if (currentQty !== cartItem.rooms) {
-             updateQuantity(room.roomId, rt.rateType, cartItem.rooms - currentQty, room.totalRooms || 10);
+             onRoomQuantityChange(room.roomId, rt.rateType, cartItem.rooms - currentQty, room.totalRooms || 10);
           }
         }
       }
@@ -423,11 +423,11 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                           ? 'ring-2 ring-blue-500 bg-blue-50/50'
                           : 'hover:bg-surface-2/50'
                       }`}
-                      onClick={() => updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10)}
+                      onClick={() => onRoomQuantityChange(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10);
+                          onRoomQuantityChange(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10);
                         }
                       }}
                     >
@@ -444,7 +444,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, -1, room.totalRooms || 10); }}
+                          onClick={(e) => { e.stopPropagation(); onRoomQuantityChange(room.roomId, rt.rateType, -1, room.totalRooms || 10); }}
                           disabled={qty === 0}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
@@ -453,7 +453,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                         <span className="w-10 text-center text-sm font-semibold text-foreground">{qty}</span>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, 1, room.totalRooms || 10); }}
+                          onClick={(e) => { e.stopPropagation(); onRoomQuantityChange(room.roomId, rt.rateType, 1, room.totalRooms || 10); }}
                           disabled={qty >= (room.totalRooms || 10)}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
