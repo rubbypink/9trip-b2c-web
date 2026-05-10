@@ -127,6 +127,28 @@ function _cacheKey(prefix, filters = {}) {
   return `${prefix}:${JSON.stringify(filters)}`;
 }
 
+/**
+ * Generate the next sequential ID for a collection (Admin SDK).
+ * Uses `counters` collection with Firestore transaction for atomicity.
+ * Initializes at 10000 if counter doesn't exist.
+ * @param {string} colName
+ * @returns {Promise<string>}
+ */
+export async function generateNextId(colName) {
+  const counterRef = adminDb.collection('counters').doc(colName);
+  return adminDb.runTransaction(async (transaction) => {
+    const snap = await transaction.get(counterRef);
+    if (!snap.exists) {
+      transaction.set(counterRef, { seq: 10000 });
+      return '10000';
+    }
+    const currentSeq = snap.data().seq;
+    const nextSeq = currentSeq + 1;
+    transaction.update(counterRef, { seq: nextSeq });
+    return String(nextSeq);
+  });
+}
+
 // ─── Generic Helpers ─────────────────────────────────────────────────
 
 /**

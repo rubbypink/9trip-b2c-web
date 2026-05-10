@@ -15,7 +15,7 @@
  * @see firestore-admin.js for the Admin SDK equivalent
  */
 
-import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, addDoc, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase';
 import { logger } from './logger';
 
@@ -82,6 +82,34 @@ function serializeDoc(snap) {
   return serializeTimestamp({ id: snap.id, ...snap.data() });
 }
 
+/**
+ * Generate the next sequential ID for a collection using a counters collection.
+ * Each document in `counters` tracks the current sequence for a collection.
+ * Initializes at 10000 if the counter document does not exist.
+ * @param {string} colName - Collection name (e.g., "bookings", "users")
+ * @returns {Promise<string>} - Next sequential ID as string (e.g., "10000")
+ */
+export async function generateNextId(colName) {
+  const counterRef = doc(db, 'counters', colName);
+  try {
+    const nextId = await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(counterRef);
+      if (!snap.exists()) {
+        transaction.set(counterRef, { seq: 10000 });
+        return '10000';
+      }
+      const currentSeq = snap.data().seq;
+      const nextSeq = currentSeq + 1;
+      transaction.update(counterRef, { seq: nextSeq });
+      return String(nextSeq);
+    });
+    return nextId;
+  } catch (error) {
+    logger.error(`[generateNextId] Error for ${colName}:`, error.message);
+    throw error;
+  }
+}
+
 // ─── Generic Helpers ──────────────────────────────────────────────────
 
 /**
@@ -108,8 +136,9 @@ export async function getDocById(colName, id) {
  */
 export async function createDoc(colName, data) {
   try {
-    const ref = await addDoc(collection(db, colName), { ...data, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-    return ref.id;
+    const id = await generateNextId(colName);
+    await setDoc(doc(db, colName, id), { ...data, id, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    return id;
   } catch (error) {
     logger.error(`[createDoc] Error creating ${colName}:`, error.message);
     return null;

@@ -19,8 +19,11 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
   if (!booking) return null;
 
   // Support both object/map and array formats for booking.items
+  // Lấy key của object để gán làm item.id (vì Object.values làm mất key)
   const items = booking.items
-    ? (Array.isArray(booking.items) ? booking.items : Object.values(booking.items))
+    ? (Array.isArray(booking.items) 
+        ? booking.items 
+        : Object.entries(booking.items).map(([key, val]) => ({ ...val, id: val.id || key })))
     : [];
 
   const handleCancelItem = async (itemId) => {
