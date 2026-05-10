@@ -7,12 +7,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { 
-  createBooking, 
-  createInventoryHold, 
-  releaseInventoryHold, 
-  getRealAvailability 
-} from "@/lib/firestore";
+import { createBooking } from "@/lib/firestore";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 
@@ -41,26 +36,37 @@ export function useBooking() {
       // If the project requirements evolve, we can map through items.
       const item = items[0];
       
-      // Verify availability again before holding
-      const available = await getRealAvailability(
-        item.serviceId, 
-        item.serviceType, 
-        item.startDate, 
-        item.maxCapacity || 100 // Default capacity if not set
-      );
-      
-      if (available < (item.adults + item.children)) {
+      const checkRes = await fetch('/api/availability/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: item.serviceId,
+          serviceType: item.serviceType,
+          startDate: item.startDate,
+          roomId: item.roomId,
+        }),
+      });
+      const checkData = await checkRes.json();
+      if (!checkData.success || checkData.availability < (item.adults + item.children)) {
         throw new Error("Rất tiếc, dịch vụ này đã hết chỗ vào ngày bạn chọn.");
       }
 
-      const id = await createInventoryHold(
-        item.serviceId,
-        item.serviceType,
-        item.startDate,
-        item.endDate || null,
-        item.adults + item.children,
-        user.uid
-      );
+      const holdRes = await fetch('/api/availability/hold', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: item.serviceId,
+          serviceType: item.serviceType,
+          startDate: item.startDate,
+          endDate: item.endDate || null,
+          quantity: item.adults + item.children,
+          userId: user.uid,
+          roomId: item.roomId,
+        }),
+      });
+      const holdData = await holdRes.json();
+      if (!holdData.success) throw new Error(holdData.message || 'Không thể giữ chỗ');
+      const id = holdData.holdId;
       
       setHoldId(id);
       return id;
@@ -120,7 +126,11 @@ export function useBooking() {
    */
   const cancelCheckout = useCallback(async () => {
     if (holdId) {
-      await releaseInventoryHold(holdId);
+      await fetch('/api/availability/release', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ holdId }),
+      });
       setHoldId(null);
     }
   }, [holdId]);

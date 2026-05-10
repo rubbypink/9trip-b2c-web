@@ -178,6 +178,8 @@ export async function deleteDocById(colName, id) {
  * Create a booking document.
  * @param {Object} bookingData
  * @returns {Promise<string|null>}
+ * @deprecated Use createBookingAdmin() from @/lib/firestore-admin instead.
+ *   The Admin version deducts availability atomically via FieldValue.increment().
  */
 export async function createBooking(bookingData) {
   try {
@@ -508,6 +510,8 @@ export async function validateCoupon(code) {
  * @param {number} quantity
  * @param {string} userId
  * @returns {Promise<string>}
+ * @deprecated Use POST /api/availability/hold instead.
+ *   The API route uses Admin SDK to decrement availability atomically.
  */
 export async function createInventoryHold(serviceId, serviceType, startDate, endDate, quantity, userId) {
   return createDoc('inventory_holds', {
@@ -525,6 +529,8 @@ export async function createInventoryHold(serviceId, serviceType, startDate, end
 /**
  * Release inventory hold.
  * @param {string} holdId
+ * @deprecated Use POST /api/availability/release instead.
+ *   The API route uses Admin SDK to restore availability atomically.
  */
 export async function releaseInventoryHold(holdId) {
   await deleteDocById('inventory_holds', holdId);
@@ -537,6 +543,8 @@ export async function releaseInventoryHold(holdId) {
  * @param {*} startDate
  * @param {number} totalCapacity
  * @returns {Promise<number>}
+ * @deprecated Use POST /api/availability/check instead.
+ *   The API route reads the availability field directly from the service document.
  */
 export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
   const bookingsQ = query(bookingsCol, where('serviceId', '==', serviceId), where('startDate', '==', startDate), where('status', '==', 'confirmed'));

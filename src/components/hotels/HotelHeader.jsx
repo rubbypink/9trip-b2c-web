@@ -290,7 +290,7 @@ const HotelHeader = function HotelHeader({ hotel, avgRating = 0, totalRating = 0
             {/* ── Score badge top-right ─────────────────────── */}
             {displayRating > 0 && (
               <div className="absolute top-3 right-3 z-10 flex flex-col items-center rounded-xl bg-background/90 backdrop-blur-sm px-3 py-1.5 shadow-sm">
-                <span className="text-lg font-bold text-primary">{displayRating.toFixed(1)}</span>
+                <span className="text-lg font-bold text-primary">{displayRating?.toFixed(1)}</span>
                 <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">
                   {getScoreLabel(displayRating)}
                 </span>

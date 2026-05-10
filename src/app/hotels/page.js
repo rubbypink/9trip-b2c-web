@@ -26,7 +26,7 @@ const getCachedHotelData = unstable_cache(
     const [{ hotels: rawHotels }, locations, totalCount] = await Promise.all([
       searchHotels(filters),
       getLocations(),
-      countHotels({ locationId: filters.locationId || "" }),
+      countHotels(filters),
     ]);
 
     let hotels = await resolveDocsImages(rawHotels);

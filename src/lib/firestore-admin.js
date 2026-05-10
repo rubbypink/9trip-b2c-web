@@ -1,4 +1,5 @@
 import { adminDb } from './firebase-admin';
+import admin from 'firebase-admin';
 
 // ─── Serialization Helper ────────────────────────────────────────────
 
@@ -196,7 +197,7 @@ export async function getTours({ pageSize = 12, cursor = null } = {}) {
     let q = toursCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = toursCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { tours: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    return { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[getTours] Error:', error.message);
     return { tours: [], lastVisible: null };
@@ -211,13 +212,13 @@ export async function getTours({ pageSize = 12, cursor = null } = {}) {
 export async function getFeaturedTours(count = 8) {
   try {
     const snap = await toursCol().where('isFeatured', '==', true).orderBy('createdAt', 'desc').limit(count).get();
-    if (!snap.empty) return serializeDocs(snap);
+    if (!snap.empty) return serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
   } catch (error) {
     console.error('[getFeaturedTours] Index not ready, falling back:', error.message);
   }
   try {
     const snap = await toursCol().orderBy('createdAt', 'desc').limit(count).get();
-    return serializeDocs(snap);
+    return serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
   } catch (error) {
     console.error('[getFeaturedTours] Fallback error:', error.message);
     return [];
@@ -428,8 +429,10 @@ export async function searchHotels(filters = {}) {
 }
 
 /**
- * Count hotels (by locationId only — in-memory filters not applied).
- * @param {{ locationId?: string }} filters
+ * Count hotels with optional in-memory filtering for starRating and amenities.
+ * Price filters (minPrice/maxPrice) are ignored in the count since price data
+ * lives in a separate collection (hotel_price_schedules).
+ * @param {{ locationId?: string, starRating?: string, amenities?: string, minPrice?: number|null, maxPrice?: number|null }} filters
  * @returns {Promise<number>}
  */
 export async function countHotels(filters = {}) {
@@ -437,16 +440,60 @@ export async function countHotels(filters = {}) {
   const cached = _cacheGet(key);
   if (cached !== undefined) return cached;
 
-  const { locationId } = filters;
+  const { locationId, starRating, amenities } = filters;
+
+  // Simple case: no in-memory filters — use Firestore aggregation query
+  if (!starRating && !amenities) {
+    try {
+      let q = hotelsCol();
+      if (locationId) q = q.where('address.cityId', '==', locationId);
+      const snap = await q.count().get();
+      const count = snap.data().count;
+      _cacheSet(key, count, CACHE_TTL.COUNTS);
+      return count;
+    } catch (error) {
+      console.error('[countHotels] count() failed, falling back to manual count:', error.message);
+      try {
+        let q = hotelsCol();
+        if (locationId) q = q.where('address.cityId', '==', locationId);
+        const snap = await q.get();
+        const count = snap.size;
+        _cacheSet(key, count, CACHE_TTL.COUNTS);
+        return count;
+      } catch (fallbackError) {
+        console.error('[countHotels] Fallback also failed:', fallbackError.message);
+        return 0;
+      }
+    }
+  }
+
+  // Complex case: apply starRating/amenities in-memory
   try {
     let q = hotelsCol();
     if (locationId) q = q.where('address.cityId', '==', locationId);
-    const snap = await q.count().get();
-    const count = snap.data().count;
+    const snap = await q.get();
+    let docs = serializeDocs(snap);
+
+    if (starRating) {
+      const minStar = Number(starRating);
+      docs = docs.filter((h) => (h.starRating || 0) >= minStar);
+    }
+
+    if (amenities) {
+      const amenityList = amenities.split(',').map((a) => a.trim()).filter(Boolean);
+      if (amenityList.length > 0) {
+        docs = docs.filter((h) => {
+          const ha = h.amenities || [];
+          return amenityList.every((a) => ha.some((item) => item.toLowerCase().includes(a.toLowerCase())));
+        });
+      }
+    }
+
+    const count = docs.length;
     _cacheSet(key, count, CACHE_TTL.COUNTS);
     return count;
   } catch (error) {
-    console.error('[countHotels] count() failed, falling back to manual count:', error.message);
+    console.error('[countHotels] Complex count failed, falling back to manual count:', error.message);
     try {
       let q = hotelsCol();
       if (locationId) q = q.where('address.cityId', '==', locationId);
@@ -1123,12 +1170,36 @@ export async function validateCoupon(code) {
 // ─── Inventory Hold ──────────────────────────────────────────────────
 
 /**
+ * Resolve the Firestore collection reference for a service type.
+ * @param {string} serviceType
+ * @returns {FirebaseFirestore.CollectionReference}
+ */
+function getCollectionRef(serviceType) {
+  switch (serviceType) {
+    case 'hotel':
+    case 'hotel_room':
+      return hotelsCol();
+    case 'tour':
+      return toursCol();
+    case 'activity':
+      return activitiesCol();
+    case 'car':
+      return carsCol();
+    case 'rental':
+      return rentalsCol();
+    default:
+      return toursCol();
+  }
+}
+
+/**
  * Check real-time availability considering bookings and active holds.
  * @param {string} serviceId
  * @param {string} serviceType
  * @param {*} startDate
  * @param {number} totalCapacity
  * @returns {Promise<number>}
+ * @deprecated Use getRealAvailabilityAdmin() instead — reads availability field directly.
  */
 export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
   try {
@@ -1151,6 +1222,334 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
   } catch (error) {
     console.error('[getRealAvailability] Error:', error.message);
     return totalCapacity;
+  }
+}
+
+/**
+ * Read availability directly from the service document's field (Single Source of Truth).
+ * @param {string} serviceId
+ * @param {string} serviceType - 'hotel' | 'hotel_room' | 'tour' | 'activity' | 'car' | 'rental'
+ * @param {*} startDate - Kept for API compatibility; not used for field-based reads
+ * @param {string} [roomId] - Required for hotel_room
+ * @returns {Promise<number>}
+ */
+export async function getRealAvailabilityAdmin(serviceId, serviceType, startDate, roomId) {
+  try {
+    const col = getCollectionRef(serviceType);
+    const snap = await col.doc(serviceId).get();
+    if (!snap.exists) return 0;
+    const data = snap.data();
+
+    if (serviceType === 'hotel' || serviceType === 'hotel_room') {
+      if (!roomId) return 0;
+      const rooms = data.rooms || {};
+      let roomData;
+      if (Array.isArray(rooms)) {
+        roomData = rooms.find(r => r.roomId === roomId || r.id === roomId);
+      } else {
+        roomData = rooms[roomId];
+      }
+      if (!roomData) return 0;
+      return Math.max(0, roomData.availability ?? roomData.totalRooms ?? 1);
+    }
+
+    // Tours, activities, cars, rentals — read root availability field
+    return Math.max(0, data.availability ?? data.capacity ?? 100);
+  } catch (error) {
+    console.error('[getRealAvailabilityAdmin] Error:', error.message);
+    return 0;
+  }
+}
+
+/**
+ * Create an inventory hold and atomically decrement availability.
+ * @param {string} serviceId
+ * @param {string} serviceType
+ * @param {*} startDate
+ * @param {*} endDate
+ * @param {number} quantity
+ * @param {string} userId
+ * @param {string} [roomId] - Required for hotel_room
+ * @returns {Promise<string|null>} Hold document ID or null on failure
+ */
+export async function createInventoryHoldAdmin(serviceId, serviceType, startDate, endDate, quantity, userId, roomId) {
+  try {
+    const col = getCollectionRef(serviceType);
+    const serviceRef = col.doc(serviceId);
+    const holdRef = inventoryHoldsCol().doc();
+
+    await adminDb.runTransaction(async (tx) => {
+      // Create hold document
+      tx.set(holdRef, {
+        serviceId,
+        serviceType,
+        startDate,
+        endDate,
+        quantity,
+        userId,
+        heldAt: admin.firestore.FieldValue.serverTimestamp(),
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      });
+
+      // Atomically decrement availability
+      if (serviceType === 'hotel' || serviceType === 'hotel_room') {
+        if (roomId) {
+          const docSnap = await tx.get(serviceRef);
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            const rooms = data.rooms || {};
+            if (Array.isArray(rooms)) {
+              const idx = rooms.findIndex(r => r.roomId === roomId || r.id === roomId);
+              if (idx !== -1) {
+                const current = rooms[idx].availability ?? rooms[idx].totalRooms ?? 0;
+                rooms[idx] = { ...rooms[idx], availability: Math.max(0, current - quantity) };
+                tx.update(serviceRef, { rooms });
+              }
+            } else {
+              tx.update(serviceRef, `rooms.${roomId}.availability`, admin.firestore.FieldValue.increment(-quantity));
+            }
+          }
+        }
+      } else {
+        tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(-quantity));
+      }
+    });
+
+    return holdRef.id;
+  } catch (error) {
+    console.error('[createInventoryHoldAdmin] Error:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Release an inventory hold and atomically restore availability.
+ * @param {string} holdId
+ * @returns {Promise<boolean>}
+ */
+export async function releaseInventoryHoldAdmin(holdId) {
+  try {
+    const holdRef = inventoryHoldsCol().doc(holdId);
+
+    await adminDb.runTransaction(async (tx) => {
+      const holdSnap = await tx.get(holdRef);
+      if (!holdSnap.exists) return;
+      const hold = holdSnap.data();
+
+      const col = getCollectionRef(hold.serviceType);
+      const serviceRef = col.doc(hold.serviceId);
+
+      tx.delete(holdRef);
+
+      if (hold.serviceType === 'hotel' || hold.serviceType === 'hotel_room') {
+        if (hold.roomId) {
+          const docSnap = await tx.get(serviceRef);
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            const rooms = data.rooms || {};
+            if (Array.isArray(rooms)) {
+              const idx = rooms.findIndex(r => r.roomId === hold.roomId || r.id === hold.roomId);
+              if (idx !== -1) {
+                const current = rooms[idx].availability ?? rooms[idx].totalRooms ?? 0;
+                rooms[idx] = { ...rooms[idx], availability: current + hold.quantity };
+                tx.update(serviceRef, { rooms });
+              }
+            } else {
+              tx.update(serviceRef, `rooms.${hold.roomId}.availability`, admin.firestore.FieldValue.increment(hold.quantity));
+            }
+          }
+        }
+      } else {
+        tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(hold.quantity));
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[releaseInventoryHoldAdmin] Error:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Create a booking and deduct availability for all items atomically.
+ * Replicates the booking creation logic from firestore.js createBooking().
+ * @param {Object} bookingData
+ * @param {Array} bookingData.items - Cart items
+ * @param {Object} [bookingData.contactInfo]
+ * @param {string} [bookingData.gateway]
+ * @returns {Promise<string|null>} Booking document ID or null on failure
+ */
+export async function createBookingAdmin(bookingData) {
+  try {
+    const rawItems = bookingData.items || [];
+    const items = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
+
+    const total = items.reduce((sum, item) => sum + (item.total || 0), 0);
+    const deposit = items.reduce((sum, item) => {
+      const prepaidPct = item.prepaid || 0;
+      return sum + (item.total || 0) * prepaidPct / 100;
+    }, 0);
+    const balance = total - deposit;
+
+    const allOrder = items.length > 0 && items.every(item => (item.prepaid || 0) === 0);
+    const prepaidType = allOrder ? 'order' : (deposit >= total ? 'full' : 'deposit');
+    const status = allOrder ? 'ordered' : 'pending';
+
+    let dueDate = null;
+    if (allOrder) {
+      dueDate = items[0]?.startDate || null;
+    } else {
+      dueDate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    }
+
+    const contactInfo = {
+      fullName: bookingData.contactInfo?.fullName || '',
+      email: bookingData.contactInfo?.email || '',
+      phone: bookingData.contactInfo?.phone || '',
+      specialRequests: bookingData.contactInfo?.specialRequests || ''
+    };
+
+    const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
+
+    const { paymentStatus, bookingStatus, pricing, gateway, ...cleanData } = bookingData;
+
+    const bookingRef = bookingsCol().doc();
+
+    await adminDb.runTransaction(async (tx) => {
+      tx.set(bookingRef, {
+        ...cleanData,
+        bookingCode,
+        payment: {
+          prepaid: prepaidType,
+          total: Math.round(total),
+          deposit: Math.round(deposit),
+          balance: Math.round(balance),
+          gate: (gateway || 'CASH').toUpperCase(),
+          date: null,
+          dueDate: dueDate,
+        },
+        status,
+        contactInfo,
+        erpSyncStatus: 'pending',
+      });
+
+      for (const item of items) {
+        const col = getCollectionRef(item.serviceType);
+        const serviceRef = col.doc(item.serviceId);
+        const qty = item.quantity ?? item.rooms ?? 1;
+
+        if (item.serviceType === 'hotel_room') {
+          if (item.roomId) {
+            const docSnap = await tx.get(serviceRef);
+            if (docSnap.exists) {
+              const data = docSnap.data();
+              const rooms = data.rooms || {};
+              if (Array.isArray(rooms)) {
+                const idx = rooms.findIndex(r => r.roomId === item.roomId || r.id === item.roomId);
+                if (idx !== -1) {
+                  const current = rooms[idx].availability ?? rooms[idx].totalRooms ?? 0;
+                  rooms[idx] = { ...rooms[idx], availability: Math.max(0, current - qty) };
+                  tx.update(serviceRef, { rooms });
+                }
+              } else {
+                tx.update(serviceRef, `rooms.${item.roomId}.availability`, admin.firestore.FieldValue.increment(-qty));
+              }
+            }
+          }
+        } else {
+          tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(-qty));
+        }
+      }
+    });
+
+    return bookingRef.id;
+  } catch (error) {
+    console.error('[createBookingAdmin] Error:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Cancel a booking and restore availability for all items atomically.
+ * @param {string} bookingId
+ * @returns {Promise<boolean>}
+ */
+export async function cancelBookingAdmin(bookingId) {
+  try {
+    const bookingRef = bookingsCol().doc(bookingId);
+
+    await adminDb.runTransaction(async (tx) => {
+      const bookingSnap = await tx.get(bookingRef);
+      if (!bookingSnap.exists) return;
+      const booking = bookingSnap.data();
+
+      tx.update(bookingRef, { status: 'cancelled' });
+
+      const items = booking.items || [];
+      const itemArr = Array.isArray(items) ? items : Object.values(items);
+
+      if (itemArr.length > 0) {
+        for (const item of itemArr) {
+          const col = getCollectionRef(item.serviceType || booking.serviceType);
+          const serviceRef = col.doc(item.serviceId || booking.serviceId);
+          const qty = item.quantity ?? item.rooms ?? 1;
+
+          if (item.serviceType === 'hotel_room') {
+            if (item.roomId) {
+              const docSnap = await tx.get(serviceRef);
+              if (docSnap.exists) {
+                const data = docSnap.data();
+                const rooms = data.rooms || {};
+                if (Array.isArray(rooms)) {
+                  const idx = rooms.findIndex(r => r.roomId === item.roomId || r.id === item.roomId);
+                  if (idx !== -1) {
+                    const current = rooms[idx].availability ?? rooms[idx].totalRooms ?? 0;
+                    rooms[idx] = { ...rooms[idx], availability: current + qty };
+                    tx.update(serviceRef, { rooms });
+                  }
+                } else {
+                  tx.update(serviceRef, `rooms.${item.roomId}.availability`, admin.firestore.FieldValue.increment(qty));
+                }
+              }
+            }
+          } else {
+            tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(qty));
+          }
+        }
+      } else if (booking.serviceId && booking.serviceType) {
+        const col = getCollectionRef(booking.serviceType);
+        const serviceRef = col.doc(booking.serviceId);
+        const qty = booking.quantity || 1;
+
+        if (booking.serviceType === 'hotel' || booking.serviceType === 'hotel_room') {
+          if (booking.roomId) {
+            const docSnap = await tx.get(serviceRef);
+            if (docSnap.exists) {
+              const data = docSnap.data();
+              const rooms = data.rooms || {};
+              if (Array.isArray(rooms)) {
+                const idx = rooms.findIndex(r => r.roomId === booking.roomId || r.id === booking.roomId);
+                if (idx !== -1) {
+                  const current = rooms[idx].availability ?? rooms[idx].totalRooms ?? 0;
+                  rooms[idx] = { ...rooms[idx], availability: current + qty };
+                  tx.update(serviceRef, { rooms });
+                }
+              } else {
+                tx.update(serviceRef, `rooms.${booking.roomId}.availability`, admin.firestore.FieldValue.increment(qty));
+              }
+            }
+          }
+        } else {
+          tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(qty));
+        }
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[cancelBookingAdmin] Error:', error.message);
+    return false;
   }
 }
 
