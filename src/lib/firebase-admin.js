@@ -51,7 +51,7 @@ function getServiceAccount() {
 	const privateKey = formatPrivateKey(process.env.FIREBASE_PRIVATE_KEY);
 
 	if (!projectId || !clientEmail || !privateKey) {
-		logger.warn('[firebase-admin] Thiếu env vars: FIREBASE_ADMIN_PROJECT_ID, FIREBASE_ADMIN_CLIENT_EMAIL, FIREBASE_ADMIN_PRIVATE_KEY');
+    logger.warn('[firebase-admin] Thiếu env vars: FIREBASE_ADMIN_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY');
 		return null;
 	}
 

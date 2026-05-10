@@ -33,7 +33,7 @@ const getCachedHotelData = unstable_cache(
     hotels = await enrichHotelsWithLowestPrices(hotels);
     return { hotels, locations, totalCount };
   },
-  ['hotels-list-query'],
+  ['hotels-list'],
   {
     revalidate: 3600,
     tags: ['hotels-data']

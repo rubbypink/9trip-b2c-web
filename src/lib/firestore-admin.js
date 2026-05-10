@@ -386,9 +386,10 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
  * @returns {Promise<{hotels: Object[], lastVisible: Object|null}>}
  */
 export async function searchHotels(filters = {}) {
-  const { locationId, starRating, minPrice, maxPrice, amenities, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
+  const { locationId, starRating, amenities, pageSize = 12, page = 1, cursor } = filters;
   try {
-    const fetchLimit = cursor ? pageSize : (page > 1 ? (page + 1) * pageSize : pageSize * 2);
+    // Fetch extra docs to compensate for in-memory filtering (star, amenities)
+    const fetchLimit = cursor ? pageSize : pageSize * 3;
     let q = hotelsCol();
     if (locationId) q = q.where('address.cityId', '==', locationId);
     q = q.orderBy('createdAt', 'desc').limit(fetchLimit);
@@ -408,18 +409,6 @@ export async function searchHotels(filters = {}) {
           return amenityList.some((a) => ha.some((item) => item.toLowerCase().includes(a.toLowerCase())));
         });
       }
-    }
-    if (minPrice != null && minPrice !== '') {
-      hotels = hotels.filter((h) => (h.pricing?.basePrice || 0) >= Number(minPrice));
-    }
-    if (maxPrice != null && maxPrice !== '') {
-      hotels = hotels.filter((h) => (h.pricing?.basePrice || 0) <= Number(maxPrice));
-    }
-
-    switch (sortBy) {
-      case 'price_asc': hotels.sort((a, b) => (a.pricing?.basePrice || 0) - (b.pricing?.basePrice || 0)); break;
-      case 'price_desc': hotels.sort((a, b) => (b.pricing?.basePrice || 0) - (a.pricing?.basePrice || 0)); break;
-      case 'rating': hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0)); break;
     }
 
     if (!cursor) {
@@ -457,8 +446,18 @@ export async function countHotels(filters = {}) {
     _cacheSet(key, count, CACHE_TTL.COUNTS);
     return count;
   } catch (error) {
-    console.error('[countHotels] Error:', error.message);
-    return 0;
+    console.error('[countHotels] count() failed, falling back to manual count:', error.message);
+    try {
+      let q = hotelsCol();
+      if (locationId) q = q.where('address.cityId', '==', locationId);
+      const snap = await q.get();
+      const count = snap.size;
+      _cacheSet(key, count, CACHE_TTL.COUNTS);
+      return count;
+    } catch (fallbackError) {
+      console.error('[countHotels] Fallback also failed:', fallbackError.message);
+      return 0;
+    }
   }
 }
 
@@ -553,7 +552,7 @@ export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYe
     const snap = await adminDb.collection('hotel_price_schedules').doc(docId).get();
     if (!snap.exists) return null;
     const data = serializeSnap(snap);
-    if (data.info?.hotelId !== hotelId || data.info?.year !== year || data.info?.status !== 'actived') return null;
+    if (data.info?.hotelId !== hotelId || data.info?.year !== year || data.info?.status !== 'active') return null;
     return data;
   } catch (error) {
     console.error('[getHotelPriceSchedule] Error:', error.message);

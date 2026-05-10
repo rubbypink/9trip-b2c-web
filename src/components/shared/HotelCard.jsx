@@ -49,10 +49,7 @@ export default function HotelCard({ hotel, item, isFeatured = false, className }
   const data = hotel || item;
   if (!data) return null;
 
-  const stars = [];
-  for (let i = 0; i < (data.starRating || 0); i++) {
-    stars.push("⭐");
-  }
+  const stars = Array.from({ length: data.starRating || 0 }, () => '⭐');
 
   // Ưu tiên lowestPrice từ pricing data, fallback về basePrice
   const displayPrice = data.lowestPrice || data.pricing?.basePrice || data.pricing?.adultPrice || data.minPrice || 0;

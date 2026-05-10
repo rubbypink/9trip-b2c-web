@@ -212,7 +212,7 @@ export async function createBooking(bookingData) {
     const bookingCode = `9T-${Date.now().toString(36).toUpperCase()}`;
 
     // Strip old schema fields before creating
-    const { paymentStatus, bookingStatus, paymentGateway, pricing, ...cleanData } = bookingData;
+    const { paymentStatus, bookingStatus, pricing, ...cleanData } = bookingData;
 
     const id = await createDoc('bookings', {
       ...cleanData,
@@ -222,7 +222,7 @@ export async function createBooking(bookingData) {
         total: Math.round(total),
         deposit: Math.round(deposit),
         balance: Math.round(balance),
-        gate: (bookingData.paymentGateway || 'CASH').toUpperCase(),
+        gate: (bookingData.gateway || 'CASH').toUpperCase(),
         date: null,
         dueDate: dueDate
       },
