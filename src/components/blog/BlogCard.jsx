@@ -30,9 +30,9 @@ export default function BlogCard({ blog }) {
   return (
     <Link
       href={`/blog/${blog.slug}`}
-      className="group flex flex-col bg-background rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-shadow duration-300"
+      className="group flex flex-col md:flex-row bg-background rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-shadow duration-300"
     >
-      <div className="relative aspect-video w-full overflow-hidden bg-muted">
+      <div className="relative aspect-video md:aspect-auto md:w-2/5 w-full shrink-0 overflow-hidden bg-muted">
         {blog.featuredImage ? (
           <Image
             src={blog.featuredImage}
@@ -47,31 +47,31 @@ export default function BlogCard({ blog }) {
           </div>
         )}
         {blog.category && (
-          <span className="absolute top-2 left-2 px-2.5 py-1 bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs font-medium rounded-full">
+          <span className="absolute top-4 left-4 px-3 py-1 bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-full shadow-sm z-10">
             {blog.category}
           </span>
         )}
       </div>
 
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-lg line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+      <div className="p-5 md:p-6 flex flex-col flex-grow justify-center">
+        <h3 className="font-bold text-xl md:text-2xl line-clamp-2 mb-3 group-hover:text-primary transition-colors text-foreground">
           {blog.title}
         </h3>
         {blog.excerpt && (
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+          <p className="text-sm md:text-base text-muted-foreground line-clamp-3 mb-4">
             {blog.excerpt}
           </p>
         )}
-        <div className="mt-auto flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-auto flex flex-wrap items-center gap-4 text-xs md:text-sm font-medium text-muted-foreground">
           {blog.author && (
-            <span className="flex items-center gap-1">
-              <User className="w-3 h-3" />
+            <span className="flex items-center gap-1.5">
+              <User className="w-4 h-4" />
               {blog.author}
             </span>
           )}
           {blog.createdAt && (
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
               {formatDate(blog.createdAt)}
             </span>
           )}

@@ -72,7 +72,7 @@ export default async function BlogListPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {blogs.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-xl text-muted-foreground">Chưa có bài viết</p>
@@ -81,9 +81,9 @@ export default async function BlogListPage() {
             </p>
           </div>
         ) : (
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
+          <div className="flex flex-col gap-8">
             {blogs.map((blog) => (
-              <div key={blog.id} className="flex-none w-[280px] sm:w-[320px] lg:w-[360px] snap-start">
+              <div key={blog.id} className="w-full">
                 <BlogCard blog={blog} />
               </div>
             ))}

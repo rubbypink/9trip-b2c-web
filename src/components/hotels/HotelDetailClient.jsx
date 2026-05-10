@@ -129,9 +129,18 @@ export default function HotelDetailClient({
     return () => window.removeEventListener('popstate', syncFromHash);
   }, []);
 
-  /**
-   * Handle date changes — update checkIn/checkOut, pricing auto-recomputes via useMemo.
-   */
+  // ── Room Quantities State ───────────────────────────────
+  const [roomQuantities, setRoomQuantities] = useState({});
+
+  const handleRoomQuantityChange = useCallback((roomId, rateType, delta, maxRooms = 10) => {
+    setRoomQuantities(prev => {
+      const key = `${roomId}_${rateType}`;
+      const current = prev[key] || 0;
+      const next = Math.max(0, Math.min(maxRooms, current + delta));
+      return { ...prev, [key]: next };
+    });
+  }, []);
+
   const handleDateChange = useCallback((newCheckIn, newCheckOut) => {
     if (newCheckIn) setCheckIn(newCheckIn);
     if (newCheckOut) setCheckOut(newCheckOut);
@@ -307,6 +316,8 @@ export default function HotelDetailClient({
                       checkIn={checkIn}
                       checkOut={checkOut}
                       nights={nights}
+                      roomQuantities={roomQuantities}
+                      onRoomQuantityChange={handleRoomQuantityChange}
                     />
                   </div>
                 </div>
@@ -377,6 +388,8 @@ export default function HotelDetailClient({
                 checkOut={checkOut}
                 nights={nights}
                 onDateChange={handleDateChange}
+                roomQuantities={roomQuantities}
+                onRoomQuantityChange={handleRoomQuantityChange}
               />
 
               {/* Map Box */}

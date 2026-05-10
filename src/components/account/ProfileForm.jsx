@@ -22,6 +22,10 @@ export default function ProfileForm() {
       displayName: fd.get("displayName")?.toString().trim() || "",
       phone: fd.get("phone")?.toString().trim() || "",
       address: fd.get("address")?.toString().trim() || "",
+      dateOfBirth: fd.get("dateOfBirth")?.toString().trim() || "",
+      cccd: fd.get("cccd")?.toString().trim() || "",
+      cccdIssueDate: fd.get("cccdIssueDate")?.toString().trim() || "",
+      nationality: fd.get("nationality")?.toString().trim() || "Việt Nam",
     };
 
     try {
@@ -126,7 +130,7 @@ export default function ProfileForm() {
       {/* Address */}
       <div>
         <label htmlFor="address" className="block text-sm font-medium text-foreground mb-1">
-          Địa chỉ
+          Địa chỉ thường trú
         </label>
         <textarea
           id="address"
@@ -134,8 +138,82 @@ export default function ProfileForm() {
           rows={3}
           defaultValue={profile.address || ""}
           className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition resize-none"
-          placeholder="Nhập địa chỉ của bạn"
+          placeholder="Nhập địa chỉ thường trú của bạn"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* CCCD */}
+        <div>
+          <label htmlFor="cccd" className="block text-sm font-medium text-foreground mb-1">
+            Số CCCD/CMND
+          </label>
+          <input
+            id="cccd"
+            name="cccd"
+            type="text"
+            defaultValue={profile.cccd || ""}
+            maxLength={12}
+            className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+            placeholder="VD: 001234567890"
+          />
+        </div>
+
+        {/* CCCD Issue Date */}
+        <div>
+          <label htmlFor="cccdIssueDate" className="block text-sm font-medium text-foreground mb-1">
+            Ngày cấp CCCD
+          </label>
+          <input
+            id="cccdIssueDate"
+            name="cccdIssueDate"
+            type="date"
+            defaultValue={profile.cccdIssueDate || ""}
+            className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* DOB */}
+        <div>
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium text-foreground mb-1">
+            Ngày sinh
+          </label>
+          <input
+            id="dateOfBirth"
+            name="dateOfBirth"
+            type="date"
+            defaultValue={profile.dateOfBirth || ""}
+            className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          />
+        </div>
+
+        {/* Nationality */}
+        <div>
+          <label htmlFor="nationality" className="block text-sm font-medium text-foreground mb-1">
+            Quốc tịch
+          </label>
+          <select
+            id="nationality"
+            name="nationality"
+            defaultValue={profile.nationality || "Việt Nam"}
+            className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          >
+            <option value="Việt Nam">Việt Nam</option>
+            <option value="Hoa Kỳ">Hoa Kỳ</option>
+            <option value="Anh">Anh</option>
+            <option value="Pháp">Pháp</option>
+            <option value="Nhật Bản">Nhật Bản</option>
+            <option value="Hàn Quốc">Hàn Quốc</option>
+            <option value="Trung Quốc">Trung Quốc</option>
+            <option value="Úc">Úc</option>
+            <option value="Canada">Canada</option>
+            <option value="Đức">Đức</option>
+            <option value="Thái Lan">Thái Lan</option>
+            <option value="Singapore">Singapore</option>
+          </select>
+        </div>
       </div>
 
       {/* Submit */}

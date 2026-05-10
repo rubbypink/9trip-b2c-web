@@ -128,15 +128,21 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
                 return (
                   <div key={item.id} className="p-4 border border-border rounded-xl bg-surface-1/50 flex flex-col sm:flex-row gap-4 justify-between">
                     <div>
-                      <h4 className="font-semibold text-foreground">{item.serviceTitle}</h4>
+                      <h4 className="font-semibold text-foreground">{item.serviceTitle || item.title || item.name}</h4>
                       <p className="text-xs text-muted-foreground mt-1">
                         {item.startDate && formatDate(item.startDate)} 
                         {item.endDate && ` - ${formatDate(item.endDate)}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Số lượng: {item.rooms || item.adults || 1}
+                        {item.serviceType === 'hotel_room' || item.serviceType === 'hotel' ? (
+                          `Số lượng: ${item.rooms || 1} phòng`
+                        ) : item.serviceType === 'activity' ? (
+                          `Số lượng: ${item.adults || 1} vé`
+                        ) : (
+                          `Số lượng: ${item.adults || 1} người lớn${item.children > 0 ? `, ${item.children} trẻ em` : ''}${item.infants > 0 ? `, ${item.infants} em bé` : ''}`
+                        )}
                       </p>
-                      <p className="font-medium text-primary-600 mt-2">{formatCurrency(item.total)}</p>
+                      <p className="font-medium text-primary-600 mt-2">{formatCurrency(item.total || item.baseTotal || 0)}</p>
                     </div>
                     
                     {canModifyCancel && (
@@ -199,16 +205,29 @@ export default function BookingDetailsModal({ booking, onClose, onUpdateBooking 
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Số lượng</label>
-                <input 
-                  type="number" 
-                  min="1"
-                  value={modifyData.quantity}
-                  onChange={e => setModifyData({...modifyData, quantity: parseInt(e.target.value) || 1})}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
+              {modifyingItem.serviceType === 'hotel_room' || modifyingItem.serviceType === 'hotel' ? (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Số lượng phòng</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={modifyData.quantity}
+                    onChange={e => setModifyData({...modifyData, quantity: parseInt(e.target.value) || 1})}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Số lượng (người/vé)</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={modifyData.quantity}
+                    onChange={e => setModifyData({...modifyData, quantity: parseInt(e.target.value) || 1})}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">

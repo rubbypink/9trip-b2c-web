@@ -205,36 +205,31 @@ function RoomCollapsibleInfo({ room }) {
  *   nights: number,
  * }} props
  */
-export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = "", checkOut = "", nights = 1 }) {
+export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = "", checkOut = "", nights = 1, roomQuantities = {}, onRoomQuantityChange }) {
   const router = useRouter();
-  const { addItem, updateCartItem, removeCartItemByKey, items: cartItems } = useCart();
-
-  // State: quantity cho mỗi room × rateType (key: "roomId_rateType")
-  const [quantities, setQuantities] = useState({});
+  const { updateCartItem, removeCartItemByKey, items: cartItems } = useCart();
 
   /**
    * Thay đổi số lượng cho 1 room + rate type.
    * @param {string} roomId
    * @param {string} rateType
    * @param {number} delta
+   * @param {number} maxRooms
    */
-  const updateQuantity = useCallback((roomId, rateType, delta) => {
-    const key = `${roomId}_${rateType}`;
-    setQuantities((prev) => {
-      const current = prev[key] || 0;
-      const next = Math.max(0, Math.min(10, current + delta));
-      return { ...prev, [key]: next };
-    });
-  }, []);
+  const updateQuantity = useCallback((roomId, rateType, delta, maxRooms) => {
+    if (onRoomQuantityChange) {
+      onRoomQuantityChange(roomId, rateType, delta, maxRooms);
+    }
+  }, [onRoomQuantityChange]);
 
   /**
    * Tổng tiền cho 1 room × rate type (chỉ tính active rooms).
    */
   const getLineTotal = useCallback((roomId, rateType, sellPrice) => {
     const key = `${roomId}_${rateType}`;
-    const qty = quantities[key] || 0;
+    const qty = roomQuantities[key] || 0;
     return sellPrice * nights * qty;
-  }, [quantities, nights]);
+  }, [roomQuantities, nights]);
 
   /**
    * Tổng tiền tất cả selections từ active rooms.
@@ -254,14 +249,13 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
    * Có ít nhất 1 selection từ active room.
    */
   const hasSelection = useMemo(() => {
-    return Object.entries(quantities).some(([key, qty]) => qty > 0);
-  }, [quantities]);
+    return Object.entries(roomQuantities).some(([key, qty]) => qty > 0);
+  }, [roomQuantities]);
 
   /**
    * Restore quantities from existing cart items on mount.
    */
   useEffect(() => {
-    const restored = { ...quantities };
     for (const room of pricingTable) {
       if (!room.isActive) continue;
       for (const rt of room.rateTypes) {
@@ -272,13 +266,15 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
             ci.rateType === rt.rateType &&
             ci.startDate === checkIn
         );
-        if (cartItem) {
+        if (cartItem && cartItem.rooms > 0) {
           const key = `${room.roomId}_${rt.rateType}`;
-          restored[key] = cartItem.rooms || 0;
+          const currentQty = roomQuantities[key] || 0;
+          if (currentQty !== cartItem.rooms) {
+             updateQuantity(room.roomId, rt.rateType, cartItem.rooms - currentQty, room.totalRooms || 10);
+          }
         }
       }
     }
-    setQuantities(restored);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -427,11 +423,11 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                           ? 'ring-2 ring-blue-500 bg-blue-50/50'
                           : 'hover:bg-surface-2/50'
                       }`}
-                      onClick={() => updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1)}
+                      onClick={() => updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1);
+                          updateQuantity(room.roomId, rt.rateType, isSelected ? -qty : 1, room.totalRooms || 10);
                         }
                       }}
                     >
@@ -448,7 +444,7 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, -1); }}
+                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, -1, room.totalRooms || 10); }}
                           disabled={qty === 0}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
@@ -457,8 +453,8 @@ export default function RoomsPanel({ pricingTable = [], hotel = {}, checkIn = ""
                         <span className="w-10 text-center text-sm font-semibold text-foreground">{qty}</span>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, 1); }}
-                          disabled={qty >= room.totalRooms}
+                          onClick={(e) => { e.stopPropagation(); updateQuantity(room.roomId, rt.rateType, 1, room.totalRooms || 10); }}
+                          disabled={qty >= (room.totalRooms || 10)}
                           className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:bg-surface-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
                           +

@@ -28,57 +28,47 @@ import { useCart } from "@/lib/cart";
  *   onDateChange: (checkIn: string, checkOut: string) => void,
  * }} props
  */
-export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn: initCheckIn = "", checkOut: initCheckOut = "", nights: initNights = 1, onDateChange }) {
+export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn = "", checkOut = "", nights = 1, onDateChange, roomQuantities = {}, onRoomQuantityChange }) {
   const router = useRouter();
-  const { addItem, updateCartItem, removeCartItemByKey } = useCart();
+  const { updateCartItem, removeCartItemByKey } = useCart();
   const debounceRef = useRef(null);
-
-  // ── Date state ───────────────────────────────────────────
-  const [checkIn, setCheckIn] = useState(initCheckIn);
-  const [checkOut, setCheckOut] = useState(initCheckOut);
-
-  // ── Per-room quantity state ──────────────────────────────
-  // Key: roomId, value: quantity (chỉ 1 rate type đầu tiên)
-  const [quantities, setQuantities] = useState({});
 
   // ── Min date ─────────────────────────────────────────────
   const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
-
-  // ── Computed nights ──────────────────────────────────────
-  const nights = useMemo(() => {
-    if (!checkIn || !checkOut) return initNights || 1;
-    const ci = new Date(checkIn);
-    const co = new Date(checkOut);
-    const diff = Math.max(1, Math.round((co - ci) / (1000 * 60 * 60 * 24)));
-    return diff;
-  }, [checkIn, checkOut, initNights]);
 
   // ── Only show active rooms in widget ─────────────────────
   const activeRooms = useMemo(() => pricingTable.filter((r) => r.isActive), [pricingTable]);
 
   // ── Per-room quantities helper ───────────────────────────
-  const getRoomQty = useCallback((roomId) => quantities[roomId] || 0, [quantities]);
+  // We use the first rateType as default for the widget
+  const getFirstRateType = useCallback((room) => {
+    return room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0].rateType : 'standard';
+  }, []);
+
+  const getRoomQty = useCallback((roomId, rateType) => {
+    const key = `${roomId}_${rateType}`;
+    return roomQuantities[key] || 0;
+  }, [roomQuantities]);
 
   const updateRoomQty = useCallback((roomId, delta) => {
-    setQuantities((prev) => {
-      const current = prev[roomId] || 0;
-      const room = pricingTable.find((r) => r.roomId === roomId);
-      const maxRooms = room?.totalRooms || 10;
-      const next = Math.max(0, Math.min(maxRooms, current + delta));
-      return { ...prev, [roomId]: next };
-    });
-  }, [pricingTable]);
+    const room = pricingTable.find((r) => r.roomId === roomId);
+    if (!room) return;
+    const rateType = getFirstRateType(room);
+    const maxRooms = room.totalRooms || 10;
+    if (onRoomQuantityChange) {
+      onRoomQuantityChange(roomId, rateType, delta, maxRooms);
+    }
+  }, [pricingTable, onRoomQuantityChange, getFirstRateType]);
 
   // ── Cart sync: quantity change → auto-update cart ────────
   const syncCart = useCallback(() => {
     if (!hotel.id) return;
     for (const room of activeRooms) {
-      const qty = getRoomQty(room.roomId);
-      // Use the first rateType for pricing
       const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
+      const rateType = rt ? rt.rateType : 'standard';
+      const qty = getRoomQty(room.roomId, rateType);
       const roomPrice = rt ? rt.avgSellPrice : 0;
       const lineTotal = roomPrice * nights * qty;
-      const key = `${room.roomId}_${rt ? rt.rateType : 'standard'}`;
 
       if (qty > 0 && rt) {
         updateCartItem({
@@ -104,11 +94,10 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
           roomName: room.roomName,
         });
       } else {
-        // Remove from cart if qty = 0 and was previously added
         removeCartItemByKey({
           serviceId: hotel.id,
           roomId: room.roomId,
-          rateType: rt ? rt.rateType : 'standard',
+          rateType: rateType,
           startDate: checkIn || minDate,
         });
       }
@@ -129,13 +118,14 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [quantities, checkIn, checkOut, nights, debouncedSync]);
+  }, [roomQuantities, checkIn, checkOut, nights, debouncedSync]);
 
   // ── Grand total ──────────────────────────────────────────
   const grandTotal = useMemo(() => {
     let total = 0;
     for (const room of activeRooms) {
-      const qty = getRoomQty(room.roomId);
+      const rateType = getFirstRateType(room);
+      const qty = getRoomQty(room.roomId, rateType);
       if (qty === 0) continue;
       const rt = room.rateTypes && room.rateTypes.length > 0 ? room.rateTypes[0] : null;
       if (rt) {
@@ -143,40 +133,30 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
       }
     }
     return total;
-  }, [activeRooms, getRoomQty, nights]);
+  }, [activeRooms, getRoomQty, nights, getFirstRateType]);
 
   // ── Has any selection ────────────────────────────────────
   const hasSelection = useMemo(() => {
-    return Object.values(quantities).some((q) => q > 0);
-  }, [quantities]);
-
-  // ── Sync local dates to parent when they change ──────────
-  const syncDatesToParent = useCallback((newCheckIn, newCheckOut) => {
-    if (onDateChange) {
-      onDateChange(newCheckIn || checkIn, newCheckOut || checkOut);
-    }
-  }, [onDateChange, checkIn, checkOut]);
+    return Object.keys(roomQuantities).some(k => roomQuantities[k] > 0);
+  }, [roomQuantities]);
 
   // ── Handle check-in change ───────────────────────────────
   const handleCheckInChange = useCallback((e) => {
     const val = e.target.value;
-    setCheckIn(val);
     let newCheckOut = checkOut;
     if (!checkOut || val >= checkOut) {
       const ci = new Date(val);
       ci.setDate(ci.getDate() + 1);
       newCheckOut = ci.toISOString().split("T")[0];
-      setCheckOut(newCheckOut);
     }
-    syncDatesToParent(val, newCheckOut);
-  }, [checkOut, syncDatesToParent]);
+    if (onDateChange) onDateChange(val, newCheckOut);
+  }, [checkOut, onDateChange]);
 
   // ── Handle check-out change ──────────────────────────────
   const handleCheckOutChange = useCallback((e) => {
     const val = e.target.value;
-    setCheckOut(val);
-    syncDatesToParent(checkIn, val);
-  }, [checkIn, syncDatesToParent]);
+    if (onDateChange) onDateChange(checkIn, val);
+  }, [checkIn, onDateChange]);
 
   // ── Handle book now ──────────────────────────────────────
   const handleBookNow = useCallback(() => {
