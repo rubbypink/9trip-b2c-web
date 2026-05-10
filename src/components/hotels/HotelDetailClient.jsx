@@ -10,6 +10,7 @@ import ImageCarousel from "@/components/shared/ImageCarousel";
 import GoogleMap from "@/components/shared/GoogleMap";
 import { ReviewSummaryCompact, WishlistButton, ShareButton } from "@/components/hotels/HotelHeader";
 import HotelBookingWidget from "@/components/hotels/HotelBookingWidget";
+import useHotelBooking from "@/hooks/useHotelBooking";
 import OverviewPanel from "@/components/hotels/HotelDetail/OverviewPanel";
 import RoomsPanel from "@/components/hotels/HotelDetail/RoomsPanel";
 import AmenitiesPanel from "@/components/hotels/HotelDetail/AmenitiesPanel";
@@ -143,17 +144,14 @@ export default function HotelDetailClient({
     return () => window.removeEventListener('popstate', syncFromHash);
   }, []);
 
-  // ── Room Quantities State ───────────────────────────────
-  const [roomQuantities, setRoomQuantities] = useState({});
-
-  const handleRoomQuantityChange = useCallback((roomId, rateType, delta, maxRooms = 10) => {
-    setRoomQuantities(prev => {
-      const key = `${roomId}_${rateType}`;
-      const current = prev[key] || 0;
-      const next = Math.max(0, Math.min(maxRooms, current + delta));
-      return { ...prev, [key]: next };
-    });
-  }, []);
+  // ── Room Quantities (shared hook) ────────────────────────
+  const { roomQuantities, setRoomQuantity: handleRoomQuantityChange } = useHotelBooking({
+    pricingTable,
+    hotel,
+    checkIn,
+    checkOut,
+    nights,
+  });
 
   const handleDateChange = useCallback((newCheckIn, newCheckOut) => {
     if (newCheckIn) setCheckIn(newCheckIn);

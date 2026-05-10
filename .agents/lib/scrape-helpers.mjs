@@ -1,9 +1,11 @@
 /**
- * Scrape helper utilities — slugify, timestamps, report generation, temp file I/O.
+ * Scrape helper utilities — slugify, timestamps, report generation, temp file I/O, HTML utils.
  */
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import https from 'https';
+import http from 'http';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
@@ -126,4 +128,84 @@ export async function cleanTempFile(slug, prefix) {
   if (fs.existsSync(filepath)) {
     fs.unlinkSync(filepath);
   }
+}
+
+// ============================================================================
+// HTML & HTTP Utilities
+// ============================================================================
+
+/**
+ * Fetch HTML content from a URL with timeout and redirect support.
+ * @param {string} url - Target URL
+ * @param {number} [timeout=30000] - Request timeout in ms
+ * @returns {Promise<string>} - HTML content
+ */
+export function fetchHtml(url, timeout = 30000) {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    const req = client.get(url, {
+      timeout,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+      },
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        const redirectUrl = new URL(res.headers.location, url).toString();
+        return fetchHtml(redirectUrl, timeout).then(resolve).catch(reject);
+      }
+      if (res.statusCode !== 200) {
+        return reject(new Error(`HTTP ${res.statusCode} for ${url}`));
+      }
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => resolve(data));
+      res.on('error', reject);
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+  });
+}
+
+/**
+ * Unescape common HTML entities in a string.
+ * @param {string} str - String with HTML entities
+ * @returns {string} - Unescaped string
+ */
+export function unescapeHtml(str) {
+  return str
+    .replace(/&q;/g, '"')
+    .replace(/&l;/g, '<')
+    .replace(/&g;/g, '>')
+    .replace(/&a;/g, '&')
+    .replace(/&n;/g, '\n')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+/**
+ * Strip HTML tags from a string, preserving line breaks.
+ * @param {string} html - HTML content
+ * @returns {string} - Plain text with line breaks preserved
+ */
+export function stripHtml(html) {
+  if (!html) return '';
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }

@@ -6,7 +6,7 @@
  * - Extracts structured hotel data from DOM via evaluate()
  * - Extracts gallery images from page HTML
  * - Post-processes and classifies images by room
- * - Returns JSON matching saveBookingDataSkill.js input schema
+ * - Returns JSON matching saveBookingDataSkill.mjs input schema
  *
  * Usage:
  *   node getHotelImages.mjs --url=https://www.booking.com/hotel/vn/...
@@ -31,6 +31,7 @@ import {
 } from '../../../lib/browser-automation.mjs';
 import { normalizeImageUrl, deduplicateUrls } from '../../../lib/image-helpers.mjs';
 import { loadEnvConfig } from '../../../lib/firebase-helpers.mjs';
+import { slugify } from '../../../lib/scrape-helpers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -96,23 +97,6 @@ function classifyImageType(url) {
   return 'hotel';
 }
 
-/**
- * Slugify a string — remove diacritics, lowercase, hyphenate.
- * @param {string} text
- * @returns {string}
- */
-function slugifyText(text) {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
 
 /**
  * Normalize a room name for fuzzy matching.
@@ -120,7 +104,7 @@ function slugifyText(text) {
  * @returns {string}
  */
 function normalizeRoomName(name) {
-  return slugifyText(name).replace(/-/g, ' ');
+  return slugify(name).replace(/-/g, ' ');
 }
 
 /**
@@ -363,13 +347,13 @@ function classifyAndSortImages(allUrls, rooms, responseText) {
 // ============================================================================
 
 /**
- * Build the final output object matching saveBookingDataSkill.js input schema.
+ * Build the final output object matching saveBookingDataSkill.mjs input schema.
  * @param {Object} extracted - Structured data from DOM extraction
  * @param {string[]} hotelGallery - Processed hotel gallery URLs
  * @param {Map<string, string[]>} roomImageMap - Room name → image URLs
  * @param {Object[]} rooms - Room definitions from extract
  * @param {string[]} warnings - Accumulated warnings
- * @returns {Object} Clean JSON matching saveBookingDataSkill.js input
+ * @returns {Object} Clean JSON matching saveBookingDataSkill.mjs input
  */
 function buildOutput(extracted, hotelGallery, roomImageMap, rooms, warnings) {
   const extractGallery = Array.isArray(extracted.gallery)
@@ -467,7 +451,7 @@ function buildOutput(extracted, hotelGallery, roomImageMap, rooms, warnings) {
  * 4. Evaluate DOM để lấy structured data
  * 5. Extract gallery image URLs từ page HTML
  * 6. Post-process: normalize, deduplicate, classify images by room
- * 7. Build output matching saveBookingDataSkill.js input schema
+ * 7. Build output matching saveBookingDataSkill.mjs input schema
  *
  * @param {string} targetUrl - Booking.com hotel detail URL
  * @returns {Promise<{success: boolean, data?: Object, error?: string}>}
@@ -507,19 +491,86 @@ export async function scrapeHotelFromUrl(targetUrl) {
 
     // ── Step 4: Extract structured data from DOM ────────────────────
     log('info', 'Step 4/5: Extracting structured data from DOM...');
-    const extractScript = buildExtractScript();
-    const dataRaw = await evaluate(extractScript);
 
-    /** @type {Object} */
-    let extracted = {};
-    try {
-      extracted = JSON.parse(dataRaw || '{}');
-      // Parse nested JSON strings (rooms, reviews are stringified)
-      if (typeof extracted.rooms === 'string') extracted.rooms = JSON.parse(extracted.rooms);
-      if (typeof extracted.reviews === 'string') extracted.reviews = JSON.parse(extracted.reviews);
-    } catch (e) {
-      warnings.push(`DOM extraction JSON parse failed: ${e.message}`);
-    }
+    /**
+     * Safely evaluate a single extraction expression, returning null on failure.
+     * @param {string} jsExpr - JavaScript expression to evaluate in browser
+     * @returns {Promise<any>}
+     */
+    const safeEval = async (jsExpr) => {
+      try {
+        const raw = await evaluate(jsExpr);
+        if (!raw || raw === 'null' || raw === 'undefined') return null;
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    };
+
+    // Extract fields individually for robustness
+    const extracted = {};
+
+    // --- Name ---
+    extracted.name = (await safeEval(
+      `(function(){var s=["h2.pp-header__title","[data-testid=\"header-title\"]","h1.hp__hotel-title","[data-testid=\"property-header\"] h1","h2[data-testid=\"property-name\"]","h2"];for(var i=0;i<s.length;i++){var el=document.querySelector(s[i]);if(el&&el.textContent)return JSON.stringify(el.textContent.trim())}var t=document.title.split(" - ")[0].split("|")[0];return JSON.stringify(t?t.trim():"");})()`
+    )) || '';
+
+    if (typeof extracted.name === 'string') extracted.name = extracted.name.replace(/^"|"$/g, '');
+
+    // --- Star Rating ---
+    extracted.starRating = await safeEval(
+      `(function(){var c=document.querySelector("[data-testid=\"rating-stars\"],.b6f6d8ad57");if(c){var n=c.querySelectorAll("span,svg,i[class*=\"star\"]").length;return JSON.stringify(n||0)}var s=document.querySelectorAll("[class*=\"star\"]:not([class*=\"empty\"])");return JSON.stringify(s.length>0?s.length:null);})()`
+    );
+
+    // --- Address ---
+    extracted.address = (await safeEval(
+      `(function(){var el=document.querySelector("[data-testid=\"property-address\"],.hp__address,[data-testid=\"header-address\"]");return JSON.stringify(el?el.textContent.trim():"");})()`
+    )) || '';
+
+    // --- Description ---
+    extracted.description = (await safeEval(
+      `(function(){var el=document.querySelector("[data-testid=\"property-description\"],#property_description_content,.hp__hotel_desc,[data-testid=\"property-description-content\"]");if(el)return JSON.stringify(el.textContent.trim());var m=document.querySelector("meta[name=\"description\"]");return JSON.stringify(m?m.content:"");})()`
+    )) || '';
+
+    // --- Policies (check-in/check-out) ---
+    const policyText = (await safeEval(
+      `(function(){var el=document.querySelector("[data-testid=\"checkin-policy\"],.hp__hotel_policy");return JSON.stringify(el?el.textContent:"");})()`
+    )) || '';
+    const ciMatch = policyText.match(/check[\s-]*in[\s:]*(\\d{1,2}:?\\d{0,2})/i);
+    extracted.checkIn = ciMatch ? ciMatch[1] : '';
+    const coMatch = policyText.match(/check[\s-]*out[\s:]*(\\d{1,2}:?\\d{0,2})/i);
+    extracted.checkOut = coMatch ? coMatch[1] : '';
+
+    // --- Amenities ---
+    const amenitiesRaw = await safeEval(
+      `(function(){var items=[];var sels=["[data-testid=\"property-most-popular-facilities\"] li","[data-testid=\"property-facilities\"] li",".hp__hotel_facilities li",".facility-list li","[data-testid=\"facility-group\"] li"];for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var t=els[j].textContent.trim();if(t&&items.indexOf(t)===-1)items.push(t)}}return JSON.stringify(items.slice(0,40));})()`
+    );
+    extracted.amenities = Array.isArray(amenitiesRaw) ? amenitiesRaw : [];
+
+    // --- Map ---
+    extracted.map = await safeEval(
+      `(function(){var scripts=document.querySelectorAll("script");for(var i=0;i<scripts.length;i++){var t=scripts[i].textContent||"";var latM=t.match(/["']latitude["']\\s*:\\s*(-?[0-9]+.?[0-9]*)/);var lngM=t.match(/["']longitude["']\\s*:\\s*(-?[0-9]+.?[0-9]*)/);if(latM&&lngM)return JSON.stringify({lat:parseFloat(latM[1]),lng:parseFloat(lngM[1])});var cM=t.match(/(-?[0-9]+\\.[0-9]+)[,;]\\s*(-?[0-9]+\\.[0-9]+)/);if(cM)return JSON.stringify({lat:parseFloat(cM[1]),lng:parseFloat(cM[2])})}return"null";})()`
+    );
+
+    // --- Phone / Website ---
+    extracted.phone = (await safeEval(
+      `(function(){var el=document.querySelector("[data-testid=\"property-phone\"],a[href^=\"tel:\"]");return JSON.stringify(el?(el.href?el.href.replace("tel:",""):el.textContent.trim()):"");})()`
+    )) || '';
+    extracted.website = (await safeEval(
+      `(function(){var el=document.querySelector("a[href*=\"website\"],[class*=\"website\"] a");return JSON.stringify(el?el.href:"");})()`
+    )) || '';
+
+    // --- Rooms ---
+    const roomsRaw = await safeEval(
+      `(function(){var rooms=[];var rows=document.querySelectorAll("[data-testid=\"room-row\"],.room_list tr,.room-block,table.hprt-table tbody tr");if(rows.length===0){rows=document.querySelectorAll("[data-testid=\"property-card\"]")}rows.forEach(function(row){var r={};var n=row.querySelector("h3,[data-testid=\"room-name\"],.room-name");r.name=n?n.textContent.trim():"";if(!r.name)return;var d=row.querySelector("[data-testid=\"room-description\"],.room_desc");r.description=d?d.textContent.trim():"";var b=row.querySelector("[data-testid=\"bed-type\"]");r.bedType=b?b.textContent.trim():"";var g=row.querySelectorAll("img");r.gallery=[];for(var i=0;i<g.length;i++){var src=g[i].src||g[i].getAttribute("data-src")||"";if(src.indexOf("bstatic.com")!==-1)r.gallery.push(src)}rooms.push(r)});return JSON.stringify(rooms);})()`
+    );
+    extracted.rooms = Array.isArray(roomsRaw) ? roomsRaw : [];
+
+    // --- Reviews ---
+    const reviewsRaw = await safeEval(
+      `(function(){var reviews=[];var blocks=document.querySelectorAll("[data-testid=\"review-card\"],.review_list .review-block,.review-card");var count=0;blocks.forEach(function(block){if(count>=25)return;var r={};var n=block.querySelector("[class*=\"reviewer\"]");r.reviewerName=n?n.textContent.trim():"";var s=block.querySelector("[class*=\"score\"]");if(s){var m=s.textContent.match(/([0-9][.,]?[0-9]*)/);r.rating=m?parseFloat(m[1].replace(",",".")):null}var t=block.querySelector("[class*=\"review-text\"],[class*=\"review-content\"]");r.text=t?t.textContent.trim():"";var d=block.querySelector("[class*=\"date\"]");r.date=d?d.textContent.trim():"";if(r.text){reviews.push(r);count++}});return JSON.stringify(reviews);})()`
+    );
+    extracted.reviews = Array.isArray(reviewsRaw) ? reviewsRaw : [];
 
     // Get page HTML for image URL extraction
     const pageHtml = await evaluate('document.documentElement.outerHTML');

@@ -1,27 +1,7 @@
 import https from 'https';
+import { fetchHtml, unescapeHtml } from '../../../lib/scrape-helpers.mjs';
 
-function fetchHtml(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject);
-  });
-}
 
-function unescapeHtml(str) {
-  return str
-    .replace(/&q;/g, '"')
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&')
-    .replace(/&a;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&l;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&g;/g, '>')
-    .replace(/&#39;/g, "'");
-}
 
 async function run() {
   const url = 'https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-na-hills/21619';

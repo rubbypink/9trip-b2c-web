@@ -4,7 +4,7 @@
  * Replaces legacy FireCrawl batchScrape with sequential agent-browser calls:
  * - Iterates over hotel URLs one by one
  * - Each URL is scraped via scrapeHotelFromUrl() from getHotelImages.mjs
- * - Results are saved to Firestore via saveBookingDataSkill.js CLI
+ * - Results are saved to Firestore via saveBookingDataSkill.mjs CLI
  *
  * Usage:
  *   node batchScrapeHotelOnBooking.mjs
@@ -40,7 +40,7 @@ function log(level, message) {
 // ============================================================================
 
 /**
- * Save scraped hotel data to Firestore by invoking saveBookingDataSkill.js.
+ * Save scraped hotel data to Firestore by invoking saveBookingDataSkill.mjs.
  * Writes data to a temp JSON file, then calls the save script via child process.
  * @param {Object[]} data - Array of hotel data objects
  * @returns {Promise<string>} stdout from save script
@@ -51,7 +51,7 @@ async function saveToDatabaseViaCLI(data) {
   log('info', `Writing ${data.length} records to temp file: ${tempPath}`);
   fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf-8');
 
-  const cmd = `node "${path.join(__dirname, 'saveBookingDataSkill.js')}" --input="${tempPath}"`;
+  const cmd = `node "${path.join(__dirname, 'saveBookingDataSkill.mjs')}" --input="${tempPath}"`;
   log('info', `Executing: ${cmd}`);
 
   return new Promise((resolve, reject) => {

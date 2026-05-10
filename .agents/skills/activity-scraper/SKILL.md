@@ -32,7 +32,7 @@ Các scraper đều sử dụng shared modules trong `.agents/lib/`:
 | `.agents/lib/image-helpers.mjs` | Download, resize, WebP conversion (multi-CDN) |
 | `.agents/lib/scrape-helpers.mjs` | Utilities: slugify, temp files, reports |
 | `.agents/lib/sanitize-data.mjs` | Làm sạch dữ liệu (thay thông tin đối thủ) |
-| `.agents/lib/schemas/activity-schema.mjs` | Activity schema + `ACTIVITY_AGENT_PROMPT` |
+| `.agents/lib/scape-schemas.mjs` | Activity schema + `ACTIVITY_AGENT_PROMPT` + `mapActivityToFirestore` |
 
 ## Input Format
 

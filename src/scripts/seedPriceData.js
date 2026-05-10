@@ -116,6 +116,7 @@ function generateRoomPriceData(room, periods, basePrice) {
         supplier: "Local Partner",
         costPrice,
         sellPrice,
+        prepaid: 100,
       };
     }
   }

@@ -3,15 +3,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { scrapeSingleTour } from './tourScraper.mjs';
 import { saveTourData } from './saveTourData.mjs';
+import { nowISO } from '../../../lib/scrape-helpers.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEMP_DIR = path.resolve(__dirname, '../../../../.temp');
 
 const CONCURRENCY = 2;
 
-function nowISO() {
-  return new Date().toISOString();
-}
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));

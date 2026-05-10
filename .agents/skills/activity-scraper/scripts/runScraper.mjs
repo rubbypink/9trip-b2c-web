@@ -1,11 +1,9 @@
 import { extractActivityPage } from '../../../lib/browser-automation.mjs';
-import { slugify } from '../../../lib/scrape-helpers.mjs';
+import { slugify, stripHtml } from '../../../lib/scrape-helpers.mjs';
 import fs from 'fs';
 import path from 'path';
 
-function stripHtml(html) {
-  return html ? html.replace(/<[^>]*>/g, '') : '';
-}
+
 
 async function run() {
   const url = 'https://www.ivivu.com/ve-vui-choi/hoat-dong/ve-sun-world-ba-na-hills/21619';
