@@ -249,7 +249,7 @@ export async function searchTours(filters = {}) {
     q = q.limit(limitVal);
     if (cursor) q = q.startAfter(cursor);
     const snap = await q.get();
-    let tours = serializeDocs(snap);
+    let tours = serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
 
     if (minPrice != null && minPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice <= Number(maxPrice));
@@ -259,7 +259,7 @@ export async function searchTours(filters = {}) {
     console.error('[searchTours] Error:', error.message);
     try {
       const snap = await toursCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
-      return { tours: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+      return { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
       return { tours: [], lastVisible: null };
     }
@@ -304,7 +304,7 @@ export async function getRelatedTours(slug, count = 4) {
     if (!tour || !tour.locationId) return { tours: [] };
 
     const snap = await toursCol().where('locationId', '==', tour.locationId).orderBy('createdAt', 'desc').limit(count * 2).get();
-    const tours = serializeDocs(snap).filter((t) => t.id !== tour.id).slice(0, count);
+    const tours = serializeDocs(snap).filter((t) => t.id !== tour.id).slice(0, count).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
     return { tours };
   } catch (error) {
     console.error('[getRelatedTours] Error:', error.message);
@@ -320,6 +320,7 @@ export async function getRelatedTours(slug, count = 4) {
 export async function getTourBySlug(slug) {
   try {
     const tour = await getDocBySlug('tours', slug);
+    if (tour) tour.pricing = { ...(tour.pricing || {}), prepaid: tour.pricing?.prepaid ?? 50 };
     return { tour };
   } catch (error) {
     console.error('[getTourBySlug] Error:', error.message);
@@ -373,7 +374,7 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
     let q = hotelsCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = hotelsCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { hotels: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    return { hotels: serializeDocs(snap).map(h => ({ ...h, pricing: { ...(h.pricing || {}), prepaid: h.pricing?.prepaid ?? 100 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
     console.error('[getHotels] Error:', error.message);
     return { hotels: [], lastVisible: null };

@@ -1,7 +1,8 @@
 /**
  * GET /api/cron/cleanup-bookings
- * Vercel Cron: Cancel pending bookings older than 60 minutes.
- * Runs every minute via vercel.json cron schedule.
+ * Cancel pending bookings older than 60 minutes.
+ * Replaced by Firebase scheduled function: cleanupExpiredHolds.
+ * @deprecated This route is for local dev only. Production uses Cloud Functions.
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';

@@ -163,12 +163,12 @@ The `availability` field is the Single Source of Truth for inventory management 
 
 ### What Updates Availability
 
-| Operation | Effect | Description |
-|-----------|--------|-------------|
-| `createInventoryHoldAdmin` | Decrements | Temporary hold placed during checkout (15-min TTL) |
-| `releaseInventoryHoldAdmin` | Increments | Hold expires or user cancels checkout |
-| `createBookingAdmin` | Decrements | Booking is confirmed and paid |
-| `cancelBookingAdmin` | Increments | Booking is canceled by user or admin |
+| Operation                   | Effect     | Description                                        |
+| --------------------------- | ---------- | -------------------------------------------------- |
+| `createInventoryHoldAdmin`  | Decrements | Temporary hold placed during checkout (15-min TTL) |
+| `releaseInventoryHoldAdmin` | Increments | Hold expires or user cancels checkout              |
+| `createBookingAdmin`        | Decrements | Booking is confirmed and paid                      |
+| `cancelBookingAdmin`        | Increments | Booking is canceled by user or admin               |
 
 ### Concurrency
 
@@ -196,20 +196,20 @@ The `availability` field is the Single Source of Truth for inventory management 
 
 ### Composite indexes
 
-| Collection | Fields | Purpose |
-|------------|--------|---------|
-| `hotels` | `isFeatured` ASC, `createdAt` DESC | Featured hotels sorted by newest |
-| `hotels` | `rating.average` DESC | Sort by guest rating |
-| `hotels` | `pricing.basePrice` ASC | Sort by price low-to-high |
-| `hotels` | `updatedAt` DESC | Recently updated hotels |
+| Collection | Fields                             | Purpose                          |
+| ---------- | ---------------------------------- | -------------------------------- |
+| `hotels`   | `isFeatured` ASC, `createdAt` DESC | Featured hotels sorted by newest |
+| `hotels`   | `rating.average` DESC              | Sort by guest rating             |
+| `hotels`   | `pricing.basePrice` ASC            | Sort by price low-to-high        |
+| `hotels`   | `updatedAt` DESC                   | Recently updated hotels          |
 
 ## Related Collections
 
-| Collection | Relationship |
-|------------|--------------|
-| `bookings` | `items[].serviceId` references hotel ID when `serviceType` is `"hotel"` |
-| `inventory_holds` | `serviceId` references hotel ID and `roomId` references room ID when `serviceType` is `"hotel_room"` |
-| `reviews` | `hotelId` field references hotel ID |
-| `locations` | `address.cityId` references location document ID |
-| `hotel_price_schedules` | `hotelId` field references hotel ID for seasonal pricing |
-| `counters` | `seq` counter for sequential ID generation |
+| Collection              | Relationship                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| `bookings`              | `items[].serviceId` references hotel ID when `serviceType` is `"hotel"`                              |
+| `inventory_holds`       | `serviceId` references hotel ID and `roomId` references room ID when `serviceType` is `"hotel_room"` |
+| `reviews`               | `hotelId` field references hotel ID                                                                  |
+| `locations`             | `address.cityId` references location document ID                                                     |
+| `hotel_price_schedules` | `hotelId` field references hotel ID for seasonal pricing                                             |
+| `counters`              | `seq` counter for sequential ID generation                                                           |

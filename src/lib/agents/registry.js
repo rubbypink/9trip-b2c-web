@@ -182,19 +182,6 @@ export const SKILL_REGISTRY = [
 
   // ── Code Generation ──────────────────────────────────────────────────
   {
-    name: 'vercel-react-best-practices',
-    displayName: 'React/Next.js Best Practices',
-    description: 'Áp dụng 70+ quy tắc performance optimization từ Vercel Engineering cho React/Next.js code.',
-    category: CATEGORIES.CODE_GENERATION,
-    execMode: EXEC_MODES.FIRESTORE_TASK,
-    scriptPath: null,
-    params: {
-      filePath: { type: 'string', required: true, description: 'Đường dẫn file cần review (từ src/)', example: 'src/app/hotels/[slug]/page.js' },
-      rules: { type: 'array', required: false, description: 'Các rule cụ thể cần check. Để trống = check tất cả', example: ['server-parallel-fetching', 'rerender-dependencies'] },
-    },
-    triggers: ['review code', 'performance', 'best practices', 'React optimization'],
-  },
-  {
     name: 'tailwind-design-system',
     displayName: 'Tailwind Design System',
     description: 'Xây dựng design system với Tailwind CSS v4, design tokens, component library, và responsive patterns.',

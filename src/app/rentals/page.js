@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { searchRentals, countRentals } from "@/lib/firestore-admin";
-import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ServiceList from "@/components/shared/ServiceList";
@@ -19,21 +18,6 @@ export const metadata = {
   alternates: { canonical: "/rentals" },
 };
 
-const getCachedRentalData = unstable_cache(
-  async (filters) => {
-    const [{ rentals }, totalCount] = await Promise.all([
-      searchRentals(filters),
-      countRentals({ type: filters.type || "" }),
-    ]);
-    return { rentals, totalCount };
-  },
-  ['rentals-list-query'],
-  {
-    revalidate: 3600,
-    tags: ['rentals-data']
-  }
-);
-
 export default async function RentalsPage({ searchParams }) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
@@ -45,7 +29,10 @@ export default async function RentalsPage({ searchParams }) {
     page,
   };
 
-  const { rentals, totalCount } = await getCachedRentalData(filters);
+  const [{ rentals }, totalCount] = await Promise.all([
+    searchRentals(filters),
+    countRentals({ type: filters.type || "" }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

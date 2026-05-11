@@ -10,17 +10,17 @@ import { useEffect } from "react";
  * @param {{ children: React.ReactNode, fallback?: React.ReactNode }} props
  */
 export default function AuthGuard({ children, fallback }) {
-  const { user, loading } = useAuth();
+  const { user, loading, initialized } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (initialized && !loading && !user) {
       router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
-  }, [loading, user, router, pathname]);
+  }, [initialized, loading, user, router, pathname]);
 
-  if (loading || !user) {
+  if (loading || !initialized || !user) {
     return (
       fallback || (
         <div className="flex items-center justify-center min-h-screen bg-background">

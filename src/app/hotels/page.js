@@ -1,6 +1,5 @@
 import { searchHotels, getLocations, countHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
-import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
@@ -21,25 +20,6 @@ export const metadata = {
   alternates: { canonical: "/hotels" },
 };
 
-const getCachedHotelData = unstable_cache(
-  async (filters) => {
-    const [{ hotels: rawHotels }, locations, totalCount] = await Promise.all([
-      searchHotels(filters),
-      getLocations(),
-      countHotels(filters),
-    ]);
-
-    let hotels = await resolveDocsImages(rawHotels);
-    hotels = await enrichHotelsWithLowestPrices(hotels);
-    return { hotels, locations, totalCount };
-  },
-  ['hotels-list'],
-  {
-    revalidate: 3600,
-    tags: ['hotels-data']
-  }
-);
-
 export default async function HotelsPage({ searchParams }) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
@@ -55,9 +35,13 @@ export default async function HotelsPage({ searchParams }) {
     page,
   };
 
-  const { hotels: rawCachedHotels, locations, totalCount } = await getCachedHotelData(filters);
-
-  let hotels = [...rawCachedHotels];
+  const [{ hotels: rawCachedHotels }, locations, totalCount] = await Promise.all([
+    searchHotels(filters),
+    getLocations(),
+    countHotels(filters),
+  ]);
+  let hotels = await resolveDocsImages(rawCachedHotels);
+  hotels = await enrichHotelsWithLowestPrices(hotels);
 
   if (filters.minPrice != null) {
     hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) >= filters.minPrice);

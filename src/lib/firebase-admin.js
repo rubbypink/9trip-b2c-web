@@ -3,8 +3,8 @@ import { logger } from './logger';
 
 /**
  * Format private key từ env var — xử lý các edge case phổ biến:
- *   1. Literal "\n" thay vì actual newline (Vercel, Render, .env single-line)
- *   2. Double-escape "\\n" (Vercel raw editor, JSON config)
+ *   1. Literal "\n" thay vì actual newline (.env single-line)
+ *   2. Double-escape "\\n"
  *   3. Surrounding quotes (một số platform wrap env var trong "")
  *   4. Trailing/leading whitespace mỗi dòng PEM
  *
@@ -42,7 +42,6 @@ const formatPrivateKey = (key) => {
 
 /**
  * Build service account credential từ environment variables.
- * Chuẩn cho Vercel — không cần file JSON local.
  * @returns {admin.ServiceAccount|null}
  */
 function getServiceAccount() {
@@ -81,7 +80,7 @@ function ensureAdminInit() {
 			admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 			return true;
 		}
-		// Fallback: GOOGLE_APPLICATION_CREDENTIALS (ko dùng trên Vercel)
+		// Fallback: GOOGLE_APPLICATION_CREDENTIALS
 		admin.initializeApp();
 		return true;
 	} catch (error) {

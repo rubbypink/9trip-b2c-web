@@ -1,6 +1,5 @@
 import { searchActivities, getLocations } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
-import { unstable_cache } from "next/cache";
 import { PAGE_SIZE } from "@/lib/constants";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
@@ -18,23 +17,6 @@ export const metadata = {
   },
   alternates: { canonical: "/activities" },
 };
-
-const getCachedActivityData = unstable_cache(
-  async (filters) => {
-    const [{ activities: rawActivities, totalCount = 0 }, locations] = await Promise.all([
-      searchActivities(filters),
-      getLocations(),
-    ]);
-
-    const activities = await resolveDocsImages(rawActivities);
-    return { activities, locations, totalCount };
-  },
-  ['activities-list-query'],
-  {
-    revalidate: 3600,
-    tags: ['activities-data']
-  }
-);
 
 export default async function ActivitiesPage({ searchParams }) {
   const params = await searchParams;
@@ -58,7 +40,11 @@ export default async function ActivitiesPage({ searchParams }) {
     { id: "Lớp học & Workshop", name: "Lớp học & Workshop" },
   ];
 
-  const { activities, locations, totalCount } = await getCachedActivityData(filters);
+  const [{ activities: rawActivities, totalCount = 0 }, locations] = await Promise.all([
+    searchActivities(filters),
+    getLocations(),
+  ]);
+  const activities = await resolveDocsImages(rawActivities);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

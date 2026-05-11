@@ -67,6 +67,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -86,6 +87,7 @@ export function AuthProvider({ children }) {
         setProfile(null);
       }
       setLoading(false);
+      setInitialized(true);
     });
     return unsubscribe;
   }, []);
@@ -238,6 +240,7 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    initialized,
     login,
     register,
     loginWithGoogle,
