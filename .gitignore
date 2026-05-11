@@ -45,7 +45,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 /test-output
-.gitignore
 # env files (can opt-in for committing if needed)
 .env*
 .env
@@ -53,12 +52,10 @@ yarn-error.log*
 firebase-debug.log
 9trip-b2c-web.code-workspace
 tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
-# vercel
-.vercel
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 .gitignore
 .sisyphus/ralph-loop.local.md
-.env*.local
 /.*/

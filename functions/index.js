@@ -16,6 +16,7 @@ import 'dotenv/config';
 import { onRequest, onCall } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import "./src/lib/logger.js";
 import admin from 'firebase-admin';
 import {
 	sendBookingConfirmation,
@@ -250,13 +251,13 @@ const apiBaseConfig = {
   region: 'asia-southeast1',
   concurrency: 80,
   memory: '512MiB',
-  timeoutSeconds: 60,
+  timeoutSeconds: 120,
   minInstances: 0,
   cors: true,
 };
 
 export const apiCore = onRequest(apiBaseConfig, apiCoreApp);
-export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 120, minInstances: 1 }, apiPaymentsApp);
-export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 1 }, apiWebhooksApp);
+export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 120, minInstances: 0 }, apiPaymentsApp);
+export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 0 }, apiWebhooksApp);
 export const apiAgents = onRequest(apiBaseConfig, apiAgentsApp);
 
