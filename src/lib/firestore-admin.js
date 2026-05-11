@@ -1,6 +1,7 @@
 import { adminDb } from './firebase-admin';
 export { adminDb };
 import admin from 'firebase-admin';
+import { logger } from './logger';
 
 // ─── Serialization Helper ────────────────────────────────────────────
 
@@ -160,11 +161,15 @@ export async function generateNextId(colName) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocById(colName, id) {
+  logger.log('[getDocById] Called with:', { colName, id });
   try {
     const snap = await adminDb.collection(colName).doc(id).get();
-    return snap.exists ? serializeSnap(snap) : null;
+    const result = snap.exists ? serializeSnap(snap) : null;
+    logger.log('[getDocById] Result:', { id: result?.id, exists: !!result });
+    return result;
   } catch (error) {
-    console.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
+    logger.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
+    logger.log('[getDocById] Result: null (error)');
     return null;
   }
 }
@@ -176,12 +181,19 @@ export async function getDocById(colName, id) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocBySlug(colName, slug) {
+  logger.log('[getDocBySlug] Called with:', { colName, slug });
   try {
     const snap = await adminDb.collection(colName).where('slug', '==', slug).limit(1).get();
-    if (snap.empty) return null;
-    return serializeSnap(snap.docs[0]);
+    if (snap.empty) {
+      logger.log('[getDocBySlug] Result: null (not found)');
+      return null;
+    }
+    const result = serializeSnap(snap.docs[0]);
+    logger.log('[getDocBySlug] Result:', { id: result?.id, slug });
+    return result;
   } catch (error) {
-    console.error(`[getDocBySlug] Error fetching ${colName}/${slug}:`, error.message);
+    logger.error(`[getDocBySlug] Error fetching ${colName}/${slug}:`, error.message);
+    logger.log('[getDocBySlug] Result: null (error)');
     return null;
   }
 }
@@ -194,13 +206,17 @@ export async function getDocBySlug(colName, slug) {
  * @returns {Promise<{tours: Object[], lastVisible: Object|null}>}
  */
 export async function getTours({ pageSize = 12, cursor = null } = {}) {
+  logger.log('[getTours] Called with:', { pageSize, cursor: cursor ? '<cursor>' : null });
   try {
     let q = toursCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = toursCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    const toursResult = { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    logger.log('[getTours] Result:', { count: toursResult.tours.length, hasMore: !!toursResult.lastVisible });
+    return toursResult;
   } catch (error) {
-    console.error('[getTours] Error:', error.message);
+    logger.error('[getTours] Error:', error.message);
+    logger.log('[getTours] Result: empty (error)');
     return { tours: [], lastVisible: null };
   }
 }
@@ -211,17 +227,25 @@ export async function getTours({ pageSize = 12, cursor = null } = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedTours(count = 8) {
+  logger.log('[getFeaturedTours] Called with:', { count });
   try {
     const snap = await toursCol().where('isFeatured', '==', true).orderBy('createdAt', 'desc').limit(count).get();
-    if (!snap.empty) return serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
+    if (!snap.empty) {
+      const result = serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
+      logger.log('[getFeaturedTours] Result:', { count: result.length });
+      return result;
+    }
   } catch (error) {
-    console.error('[getFeaturedTours] Index not ready, falling back:', error.message);
+    logger.error('[getFeaturedTours] Index not ready, falling back:', error.message);
   }
   try {
     const snap = await toursCol().orderBy('createdAt', 'desc').limit(count).get();
-    return serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
+    const result = serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
+    logger.log('[getFeaturedTours] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getFeaturedTours] Fallback error:', error.message);
+    logger.error('[getFeaturedTours] Fallback error:', error.message);
+    logger.log('[getFeaturedTours] Result: empty (error)');
     return [];
   }
 }
@@ -233,6 +257,7 @@ export async function getFeaturedTours(count = 8) {
  */
 export async function searchTours(filters = {}) {
   const { locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
+  logger.log('[searchTours] Called with:', { locationId, tourTypeId, minPrice, maxPrice, minRating, sortBy, pageSize, page, hasCursor: !!filters.cursor });
   try {
     let q = toursCol();
     if (locationId) q = q.where('locationId', '==', locationId);
@@ -255,13 +280,17 @@ export async function searchTours(filters = {}) {
     if (minPrice != null && minPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice >= Number(minPrice));
     if (maxPrice != null && maxPrice !== '') tours = tours.filter((t) => t.pricing?.adultPrice <= Number(maxPrice));
 
+    logger.log('[searchTours] Result:', { count: tours.length, hasMore: true });
     return { tours, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
-    console.error('[searchTours] Error:', error.message);
+    logger.error('[searchTours] Error:', error.message);
     try {
       const snap = await toursCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
-      return { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+      const fallbackResult = { tours: serializeDocs(snap).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+      logger.log('[searchTours] Result:', { count: fallbackResult.tours.length, hasMore: !!fallbackResult.lastVisible });
+      return fallbackResult;
     } catch {
+      logger.log('[searchTours] Result: empty (fallback error)');
       return { tours: [], lastVisible: null };
     }
   }
@@ -273,9 +302,13 @@ export async function searchTours(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countTours(filters = {}) {
+  logger.log('[countTours] Called with:', { filters });
   const key = _cacheKey('countTours', filters);
   const cached = _cacheGet(key);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    logger.log('[countTours] Result: cached', { count: cached });
+    return cached;
+  }
 
   const { locationId, tourTypeId, minRating } = filters;
   try {
@@ -286,9 +319,11 @@ export async function countTours(filters = {}) {
     const snap = await q.count().get();
     const count = snap.data().count;
     _cacheSet(key, count, CACHE_TTL.COUNTS);
+    logger.log('[countTours] Result:', { count });
     return count;
   } catch (error) {
-    console.error('[countTours] Error:', error.message);
+    logger.error('[countTours] Error:', error.message);
+    logger.log('[countTours] Result: 0 (error)');
     return 0;
   }
 }
@@ -300,15 +335,18 @@ export async function countTours(filters = {}) {
  * @returns {Promise<{tours: Object[]}>}
  */
 export async function getRelatedTours(slug, count = 4) {
+  logger.log('[getRelatedTours] Called with:', { slug, count });
   try {
     const tour = await getDocBySlug('tours', slug);
     if (!tour || !tour.locationId) return { tours: [] };
 
     const snap = await toursCol().where('locationId', '==', tour.locationId).orderBy('createdAt', 'desc').limit(count * 2).get();
     const tours = serializeDocs(snap).filter((t) => t.id !== tour.id).slice(0, count).map(t => ({ ...t, pricing: { ...(t.pricing || {}), prepaid: t.pricing?.prepaid ?? 50 } }));
+    logger.log('[getRelatedTours] Result:', { count: tours.length });
     return { tours };
   } catch (error) {
-    console.error('[getRelatedTours] Error:', error.message);
+    logger.error('[getRelatedTours] Error:', error.message);
+    logger.log('[getRelatedTours] Result: empty (error)');
     return { tours: [] };
   }
 }
@@ -319,12 +357,15 @@ export async function getRelatedTours(slug, count = 4) {
  * @returns {Promise<{tour: Object|null}>}
  */
 export async function getTourBySlug(slug) {
+  logger.log('[getTourBySlug] Called with:', { slug });
   try {
     const tour = await getDocBySlug('tours', slug);
     if (tour) tour.pricing = { ...(tour.pricing || {}), prepaid: tour.pricing?.prepaid ?? 50 };
+    logger.log('[getTourBySlug] Result:', { found: !!tour, slug });
     return { tour };
   } catch (error) {
-    console.error('[getTourBySlug] Error:', error.message);
+    logger.error('[getTourBySlug] Error:', error.message);
+    logger.log('[getTourBySlug] Result: null (error)');
     return { tour: null };
   }
 }
@@ -335,12 +376,16 @@ export async function getTourBySlug(slug) {
  * @returns {Promise<Object[]>}
  */
 export async function getTourPricing(tourId) {
+  logger.log('[getTourPricing] Called with:', { tourId });
   try {
     const snap = await adminDb.collection('tours').doc(tourId).collection('tourPricing')
       .where('isActive', '==', true).orderBy('sortOrder', 'asc').get();
-    return serializeDocs(snap).map(tier => ({ ...tier, prepaid: tier.prepaid ?? 50 }));
+    const pricingResult = serializeDocs(snap).map(tier => ({ ...tier, prepaid: tier.prepaid ?? 50 }));
+    logger.log('[getTourPricing] Result:', { count: pricingResult.length });
+    return pricingResult;
   } catch (error) {
-    console.error('[getTourPricing] Error:', error.message);
+    logger.error('[getTourPricing] Error:', error.message);
+    logger.log('[getTourPricing] Result: empty (error)');
     return [];
   }
 }
@@ -351,15 +396,18 @@ export async function getTourPricing(tourId) {
  * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
  */
 export async function getTourReviews(slug) {
+  logger.log('[getTourReviews] Called with:', { slug });
   try {
     const tour = await getDocBySlug('tours', slug);
     if (!tour) return { reviews: [], totalRating: 0, avgRating: 0 };
     const { reviews } = await getReviews('tour', tour.id);
     const totalRating = reviews.length;
     const avgRating = totalRating > 0 ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating : 0;
+    logger.log('[getTourReviews] Result:', { count: reviews.length, avgRating });
     return { reviews, totalRating, avgRating };
   } catch (error) {
-    console.error('[getTourReviews] Error:', error.message);
+    logger.error('[getTourReviews] Error:', error.message);
+    logger.log('[getTourReviews] Result: empty (error)');
     return { reviews: [], totalRating: 0, avgRating: 0 };
   }
 }
@@ -371,13 +419,17 @@ export async function getTourReviews(slug) {
  * @returns {Promise<{hotels: Object[], lastVisible: Object|null}>}
  */
 export async function getHotels({ pageSize = 12, cursor = null } = {}) {
+  logger.log('[getHotels] Called with:', { pageSize, cursor: cursor ? '<cursor>' : null });
   try {
     let q = hotelsCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = hotelsCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { hotels: serializeDocs(snap).map(h => ({ ...h, pricing: { ...(h.pricing || {}), prepaid: h.pricing?.prepaid ?? 100 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    const hotelsResult = { hotels: serializeDocs(snap).map(h => ({ ...h, pricing: { ...(h.pricing || {}), prepaid: h.pricing?.prepaid ?? 100 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    logger.log('[getHotels] Result:', { count: hotelsResult.hotels.length, hasMore: !!hotelsResult.lastVisible });
+    return hotelsResult;
   } catch (error) {
-    console.error('[getHotels] Error:', error.message);
+    logger.error('[getHotels] Error:', error.message);
+    logger.log('[getHotels] Result: empty (error)');
     return { hotels: [], lastVisible: null };
   }
 }
@@ -390,6 +442,7 @@ export async function getHotels({ pageSize = 12, cursor = null } = {}) {
  */
 export async function searchHotels(filters = {}) {
   const { locationId, starRating, amenities, pageSize = 12, page = 1, cursor } = filters;
+  logger.log('[searchHotels] Called with:', { locationId, starRating, amenities, pageSize, page, hasCursor: !!filters.cursor });
   try {
     // Fetch extra docs to compensate for in-memory filtering (star, amenities)
     const fetchLimit = cursor ? pageSize : pageSize * 3;
@@ -418,13 +471,15 @@ export async function searchHotels(filters = {}) {
       const startIdx = (page - 1) * pageSize;
       hotels = hotels.slice(startIdx, startIdx + pageSize);
     }
+    logger.log('[searchHotels] Result:', { count: hotels.length, hasMore: !!snap.docs[snap.docs.length - 1] });
     return { hotels, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
-    console.error('[searchHotels] Error:', error.message);
+    logger.error('[searchHotels] Error:', error.message);
     try {
       const snap = await hotelsCol().orderBy('createdAt', 'desc').limit(pageSize).get();
       return { hotels: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
+      logger.log('[searchHotels] Result: empty (fallback error)');
       return { hotels: [], lastVisible: null };
     }
   }
@@ -438,9 +493,13 @@ export async function searchHotels(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countHotels(filters = {}) {
+  logger.log('[countHotels] Called with:', { filters });
   const key = _cacheKey('countHotels', filters);
   const cached = _cacheGet(key);
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    logger.log('[countHotels] Result: cached', { count: cached });
+    return cached;
+  }
 
   const { locationId, starRating, amenities } = filters;
 
@@ -454,7 +513,7 @@ export async function countHotels(filters = {}) {
       _cacheSet(key, count, CACHE_TTL.COUNTS);
       return count;
     } catch (error) {
-      console.error('[countHotels] count() failed, falling back to manual count:', error.message);
+      logger.error('[countHotels] count() failed, falling back to manual count:', error.message);
       try {
         let q = hotelsCol();
         if (locationId) q = q.where('address.cityId', '==', locationId);
@@ -463,7 +522,8 @@ export async function countHotels(filters = {}) {
         _cacheSet(key, count, CACHE_TTL.COUNTS);
         return count;
       } catch (fallbackError) {
-        console.error('[countHotels] Fallback also failed:', fallbackError.message);
+        logger.error('[countHotels] Fallback also failed:', fallbackError.message);
+        logger.log('[countHotels] Result: 0 (fallback error)');
         return 0;
       }
     }
@@ -495,7 +555,7 @@ export async function countHotels(filters = {}) {
     _cacheSet(key, count, CACHE_TTL.COUNTS);
     return count;
   } catch (error) {
-    console.error('[countHotels] Complex count failed, falling back to manual count:', error.message);
+    logger.error('[countHotels] Complex count failed, falling back to manual count:', error.message);
     try {
       let q = hotelsCol();
       if (locationId) q = q.where('address.cityId', '==', locationId);
@@ -504,7 +564,8 @@ export async function countHotels(filters = {}) {
       _cacheSet(key, count, CACHE_TTL.COUNTS);
       return count;
     } catch (fallbackError) {
-      console.error('[countHotels] Fallback also failed:', fallbackError.message);
+      logger.error('[countHotels] Fallback also failed:', fallbackError.message);
+      logger.log('[countHotels] Result: 0 (fallback error)');
       return 0;
     }
   }
@@ -516,11 +577,15 @@ export async function countHotels(filters = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedHotels(count = 6) {
+  logger.log('[getFeaturedHotels] Called with:', { count });
   try {
     const snap = await hotelsCol().where('isFeatured', '==', true).orderBy('createdAt', 'desc').limit(count).get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    logger.log('[getFeaturedHotels] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getFeaturedHotels] Error:', error.message);
+    logger.error('[getFeaturedHotels] Error:', error.message);
+    logger.log('[getFeaturedHotels] Result: empty (error)');
     return [];
   }
 }
@@ -531,12 +596,19 @@ export async function getFeaturedHotels(count = 6) {
  * @returns {Promise<{hotel: Object|null}>}
  */
 export async function getHotelBySlug(slug) {
+  logger.log('[getHotelBySlug] Called with:', { slug });
   try {
     const snap = await hotelsCol().where('slug', '==', slug).limit(1).get();
-    if (snap.empty) return { hotel: null };
-    return { hotel: serializeSnap(snap.docs[0]) };
+    if (snap.empty) {
+      logger.log('[getHotelBySlug] Result: null (not found)');
+      return { hotel: null };
+    }
+    const hotelResult = serializeSnap(snap.docs[0]);
+    logger.log('[getHotelBySlug] Result:', { id: hotelResult?.id, slug });
+    return { hotel: hotelResult };
   } catch (error) {
-    console.error('[getHotelBySlug] Error:', error.message);
+    logger.error('[getHotelBySlug] Error:', error.message);
+    logger.log('[getHotelBySlug] Result: null (error)');
     return { hotel: null };
   }
 }
@@ -549,15 +621,18 @@ export async function getHotelBySlug(slug) {
  * @returns {Promise<{hotels: Object[]}>}
  */
 export async function getRelatedHotels(currentSlug, locationId, count = 3) {
+  logger.log('[getRelatedHotels] Called with:', { currentSlug, locationId, count });
   if (!locationId) return { hotels: [] };
   try {
     const snap = await hotelsCol().where('address.cityId', '==', locationId).limit(count + 10).get();
     let hotels = serializeDocs(snap).filter((h) => h.slug !== currentSlug);
     hotels.sort((a, b) => (b.rating?.average || 0) - (a.rating?.average || 0));
     hotels = hotels.slice(0, count);
+    logger.log('[getRelatedHotels] Result:', { count: hotels.length });
     return { hotels };
   } catch (error) {
-    console.error('[getRelatedHotels] Error:', error.message);
+    logger.error('[getRelatedHotels] Error:', error.message);
+    logger.log('[getRelatedHotels] Result: empty (error)');
     return { hotels: [] };
   }
 }
@@ -568,6 +643,7 @@ export async function getRelatedHotels(currentSlug, locationId, count = 3) {
  * @returns {Promise<{reviews: Object[], totalRating: number, avgRating: number}>}
  */
 export async function getHotelReviews(slug) {
+  logger.log('[getHotelReviews] Called with:', { slug });
   try {
     const hotel = await getDocBySlug('hotels', slug);
     if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
@@ -576,12 +652,14 @@ export async function getHotelReviews(slug) {
     const avgRating = totalRating > 0 ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalRating : hotel.rating?.average || 0;
     return { reviews, totalRating, avgRating };
   } catch (error) {
-    console.error('[getHotelReviews] Error:', error.message);
+    logger.error('[getHotelReviews] Error:', error.message);
     try {
       const hotel = await getDocBySlug('hotels', slug);
       if (!hotel) return { reviews: [], totalRating: 0, avgRating: 0 };
-      return { reviews: [], totalRating: hotel.rating?.count || 0, avgRating: hotel.rating?.average || 0 };
+      logger.log('[getHotelReviews] Result: fallback rating');
+    return { reviews: [], totalRating: hotel.rating?.count || 0, avgRating: hotel.rating?.average || 0 };
     } catch {
+      logger.log('[getHotelReviews] Result: empty (fallback error)');
       return { reviews: [], totalRating: 0, avgRating: 0 };
     }
   }
@@ -596,15 +674,21 @@ export async function getHotelReviews(slug) {
  * @returns {Promise<Object|null>}
  */
 export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYear()) {
+  logger.log('[getHotelPriceSchedule] Called with:', { hotelId, year });
   try {
     const docId = `${hotelId}_base_${year}`;
     const snap = await adminDb.collection('hotel_price_schedules').doc(docId).get();
     if (!snap.exists) return null;
     const data = serializeSnap(snap);
-    if (data.info?.hotelId !== hotelId || data.info?.year !== year || data.info?.status !== 'active') return null;
+    if (data.info?.hotelId !== hotelId || data.info?.year !== year || data.info?.status !== 'active') {
+      logger.log('[getHotelPriceSchedule] Result: null (inactive/mismatch)');
+      return null;
+    }
+    logger.log('[getHotelPriceSchedule] Result:', { hotelId, year, status: data.info?.status });
     return data;
   } catch (error) {
-    console.error('[getHotelPriceSchedule] Error:', error.message);
+    logger.error('[getHotelPriceSchedule] Error:', error.message);
+    logger.log('[getHotelPriceSchedule] Result: null (error)');
     return null;
   }
 }
@@ -617,6 +701,7 @@ export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYe
  * @returns {Array}
  */
 export function resolveRoomPricing(priceSchedule, roomId, date) {
+  logger.log('[resolveRoomPricing] Called with:', { roomId, date });
   if (!priceSchedule?.priceData || !roomId) return [];
   const priceData = priceSchedule.priceData;
   const result = [];
@@ -653,6 +738,7 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
  * @returns {number}
  */
 export function getLowestRoomPrice(priceSchedule, roomId, date) {
+  logger.log('[getLowestRoomPrice] Called with:', { roomId, date });
   const pricing = resolveRoomPricing(priceSchedule, roomId, date);
   return pricing.length === 0 ? 0 : pricing[0].sellPrice;
 }
@@ -665,6 +751,7 @@ export function getLowestRoomPrice(priceSchedule, roomId, date) {
  * @returns {number}
  */
 export function getHotelLowestPrice(priceSchedule, rooms, date) {
+  logger.log('[getHotelLowestPrice] Called with:', { roomCount: rooms?.length, date });
   if (!rooms || rooms.length === 0) return 0;
   let lowest = Infinity;
   for (const room of rooms) {
@@ -684,6 +771,7 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
  * @returns {Array}
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
+  logger.log('[buildRoomPricingTable] Called with:', { checkIn, checkOut });
   try {
     const roomsArr = Array.isArray(rooms) ? rooms : (rooms ? Object.values(rooms) : []);
     if (roomsArr.length === 0) return [];
@@ -736,7 +824,7 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
 
     return sortedRooms.map((room) => buildRoomRow(room, dates)).filter(Boolean);
   } catch (error) {
-    console.error('[firestore-admin] Error in buildRoomPricingTable:', error);
+    logger.error('[firestore-admin] Error in buildRoomPricingTable:', error);
     return [];
   }
 }
@@ -747,7 +835,11 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
  * @returns {Promise<Object[]>}
  */
 export async function enrichHotelsWithLowestPrices(hotels) {
-  if (!hotels || hotels.length === 0) return hotels;
+  logger.log('[enrichHotelsWithLowestPrices] Called with:', { count: hotels?.length });
+  if (!hotels || hotels.length === 0) {
+    logger.log('[enrichHotelsWithLowestPrices] Result: empty input');
+    return hotels;
+  }
   const today = new Date().toISOString().split('T')[0];
   const currentYear = new Date().getFullYear();
 
@@ -764,6 +856,7 @@ export async function enrichHotelsWithLowestPrices(hotels) {
   for (const result of results) {
     if (result.status === 'fulfilled') result.value.hotel.lowestPrice = result.value.lowestPrice;
   }
+  logger.log('[enrichHotelsWithLowestPrices] Result:', { count: hotels.length });
   return hotels;
 }
 
@@ -774,13 +867,17 @@ export async function enrichHotelsWithLowestPrices(hotels) {
  * @returns {Promise<{activities: Object[], lastVisible: Object|null}>}
  */
 export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
+  logger.log('[getActivitiesList] Called with:', { pageSize, cursor: cursor ? '<cursor>' : null });
   try {
     let q = activitiesCol().orderBy('createdAt', 'desc').limit(pageSize);
     if (cursor) q = activitiesCol().orderBy('createdAt', 'desc').startAfter(cursor).limit(pageSize);
     const snap = await q.get();
-    return { activities: serializeDocs(snap).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    const activitiesResult = { activities: serializeDocs(snap).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    logger.log('[getActivitiesList] Result:', { count: activitiesResult.activities.length, hasMore: !!activitiesResult.lastVisible });
+    return activitiesResult;
   } catch (error) {
-    console.error('[getActivitiesList] Error:', error.message);
+    logger.error('[getActivitiesList] Error:', error.message);
+    logger.log('[getActivitiesList] Result: empty (error)');
     return { activities: [], lastVisible: null };
   }
 }
@@ -792,6 +889,7 @@ export async function getActivitiesList({ pageSize = 12, cursor = null } = {}) {
  */
 export async function searchActivities(filters = {}) {
   const { locationId, categoryId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
+  logger.log('[searchActivities] Called with:', { locationId, categoryId, minPrice, maxPrice, sortBy, pageSize, page, hasCursor: !!filters.cursor });
   try {
     let q = activitiesCol();
     if (locationId) q = q.where('locationId', '==', locationId);
@@ -828,9 +926,11 @@ export async function searchActivities(filters = {}) {
       activities = activities.slice((page - 1) * pageSize, page * pageSize);
     }
 
+    logger.log('[searchActivities] Result:', { count: activities.length, totalCount, hasMore: !!snap.docs[snap.docs.length - 1] });
     return { activities, totalCount, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
-    console.error('[searchActivities] Error:', error.message);
+    logger.error('[searchActivities] Error:', error.message);
+    logger.log('[searchActivities] Result: empty (error)');
     return { activities: [], totalCount: 0, lastVisible: null };
   }
 }
@@ -841,12 +941,15 @@ export async function searchActivities(filters = {}) {
  * @returns {Promise<{activity: Object|null}>}
  */
 export async function getActivityBySlug(slug) {
+  logger.log('[getActivityBySlug] Called with:', { slug });
   try {
     const activity = await getDocBySlug('activities', slug);
     if (activity) activity.pricing = { ...(activity.pricing || {}), prepaid: activity.pricing?.prepaid ?? 0 };
+    logger.log('[getActivityBySlug] Result:', { found: !!activity, slug });
     return { activity };
   } catch (error) {
-    console.error('[getActivityBySlug] Error:', error.message);
+    logger.error('[getActivityBySlug] Error:', error.message);
+    logger.log('[getActivityBySlug] Result: null (error)');
     return { activity: null };
   }
 }
@@ -858,14 +961,17 @@ export async function getActivityBySlug(slug) {
  * @returns {Promise<{activities: Object[]}>}
  */
 export async function getRelatedActivities(slug, count = 4) {
+  logger.log('[getRelatedActivities] Called with:', { slug, count });
   try {
     const activity = await getDocBySlug('activities', slug);
     if (!activity || !activity.locationId) return { activities: [] };
     const snap = await activitiesCol().where('locationId', '==', activity.locationId).orderBy('createdAt', 'desc').limit(count * 2).get();
     const activities = serializeDocs(snap).filter((a) => a.id !== activity.id).slice(0, count).map(a => ({ ...a, pricing: { ...(a.pricing || {}), prepaid: a.pricing?.prepaid ?? 0 } }));
+    logger.log('[getRelatedActivities] Result:', { count: activities.length });
     return { activities };
   } catch (error) {
-    console.error('[getRelatedActivities] Error:', error.message);
+    logger.error('[getRelatedActivities] Error:', error.message);
+    logger.log('[getRelatedActivities] Result: empty (error)');
     return { activities: [] };
   }
 }
@@ -879,6 +985,7 @@ export async function getRelatedActivities(slug, count = 4) {
  */
 export async function searchCars(filters = {}) {
   const { carType, transmission, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
+  logger.log('[searchCars] Called with:', { carType, transmission, minPrice, maxPrice, sortBy, pageSize, page, hasCursor: !!filters.cursor });
   try {
     const limitVal = cursor ? pageSize : (page > 1 ? page * pageSize : pageSize);
     let q = carsCol();
@@ -899,13 +1006,15 @@ export async function searchCars(filters = {}) {
       const startIdx = (page - 1) * pageSize;
       cars = cars.slice(startIdx, startIdx + pageSize);
     }
+    logger.log('[searchCars] Result:', { count: cars.length, hasMore: !!snap.docs[snap.docs.length - 1] });
     return { cars, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
-    console.error('[searchCars] Error:', error.message);
+    logger.error('[searchCars] Error:', error.message);
     try {
       const snap = await carsCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
       return { cars: serializeDocs(snap).map(c => ({ ...c, pricing: { ...(c.pricing || {}), prepaid: c.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
+      logger.log('[searchCars] Result: empty (fallback error)');
       return { cars: [], lastVisible: null };
     }
   }
@@ -917,15 +1026,19 @@ export async function searchCars(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countCars(filters = {}) {
+  logger.log('[countCars] Called with:', { filters });
   const { carType, transmission } = filters;
   try {
     let q = carsCol();
     if (carType) q = q.where('carType', '==', carType);
     if (transmission) q = q.where('transmission', '==', transmission);
     const snap = await q.count().get();
-    return snap.data().count;
+    const count = snap.data().count;
+    logger.log('[countCars] Result:', { count });
+    return count;
   } catch (error) {
-    console.error('[countCars] Error:', error.message);
+    logger.error('[countCars] Error:', error.message);
+    logger.log('[countCars] Result: 0 (error)');
     return 0;
   }
 }
@@ -939,6 +1052,7 @@ export async function countCars(filters = {}) {
  */
 export async function searchRentals(filters = {}) {
   const { type, locationId, minPrice, maxPrice, sortBy = 'newest', pageSize = 12, page = 1, cursor } = filters;
+  logger.log('[searchRentals] Called with:', { type, locationId, minPrice, maxPrice, sortBy, pageSize, page, hasCursor: !!filters.cursor });
   try {
     const limitVal = cursor ? pageSize : (page > 1 ? page * pageSize : pageSize);
     let q = rentalsCol();
@@ -959,13 +1073,15 @@ export async function searchRentals(filters = {}) {
       const startIdx = (page - 1) * pageSize;
       rentals = rentals.slice(startIdx, startIdx + pageSize);
     }
+    logger.log('[searchRentals] Result:', { count: rentals.length, hasMore: !!snap.docs[snap.docs.length - 1] });
     return { rentals, lastVisible: snap.docs[snap.docs.length - 1] || null };
   } catch (error) {
-    console.error('[searchRentals] Error:', error.message);
+    logger.error('[searchRentals] Error:', error.message);
     try {
       const snap = await rentalsCol().orderBy('createdAt', 'desc').limit(cursor ? pageSize : (page > 1 ? page * pageSize : pageSize)).get();
       return { rentals: serializeDocs(snap).map(r => ({ ...r, pricing: { ...(r.pricing || {}), prepaid: r.pricing?.prepaid ?? 0 } })), lastVisible: snap.docs[snap.docs.length - 1] || null };
     } catch {
+      logger.log('[searchRentals] Result: empty (fallback error)');
       return { rentals: [], lastVisible: null };
     }
   }
@@ -977,15 +1093,19 @@ export async function searchRentals(filters = {}) {
  * @returns {Promise<number>}
  */
 export async function countRentals(filters = {}) {
+  logger.log('[countRentals] Called with:', { filters });
   const { type, locationId } = filters;
   try {
     let q = rentalsCol();
     if (type) q = q.where('type', '==', type);
     if (locationId) q = q.where('locationId', '==', locationId);
     const snap = await q.count().get();
-    return snap.data().count;
+    const count = snap.data().count;
+    logger.log('[countRentals] Result:', { count });
+    return count;
   } catch (error) {
-    console.error('[countRentals] Error:', error.message);
+    logger.error('[countRentals] Error:', error.message);
+    logger.log('[countRentals] Result: 0 (error)');
     return 0;
   }
 }
@@ -997,16 +1117,22 @@ export async function countRentals(filters = {}) {
  * @returns {Promise<Object[]>}
  */
 export async function getLocations() {
+  logger.log('[getLocations] Called');
   const cached = _cacheGet('locations:all');
-  if (cached !== undefined) return cached;
+  if (cached !== undefined) {
+    logger.log('[getLocations] Result: cached', { count: cached.length });
+    return cached;
+  }
 
   try {
     const snap = await locationsCol().orderBy('name', 'asc').get();
     const result = serializeDocs(snap);
     _cacheSet('locations:all', result, CACHE_TTL.LOCATIONS);
+    logger.log('[getLocations] Result:', { count: result.length });
     return result;
   } catch (error) {
-    console.error('[getLocations] Error:', error.message);
+    logger.error('[getLocations] Error:', error.message);
+    logger.log('[getLocations] Result: empty (error)');
     return [];
   }
 }
@@ -1017,11 +1143,15 @@ export async function getLocations() {
  * @returns {Promise<Object[]>}
  */
 export async function getFeaturedLocations(count = 8) {
+  logger.log('[getFeaturedLocations] Called with:', { count });
   try {
     const snap = await locationsCol().where('isFeatured', '==', true).limit(count).get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    logger.log('[getFeaturedLocations] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getFeaturedLocations] Error:', error.message);
+    logger.error('[getFeaturedLocations] Error:', error.message);
+    logger.log('[getFeaturedLocations] Result: empty (error)');
     return [];
   }
 }
@@ -1032,10 +1162,14 @@ export async function getFeaturedLocations(count = 8) {
  * @returns {Promise<Object|null>}
  */
 export async function getLocationBySlug(slug) {
+  logger.log('[getLocationBySlug] Called with:', { slug });
   try {
-    return await getDocBySlug('locations', slug);
+    const result = await getDocBySlug('locations', slug);
+    logger.log('[getLocationBySlug] Result:', { found: !!result, slug });
+    return result;
   } catch (error) {
-    console.error('[getLocationBySlug] Error:', error.message);
+    logger.error('[getLocationBySlug] Error:', error.message);
+    logger.log('[getLocationBySlug] Result: null (error)');
     return null;
   }
 }
@@ -1048,6 +1182,7 @@ export async function getLocationBySlug(slug) {
  * @returns {Promise<Object|null>}
  */
 export async function getBookingById(id) {
+  logger.log('[getBookingById] Called with:', { id });
   return getDocById('bookings', id);
 }
 
@@ -1057,11 +1192,15 @@ export async function getBookingById(id) {
  * @returns {Promise<Object[]>}
  */
 export async function getUserBookings(userId) {
+  logger.log('[getUserBookings] Called with:', { userId });
   try {
     const snap = await bookingsCol().where('userId', '==', userId).orderBy('createdAt', 'desc').get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    logger.log('[getUserBookings] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getUserBookings] Error:', error.message);
+    logger.error('[getUserBookings] Error:', error.message);
+    logger.log('[getUserBookings] Result: empty (error)');
     return [];
   }
 }
@@ -1076,6 +1215,7 @@ export async function getUserBookings(userId) {
  * @returns {Promise<{reviews: Object[], lastVisible: Object|null}>}
  */
 export async function getReviews(serviceType, serviceId, { pageSize = 10, cursor = null } = {}) {
+  logger.log('[getReviews] Called with:', { serviceType, serviceId, pageSize, hasCursor: !!cursor });
   try {
     let q = reviewsCol()
       .where('serviceType', '==', serviceType)
@@ -1084,9 +1224,12 @@ export async function getReviews(serviceType, serviceId, { pageSize = 10, cursor
       .orderBy('createdAt', 'desc');
     q = cursor ? q.startAfter(cursor).limit(pageSize) : q.limit(pageSize);
     const snap = await q.get();
-    return { reviews: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    const reviewsResult = { reviews: serializeDocs(snap), lastVisible: snap.docs[snap.docs.length - 1] || null };
+    logger.log('[getReviews] Result:', { count: reviewsResult.reviews.length, hasMore: !!reviewsResult.lastVisible });
+    return reviewsResult;
   } catch (error) {
-    console.error('[getReviews] Error:', error.message);
+    logger.error('[getReviews] Error:', error.message);
+    logger.log('[getReviews] Result: empty (error)');
     return { reviews: [], lastVisible: null };
   }
 }
@@ -1097,11 +1240,15 @@ export async function getReviews(serviceType, serviceId, { pageSize = 10, cursor
  * @returns {Promise<Object[]>}
  */
 export async function getUserReviews(userId) {
+  logger.log('[getUserReviews] Called with:', { userId });
   try {
     const snap = await reviewsCol().where('userId', '==', userId).orderBy('createdAt', 'desc').get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    logger.log('[getUserReviews] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getUserReviews] Error:', error.message);
+    logger.error('[getUserReviews] Error:', error.message);
+    logger.log('[getUserReviews] Result: empty (error)');
     return [];
   }
 }
@@ -1116,13 +1263,21 @@ export async function getUserReviews(userId) {
  * @returns {Promise<Object|null>}
  */
 export async function getUserProfile(uid) {
+  logger.log('[getUserProfile] Called with:', { uid });
   try {
     const snap = await usersCol().where('uid', '==', uid).limit(1).get();
-    if (!snap.empty) return serializeSnap(snap.docs[0]);
+    if (!snap.empty) {
+      const profileResult = serializeSnap(snap.docs[0]);
+      logger.log('[getUserProfile] Result:', { found: true, uid });
+      return profileResult;
+    }
     // Legacy fallback: doc ID might still be Auth UID (pre-migration)
-    return getDocById('users', uid);
+    const fallbackResult = await getDocById('users', uid);
+    logger.log('[getUserProfile] Result:', { found: !!fallbackResult, uid });
+    return fallbackResult;
   } catch (error) {
-    console.error('[getUserProfile] Error:', error.message);
+    logger.error('[getUserProfile] Error:', error.message);
+    logger.log('[getUserProfile] Result: null (error)');
     return null;
   }
 }
@@ -1133,8 +1288,12 @@ export async function getUserProfile(uid) {
  * @returns {Promise<Object[]>}
  */
 export async function getUserWishlist(uid) {
+  logger.log('[getUserWishlist] Called with:', { uid });
   const userProfile = await getUserProfile(uid);
-  if (!userProfile || !userProfile.wishlist || userProfile.wishlist.length === 0) return [];
+  if (!userProfile || !userProfile.wishlist || userProfile.wishlist.length === 0) {
+    logger.log('[getUserWishlist] Result: empty (no wishlist)');
+    return [];
+  }
 
   const detailPromises = userProfile.wishlist.map(async (itemId) => {
     const collections = ['tours', 'hotels', 'activities'];
@@ -1145,7 +1304,9 @@ export async function getUserWishlist(uid) {
     return null;
   });
   const results = await Promise.all(detailPromises);
-  return results.filter((item) => item !== null);
+  const filtered = results.filter((item) => item !== null);
+  logger.log('[getUserWishlist] Result:', { count: filtered.length });
+  return filtered;
 }
 
 // ─── Coupons ─────────────────────────────────────────────────────────
@@ -1156,6 +1317,7 @@ export async function getUserWishlist(uid) {
  * @returns {Promise<Object|null>}
  */
 export async function validateCoupon(code) {
+  logger.log('[validateCoupon] Called with:', { code });
   try {
     const snap = await couponsCol().where('code', '==', code).where('status', '==', 'active').limit(1).get();
     if (snap.empty) return null;
@@ -1164,7 +1326,8 @@ export async function validateCoupon(code) {
     if (coupon.maxUsage && coupon.usedCount >= coupon.maxUsage) return null;
     return coupon;
   } catch (error) {
-    console.error('[validateCoupon] Error:', error.message);
+    logger.error('[validateCoupon] Error:', error.message);
+    logger.log('[validateCoupon] Result: null (error)');
     return null;
   }
 }
@@ -1204,6 +1367,7 @@ function getCollectionRef(serviceType) {
  * @deprecated Use getRealAvailabilityAdmin() instead — reads availability field directly.
  */
 export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
+  logger.log('[getRealAvailability] Called with:', { serviceId, serviceType, startDate, totalCapacity });
   try {
     const bookingsSnap = await bookingsCol()
       .where('serviceId', '==', serviceId)
@@ -1220,9 +1384,12 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
       .get();
     const heldCount = holdsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
 
-    return Math.max(0, totalCapacity - bookedCount - heldCount);
+    const availResult = Math.max(0, totalCapacity - bookedCount - heldCount);
+    logger.log('[getRealAvailability] Result:', { available: availResult });
+    return availResult;
   } catch (error) {
-    console.error('[getRealAvailability] Error:', error.message);
+    logger.error('[getRealAvailability] Error:', error.message);
+    logger.log('[getRealAvailability] Result: fallback to totalCapacity', { totalCapacity });
     return totalCapacity;
   }
 }
@@ -1236,6 +1403,7 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
  * @returns {Promise<number>}
  */
 export async function getRealAvailabilityAdmin(serviceId, serviceType, startDate, roomId) {
+  logger.log('[getRealAvailabilityAdmin] Called with:', { serviceId, serviceType, startDate, roomId });
   try {
     const col = getCollectionRef(serviceType);
     const snap = await col.doc(serviceId).get();
@@ -1256,9 +1424,12 @@ export async function getRealAvailabilityAdmin(serviceId, serviceType, startDate
     }
 
     // Tours, activities, cars, rentals — read root availability field
-    return Math.max(0, data.availability ?? data.capacity ?? 100);
+    const availResult = Math.max(0, data.availability ?? data.capacity ?? 100);
+    logger.log('[getRealAvailabilityAdmin] Result:', { available: availResult });
+    return availResult;
   } catch (error) {
-    console.error('[getRealAvailabilityAdmin] Error:', error.message);
+    logger.error('[getRealAvailabilityAdmin] Error:', error.message);
+    logger.log('[getRealAvailabilityAdmin] Result: 0 (error)');
     return 0;
   }
 }
@@ -1564,11 +1735,15 @@ export async function cancelBookingAdmin(bookingId) {
  * @returns {Promise<Object[]>}
  */
 export async function getUserNotifications(userId, pageSize = 20) {
+  logger.log('[getUserNotifications] Called with:', { userId, pageSize });
   try {
     const snap = await notificationsCol().where('userId', '==', userId).orderBy('createdAt', 'desc').limit(pageSize).get();
-    return serializeDocs(snap);
+    const result = serializeDocs(snap);
+    logger.log('[getUserNotifications] Result:', { count: result.length });
+    return result;
   } catch (error) {
-    console.error('[getUserNotifications] Error:', error.message);
+    logger.error('[getUserNotifications] Error:', error.message);
+    logger.log('[getUserNotifications] Result: empty (error)');
     return [];
   }
 }
@@ -1580,6 +1755,7 @@ export async function getUserNotifications(userId, pageSize = 20) {
  * @returns {Promise<Object|null>}
  */
 export async function getSiteSettings() {
+  logger.log('[getSiteSettings] Called');
   return getDocById('settings', 'site');
 }
 
@@ -1591,15 +1767,19 @@ export async function getSiteSettings() {
  * @returns {Promise<{blogs: Object[]}>}
  */
 export async function getPublishedBlogs(limit = 50) {
+  logger.log('[getPublishedBlogs] Called with:', { limit });
   try {
     const snap = await blogsCol()
       .where('status', '==', 'published')
       .orderBy('createdAt', 'desc')
       .limit(limit)
       .get();
-    return { blogs: serializeDocs(snap) };
+    const blogsData = serializeDocs(snap);
+    logger.log('[getPublishedBlogs] Result:', { count: blogsData.length });
+    return { blogs: blogsData };
   } catch (error) {
-    console.error('[getPublishedBlogs] Error:', error.message);
+    logger.error('[getPublishedBlogs] Error:', error.message);
+    logger.log('[getPublishedBlogs] Result: empty (error)');
     return { blogs: [] };
   }
 }
@@ -1610,12 +1790,19 @@ export async function getPublishedBlogs(limit = 50) {
  * @returns {Promise<{blog: Object|null}>}
  */
 export async function getBlogBySlug(slug) {
+  logger.log('[getBlogBySlug] Called with:', { slug });
   try {
     const snap = await blogsCol().where('slug', '==', slug).where('status', '==', 'published').limit(1).get();
-    if (snap.empty) return { blog: null };
-    return { blog: serializeSnap(snap.docs[0]) };
+    if (snap.empty) {
+      logger.log('[getBlogBySlug] Result: null (not found)');
+      return { blog: null };
+    }
+    const blogResult = serializeSnap(snap.docs[0]);
+    logger.log('[getBlogBySlug] Result:', { id: blogResult?.id, slug });
+    return { blog: blogResult };
   } catch (error) {
-    console.error('[getBlogBySlug] Error:', error.message);
+    logger.error('[getBlogBySlug] Error:', error.message);
+    logger.log('[getBlogBySlug] Result: null (error)');
     return { blog: null };
   }
 }
@@ -1628,6 +1815,7 @@ export async function getBlogBySlug(slug) {
  * @returns {Promise<{blogs: Object[]}>}
  */
 export async function getRelatedBlogs(category, currentSlug, count = 3) {
+  logger.log('[getRelatedBlogs] Called with:', { category, currentSlug, count });
   if (!category) return { blogs: [] };
   try {
     const snap = await blogsCol()
@@ -1637,9 +1825,11 @@ export async function getRelatedBlogs(category, currentSlug, count = 3) {
       .limit(count + 5)
       .get();
     let blogs = serializeDocs(snap).filter((b) => b.slug !== currentSlug).slice(0, count);
+    logger.log('[getRelatedBlogs] Result:', { count: blogs.length });
     return { blogs };
   } catch (error) {
-    console.error('[getRelatedBlogs] Error:', error.message);
+    logger.error('[getRelatedBlogs] Error:', error.message);
+    logger.log('[getRelatedBlogs] Result: empty (error)');
     return { blogs: [] };
   }
 }
