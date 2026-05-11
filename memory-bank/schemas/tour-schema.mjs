@@ -1,4 +1,4 @@
-// DEPRECATED: Migrated to .agents/lib/scape-schemas.mjs
+// DEPRECATED: Use tours-schema.mjs instead (this file kept for reference only)
 // /**
 //  * @fileoverview Tour Schema Module — Defines extraction schemas, agent prompts, and Firestore mapping for tours.
 //  * @module tour-schema

@@ -4,6 +4,7 @@
  */
 import { NextResponse } from 'next/server';
 import { SKILL_REGISTRY, CATEGORIES, getSkillsByCategory, summarizeSkill } from '@/lib/agents/registry';
+import { logger } from '@/lib/logger';
 
 /**
  * @param {Request} request
@@ -27,7 +28,7 @@ export async function GET(request) {
       skills: skills.map(summarizeSkill),
     });
   } catch (err) {
-    console.error('[Agents/Skills] Error:', err.message);
+    logger.error('[Agents/Skills] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

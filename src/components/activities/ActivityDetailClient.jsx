@@ -78,10 +78,9 @@ export default function ActivityDetailClient({
     gallery = [],
     description,
     excerpt,
-    locationName,
+    location,
     pricing = {},
-    duration = {},
-    duration: { days, hours, minutes } = {},
+    duration,
     included = [],
     excluded = [],
     highlights = [],
@@ -108,10 +107,10 @@ export default function ActivityDetailClient({
   const showPricing = pricingTiers.length > 0 || (Array.isArray(included) && included.length > 0) || (Array.isArray(excluded) && excluded.length > 0);
 
   const hasAnyBadge =
-    (typeof duration === "object" ? !!(days || hours) : !!duration) ||
+    !!duration ||
     discountPct > 0 ||
     !!openingHours ||
-    !!locationName ||
+    !!location ||
     capacity > 0;
 
   const hasDetails = included.length > 0 || excluded.length > 0;
@@ -144,12 +143,10 @@ export default function ActivityDetailClient({
           {/* Product Info Badges */}
           <div className="bg-card rounded-xl border border-border p-4">
             <div className={`flex flex-wrap gap-3 ${hasAnyBadge ? "" : "hidden"}`}>
-              {(typeof duration === "object" && (days || hours)) ? (
-                <Badge icon="/icons/time.svg" label="Thởi gian" value={
-                  days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`
-                } />
-              ) : activity.duration ? (
-                <Badge icon="/icons/time.svg" label="Thởi gian" value={activity.duration} />
+              {duration ? (
+                <Badge icon="/icons/time.svg" label="Thởi gian" value={duration} />
+              ) : durationDetail ? (
+                <Badge icon="/icons/time.svg" label="Thởi gian" value={durationDetail} />
               ) : null}
               {discountPct > 0 && (
                 <Badge
@@ -162,8 +159,8 @@ export default function ActivityDetailClient({
               {openingHours && (
                 <Badge icon="/icons/clock.svg" label="Giở diễn" value={openingHours} />
               )}
-              {locationName && (
-                <Badge icon="/icons/location.svg" label="Địa điểm" value={locationName} />
+              {location && (
+                <Badge icon="/icons/location.svg" label="Địa điểm" value={location} />
               )}
               {capacity > 0 && (
                 <Badge icon="/icons/users.svg" label="Sức chứa" value={`${capacity.toLocaleString()} ngưởi`} />
@@ -176,19 +173,17 @@ export default function ActivityDetailClient({
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                {locationName && (
+                {location && (
                   <span className="inline-flex items-center gap-1">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    {locationName}
+                    {location}
                   </span>
                 )}
-                {(days > 0 || hours > 0) && (
-                  <span>
-                    {days > 0 ? `${days} ngày${hours > 0 ? ` ${hours}h` : ""}` : `${hours || 0}h${minutes > 0 ? `${minutes}p` : ""}`}
-                  </span>
+                {duration && (
+                  <span>{duration}</span>
                 )}
                 <StarRating rating={avgRating} showCount reviewCount={totalRating} />
               </div>

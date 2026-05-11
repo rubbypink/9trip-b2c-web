@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminDb, serializeDocs } from '@/lib/firestore-admin';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/agents/tasks — List agent tasks with optional filters.
@@ -47,10 +48,7 @@ export async function GET(request) {
     query = query.limit(limit);
     const snapshot = await query.get();
 
-    const tasks = [];
-    snapshot.forEach((doc) => {
-      tasks.push({ id: doc.id, ...doc.data() });
-    });
+    const tasks = serializeDocs(snapshot);
 
     return NextResponse.json({
       success: true,
@@ -58,7 +56,7 @@ export async function GET(request) {
       tasks,
     });
   } catch (err) {
-    console.error('[Agents/Tasks] Error:', err.message);
+    logger.error('[Agents/Tasks] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

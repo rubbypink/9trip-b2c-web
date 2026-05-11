@@ -4,6 +4,7 @@
  */
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export async function POST(request) {
   try {
@@ -20,11 +21,11 @@ export async function POST(request) {
       console.log(`[Welcome Email] Sent to ${email}`);
       return NextResponse.json({ success: true, messageId: result.messageId });
     } else {
-      console.error(`[Welcome Email] Failed to send to ${email}:`, result.error);
+      logger.error(`[Welcome Email] Failed to send to ${email}:`, result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
   } catch (err) {
-    console.error('[Welcome Email] Error:', err.message);
+    logger.error('[Welcome Email] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

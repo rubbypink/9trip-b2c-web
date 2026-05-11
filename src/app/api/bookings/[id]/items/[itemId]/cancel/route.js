@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/bookings/[id]/items/[itemId]/cancel
@@ -45,7 +46,7 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({ success: true, updatedPricing, isCancelled: Object.keys(updatedItems).length === 0 });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

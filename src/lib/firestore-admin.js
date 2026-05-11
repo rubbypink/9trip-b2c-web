@@ -1,4 +1,5 @@
 import { adminDb } from './firebase-admin';
+export { adminDb };
 import admin from 'firebase-admin';
 
 // ─── Serialization Helper ────────────────────────────────────────────
@@ -54,7 +55,7 @@ function serializeAdminDoc(value) {
  * @param {import('firebase-admin/firestore').DocumentSnapshot} snap
  * @returns {Object}
  */
-function serializeSnap(snap) {
+export function serializeSnap(snap) {
   return serializeAdminDoc({ id: snap.id, ...snap.data() });
 }
 
@@ -63,7 +64,7 @@ function serializeSnap(snap) {
  * @param {import('firebase-admin/firestore').QuerySnapshot} snap
  * @returns {Object[]}
  */
-function serializeDocs(snap) {
+export function serializeDocs(snap) {
   return snap.docs.map((d) => serializeSnap(d));
 }
 
@@ -236,12 +237,12 @@ export async function searchTours(filters = {}) {
     let q = toursCol();
     if (locationId) q = q.where('locationId', '==', locationId);
     if (tourTypeId) q = q.where('tourTypeId', '==', tourTypeId);
-    if (minRating) q = q.where('ratingAverage', '>=', minRating);
+    if (minRating) q = q.where('rating.average', '>=', minRating);
 
     switch (sortBy) {
       case 'price_asc': q = q.orderBy('pricing.adultPrice', 'asc'); break;
       case 'price_desc': q = q.orderBy('pricing.adultPrice', 'desc'); break;
-      case 'rating': q = q.orderBy('ratingAverage', 'desc'); break;
+      case 'rating': q = q.orderBy('rating.average', 'desc'); break;
       default: q = q.orderBy('createdAt', 'desc');
     }
 
@@ -281,7 +282,7 @@ export async function countTours(filters = {}) {
     let q = toursCol();
     if (locationId) q = q.where('locationId', '==', locationId);
     if (tourTypeId) q = q.where('tourTypeId', '==', tourTypeId);
-    if (minRating) q = q.where('ratingAverage', '>=', minRating);
+    if (minRating) q = q.where('rating.average', '>=', minRating);
     const snap = await q.count().get();
     const count = snap.data().count;
     _cacheSet(key, count, CACHE_TTL.COUNTS);

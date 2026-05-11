@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { sendCancellationConfirmation } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
@@ -37,14 +38,14 @@ export async function GET() {
       cleanedUp++;
 
       sendCancellationConfirmation(booking, 'Hết thời gian thanh toán (60 phút)')
-        .catch(err => console.error('[Cron] Email failed:', err.message));
+        .catch(err => logger.error('[Cron] Email failed:', err.message));
     }
 
     await batch.commit();
 
     return NextResponse.json({ success: true, cleanedUp });
   } catch (error) {
-    console.error('[CRON_CLEANUP_ERROR]:', error);
+    logger.error('[CRON_CLEANUP_ERROR]:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

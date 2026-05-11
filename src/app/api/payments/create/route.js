@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { PaymentService } from '@/lib/payments/payment';
 import { adminDb, generateNextId } from '@/lib/firebase-admin';
 import { sendBookingConfirmation } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -83,7 +84,7 @@ export async function POST(req) {
         // 6. SEND CONFIRMATION EMAIL if ordered
         if (status === 'ordered') {
             sendBookingConfirmation(bookingDoc).catch(err =>
-                console.error('[Email] Booking confirmation failed:', err.message)
+                logger.error('[Email] Booking confirmation failed:', err.message)
             );
         }
 
@@ -109,7 +110,7 @@ export async function POST(req) {
         return NextResponse.json({ success: true, url: paymentUrl, bookingId: orderId }, { status: 200 });
 
     } catch (error) {
-        console.error('[API_PAYMENT_CREATE_ERROR]:', error);
+        logger.error('[API_PAYMENT_CREATE_ERROR]:', error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

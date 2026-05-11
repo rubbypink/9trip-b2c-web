@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { releaseInventoryHoldAdmin } from '@/lib/firestore-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -18,7 +19,7 @@ export async function POST(req) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('[API availability/release] Error:', error.message);
+        logger.error('[API availability/release] Error:', error.message);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

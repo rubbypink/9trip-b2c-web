@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminDb, serializeSnap } from '@/lib/firestore-admin';
+import { logger } from '@/lib/logger';
 
 /**
  * GET /api/agents/tasks/[id] — Get a single task by ID with full status and result.
@@ -23,10 +24,10 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      task: { id: doc.id, ...doc.data() },
+      task: serializeSnap(doc),
     });
   } catch (err) {
-    console.error('[Agents/Task] Error:', err.message);
+    logger.error('[Agents/Task] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -74,7 +75,7 @@ export async function DELETE(request, { params }) {
       message: 'Task đã được hủy.',
     });
   } catch (err) {
-    console.error('[Agents/Task] Error:', err.message);
+    logger.error('[Agents/Task] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

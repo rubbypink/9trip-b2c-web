@@ -7,6 +7,7 @@
 
 import { NextResponse } from "next/server";
 import { sendContactNotification } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 /**
  * Validate email format.
@@ -56,7 +57,7 @@ export async function POST(request) {
       { status: 500 }
     );
   } catch (err) {
-    console.error("[Contact] Error:", err.message);
+    logger.error("[Contact] Error:", err.message);
     return NextResponse.json(
       { error: "Có lỗi xảy ra. Vui lòng thử lại sau." },
       { status: 500 }

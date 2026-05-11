@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PaymentService } from '@/lib/payments/payment';
 import { adminDb } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -57,7 +58,7 @@ export async function POST(req) {
         return NextResponse.json({ success: true, url: paymentUrl }, { status: 200 });
 
     } catch (error) {
-        console.error('[API_RETRY_PAYMENT_ERROR]:', error);
+        logger.error('[API_RETRY_PAYMENT_ERROR]:', error);
         return NextResponse.json({ success: false, message: 'Lỗi hệ thống khi tạo lại thanh toán' }, { status: 500 });
     }
 }

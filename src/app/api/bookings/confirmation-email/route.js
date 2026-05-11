@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendBookingConfirmation } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export async function POST(request) {
   try {
@@ -15,11 +16,11 @@ export async function POST(request) {
       console.log(`[Booking Email] Confirmation sent for booking ${booking.id || booking.bookingCode}`);
       return NextResponse.json({ success: true, messageId: result.messageId });
     } else {
-      console.error('[Booking Email] Failed:', result.error);
+      logger.error('[Booking Email] Failed:', result.error);
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
   } catch (err) {
-    console.error('[Booking Email] Error:', err.message);
+    logger.error('[Booking Email] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

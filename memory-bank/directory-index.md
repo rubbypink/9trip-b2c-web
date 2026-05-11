@@ -1,6 +1,6 @@
 # Directory Index: 9Trip B2C
 
-> **Last updated:** 05/05/2026
+> **Last updated:** 11/05/2026
 > 
 > **Mục đích:** Tìm file nhanh theo mục đích. Mỗi thư mục mô tả ngắn gọn nội dung.
 
@@ -9,7 +9,7 @@
 ## Cấu trúc Tổng quan
 
 ```
-9trip-b2c-web/
+tripphuquoc-db-fs/
 ├── src/                    # Source code chính
 ├── public/images/           # Static assets (favicon, social icons)
 ├── memory-bank/             # Project knowledge base (6 files)
@@ -100,6 +100,7 @@ Mỗi route là 1 thư mục với `page.js` (Server Component). Client componen
 | File | Mục đích |
 |---|---|
 | `listing-store.js` | Zustand store cho listing page state (filters, sort) |
+| `theme-store.js` | Theme store for project |
 
 ## `src/scripts/` — Admin/Utility Scripts
 

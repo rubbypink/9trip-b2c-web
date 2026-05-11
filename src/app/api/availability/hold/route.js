@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createInventoryHoldAdmin } from '@/lib/firestore-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -26,7 +27,7 @@ export async function POST(req) {
 
         return NextResponse.json({ success: true, holdId });
     } catch (error) {
-        console.error('[API availability/hold] Error:', error.message);
+        logger.error('[API availability/hold] Error:', error.message);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

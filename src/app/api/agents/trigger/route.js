@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { getSkill, getFlow, validateParams, EXEC_MODES } from '@/lib/agents/registry';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/agents/trigger — Create a new agent task.
@@ -110,7 +111,7 @@ export async function POST(request) {
         : 'Task đã được tạo và đang chờ Cloud Function xử lý.',
     }, { status: 201 });
   } catch (err) {
-    console.error('[Agents/Trigger] Error:', err.message);
+    logger.error('[Agents/Trigger] Error:', err.message);
     return NextResponse.json({
       success: false,
       error: 'Lỗi hệ thống khi tạo agent task.',

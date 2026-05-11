@@ -17,6 +17,7 @@ import {
   sendPasswordReset,
   sendPasswordChangedEmail,
 } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 /** @type {Object<string, Function>} */
 const TEMPLATE_HANDLERS = {
@@ -54,7 +55,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: false, error: result.error }, { status: 500 });
   } catch (err) {
-    console.error("[Email Send] Error:", err.message);
+    logger.error("[Email Send] Error:", err.message);
     return NextResponse.json(
       { error: "Không thể gửi email. Vui lòng thử lại sau." },
       { status: 500 }

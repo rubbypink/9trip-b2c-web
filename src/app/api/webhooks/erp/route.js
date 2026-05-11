@@ -5,6 +5,7 @@
  * This endpoint is kept for backward compatibility — redirects to new route.
  */
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 const NEW_BASE = '/webhooks/erp';
 
@@ -45,7 +46,7 @@ export async function POST(request) {
 		const data = await response.json();
 		return NextResponse.json(data, { status: response.status });
 	} catch (err) {
-		console.error('[Legacy ERP Webhook] Error:', err);
+		logger.error('[Legacy ERP Webhook] Error:', err);
 		return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
 	}
 }

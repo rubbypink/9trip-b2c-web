@@ -8,6 +8,7 @@
 
 import { NextResponse } from "next/server";
 import { getBookingById } from "@/lib/firestore-admin";
+import { logger } from "@/lib/logger";
 
 /**
  * @param {Request} request
@@ -33,7 +34,7 @@ export async function GET(request, { params }) {
       payment: booking.payment || null,
     });
   } catch (err) {
-    console.error("[BookingStatus] Error:", err.message);
+    logger.error("[BookingStatus] Error:", err.message);
     return NextResponse.json({ error: "Failed to fetch booking status" }, { status: 500 });
   }
 }

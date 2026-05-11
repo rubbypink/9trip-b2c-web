@@ -56,8 +56,8 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
     featuredImage,
     gallery = [],
     excerpt,
-    locationName,
-    duration = {},
+    location,
+    durationDays,
     pricing = {},
     isFeatured,
   } = tour;
@@ -66,11 +66,9 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
 
   const hasAnyBadge =
     !!isFeatured ||
-    tour.duration?.days > 0 ||
-    !!tour.locationName ||
-    !!tour.departurePoint ||
-    !!tour.transport ||
-    (tour.pricing?.discountPercent || tour.discountPercent) > 0;
+    durationDays > 0 ||
+    !!tour.location ||
+    (tour.pricing?.discountPercent) > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -101,20 +99,14 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
               {isFeatured && (
                 <Badge icon="/icons/star.svg" label="Nổi bật" value="Tour nổi bật" highlight />
               )}
-              {tour.duration?.days > 0 && (
-                <Badge icon="/icons/time.svg" label="Thởi gian" value={`${tour.duration.days} ngày ${tour.duration.nights || tour.duration.days - 1 || 0} đêm`} />
+              {durationDays > 0 && (
+                <Badge icon="/icons/time.svg" label="Thởi gian" value={`${durationDays} ngày ${durationDays - 1 || 0} đêm`} />
               )}
-              {tour.locationName && (
-                <Badge icon="/icons/location.svg" label="Địa điểm" value={tour.locationName} />
+              {tour.location && (
+                <Badge icon="/icons/location.svg" label="Địa điểm" value={tour.location} />
               )}
-              {tour.departurePoint && (
-                <Badge icon="/icons/flag.svg" label="Xuất phát" value={tour.departurePoint} />
-              )}
-              {tour.transport && (
-                <Badge icon="/icons/truck.svg" label="Phương tiện" value={tour.transport} />
-              )}
-              {(tour.pricing?.discountPercent || tour.discountPercent) > 0 && (
-                <Badge icon="/icons/ticket.svg" label="Ưu đãi" value={`Giảm ${tour.pricing?.discountPercent || tour.discountPercent}%`} highlight />
+              {tour.pricing?.discountPercent > 0 && (
+                <Badge icon="/icons/ticket.svg" label="Ưu đãi" value={`Giảm ${tour.pricing?.discountPercent}%`} highlight />
               )}
             </div>
           </div>
@@ -124,27 +116,24 @@ export default function TourDetailClient({ tour, pricingTiers = [], relatedTours
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                {locationName && (
-                  <span className="inline-flex items-center gap-1">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {locationName}
-                  </span>
+                {location && (
+                    <span className="inline-flex items-center gap-1">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {location}
+                    </span>
                 )}
-                {duration.days > 0 && (
-                  <span className="inline-flex items-center gap-1">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {duration.days} ngày{duration.nights || duration.days - 1 ? ` ${duration.nights || duration.days - 1} đêm` : ""}
-                  </span>
+                {durationDays > 0 && (
+                    <span className="inline-flex items-center gap-1">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {durationDays} ngày{durationDays - 1 > 0 ? ` ${durationDays - 1} đêm` : ""}
+                    </span>
                 )}
                 <StarRating rating={avgRating} showCount reviewCount={totalRating} />
-                {tour.viewCount > 0 && (
-                  <span>{tour.viewCount.toLocaleString("vi-VN")} lượt xem</span>
-                )}
               </div>
               {excerpt && <p className="text-muted-foreground mt-3">{excerpt}</p>}
             </div>

@@ -4,6 +4,7 @@
  */
 import { NextResponse } from 'next/server';
 import { FLOW_REGISTRY, CATEGORIES, summarizeFlow } from '@/lib/agents/registry';
+import { logger } from '@/lib/logger';
 
 /**
  * @param {Request} request
@@ -27,7 +28,7 @@ export async function GET(request) {
       flows: flows.map(summarizeFlow),
     });
   } catch (err) {
-    console.error('[Agents/Flows] Error:', err.message);
+    logger.error('[Agents/Flows] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

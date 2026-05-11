@@ -6,6 +6,8 @@ import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import { formatCurrency } from "@/lib/utils";
 
+export const revalidate = 3600;
+
 /**
  * Find a room by ID from a hotel's embedded rooms (Map or array).
  * @param {Object} hotel

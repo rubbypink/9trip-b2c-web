@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server';
 import { sendCancellationConfirmation } from '@/lib/email';
 import { adminDb } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(request, { params }) {
   try {
@@ -33,12 +34,12 @@ export async function POST(request, { params }) {
 
     const fullBooking = { id, ...booking, status: 'canceled', cancellationReason: reason || 'Không có lý do' };
     sendCancellationConfirmation(fullBooking, reason || 'Không có lý do').catch(err =>
-      console.error('[Cancel] Cancellation email failed:', err.message)
+      logger.error('[Cancel] Cancellation email failed:', err.message)
     );
 
     return NextResponse.json({ success: true, message: 'Booking cancelled successfully' });
   } catch (err) {
-    console.error('[Cancel] Error:', err.message);
+    logger.error('[Cancel] Error:', err.message);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

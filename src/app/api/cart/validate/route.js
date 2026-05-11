@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -116,7 +117,7 @@ export async function POST(req) {
         });
 
     } catch (error) {
-        console.error('[API_VALIDATE_CART_ERROR]:', error);
+        logger.error('[API_VALIDATE_CART_ERROR]:', error);
         return NextResponse.json({ success: false, message: 'Lỗi hệ thống khi thẩm định giá' }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 # Tech Context: 9Trip B2C
 
-> **Last updated:** 05/05/2026
+> **Last updated:** 2026-05-11
 
 ---
 
@@ -39,9 +39,18 @@
 - ✅ **Payment Webhook** xác thực signature trước khi xử lý.
 - ✅ **Responsive mobile-first** (Tailwind responsive utilities).
 
+### 2.3. Core Tenets
+
+- 🏛️ **Backend in separate repo** — Cloud Functions logic lives in a dedicated Firebase Functions repo. This frontend repo never writes service data directly. It calls ERP webhooks or Cloud Functions for mutations.
+- ⚡ **Preload / dynamic load** — Critical data is preloaded server-side (JSON embed in HTML). Non-critical components use dynamic imports (`next/dynamic`) to reduce bundle size.
+- 🔄 **Auto-load next page** — List pages pre-fetch the next page of results when the user scrolls near the bottom, enabling instant pagination.
+- 📐 **Schema compliance is mandatory** — Every Firestore document must match the defined schema. No ad-hoc fields. When scraping data, map fields exactly to the schema before writing.
+- 🖥️ **Admin SDK for Server Components** — All server-side data fetching (page.js, layout.js, route.js) uses `@/lib/firestore-admin.js` with the Admin SDK for direct Firestore access without auth restrictions.
+- 👤 **Client SDK for Client Components** — Write operations, auth-dependent reads, and interactive features use `@/lib/firestore.js` with the Client SDK, scoped to the signed-in user's permissions.
+
 # Product Context: 9Trip B2C
 
-> **Last updated:** 05/05/2026
+> **Last updated:** 2026-05-11
 
 ## 1 User Flow Chính
 
@@ -62,7 +71,59 @@
 5. **Payment Webhook** — Tất cả gateway (VNPay, MoMo, PayPal) dùng chung 1 handler `/webhooks/payment`. GET cho return redirect, POST cho IPN.
 6. **ERP Webhook** — `/webhooks/erp` nhận data từ ERP push. Web không tự ghi collection dịch vụ.
 
-## 3. Key Constants
+---
+
+# Tech Context (continued)
+
+## 3. Performance Standards
+
+| Standard | Implementation | Notes |
+|----------|---------------|-------|
+| **ISR/SSG for SEO pages** | `revalidate = 3600` on detail pages; `generateStaticParams` for listing pages | Homepage, tour/hotel/activity detail, blog posts. Ensures fast TTFB + SEO freshness. |
+| **Image optimization** | AVIF primary, WebP fallback via `<Image>` component with `next.config.js` format opts | All service images stored in Firebase Storage, served through Next.js Image Optimization. |
+| **Code splitting** | `next/dynamic` for heavy components (maps, galleries, lightboxes, carousels) | Leaf components only — never split layout or page shell. |
+| **Preloading critical data** | Server-rendered JSON script tag (`#listing-preload-data`) with tours/hotels/activities | Client reads preload to skip initial fetch waterfall. Pages beyond the first batch use cursor-based pagination. |
+| **Bundle budget** | Keep initial JS under 150 KB gzipped | Monitor with `@next/bundle-analyzer`. Avoid large dependencies on critical path. |
+
+## 4. Firebase Integration Patterns
+
+### 4.1. Dual SDK Architecture
+
+| SDK | File | Used By | Purpose |
+|-----|------|---------|---------|
+| **Admin SDK** | `src/lib/firestore-admin.js` | Server Components, API routes, `generateMetadata` | Direct Firestore reads — no auth restrictions, supports server-side caching |
+| **Client SDK** | `src/lib/firestore.js` | Client Components (`'use client'`) | Write operations (bookings, reviews, wishlist), auth-dependent reads |
+
+### 4.2. Serialization (Critical)
+
+Firestore Timestamps, GeoPoints, and DocumentReferences are **not serializable** to Client Components. Every function in both SDK files wraps results through internal serializers:
+
+- `firestore-admin.js`: `serializeAdminDoc()` / `serializeSnap()` / `serializeDocs()` — converts Timestamp → ISO string, GeoPoint → `{lat, lng}`, DocumentReference → `{_ref: path}`
+- `firestore.js`: `serializeDoc()` — same purpose for Client SDK snapshots
+
+Always serialize Firestore data **before** passing it from a Server Component to a Client Component.
+
+### 4.3. Collection Inventory
+
+| Collection | Purpose | Written by |
+|-----------|---------|------------|
+| `tours` | Tour services | ERP Webhook |
+| `hotels` | Hotel services | ERP Webhook |
+| `activities` | Activity services | ERP Webhook |
+| `cars` | Car rental services | ERP Webhook |
+| `rentals` | Property rentals | ERP Webhook |
+| `locations` | Location taxonomy | ERP Webhook |
+| `blogs` | Blog articles | ERP Webhook |
+| `bookings` | Customer bookings | Client SDK |
+| `reviews` | Customer reviews | Client SDK |
+| `users` | User profiles | Client SDK |
+| `coupons` | Discount coupons | ERP Webhook |
+| `notifications` | User notifications | Cloud Functions |
+| `inventory_holds` | Temporary holds (TTL 10 min) | Client SDK |
+
+The frontend repo **never writes** to service collections (`tours`, `hotels`, `activities`, `cars`, `rentals`, `locations`, `blogs`). Those are populated externally via the ERP webhook handler.
+
+## 5. Key Constants
 
 - **TTL Inventory Hold**: 10 phút
 - **ISR Revalidate**: 3600 giây (1 giờ)
@@ -70,7 +131,7 @@
 - **Site URL**: `https://9tripphuquoc.com`
 - **ERP Webhook Secret**: từ env `ERP_WEBHOOK_SECRET`
 
-## 4. Shared Components Index
+## 6. Shared Components Index
 
 | Component             | Vị trí                                      | Dùng cho                             |
 | --------------------- | ------------------------------------------- | ------------------------------------ |

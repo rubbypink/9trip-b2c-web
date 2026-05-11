@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getRealAvailabilityAdmin } from '@/lib/firestore-admin';
+import { logger } from '@/lib/logger';
 
 export async function POST(req) {
     try {
@@ -14,7 +15,7 @@ export async function POST(req) {
 
         return NextResponse.json({ success: true, availability });
     } catch (error) {
-        console.error('[API availability/check] Error:', error.message);
+        logger.error('[API availability/check] Error:', error.message);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

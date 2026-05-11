@@ -7,6 +7,7 @@
 
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import { logger } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("[PaymentLog] Failed to write:", err.message);
+    logger.error("[PaymentLog] Failed to write:", err.message);
     return NextResponse.json({ error: "Failed to log payment event" }, { status: 500 });
   }
 }
