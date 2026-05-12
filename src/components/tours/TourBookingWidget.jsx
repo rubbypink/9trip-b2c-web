@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@9trip/shared/utils";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
 
 /**
  * TourBookingWidget — Booking form for tour detail page.
@@ -42,6 +43,8 @@ export default function TourBookingWidget({
   currency = "VND",
 }) {
   const router = useRouter();
+  const { addItem } = useCart();
+  const { user } = useAuth();
   const { addItem } = useCart();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTierId, setSelectedTierId] = useState(
@@ -101,7 +104,11 @@ export default function TourBookingWidget({
         total: total,
         currency: selectedTier?.currency || currency,
       });
-      router.push("/checkout");
+      if (user) {
+        router.push("/checkout");
+      } else {
+        router.push("/login?redirect=/checkout");
+      }
     } catch (error) {
       console.error('[TourBookingWidget] Error booking:', error.message);
     }

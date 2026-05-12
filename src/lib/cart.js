@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import { validateCoupon } from "./firestore";
 
 const CartContext = createContext(null);
@@ -191,6 +191,16 @@ export function CartProvider({ children }) {
     setCouponCode(null);
     setCouponDiscount(0);
     setCouponData(null);
+    try {
+      localStorage.removeItem('9trip_cart');
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+    setItems([]);
+    setCouponCode(null);
+    setCouponDiscount(0);
+    setCouponData(null);
   }, []);
 
   /**
@@ -232,6 +242,39 @@ export function CartProvider({ children }) {
   }, []);
 
   // Hàm hồi sinh giỏ hàng từ mảng items backup
+  const restoreCart = useCallback((backupItems) => {
+    if (backupItems && backupItems.length > 0) {
+      setItems(backupItems);
+    }
+  }, []);
+
+  // Restore cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('9trip_cart');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setItems(parsed);
+        }
+      }
+    } catch (e) {
+      console.error('[CartProvider] Failed to restore cart from localStorage:', e);
+    }
+  }, []);
+
+  // Persist cart to localStorage whenever items change
+  useEffect(() => {
+    try {
+      if (items.length > 0) {
+        localStorage.setItem('9trip_cart', JSON.stringify(items));
+      } else {
+        localStorage.removeItem('9trip_cart');
+      }
+    } catch (e) {
+      console.error('[CartProvider] Failed to save cart to localStorage:', e);
+    }
+  }, [items]);
   const restoreCart = (backupItems) => {
     if (backupItems && backupItems.length > 0) {
       setItems(backupItems); // Thay setItems bằng hàm cập nhật state giỏ hàng của bro

@@ -1,16 +1,6 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
-    "ai-agents-architect": {
-      "source": "sickn33/antigravity-awesome-skills",
-      "sourceType": "github",
-      "computedHash": "be16dc0359f7b79de38bcb14b48a665344c4fa15c7784901d9563177e1962e10"
-    },
-    "firebase-ai-logic": {
-      "source": "firebase/agent-skills",
-      "sourceType": "github",
-      "computedHash": "454e17900a16e50008ebff708000d1daa7bdbce8991b805a56b2e556ab6614f6"
-    },
     "mcp-builder": {
       "source": "anthropics/skills",
       "sourceType": "github",
@@ -31,6 +21,5 @@
       "sourceType": "github",
       "computedHash": "f54f39ce967af3a4bba1f662c3600f0253467508d5fbbc7c545c67e102da2253"
     }
-
   }
 }

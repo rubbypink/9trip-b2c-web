@@ -81,9 +81,11 @@
       "disallowLegacyRuntimeConfig": true,
       "ignore": ["firebase.json", "**/node_modules/**", "functions/", ".github", ".next/dev/**",  ".git", "firebase-debug.log", "firebase-debug.*.log", "vendor-shared/", ".agents/", ".codenomad/", ".opencode/", ".vscode/", ".report/", "specs/"], 
       "predeploy": [
-        "cp -r ~/projects/tripphuquoc-db-fs/packages/shared ./vendor-shared",
-        "node -e \"const p=require('./package.json'); p.dependencies['@9trip/shared']='file:./vendor-shared'; require('fs').writeFileSync('package.json', JSON.stringify(p, null, '\\t')+'\\n')\""
-      ]
+			"cp -r ~/projects/tripphuquoc-db-fs/packages/shared ./vendor-shared",
+			"node -e \"const p=require('./package.json'); p.dependencies['@9trip/shared']='file:./vendor-shared'; require('fs').writeFileSync('package.json', JSON.stringify(p, null, '\\t')+'\\n')\"",
+			"rm -rf ./vendor-shared",
+			"rm -rf ../../.firebase"
+		]
     }
   ]
 }

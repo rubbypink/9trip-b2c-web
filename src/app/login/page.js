@@ -23,7 +23,7 @@ function LoginForm() {
 	// Nếu đã đăng nhập thì tự động chuyển hướng
 	useEffect(() => {
 		if (!authLoading && user) {
-			router.replace('/');
+			router.replace(redirect);
 		}
 	}, [user, authLoading, router, redirect]);
 
@@ -33,7 +33,7 @@ function LoginForm() {
 		setLoading(true);
 		try {
 			await loginWithEmail(email, password);
-			router.replace('/');
+			router.replace(redirect);
 		} catch (err) {
 			setError(err);
 		} finally {
@@ -52,7 +52,7 @@ function LoginForm() {
 				displayName: cred.user.displayName,
 				photoURL: cred.user.photoURL,
 			});
-			router.replace('/');
+			router.replace(redirect);
 		} catch (err) {
 			setError(err);
 		} finally {

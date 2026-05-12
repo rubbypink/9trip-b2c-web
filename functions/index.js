@@ -26,14 +26,12 @@ import { adminDb } from './src/lib/firebase-admin.js';
 import {
 	sendBookingConfirmation,
 	sendPaymentReceipt,
-	sendWelcomeEmail,
 	sendPasswordChangedEmail,
 	sendBookingCancelledEmail,
 	sendBookingModifiedEmail,
 } from './src/notifications/email.js';
 import { EmailMissingError } from '@9trip/shared/email/service';
 import { cleanupExpiredHolds as cleanupHolds, cancelAbandonedBookings as cancelBookings } from './src/scheduled/cleanup.js';
-import { executeAgentTask } from './src/agents/executor.js';
 import { handleChat } from './emily/index.js';
 
 // ─── Email Notifications ──────────────────────────────────────────────
@@ -74,23 +72,6 @@ export const onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}
 			}
 			throw err;
 		}
-	}
-});
-
-/**
- * Send welcome email when a new user is created.
- */
-export const onUserCreated = onDocumentCreated({ document: 'users/{userId}', region: 'asia-southeast1' }, async (event) => {
-	const user = event.data.data();
-	if (!user) return;
-	try {
-		await sendWelcomeEmail(adminDb, user, event.params.userId);
-	} catch (err) {
-		if (err instanceof EmailMissingError) {
-			console.warn(`[email] ${err.message}`);
-			return;
-		}
-		throw err;
 	}
 });
 
@@ -209,21 +190,6 @@ export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes'
 	await cancelBookings(adminDb);
 });
 
-// ─── Agent Task Executor ──────────────────────────────────────────────
-
-/**
- * Agent task executor — listens for new agentTasks documents and executes them.
- * Trigger: document created in agentTasks/{taskId}
- *
- * Handles both skill and flow execution:
- *   - 'firestore-task' mode: executes directly (media-finder, orchestrator, etc.)
- *   - 'agent-only' mode: leaves as 'queued_for_agent' for external AI agent
- */
-export const onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
-	const snap = event.data;
-	if (!snap) return;
-	await executeAgentTask(adminDb, snap, event);
-});
 
 // ─── Emily Chat ───────────────────────────────────────────────────────
 
@@ -240,7 +206,6 @@ export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (reques
 import apiCoreApp from './src/apps/apiCore.js';
 import apiPaymentsApp from './src/apps/apiPayments.js';
 import apiWebhooksApp from './src/apps/apiWebhooks.js';
-import apiAgentsApp from './src/apps/apiAgents.js';
 
 const apiBaseConfig = {
   region: 'asia-southeast1',
@@ -250,9 +215,8 @@ const apiBaseConfig = {
   minInstances: 0,
   cors: true,
 };
-
+export { onUserCreated, onUserUpdatedSync, onUserDeletedSync } from './src/triggers/users.js';
 export const apiCore = onRequest(apiBaseConfig, apiCoreApp);
 export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 300, minInstances: 0 }, apiPaymentsApp);
 export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 0 }, apiWebhooksApp);
-export const apiAgents = onRequest(apiBaseConfig, apiAgentsApp);
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { formatCurrency } from "@9trip/shared/utils";
 import { useCart } from "@/lib/cart";
+import { useAuth } from "@/lib/auth";
 
 /**
  * HotelBookingWidget — Booking form sidebar cho hotel detail.
@@ -30,6 +31,9 @@ import { useCart } from "@/lib/cart";
  */
 export default function HotelBookingWidget({ hotel = {}, pricingTable = [], checkIn = "", checkOut = "", nights = 1, onDateChange, roomQuantities = {}, onRoomQuantityChange }) {
   const router = useRouter();
+  const { updateCartItem, removeCartItemByKey } = useCart();
+  const { user } = useAuth();
+  const debounceRef = useRef(null);
   const { updateCartItem, removeCartItemByKey } = useCart();
   const debounceRef = useRef(null);
 
@@ -184,6 +188,17 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
 
   // ── Handle book now ──────────────────────────────────────
   const handleBookNow = useCallback(() => {
+    // Ensure cart is up-to-date before navigating
+    syncCart();
+    // Small delay to let cart state update
+    setTimeout(() => {
+      if (user) {
+        router.push("/checkout");
+      } else {
+        router.push("/login?redirect=/checkout");
+      }
+    }, 100);
+  }, [syncCart, router, user]);
     // Ensure cart is up-to-date before navigating
     syncCart();
     // Small delay to let cart state update

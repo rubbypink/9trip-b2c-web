@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
@@ -20,6 +20,21 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+        setIsUserMenuOpen(false);
+        setIsCartOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const cartItems = getCartItemsForDropdown();
   const cartCount = items?.length || 0;
@@ -53,7 +68,7 @@ export default function Header() {
   }, [removeItem]);
 
   return (
-    <header className="sticky top-0 z-40 bg-background shadow-sm border-b border-border">
+    <header ref={headerRef} className="sticky top-0 z-40 bg-background shadow-sm border-b border-border">
       {/* Top bar */}
       <div className="bg-primary-600 text-white text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center">
@@ -110,7 +125,11 @@ export default function Header() {
             {/* Cart */}
             <button
               className="relative p-2 text-foreground hover:text-primary-600 transition-colors"
-              onClick={() => setIsCartOpen(!isCartOpen)}
+              onClick={() => {
+                setIsCartOpen(!isCartOpen);
+                setIsUserMenuOpen(false);
+                setIsMenuOpen(false);
+              }}
               aria-label="Giỏ hàng"
             >
               🛒
@@ -126,7 +145,11 @@ export default function Header() {
               <div className="relative">
                 <button
                   className="flex items-center gap-2 p-2 text-foreground hover:text-primary-600 transition-colors"
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onClick={() => {
+                    setIsUserMenuOpen(!isUserMenuOpen);
+                    setIsCartOpen(false);
+                    setIsMenuOpen(false);
+                  }}
                 >
                   <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
                     {user.email?.[0]?.toUpperCase() || "U"}
@@ -163,7 +186,11 @@ export default function Header() {
             {/* Mobile menu toggle */}
             <button
               className="lg:hidden p-2 text-foreground"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                setIsMenuOpen(!isMenuOpen);
+                setIsCartOpen(false);
+                setIsUserMenuOpen(false);
+              }}
               aria-label="Menu"
             >
               {isMenuOpen ? "✕" : "☰"}
