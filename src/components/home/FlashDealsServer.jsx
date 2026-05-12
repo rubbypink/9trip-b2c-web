@@ -87,7 +87,7 @@ export default async function FlashDealsServer() {
                     <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
-                    <span className="text-xs text-muted-foreground">{tour.locationName || tour.location || "—"}</span>
+                    <span className="text-xs text-muted-foreground">{tour.location || tour.locationName || "—"}</span>
                   </div>
                   <h3 className="font-semibold text-foreground group-hover:text-orange-600 transition-colors line-clamp-2 text-sm">
                     {tour.name}

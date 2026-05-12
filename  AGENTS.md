@@ -7,7 +7,7 @@ description: 'System-wide instructions for 9 Trip B2C — Memory Bank, project t
 
 ## 1. MANDATORY: Memory Bank Reading
 
-Before starting ANY code task, you MUST read the following files in order:
+Before starting ANY code task, you MUST read the following files in order (if you have not already):
 
 1. `memory-bank/systemPatterns.md` — Understand architecture, patterns, conventions
 2. `memory-bank/projectContext.md` — Understand project goals, constraints, scope
@@ -18,7 +18,7 @@ After reading, you must confirm with this exact statement:
 
 > "I have read the memory bank and understand the project structure."
 
-**Do not skip this step.** Even for small changes. Context prevents regressions.
+**THIS IS MUST DO STEP.** Even for small changes. Context prevents regressions.
 
 ---
 

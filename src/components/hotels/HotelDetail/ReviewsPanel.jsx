@@ -24,7 +24,7 @@ export default function ReviewsPanel({ reviews = [], avgRating = 0, totalRating 
       <Card>
         <div className="flex items-center gap-6">
           <div className="text-center">
-            <div className="text-4xl font-bold text-primary">{avgRating.toFixed(1)}</div>
+            <div className="text-4xl font-bold text-primary">{(Number(avgRating) || 0).toFixed(1)}</div>
             <div className="text-sm text-muted-foreground mt-1">{totalRating} đánh giá</div>
           </div>
           <div className="flex-1">

@@ -52,7 +52,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.8,
     reviewCount: 124,
     duration: "3 ngày 2 đêm",
-    locationName: "Đà Nẵng",
+    durationDays: 3,
+    location: "Đà Nẵng",
   },
   {
     id: "tour-2",
@@ -64,7 +65,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.7,
     reviewCount: 89,
     duration: "2 ngày 2 đêm",
-    locationName: "Sapa",
+    durationDays: 2,
+    location: "Sapa",
   },
   {
     id: "tour-3",
@@ -76,7 +78,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.6,
     reviewCount: 67,
     duration: "4 ngày 3 đêm",
-    locationName: "Nha Trang",
+    durationDays: 4,
+    location: "Nha Trang",
   },
   {
     id: "tour-4",
@@ -87,7 +90,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.9,
     reviewCount: 156,
     duration: "3 ngày 2 đêm",
-    locationName: "Phú Quốc",
+    durationDays: 3,
+    location: "Phú Quốc",
   },
   {
     id: "tour-5",
@@ -99,7 +103,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.5,
     reviewCount: 201,
     duration: "2 ngày 1 đêm",
-    locationName: "Hà Nội",
+    durationDays: 2,
+    location: "Hà Nội",
   },
   {
     id: "tour-6",
@@ -111,7 +116,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.7,
     reviewCount: 73,
     duration: "4 ngày 3 đêm",
-    locationName: "Huế",
+    durationDays: 4,
+    location: "Huế",
   },
   {
     id: "tour-7",
@@ -122,7 +128,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.6,
     reviewCount: 98,
     duration: "3 ngày 2 đêm",
-    locationName: "Đà Lạt",
+    durationDays: 3,
+    location: "Đà Lạt",
   },
   {
     id: "tour-8",
@@ -134,7 +141,8 @@ export const mockFeaturedTours = [
     ratingAverage: 4.4,
     reviewCount: 55,
     duration: "2 ngày 1 đêm",
-    locationName: "Miền Tây",
+    durationDays: 2,
+    location: "Miền Tây",
   },
 ];
 
@@ -149,7 +157,8 @@ export const mockBestActivities = [
     ratingAverage: 4.8,
     reviewCount: 256,
     duration: "Nửa ngày",
-    locationName: "Nha Trang",
+    durationDays: 0.5,
+    location: "Nha Trang",
   },
   {
     id: "act-2",
@@ -160,7 +169,8 @@ export const mockBestActivities = [
     ratingAverage: 4.9,
     reviewCount: 178,
     duration: "2 ngày 1 đêm",
-    locationName: "Sapa",
+    durationDays: 2,
+    location: "Sapa",
   },
   {
     id: "act-3",
@@ -172,7 +182,8 @@ export const mockBestActivities = [
     ratingAverage: 4.7,
     reviewCount: 412,
     duration: "2-3 tiếng",
-    locationName: "Hội An",
+    durationDays: 2,
+    location: "Hội An",
   },
   {
     id: "act-4",
@@ -183,7 +194,8 @@ export const mockBestActivities = [
     ratingAverage: 4.7,
     reviewCount: 145,
     duration: "1 ngày",
-    locationName: "Đà Lạt",
+    durationDays: 1,
+    location: "Đà Lạt",
   },
   {
     id: "act-5",
@@ -195,7 +207,8 @@ export const mockBestActivities = [
     ratingAverage: 4.6,
     reviewCount: 198,
     duration: "1 ngày",
-    locationName: "Phú Quốc",
+    durationDays: 1,
+    location: "Phú Quốc",
   },
   {
     id: "act-6",
@@ -206,7 +219,8 @@ export const mockBestActivities = [
     ratingAverage: 4.5,
     reviewCount: 167,
     duration: "1 ngày",
-    locationName: "Sapa",
+    durationDays: 1,
+    location: "Sapa",
   },
 ];
 

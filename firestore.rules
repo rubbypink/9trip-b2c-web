@@ -13,8 +13,8 @@ service cloud.firestore {
     }
 
     // Public read-only collections — sync từ ERP, web chỉ đọc
-    match /{collection}/{docId} where collection in ['tours', 'hotels', 'activities', 'locations', 'rooms', 'cars', 'settings', 'coupons', 'hotel_price_schedules', 'tour_prices'] {
-      allow read: if true;
+    match /{collection}/{docId} {
+      allow read: if collection in ['tours', 'hotels', 'activities', 'locations', 'rooms', 'cars', 'settings', 'coupons', 'hotel_price_schedules', 'tour_prices'];
       allow write: if false; // Managed by backend/admin
     }
 

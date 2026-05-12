@@ -1,6 +1,7 @@
 import { searchActivities, getLocations } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
 import { PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityFilters from "@/components/activities/ActivityFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -40,11 +41,21 @@ export default async function ActivitiesPage({ searchParams }) {
     { id: "Lớp học & Workshop", name: "Lớp học & Workshop" },
   ];
 
-  const [{ activities: rawActivities, totalCount = 0 }, locations] = await Promise.all([
-    searchActivities(filters),
-    getLocations(),
-  ]);
-  const activities = await resolveDocsImages(rawActivities);
+  let activities = [];
+  let locations = [];
+  let totalCount = 0;
+
+  try {
+    const [{ activities: rawActivities, totalCount: count = 0 }, locs] = await Promise.all([
+      searchActivities(filters),
+      getLocations(),
+    ]);
+    activities = await resolveDocsImages(rawActivities);
+    locations = locs;
+    totalCount = count;
+  } catch (error) {
+    logger.error("[ActivitiesPage] Error loading data:", error.message);
+  }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

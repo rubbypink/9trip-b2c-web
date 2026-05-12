@@ -14,6 +14,17 @@ const eslintConfig = defineConfig([
 		'functions/**',
 		// Scripts — development only
 		'src/scripts/**',
+		'.github/',
+		'memory-bank/',
+		'.agents/',
+		'.codenomad/',
+		'.opencode/',
+		'.playwright*/',
+		'.report/',
+		'.sisyphus/',
+		'e2e/',
+		'specs/'
+
 	]),
 	{
 		rules: {

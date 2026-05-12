@@ -10,15 +10,16 @@ import { formatDate } from '@/lib/utils';
  * @param {{ tour: object }} props
  */
 export default function TourHeader({ tour }) {
-	const { title, featuredImage, gallery = [], ratingAverage = 0, ratingCount = 0, viewCount = 0, locationName, duration = {}, pricing = {}, isFeatured, excerpt } = tour;
+	const { title, featuredImage, gallery = [], ratingAverage = 0, ratingCount = 0, viewCount = 0, locationName, location = locationName, duration = {}, durationDays, pricing = {}, isFeatured, excerpt } = tour;
 
 	const allImages = featuredImage ? [featuredImage, ...gallery] : gallery;
 
-	const durationText = duration.days ? `${duration.days} ngày ${duration.nights || duration.days - 1 || 0} đêm` : duration.unit === 'hour' ? `${duration.days || 0} giờ` : '';
+	const durDays = duration.days || durationDays || 0;
+	const durationText = durDays ? `${durDays} ngày ${duration.nights || durDays - 1 || 0} đêm` : duration.unit === 'hour' ? `${durDays || 0} giờ` : '';
 
 	const discountPct = pricing.discount > 0 && pricing.adultPrice ? Math.round((pricing.discount / pricing.adultPrice) * 100) : pricing.discountPercent || 0;
 
-	const hasMeta = !!locationName || !!durationText;
+	const hasMeta = !!location || !!durationText;
 
 	return (
 		<div className="bg-background">
@@ -81,7 +82,7 @@ export default function TourHeader({ tour }) {
 				</div>
 
 				<div className={`flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2 ${hasMeta ? '' : 'hidden'}`}>
-					{locationName && (
+					{location && (
 						<span className="inline-flex items-center gap-1">
 							<svg
 								className="h-4 w-4"
@@ -102,7 +103,7 @@ export default function TourHeader({ tour }) {
 									d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
 								/>
 							</svg>
-							{locationName}
+							{location}
 						</span>
 					)}
 					{durationText && (

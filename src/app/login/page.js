@@ -4,6 +4,7 @@ import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { loginWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase-auth';
+import { upsertUserProfile } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 
@@ -45,7 +46,12 @@ function LoginForm() {
 		setSocialLoading(provider);
 		try {
 			const loginFn = provider === 'google' ? loginWithGoogle : loginWithFacebook;
-			await loginFn();
+			const cred = await loginFn();
+			await upsertUserProfile(cred.user.uid, {
+				email: cred.user.email,
+				displayName: cred.user.displayName,
+				photoURL: cred.user.photoURL,
+			});
 			router.replace('/');
 		} catch (err) {
 			setError(err);

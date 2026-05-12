@@ -8,6 +8,7 @@ import {
   getRelatedHotels,
 } from "@/lib/firestore-admin";
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
+import { logger } from "@/lib/logger";
 
 export const revalidate = 3600;
 
@@ -83,27 +84,50 @@ export default async function HotelDetailPage({ params }) {
     );
   }
 
-  // 2. Fetch price, reviews, related in parallel
-  const cityId = rawHotel.address?.cityId;
-  const [priceSchedule, reviewResult, { hotels: rawRelated }] = await Promise.all([
-    cachedGetHotelPriceSchedule(rawHotel.id),
-    cachedGetHotelReviews(slug),
-    cachedGetRelatedHotels(slug, cityId, 3),
-  ]);
+  // 2. Fetch price, reviews, related in parallel — with fallback on failure
+  let priceSchedule = null;
+  let reviews = [], totalRating = 0, avgRating = 0;
+  let rawRelated = [];
 
-  const { reviews, totalRating, avgRating } = reviewResult;
+  try {
+    const cityId = rawHotel.address?.cityId;
+    const [ps, revResult, relResult] = await Promise.all([
+      cachedGetHotelPriceSchedule(rawHotel.id),
+      cachedGetHotelReviews(slug),
+      cachedGetRelatedHotels(slug, cityId, 3),
+    ]);
+    priceSchedule = ps;
+    reviews = revResult?.reviews || [];
+    totalRating = revResult?.totalRating || 0;
+    avgRating = revResult?.avgRating || 0;
+    rawRelated = relResult?.hotels || [];
+  } catch (error) {
+    logger.error("[HotelDetailPage] Error fetching secondary data:", error.message);
+  }
 
-  // 3. Resolve images in parallel
-  const [hotel, relatedHotels] = await Promise.all([
-    resolveDocImages(rawHotel),
-    resolveDocsImages(rawRelated),
-  ]);
+  // 3. Resolve images in parallel — with fallback on failure
+  let hotel = rawHotel;
+  let relatedHotels = [];
+  try {
+    [hotel, relatedHotels] = await Promise.all([
+      resolveDocImages(rawHotel),
+      resolveDocsImages(rawRelated),
+    ]);
+  } catch (error) {
+    logger.error("[HotelDetailPage] Error resolving images:", error.message);
+  }
+
+  // Normalize old schema fields for backward compatibility
+  if (hotel) {
+    hotel.name = hotel.name || hotel.title;
+    hotel.location = hotel.locationName || hotel.location;
+  }
 
   // Lược bỏ bớt payload gửi xuống Client để tối ưu (Phase 1)
   const clientRelatedHotels = relatedHotels.map(h => ({
     id: h.id,
     slug: h.slug,
-    name: h.name,
+    name: h.name || h.title,
     featuredImage: h.featuredImage,
     address: { city: h.address?.city },
     rating: { average: h.rating?.average || 0 },

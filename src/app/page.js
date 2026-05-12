@@ -16,7 +16,7 @@ import { mockLatestNews } from '@/lib/mockData';
 export const metadata = {
 	title: `${SITE.name} — ${SITE.tagline}`,
 	description: SITE_DESCRIPTION,
-	openGraph: { title: `${SITE.name} — ${SITE.tagline}`, description: SITE_DESCRIPTION, url: SITE.url, images: [{ url: '/images/og-default.jpg', width: 1200, height: 630 }] },
+	openGraph: { title: `${SITE.name} — ${SITE.tagline}`, description: SITE_DESCRIPTION, url: SITE.url, images: [{ url: '/images/logo.png' || '/images/favicon.webp', width: 630, height: 630 }] },
 	alternates: { canonical: '/' },
 };
 
@@ -39,9 +39,9 @@ function stripTour(t) {
 		slug: t.slug,
 		title: t.title,
 		featuredImage: t.featuredImage,
-		locationName: t.locationName,
+		location: t.locationName || t.location,
 		excerpt: t.excerpt || '',
-		duration: t.duration || {},
+		durationDays: t.durationDays || t.duration?.days || 0,
 		pricing: { adultPrice: t.pricing?.adultPrice || 0, childPrice: t.pricing?.childPrice || 0, currency: t.pricing?.currency || 'VND' },
 		ratingAverage: t.ratingAverage || 0,
 		ratingCount: t.ratingCount || 0,
@@ -54,7 +54,7 @@ function stripHotel(h) {
 		slug: h.slug,
 		name: h.name || h.title,
 		featuredImage: h.featuredImage,
-		locationName: h.locationName || h.address?.city || '',
+		location: h.locationName || h.location || h.address?.city || '',
 		starRating: h.starRating || 0,
 		pricing: { basePrice: h.lowestPrice || h.pricing?.basePrice || 0, currency: 'VND' },
 		ratingAverage: h.ratingAverage || h.rating?.average || 0,
@@ -68,7 +68,7 @@ function stripActivity(a) {
 		slug: a.slug,
 		title: a.title,
 		featuredImage: a.featuredImage,
-		locationName: a.locationName || '',
+		location: a.locationName || a.location || '',
 		excerpt: a.excerpt || '',
 		pricing: { basePrice: a.pricing?.basePrice || 0, currency: a.pricing?.currency || 'VND' },
 		ratingAverage: a.ratingAverage || a.rating?.average || 0,

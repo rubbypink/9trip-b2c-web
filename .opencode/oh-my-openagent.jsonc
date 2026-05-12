@@ -1,1 +1,12 @@
-{ "team_mode": { "enabled": true, "max_parallel_members": 4, "max_members": 8, "tmux_visualization": false }, "sisyphus_agent": { "disabled": false, "default_builder_enabled": false, "planner_enabled": true, "replace_plan": true } }
+// {
+//     "agents": {
+//         "plant": {
+//           "model": "opencode-go/GLM-5.1",
+//           "fallback": [
+//             "opencode-go/GLM-5",
+//             "opencode-go/deepseek-v4-pro",
+//             "google/antigravity-gemini-3.1-pro"
+//           ]
+//         }
+//       }
+// }

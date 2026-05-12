@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { searchRentals, countRentals } from "@/lib/firestore-admin";
 import { PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ServiceList from "@/components/shared/ServiceList";
 
@@ -29,10 +30,19 @@ export default async function RentalsPage({ searchParams }) {
     page,
   };
 
-  const [{ rentals }, totalCount] = await Promise.all([
-    searchRentals(filters),
-    countRentals({ type: filters.type || "" }),
-  ]);
+  let rentals = [];
+  let totalCount = 0;
+
+  try {
+    const [{ rentals: rawRentals }, count] = await Promise.all([
+      searchRentals(filters),
+      countRentals({ type: filters.type || "" }),
+    ]);
+    rentals = rawRentals;
+    totalCount = count;
+  } catch (error) {
+    logger.error("[RentalsPage] Error loading data:", error.message);
+  }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

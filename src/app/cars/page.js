@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { searchCars, countCars } from "@/lib/firestore-admin";
 import { PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import CarFilters from "@/components/cars/CarFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -30,10 +31,19 @@ export default async function CarsPage({ searchParams }) {
     page,
   };
 
-  const [{ cars }, totalCount] = await Promise.all([
-    searchCars(filters),
-    countCars({ carType: filters.carType || "", transmission: filters.transmission || "" }),
-  ]);
+  let cars = [];
+  let totalCount = 0;
+
+  try {
+    const [{ cars: rawCars }, count] = await Promise.all([
+      searchCars(filters),
+      countCars({ carType: filters.carType || "", transmission: filters.transmission || "" }),
+    ]);
+    cars = rawCars;
+    totalCount = count;
+  } catch (error) {
+    logger.error("[CarsPage] Error loading data:", error.message);
+  }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

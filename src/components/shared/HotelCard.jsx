@@ -113,7 +113,7 @@ export default function HotelCard({ hotel, item, isFeatured = false, className }
         </Link>
         
         <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
-          📍 {data.locationName || data.address?.city || "Phú Quốc"}
+          📍 {data.location || data.locationName || data.address?.city || "Phú Quốc"}
         </p>
         
         <div className="flex items-center gap-1 mb-3 h-5">

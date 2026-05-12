@@ -1,6 +1,7 @@
 import { searchTours, getLocations, countTours } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
 import { PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourFilters from "@/components/tours/TourFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -33,12 +34,22 @@ export default async function ToursPage({ searchParams }) {
     page,
   };
 
-  const [{ tours: rawTours }, locations, totalCount] = await Promise.all([
-    searchTours(filters),
-    getLocations(),
-    countTours(filters),
-  ]);
-  const tours = await resolveDocsImages(rawTours);
+  let tours = [];
+  let locations = [];
+  let totalCount = 0;
+
+  try {
+    const [{ tours: rawTours }, locs, count] = await Promise.all([
+      searchTours(filters),
+      getLocations(),
+      countTours(filters),
+    ]);
+    tours = await resolveDocsImages(rawTours);
+    locations = locs;
+    totalCount = count;
+  } catch (error) {
+    logger.error("[ToursPage] Error loading data:", error.message);
+  }
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 

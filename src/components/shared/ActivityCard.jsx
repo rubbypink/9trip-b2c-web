@@ -59,6 +59,7 @@ export default function ActivityCard({ activity, item }) {
     rating,
     included = [],
     locationName,
+    location = locationName,
     discountPercent,
   } = data;
 
@@ -101,7 +102,7 @@ export default function ActivityCard({ activity, item }) {
           {title}
         </Link>
         <p className="text-xs text-muted-foreground mb-2">
-          📍 {locationName || "Phú Quốc"}
+          📍 {location || "Phú Quốc"}
         </p>
         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
           <span>

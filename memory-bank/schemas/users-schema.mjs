@@ -15,6 +15,7 @@ export const FIELDS = {
 	id: { type: 'string', required: true, description: 'Sequential ID "10000"' },
 	uid: { type: 'string', required: true, description: 'Firebase Auth UID (from firebase auth)' },
 	email: { type: 'string', required: true, description: 'User email' },
+	password: { type: 'string', description: 'Hashed password (if using email/password auth)' },
 	fullName: { type: 'string', required: true, description: 'Display name' },
 	phone: { type: 'string', description: 'Phone number (optional)' },
 	photoURL: { type: 'string', description: 'Avatar URL' },

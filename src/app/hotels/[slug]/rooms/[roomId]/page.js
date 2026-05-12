@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getHotelBySlug, getHotelPriceSchedule, resolveRoomPricing } from "@/lib/firestore-admin";
 import { resolveDocImages } from "@/lib/storage-admin";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import { formatCurrency } from "@/lib/utils";
@@ -77,11 +78,20 @@ export default async function RoomDetailPage({ params }) {
 
   if (!rawRoom) notFound();
 
-  // Resolve room images (featuredImage + gallery in room, handled by resolveDocImages)
-  const room = await resolveDocImages(rawRoom);
+  let room = rawRoom;
+  try {
+    room = await resolveDocImages(rawRoom);
+  } catch (error) {
+    logger.error("[RoomDetailPage] Error resolving room images:", error.message);
+  }
 
   // v4: Fetch pricing from hotel_price_schedules
-  const priceSchedule = await getHotelPriceSchedule(hotel.id);
+  let priceSchedule = null;
+  try {
+    priceSchedule = await getHotelPriceSchedule(hotel.id);
+  } catch (error) {
+    logger.error("[RoomDetailPage] Error fetching price schedule:", error.message);
+  }
   const today = new Date().toISOString().split("T")[0];
   const pricingEntries = priceSchedule
     ? resolveRoomPricing(priceSchedule, rawRoom.id, today)

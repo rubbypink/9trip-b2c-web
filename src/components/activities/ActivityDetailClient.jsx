@@ -487,7 +487,7 @@ export default function ActivityDetailClient({
                   {reviews.length > 0 ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 mb-6">
-                        <span className="text-3xl font-bold text-foreground">{avgRating.toFixed(1)}</span>
+                        <span className="text-3xl font-bold text-foreground">{(Number(avgRating) || 0).toFixed(1)}</span>
                         <StarRating rating={avgRating} showCount reviewCount={totalRating} />
                       </div>
                       {reviews.map((review) => (

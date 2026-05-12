@@ -104,10 +104,10 @@ export default async function TourDetailPage({ params }) {
     slug: t.slug,
     title: t.title,
     featuredImage: t.featuredImage,
-    locationName: t.locationName,
+    location: t.locationName || t.location,
     ratingAverage: t.ratingAverage || 0,
     pricing: { adultPrice: t.pricing?.adultPrice || 0 },
-    duration: t.duration,
+    durationDays: t.durationDays || t.duration?.days,
   }));
 
   const clientReviews = reviews.slice(0, 5); // Pass few newest reviews for summary
@@ -120,10 +120,10 @@ export default async function TourDetailPage({ params }) {
     description: tour.excerpt || tour.description?.replace(/<[^>]*>/g, "").slice(0, 200),
     image: tour.featuredImage,
     url: `/tours/${slug}`,
-    ...(tour.locationName && {
+    ...((tour.locationName || tour.location) && {
       touristDestination: {
         "@type": "City",
-        name: tour.locationName,
+        name: tour.locationName || tour.location,
       },
     }),
     ...((tour.pricing?.adultPrice || pricingTiers[0]?.adultPrice) && {
@@ -141,10 +141,10 @@ export default async function TourDetailPage({ params }) {
         reviewCount: tour.ratingCount || 0,
       },
     }),
-    ...(tour.duration?.days && {
+    ...((tour.durationDays || tour.duration?.days) && {
       itinerary: {
         "@type": "Trip",
-        duration: `P${tour.duration.days}D`,
+        duration: `P${tour.durationDays || tour.duration?.days}D`,
       },
     }),
   };

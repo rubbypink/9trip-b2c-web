@@ -119,9 +119,12 @@ export async function generateNextId(colName) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocById(colName, id) {
+  logger.log('[getDocById] Called with:', { colName, id });
   try {
     const snap = await getDoc(doc(db, colName, id));
-    return snap.exists() ? serializeDoc(snap) : null;
+    const _result = snap.exists() ? serializeDoc(snap) : null;
+    logger.log('[getDocById] Result:', _result);
+    return _result;
   } catch (error) {
     logger.error(`[getDocById] Error fetching ${colName}/${id}:`, error.message);
     return null;
@@ -419,9 +422,12 @@ export async function upsertUserProfile(uid, profileData) {
  * @returns {Promise<Object|null>}
  */
 export async function getUserProfile(uid) {
+  logger.log('[getUserProfile] Called with:', { uid });
   try {
-    const result = await getUserByUid(uid);
-    return result ? result.data : null;
+    const _userResult = await getUserByUid(uid);
+    const _data = _userResult ? _userResult.data : null;
+    logger.log('[getUserProfile] Result:', _data);
+    return _data;
   } catch (error) {
     logger.error(`[getUserProfile] Error for uid=${uid}:`, error.message);
     return null;
@@ -464,8 +470,12 @@ export async function removeFromWishlist(uid, serviceId) {
  * @returns {Promise<Object[]>}
  */
 export async function getUserWishlist(uid) {
+  logger.log('[getUserWishlist] Called with:', { uid });
   const userProfile = await getUserProfile(uid);
-  if (!userProfile || !userProfile.wishlist || userProfile.wishlist.length === 0) return [];
+  if (!userProfile || !userProfile.wishlist || userProfile.wishlist.length === 0) {
+    logger.log('[getUserWishlist] Result:', []);
+    return [];
+  }
 
   const detailPromises = userProfile.wishlist.map(async (itemId) => {
     const collections = ['tours', 'hotels', 'activities'];
@@ -477,7 +487,9 @@ export async function getUserWishlist(uid) {
   });
 
   const results = await Promise.all(detailPromises);
-  return results.filter((item) => item !== null);
+  const _filtered = results.filter((item) => item !== null);
+  logger.log('[getUserWishlist] Result:', _filtered);
+  return _filtered;
 }
 
 // ─── Coupons ──────────────────────────────────────────────────────────
@@ -488,14 +500,25 @@ export async function getUserWishlist(uid) {
  * @returns {Promise<Object|null>}
  */
 export async function validateCoupon(code) {
+  logger.log('[validateCoupon] Called with:', { code });
   const q = query(couponsCol, where('code', '==', code), where('status', '==', 'active'), limit(1));
   const snap = await getDocs(q);
-  if (snap.empty) return null;
+  if (snap.empty) {
+    logger.log('[validateCoupon] Result:', null);
+    return null;
+  }
   const coupon = serializeDoc(snap.docs[0]);
 
-  if (coupon.expireDate && new Date(coupon.expireDate) < new Date()) return null;
-  if (coupon.maxUsage && coupon.usedCount >= coupon.maxUsage) return null;
+  if (coupon.expireDate && new Date(coupon.expireDate) < new Date()) {
+    logger.log('[validateCoupon] Result:', null);
+    return null;
+  }
+  if (coupon.maxUsage && coupon.usedCount >= coupon.maxUsage) {
+    logger.log('[validateCoupon] Result:', null);
+    return null;
+  }
 
+  logger.log('[validateCoupon] Result:', coupon);
   return coupon;
 }
 
@@ -547,6 +570,7 @@ export async function releaseInventoryHold(holdId) {
  *   The API route reads the availability field directly from the service document.
  */
 export async function getRealAvailability(serviceId, serviceType, startDate, totalCapacity) {
+  logger.log('[getRealAvailability] Called with:', { serviceId, serviceType, startDate, totalCapacity });
   const bookingsQ = query(bookingsCol, where('serviceId', '==', serviceId), where('startDate', '==', startDate), where('status', '==', 'confirmed'));
   const bookingsSnap = await getDocs(bookingsQ);
   const bookedCount = bookingsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
@@ -556,7 +580,9 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
   const holdsSnap = await getDocs(holdsQ);
   const heldCount = holdsSnap.docs.reduce((sum, d) => sum + (d.data().quantity || 1), 0);
 
-  return Math.max(0, totalCapacity - bookedCount - heldCount);
+  const _result = Math.max(0, totalCapacity - bookedCount - heldCount);
+  logger.log('[getRealAvailability] Result:', _result);
+  return _result;
 }
 
 // ─── Notifications ────────────────────────────────────────────────────
@@ -568,9 +594,12 @@ export async function getRealAvailability(serviceId, serviceType, startDate, tot
  * @returns {Promise<Object[]>}
  */
 export async function getUserNotifications(userId, pageSize = 20) {
+  logger.log('[getUserNotifications] Called with:', { userId, pageSize });
   const q = query(notificationsCol, where('userId', '==', userId), orderBy('createdAt', 'desc'), limit(pageSize));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => serializeDoc(d));
+  const _result = snap.docs.map((d) => serializeDoc(d));
+  logger.log('[getUserNotifications] Result:', _result);
+  return _result;
 }
 
 /**
@@ -588,7 +617,10 @@ export async function markNotificationRead(notificationId) {
  * @returns {Promise<Object|null>}
  */
 export async function getSiteSettings() {
-  return getDocById('settings', 'site');
+  logger.log('[getSiteSettings] Called with:', {});
+  const _result = await getDocById('settings', 'site');
+  logger.log('[getSiteSettings] Result:', _result);
+  return _result;
 }
 
 // ─── Hotel Pricing Utilities (pure functions, no DB) ──────────────────
@@ -630,8 +662,11 @@ export function resolveRoomPricing(priceSchedule, roomId, date) {
  * @returns {number}
  */
 export function getLowestRoomPrice(priceSchedule, roomId, date) {
+  logger.log('[getLowestRoomPrice] Called with:', { roomId, date });
   const pricing = resolveRoomPricing(priceSchedule, roomId, date);
-  return pricing.length === 0 ? 0 : pricing[0].sellPrice;
+  const _result = pricing.length === 0 ? 0 : pricing[0].sellPrice;
+  logger.log('[getLowestRoomPrice] Result:', _result);
+  return _result;
 }
 
 /**
@@ -642,14 +677,20 @@ export function getLowestRoomPrice(priceSchedule, roomId, date) {
  * @returns {number}
  */
 export function getHotelLowestPrice(priceSchedule, rooms, date) {
-  if (!rooms || rooms.length === 0) return 0;
+  logger.log('[getHotelLowestPrice] Called with:', { roomsCount: rooms?.length, date });
+  if (!rooms || rooms.length === 0) {
+    logger.log('[getHotelLowestPrice] Result:', 0);
+    return 0;
+  }
   let lowest = Infinity;
   for (const room of rooms) {
     if (!room.isActive) continue;
     const price = getLowestRoomPrice(priceSchedule, room.id, date);
     if (price > 0 && price < lowest) lowest = price;
   }
-  return lowest === Infinity ? 0 : lowest;
+  const _result = lowest === Infinity ? 0 : lowest;
+  logger.log('[getHotelLowestPrice] Result:', _result);
+  return _result;
 }
 
 /**
@@ -661,9 +702,13 @@ export function getHotelLowestPrice(priceSchedule, rooms, date) {
  * @returns {Array}
  */
 export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
+  logger.log('[buildRoomPricingTable] Called with:', { checkIn, checkOut });
   try {
     const roomsArr = Array.isArray(rooms) ? rooms : (rooms ? Object.values(rooms) : []);
-    if (roomsArr.length === 0) return [];
+    if (roomsArr.length === 0) {
+      logger.log('[buildRoomPricingTable] Result:', []);
+      return [];
+    }
 
     const sortedRooms = [...roomsArr].sort((a, b) => {
       const orderA = a?.sortOrder ?? 999;
@@ -704,9 +749,11 @@ export function buildRoomPricingTable(priceSchedule, rooms, checkIn, checkOut) {
     }
     if (dates.length === 0) dates.push(checkIn);
 
-    return sortedRooms.map(room => buildRoomRow(room, dates)).filter(Boolean);
+    const _buildResult = sortedRooms.map(room => buildRoomRow(room, dates)).filter(Boolean);
+    logger.log('[buildRoomPricingTable] Result:', _buildResult);
+    return _buildResult;
   } catch (error) {
-    console.error('[firestore] Error in buildRoomPricingTable:', error);
+    logger.error('[buildRoomPricingTable] Error:', error);
     return [];
   }
 }

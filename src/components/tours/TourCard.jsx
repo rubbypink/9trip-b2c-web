@@ -57,7 +57,9 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
     rating,
     included = [],
     locationName,
+    location = locationName,
     excerpt,
+    durationDays,
     isFeatured,
     discountPercent,
   } = tour;
@@ -68,8 +70,9 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
       ? Math.round((pricing.discount / pricing.adultPrice) * 100)
       : 0);
 
-  const durationText = duration.days
-    ? `${duration.days} ngày ${duration.nights || duration.days - 1 || 0} đêm`
+  const durDays = duration.days || durationDays || 0;
+  const durationText = durDays
+    ? `${durDays} ngày ${duration.nights || durDays - 1 || 0} đêm`
     : "";
 
   const avgRating = rating?.average || ratingAverage || 0;
@@ -110,7 +113,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
         <div className="flex flex-1 flex-col justify-between gap-2">
           <div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-              {locationName && <span>{locationName}</span>}
+              {location && <span>{location}</span>}
               {durationText && <span>• {durationText}</span>}
             </div>
             <Link href={`/tours/${slug}`}>
@@ -180,7 +183,7 @@ export default function TourCard({ tour: tourProp, item, variant = "grid", class
       </Link>
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-          {locationName && <span>{locationName}</span>}
+          {location && <span>{location}</span>}
           {durationText && <span>• {durationText}</span>}
         </div>
         <Link href={`/tours/${slug}`}>

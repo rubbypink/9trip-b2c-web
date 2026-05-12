@@ -1,6 +1,7 @@
 import { searchHotels, getLocations, countHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
 import { PAGE_SIZE } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";
@@ -35,13 +36,23 @@ export default async function HotelsPage({ searchParams }) {
     page,
   };
 
-  const [{ hotels: rawCachedHotels }, locations, totalCount] = await Promise.all([
-    searchHotels(filters),
-    getLocations(),
-    countHotels(filters),
-  ]);
-  let hotels = await resolveDocsImages(rawCachedHotels);
-  hotels = await enrichHotelsWithLowestPrices(hotels);
+  let hotels = [];
+  let locations = [];
+  let totalCount = 0;
+
+  try {
+    const [{ hotels: rawCachedHotels }, locs, count] = await Promise.all([
+      searchHotels(filters),
+      getLocations(),
+      countHotels(filters),
+    ]);
+    hotels = await resolveDocsImages(rawCachedHotels);
+    hotels = await enrichHotelsWithLowestPrices(hotels);
+    locations = locs;
+    totalCount = count;
+  } catch (error) {
+    logger.error("[HotelsPage] Error loading data:", error.message);
+  }
 
   if (filters.minPrice != null) {
     hotels = hotels.filter((h) => (h.lowestPrice || h.pricing?.basePrice || 0) >= filters.minPrice);

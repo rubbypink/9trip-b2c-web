@@ -38,6 +38,7 @@
 - ✅ **Inventory Hold với TTL 10 phút** trước khi tạo booking.
 - ✅ **Payment Webhook** xác thực signature trước khi xử lý.
 - ✅ **Responsive mobile-first** (Tailwind responsive utilities).
+- ✅ **Handle Error** Always use try catch to make sure errors like not found, unidentify, null of target never crash app.
 
 ### 2.3. Core Tenets
 

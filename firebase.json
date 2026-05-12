@@ -2,6 +2,9 @@
   "hosting": {
     "source": ".",
     "ignore": ["firebase.json", "**/node_modules/**"],
+    "frameworksBackend": {
+      "region": "asia-southeast1"
+    },
     "rewrites": [
       {
         "source": "/api/bookings/**",
@@ -75,7 +78,7 @@
       "source": "functions",
       "codebase": "default",
       "disallowLegacyRuntimeConfig": true,
-      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"]
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local", "!.env.local"]
     }
   ],
   "firestore": {

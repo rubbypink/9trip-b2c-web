@@ -46,7 +46,7 @@ export default function ReviewsPanel({ ratingAverage = 0, ratingCount = 0, revie
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-6 rounded-xl border border-border bg-surface-1/50">
         {/* Average score */}
         <div className="text-center">
-          <div className="text-4xl font-bold text-foreground">{ratingAverage.toFixed(1)}</div>
+          <div className="text-4xl font-bold text-foreground">{(Number(ratingAverage) || 0).toFixed(1)}</div>
           <StarRating rating={ratingAverage} size="sm" className="mt-1 justify-center" />
           <p className="text-sm text-muted-foreground mt-1">{totalReviews} đánh giá</p>
         </div>

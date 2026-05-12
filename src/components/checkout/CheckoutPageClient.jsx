@@ -48,7 +48,7 @@ export default function CheckoutPageClient() {
         
         const data = await res.json();
         if (data.success) {
-          setRealGrandTotal(data.pricing.grandTotal); 
+          setRealGrandTotal(data.pricing?.grandTotal); 
         } else {
           setErrorMsg(data.message); 
         }

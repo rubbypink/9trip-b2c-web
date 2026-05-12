@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getActivityBySlug, getReviews, getRelatedActivities } from "@/lib/firestore-admin";
 import { resolveDocImages } from "@/lib/storage-admin";
+import { logger } from "@/lib/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "@/components/activities/ActivityDetailClient";
 
@@ -54,14 +55,24 @@ export default async function ActivityDetailPage({ params }) {
 
   if (!rawActivity) notFound();
 
-  // Resolve image URLs (gs:// → HTTPS)
-  const activity = await resolveDocImages(rawActivity);
+  let activity = rawActivity;
+  let reviews = [];
+  let relatedActivities = [];
 
-  // Fetch reviews and related activities in parallel
-  const [{ reviews }, { activities: relatedActivities }] = await Promise.all([
-    getReviews("activity", activity.id),
-    getRelatedActivities(slug, 3),
-  ]);
+  try {
+    // Resolve image URLs (gs:// → HTTPS)
+    activity = await resolveDocImages(rawActivity);
+
+    // Fetch reviews and related activities in parallel
+    const [{ reviews: r }, { activities: rel }] = await Promise.all([
+      getReviews("activity", activity.id),
+      getRelatedActivities(slug, 3),
+    ]);
+    reviews = r || [];
+    relatedActivities = rel || [];
+  } catch (error) {
+    logger.error("[ActivityDetailPage] Error loading data:", error.message);
+  }
 
   const totalRating = reviews.length;
   const avgRating =
@@ -75,10 +86,10 @@ export default async function ActivityDetailPage({ params }) {
     slug: a.slug,
     title: a.title,
     featuredImage: a.featuredImage,
-    locationName: a.locationName,
+    location: a.locationName || a.location,
     ratingAverage: a.ratingAverage || 0,
     pricing: { basePrice: a.pricing?.basePrice || 0 },
-    duration: a.duration,
+    durationDays: a.durationDays || a.duration?.days,
   }));
 
   const clientReviews = reviews.slice(0, 5); // Pass few newest reviews for summary
@@ -94,10 +105,10 @@ export default async function ActivityDetailPage({ params }) {
     description: activity.excerpt || activity.description?.replace(/<[^>]*>/g, "").slice(0, 200),
     image: activity.featuredImage,
     url: `/activities/${slug}`,
-    ...(activity.locationName && {
+    ...((activity.locationName || activity.location) && {
       touristDestination: {
         "@type": "City",
-        name: activity.locationName,
+        name: activity.locationName || activity.location,
       },
     }),
     ...((activity.pricing?.basePrice || pricingTiers[0]?.adultPrice) && {

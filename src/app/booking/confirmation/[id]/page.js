@@ -104,9 +104,9 @@ export default function BookingConfirmationPage({ params }) {
                             ) : "Sửa đơn & Thanh toán lại"}
                         </button>
 
-                        <Link href="/contact" className="w-full py-3 px-4 bg-card text-foreground border border-border rounded-xl font-bold hover:bg-surface-1 transition-colors">
+                        <a href="mailto:info@9tripphuquoc.com" className="w-full py-3 px-4 bg-card text-foreground border border-border rounded-xl font-bold hover:bg-surface-1 transition-colors">
                             Liên hệ hỗ trợ
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -257,7 +257,7 @@ const apiBaseConfig = {
 };
 
 export const apiCore = onRequest(apiBaseConfig, apiCoreApp);
-export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 120, minInstances: 0 }, apiPaymentsApp);
+export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 300, minInstances: 0 }, apiPaymentsApp);
 export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 0 }, apiWebhooksApp);
 export const apiAgents = onRequest(apiBaseConfig, apiAgentsApp);
 

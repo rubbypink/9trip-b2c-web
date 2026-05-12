@@ -208,7 +208,7 @@ export default function HotelDetailClient({
                   <Badge icon="/icons/location.svg" label="Địa điểm" value={address.city} />
                 )}
                 {avgRating > 0 && (
-                  <Badge icon="/icons/star.svg" label="Đánh giá" value={`${avgRating.toFixed(1)} (${totalRating} đánh giá)`} />
+                  <Badge icon="/icons/star.svg" label="Đánh giá" value={`${(Number(avgRating) || 0).toFixed(1)} (${totalRating} đánh giá)`} />
                 )}
                 {lowestPrice > 0 && (
                   <Badge icon="/icons/tag.svg" label="Giá" value={`Từ ${formatCurrency(lowestPrice, "VND")}/đêm`} highlight />
@@ -235,7 +235,7 @@ export default function HotelDetailClient({
                       <span className="inline-flex items-center gap-1 text-muted-foreground">
                         <span className="text-muted-foreground">|</span>
                         <span className="text-yellow-500">★</span>
-                        <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>
+                        <span className="font-semibold text-foreground">{(Number(avgRating) || 0).toFixed(1)}</span>
                         {totalRating > 0 && <span>({totalRating})</span>}
                       </span>
                     )}
@@ -370,7 +370,7 @@ export default function HotelDetailClient({
                         )}
                         {h.rating?.average > 0 && (
                           <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm rounded-lg px-2 py-0.5 text-xs font-bold text-primary shadow-sm">
-                            {h.rating.average.toFixed(1)}
+                            {(Number(h.rating?.average) || 0).toFixed(1)}
                           </div>
                         )}
                       </div>

@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { registerWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase-auth';
+import { upsertUserProfile } from '@/lib/firestore';
 import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 
 function RegisterForm() {
@@ -49,7 +50,12 @@ function RegisterForm() {
 		setSocialLoading(provider);
 		try {
 			const loginFn = provider === 'google' ? loginWithGoogle : loginWithFacebook;
-			await loginFn();
+			const cred = await loginFn();
+			await upsertUserProfile(cred.user.uid, {
+				email: cred.user.email,
+				displayName: cred.user.displayName,
+				photoURL: cred.user.photoURL,
+			});
 			router.replace(redirect);
 		} catch (err) {
 			setError(err);

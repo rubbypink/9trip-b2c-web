@@ -76,12 +76,19 @@ function ensureAdminInit() {
 	if (admin.apps.length) return true;
 	try {
 		const serviceAccount = getServiceAccount();
+		const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
+			|| process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+			|| `${process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`;
+
 		if (serviceAccount) {
-			admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+			admin.initializeApp({
+				credential: admin.credential.cert(serviceAccount),
+				storageBucket,
+			});
 			return true;
 		}
 		// Fallback: GOOGLE_APPLICATION_CREDENTIALS
-		admin.initializeApp();
+		admin.initializeApp({ storageBucket });
 		return true;
 	} catch (error) {
 		logger.error('[firebase-admin] Lỗi khởi tạo Firebase Admin:', error);

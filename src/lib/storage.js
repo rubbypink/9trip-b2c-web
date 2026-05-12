@@ -20,18 +20,21 @@
  *   rentals/{rentalId}/
  *     featured.webp
  *     gallery/01.webp, 02.webp, ...
+ *   images/logo.png, favicon.webp...
+ *     banners/hero-banner.webp,footer-banner.webp, ...
  */
 
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { storage } from './firebase';
 import { logger } from './logger';
+import { getSafeImage } from './error-utils';
 
 // ─── Path Builders ────────────────────────────────────────────────────
 
 /**
  * Standard service types mapped to their Storage root folders.
  */
-const STORAGE_ROOTS = { tour: 'tours', hotel: 'hotels', activity: 'activities', car: 'cars', rental: 'rentals', avatar: 'avatars', picture: 'pictures', video: 'videos' };
+const STORAGE_ROOTS = { tour: 'tours', hotel: 'hotels', activity: 'activities', car: 'cars', rental: 'rentals', avatar: 'avatars', picture: 'pictures', video: 'videos', image: 'images' };
 
 /**
  * Build the base Storage path for a service item.
@@ -207,10 +210,16 @@ export async function uploadRoomGalleryImages(serviceType, serviceId, roomId, fi
  * @returns {Promise<string|null>} Downloadable HTTPS URL or null
  */
 export async function getStorageImageUrl(imagePath) {
-	if (!imagePath) return null;
+	logger.log('[getStorageImageUrl] Called with:', { imagePath });
+	if (!imagePath) {
+		const fallback = getSafeImage(null);
+		logger.log('[getStorageImageUrl] Result: fallback (no path)', fallback);
+		return fallback;
+	}
 
 	// Already a full HTTP/HTTPS URL — return as-is (externally hosted)
 	if (typeof imagePath === 'string' && (imagePath.startsWith('http://') || imagePath.startsWith('https://'))) {
+		logger.log('[getStorageImageUrl] Result:', imagePath);
 		return imagePath;
 	}
 
@@ -218,20 +227,24 @@ export async function getStorageImageUrl(imagePath) {
 	if (typeof imagePath === 'string' && imagePath.startsWith('gs://')) {
 		try {
 			const storageRef = ref(storage, imagePath);
-			return await getDownloadURL(storageRef);
+			const url = await getDownloadURL(storageRef);
+			logger.log('[getStorageImageUrl] Result:', url);
+			return url;
 		} catch (error) {
 			logger.error('[getStorageImageUrl] Failed to resolve gs:// path:', imagePath, error.message);
-			return null;
+			return getSafeImage(null);
 		}
 	}
 
 	// Relative path within the default bucket (e.g. "tours/abc123/featured.webp")
 	try {
 		const storageRef = ref(storage, imagePath);
-		return await getDownloadURL(storageRef);
+		const url = await getDownloadURL(storageRef);
+		logger.log('[getStorageImageUrl] Result:', url);
+		return url;
 	} catch (error) {
 		logger.error('[getStorageImageUrl] Failed to resolve relative path:', imagePath, error.message);
-		return null;
+		return getSafeImage(null);
 	}
 }
 
@@ -242,8 +255,12 @@ export async function getStorageImageUrl(imagePath) {
  * @returns {Promise<string|null>}
  */
 export async function getFeaturedImageUrl(serviceType, serviceId) {
+	logger.log('[getFeaturedImageUrl] Called with:', { serviceType, serviceId });
 	const path = getFeaturedImagePath(serviceType, serviceId);
-	return getStorageImageUrl(path);
+	const url = await getStorageImageUrl(path);
+	const result = url || getSafeImage(null);
+	logger.log('[getFeaturedImageUrl] Result:', result);
+	return result;
 }
 
 /**
@@ -254,15 +271,18 @@ export async function getFeaturedImageUrl(serviceType, serviceId) {
  * @returns {Promise<string[]>}
  */
 export async function getGalleryImageUrls(serviceType, serviceId) {
+	logger.log('[getGalleryImageUrls] Called with:', { serviceType, serviceId });
 	try {
 		const galleryPath = `${getStorageBasePath(serviceType, serviceId)}/gallery`;
 		const listRef = ref(storage, galleryPath);
 		const result = await listAll(listRef);
 		const urls = await Promise.all(result.items.map((itemRef) => getDownloadURL(itemRef)));
-		return urls;
+		const final = urls.length > 0 ? urls : [getSafeImage(null)];
+		logger.log('[getGalleryImageUrls] Result:', final);
+		return final;
 	} catch (error) {
 		logger.error('[getGalleryImageUrls] Error:', error.message);
-		return [];
+		return [getSafeImage(null)];
 	}
 }
 
@@ -277,7 +297,11 @@ export async function getGalleryImageUrls(serviceType, serviceId) {
  * @returns {Promise<Object>} Document with resolved image URLs
  */
 export async function resolveDocImages(doc) {
-	if (!doc || typeof doc !== 'object') return doc;
+	logger.log('[resolveDocImages] Called with:', { doc });
+	if (!doc || typeof doc !== 'object') {
+		logger.log('[resolveDocImages] Result:', doc);
+		return doc;
+	}
 
 	const imageFields = ['featuredImage', 'gallery', 'images', 'media', 'logo'];
 	const result = { ...doc };
@@ -286,10 +310,11 @@ export async function resolveDocImages(doc) {
 		if (result[field]) {
 			if (Array.isArray(result[field])) {
 				const resolved = await Promise.all(result[field].map((url) => getStorageImageUrl(url)));
-				result[field] = resolved.filter(Boolean);
+				const filtered = resolved.filter(Boolean);
+				result[field] = filtered.length > 0 ? filtered : [getSafeImage(null)];
 			} else if (typeof result[field] === 'string') {
 				const resolved = await getStorageImageUrl(result[field]);
-				result[field] = resolved || result[field];
+				result[field] = resolved || getSafeImage(null);
 			}
 		}
 	}
@@ -311,6 +336,7 @@ export async function resolveDocImages(doc) {
 		}
 	}
 
+	logger.log('[resolveDocImages] Result:', result);
 	return result;
 }
 
@@ -320,8 +346,14 @@ export async function resolveDocImages(doc) {
  * @returns {Promise<Object[]>} Documents with resolved image URLs
  */
 export async function resolveDocsImages(docs) {
-	if (!Array.isArray(docs)) return docs;
-	return Promise.all(docs.map((doc) => resolveDocImages(doc)));
+	logger.log('[resolveDocsImages] Called with:', { docs });
+	if (!Array.isArray(docs)) {
+		logger.log('[resolveDocsImages] Result:', docs);
+		return docs;
+	}
+	const results = await Promise.all(docs.map((doc) => resolveDocImages(doc)));
+	logger.log('[resolveDocsImages] Result:', results);
+	return results;
 }
 
 // ─── Delete ───────────────────────────────────────────────────────────

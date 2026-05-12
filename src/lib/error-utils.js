@@ -79,5 +79,5 @@ export function safeJsonParse(str, fallback = null) {
  */
 export function getSafeImage(url, type = "tour") {
   if (url && url.startsWith("http")) return url;
-  return `/placeholder-${type}.jpg`;
+  return `/images/favicon.webp`;
 }
