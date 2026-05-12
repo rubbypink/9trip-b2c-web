@@ -16,7 +16,6 @@ __tests__/
 # Ignore editor config
 .vscode/
 .idea/
-
-/.*/
+node_modules/
 
 

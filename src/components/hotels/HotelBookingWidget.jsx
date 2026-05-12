@@ -34,8 +34,6 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
   const { updateCartItem, removeCartItemByKey } = useCart();
   const { user } = useAuth();
   const debounceRef = useRef(null);
-  const { updateCartItem, removeCartItemByKey } = useCart();
-  const debounceRef = useRef(null);
 
   // ── Min date ─────────────────────────────────────────────
   const minDate = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -199,13 +197,6 @@ export default function HotelBookingWidget({ hotel = {}, pricingTable = [], chec
       }
     }, 100);
   }, [syncCart, router, user]);
-    // Ensure cart is up-to-date before navigating
-    syncCart();
-    // Small delay to let cart state update
-    setTimeout(() => {
-      router.push("/checkout");
-    }, 100);
-  }, [syncCart, router]);
 
   // ── Handle consult ───────────────────────────────────────
   const handleConsult = useCallback(() => {

@@ -197,11 +197,6 @@ export function CartProvider({ children }) {
       // ignore
     }
   }, []);
-    setItems([]);
-    setCouponCode(null);
-    setCouponDiscount(0);
-    setCouponData(null);
-  }, []);
 
   /**
    * Apply a coupon code.
@@ -275,11 +270,6 @@ export function CartProvider({ children }) {
       console.error('[CartProvider] Failed to save cart to localStorage:', e);
     }
   }, [items]);
-  const restoreCart = (backupItems) => {
-    if (backupItems && backupItems.length > 0) {
-      setItems(backupItems); // Thay setItems bằng hàm cập nhật state giỏ hàng của bro
-    }
-  };
 
   // Derived values (rounded to avoid floating point errors)
   const subtotal = useMemo(() => Math.round(items.reduce((sum, item) => sum + item.total, 0)), [items]);

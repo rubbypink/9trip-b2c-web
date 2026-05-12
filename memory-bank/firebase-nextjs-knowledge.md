@@ -159,7 +159,7 @@ firebase functions:secrets:set STRIPE_KEY
 Project này có 2 nhóm functions:
 
 1. **Custom Cloud Functions** (`functions/` source):
-   - `apiCore`, `apiPayments`, `apiWebhooks`, `apiAgents`
+   - `apiCore`, `apiPayments`, `apiWebhooks`
    - Express-based micro-monoliths
    - Firestore triggers (`onDocumentCreated`, `onDocumentUpdated`)
    - Scheduled tasks (`onSchedule`)

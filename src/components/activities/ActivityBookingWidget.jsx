@@ -45,7 +45,6 @@ export default function ActivityBookingWidget({
   const router = useRouter();
   const { addItem } = useCart();
   const { user } = useAuth();
-  const { addItem } = useCart();
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTierId, setSelectedTierId] = useState(
     pricingTiers.length > 0 ? pricingTiers[0].id : null

@@ -1,24 +1,18 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
 
 /**
- * Bảo vệ route yêu cầu đăng nhập.
- * Chuyển hướng sang /login nếu chưa xác thực.
+ * Bảo vệ route yêu cầu đăng nhập (Client-side hydration guard).
+ *
+ * Proxy.js (edge) đã redirect unauthenticated users về /login trước khi HTML
+ * đến client. AuthGuard chỉ còn nhiệm vụ render loading skeleton trong khi
+ * Firebase Auth state hydrate để tránh flash unauthenticated content.
+ *
  * @param {{ children: React.ReactNode, fallback?: React.ReactNode }} props
  */
 export default function AuthGuard({ children, fallback }) {
   const { user, loading, initialized } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (initialized && !loading && !user) {
-      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
-    }
-  }, [initialized, loading, user, router, pathname]);
 
   if (loading || !initialized || !user) {
     return (

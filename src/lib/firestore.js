@@ -378,6 +378,7 @@ async function getUserByUid(uid) {
   return null;
 }
 
+
 /**
  * Create or update user profile.
  * Uses sequential ID (via generateNextId) for new users and stores

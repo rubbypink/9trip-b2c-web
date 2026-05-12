@@ -7,7 +7,6 @@
  *   - apiCore:       bookings, availability, email, auth, contact, cart
  *   - apiPayments:   payment creation, retry, return, log, MoMo
  *   - apiWebhooks:   ERP webhooks, payment gateway callbacks
- *   - apiAgents:     agent task endpoints
  *
  * Firestore triggers and scheduled functions remain as individual exports
  * since they cannot be grouped into Express apps.
@@ -16,8 +15,16 @@
 // Prevent MaxListenersExceededWarning caused by firebase-functions v2 SDK
 // registering process.on('uncaughtException', ...) for each exported function
 // trigger (14+ triggers exceeding the default 10-listener limit).
-process.setMaxListeners(0);
+// process.setMaxListeners(0);
 import 'dotenv/config'; // Load environment variables from .env file
+import { setGlobalOptions } from 'firebase-functions/v2';
+
+// [TÙY CHỌN] Nếu muốn áp dụng cấu hình này cho TẤT CẢ các hàm v2 trong file này
+setGlobalOptions({
+	maxInstances: 10,
+	timeoutSeconds: 540, // Tăng lên 5 phút (tối đa 3600s)
+	memory: '1024MiB', // Tăng bộ nhớ RAM (Mặc định 256MiB thường không đủ cho webhook)
+});
 import { onRequest, onCall } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -26,13 +33,13 @@ import { adminDb } from './src/lib/firebase-admin.js';
 import {
 	sendBookingConfirmation,
 	sendPaymentReceipt,
-	sendPasswordChangedEmail,
 	sendBookingCancelledEmail,
 	sendBookingModifiedEmail,
 } from './src/notifications/email.js';
 import { EmailMissingError } from '@9trip/shared/email/service';
 import { cleanupExpiredHolds as cleanupHolds, cancelAbandonedBookings as cancelBookings } from './src/scheduled/cleanup.js';
 import { handleChat } from './emily/index.js';
+
 
 // ─── Email Notifications ──────────────────────────────────────────────
 
@@ -65,27 +72,6 @@ export const onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}
 	if (before.status !== 'paid' && after.status === 'paid') {
 		try {
 			await sendPaymentReceipt(adminDb, after, event.params.bookingId);
-		} catch (err) {
-			if (err instanceof EmailMissingError) {
-				console.warn(`[email] ${err.message}`);
-				return;
-			}
-			throw err;
-		}
-	}
-});
-
-/**
- * Send password changed notification when user doc is updated with passwordChangedAt.
- */
-export const onPasswordChanged = onDocumentUpdated({ document: 'users/{userId}', region: 'asia-southeast1' }, async (event) => {
-	const before = event.data.before.data();
-	const after = event.data.after.data();
-	if (!before || !after) return;
-
-	if (!before.passwordChangedAt && after.passwordChangedAt) {
-		try {
-			await sendPasswordChangedEmail(adminDb, after, event.params.userId);
 		} catch (err) {
 			if (err instanceof EmailMissingError) {
 				console.warn(`[email] ${err.message}`);
@@ -198,7 +184,7 @@ export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes'
  * Trigger: Callable function (chatWithEmily)
  */
 export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (request) => {
-  return await handleChat(request, adminDb);
+  return await handleChat(request);
 });
 
 // ─── API Micro-Monoliths (Vercel API Routes Migration) ──────────────────
@@ -210,13 +196,13 @@ import apiWebhooksApp from './src/apps/apiWebhooks.js';
 const apiBaseConfig = {
   region: 'asia-southeast1',
   concurrency: 80,
-  memory: '512MiB',
-  timeoutSeconds: 120,
+  memory: '1024MiB',
+  timeoutSeconds: 540,
   minInstances: 0,
   cors: true,
 };
 export { onUserCreated, onUserUpdatedSync, onUserDeletedSync } from './src/triggers/users.js';
 export const apiCore = onRequest(apiBaseConfig, apiCoreApp);
-export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 300, minInstances: 0 }, apiPaymentsApp);
+export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 540, memory: '1GiB', minInstances: 0 }, apiPaymentsApp);
 export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 0 }, apiWebhooksApp);
 

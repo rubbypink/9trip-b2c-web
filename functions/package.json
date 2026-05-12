@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "9trip-b2c-back-end",
+	"name": "9trip-b2c-functions",
 	"description": "Cloud Functions for 9 Trip Phú Quốc — payment webhooks, email notifications, scheduled cleanup",
 	"main": "index.js",
 	"scripts": {
@@ -16,26 +16,17 @@
 	},
 	"dependencies": {
 		"@9trip/shared": "file:../packages/shared",
-		"@genkit-ai/google-genai": "^1.33.0",
-		"@genkit-ai/vertexai": "^1.32.0",
-		"@google-cloud/vertexai": "^1.12.0",
 		"@google/genai": "^2.0.1",
 		"cors": "^2.8.5",
 		"dotenv": "^17.4.2",
 		"express": "^5.1.0",
 		"firebase-admin": "^13.8.0",
 		"firebase-functions": "^7.2.5",
-		"genkit": "^1.33.0",
 		"helmet": "^8.1.0",
-		"next": "latest",
-		"nodemailer": "^8.0.7",
-		"react": "latest",
-		"react-dom": "latest"
+		"nodemailer": "^8.0.7"
 	},
 	"devDependencies": {
-		"@google-cloud/functions-framework": "^5.0.2",
-		"eslint": "^10.3.0",
-		"firebase-functions-test": "^3.4.1"
+		"@google-cloud/functions-framework": "^5.0.2"
 	},
 	"private": true
 }
