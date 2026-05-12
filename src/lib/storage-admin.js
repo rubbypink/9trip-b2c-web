@@ -143,3 +143,61 @@ export async function resolveImageBatch(items, field = "featuredImage") {
     }))
   );
 }
+
+
+/**
+ * Resolves all Firebase Storage image URLs inside an HTML string.
+ * Searches for <img src="gs://..."> or relative storage paths and replaces them
+ * with fully resolved HTTPS download URLs.
+ *
+ * @param {string} htmlContent - The raw HTML string.
+ * @returns {Promise<string>} The HTML string with resolved image URLs.
+ */
+export async function resolveHtmlImages(htmlContent) {
+  if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+
+  // Regex to find all img tags and extract their src attribute
+  const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/g;
+  let match;
+  const matches = [];
+
+  // Gather all matches
+  while ((match = imgTagRegex.exec(htmlContent)) !== null) {
+    matches.push({
+      fullTag: match[0],
+      srcUrl: match[1],
+    });
+  }
+
+  if (matches.length === 0) return htmlContent;
+
+  let resolvedHtml = htmlContent;
+
+  // Process images in parallel
+  const resolvePromises = matches.map(async (m) => {
+    // We skip resolving if it's already a regular http/https URL
+    // Note: getStorageImageUrl handles gs:// or relative paths
+    if (m.srcUrl.startsWith('http://') || m.srcUrl.startsWith('https://')) {
+      // Also skip if it's already a firebase URL (might be a pass-through)
+      if (m.srcUrl.includes('firebasestorage.googleapis.com')) {
+        return;
+      }
+    }
+
+    try {
+      const resolvedUrl = await getStorageImageUrl(m.srcUrl);
+      if (resolvedUrl && resolvedUrl !== m.srcUrl) {
+        // Replace the specific src URL in the HTML. 
+        // Use split/join to replace all occurrences of this exact src safely
+        resolvedHtml = resolvedHtml.split(`src="${m.srcUrl}"`).join(`src="${resolvedUrl}"`);
+        resolvedHtml = resolvedHtml.split(`src='${m.srcUrl}'`).join(`src='${resolvedUrl}'`);
+      }
+    } catch (error) {
+      console.error('[storage-admin] Failed to resolve HTML image URL:', m.srcUrl, error);
+    }
+  });
+
+  await Promise.all(resolvePromises);
+
+  return resolvedHtml;
+}

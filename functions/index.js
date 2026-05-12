@@ -17,23 +17,23 @@
 // registering process.on('uncaughtException', ...) for each exported function
 // trigger (14+ triggers exceeding the default 10-listener limit).
 process.setMaxListeners(0);
-import 'dotenv/config'; // Load environment variables from .env file
-import { onRequest, onCall } from 'firebase-functions/v2/https';
-import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
-import "@9trip/shared/logger";
 import { adminDb } from './src/lib/firebase-admin.js';
+// import 'dotenv/config'; // Load environment variables from .env file
+import { onRequest, onCall } from 'firebase-functions/v2/https';
+import { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { logger} from "@9trip/shared/logger";
+import { syncUserToAuth, deleteUserFromAuth } from './src/triggers/users.js';
 import {
 	sendBookingConfirmation,
 	sendPaymentReceipt,
 	sendWelcomeEmail,
-	sendPasswordChangedEmail,
+	// sendPasswordChangedEmail,
 	sendBookingCancelledEmail,
 	sendBookingModifiedEmail,
 } from './src/notifications/email.js';
 import { EmailMissingError } from '@9trip/shared/email/service';
 import { cleanupExpiredHolds as cleanupHolds, cancelAbandonedBookings as cancelBookings } from './src/scheduled/cleanup.js';
-import { executeAgentTask } from './src/agents/executor.js';
 import { handleChat } from './emily/index.js';
 
 // ─── Email Notifications ──────────────────────────────────────────────
@@ -80,40 +80,76 @@ export const onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}
 /**
  * Send welcome email when a new user is created.
  */
-export const onUserCreated = onDocumentCreated({ document: 'users/{userId}', region: 'asia-southeast1' }, async (event) => {
-	const user = event.data.data();
-	if (!user) return;
-	try {
-		await sendWelcomeEmail(adminDb, user, event.params.userId);
-	} catch (err) {
-		if (err instanceof EmailMissingError) {
-			console.warn(`[email] ${err.message}`);
-			return;
-		}
-		throw err;
-	}
-});
+// export const newUserCreated = onDocumentCreated({ document: 'users/{userId}', region: 'asia-southeast1' },
+// 	async (event) => {
+// 		const userDoc = event.data.data();
+// 		const docId = event.params.userId;
+// 		if (!userDoc) return;
+
+// 		// Use the uid field if present, otherwise fall back to document ID
+// 		const authUid = userDoc.uid || docId;
+
+// 		try {
+// 			await syncUserToAuth(authUid, userDoc);
+// 			logger.info(`User ${authUid} synced to Firebase Auth on creation`);
+
+// 			// Send welcome email (fire-and-forget)
+// 			sendWelcomeEmail(adminDb, userDoc, docId).catch((emailError) => {
+// 				if (emailError instanceof EmailMissingError) {
+// 					logger.warn(`Welcome email not sent to ${userDoc.email}: email missing`);
+// 				} else {
+// 					logger.error(`Error sending welcome email to ${userDoc.email}:`, emailError);
+// 				}
+// 			});
+// 		} catch (error) {
+// 			logger.error(`[onUserCreated] Error processing user ${authUid}:`, error);
+// 		}
+// });
+
+// // ─── onUserUpdatedSync: Sync changed fields to Firebase Auth ────────────
+
+// export const userUpdated = onDocumentUpdated(
+// 	{ document: 'users/{userId}', region: 'asia-southeast1' },
+// 	async (event) => {
+// 		const before = event.data.before.data();
+// 		const after = event.data.after.data();
+// 		if (!before || !after) return;
+// 		const uid = after.uid || event.params.userId;
+// 		await syncUserToAuth(uid, after, before);
+// 	}
+// );
+
+// // ─── onUserDeletedSync: Remove from Firebase Auth ───────────────────────
+
+// export const userDeleted = onDocumentDeleted(
+// 	{ document: 'users/{userId}', region: 'asia-southeast1' },
+// 	async (event) => {
+// 		const uid = event.params.userId;
+// 		await deleteUserFromAuth(uid);
+// 	}
+// );
+
 
 /**
  * Send password changed notification when user doc is updated with passwordChangedAt.
  */
-export const onPasswordChanged = onDocumentUpdated({ document: 'users/{userId}', region: 'asia-southeast1' }, async (event) => {
-	const before = event.data.before.data();
-	const after = event.data.after.data();
-	if (!before || !after) return;
+// export const onPasswordChanged = onDocumentUpdated({ document: 'users/{userId}', region: 'asia-southeast1' }, async (event) => {
+// 	const before = event.data.before.data();
+// 	const after = event.data.after.data();
+// 	if (!before || !after) return;
 
-	if (!before.passwordChangedAt && after.passwordChangedAt) {
-		try {
-			await sendPasswordChangedEmail(adminDb, after, event.params.userId);
-		} catch (err) {
-			if (err instanceof EmailMissingError) {
-				console.warn(`[email] ${err.message}`);
-				return;
-			}
-			throw err;
-		}
-	}
-});
+// 	if (!before.passwordChangedAt && after.passwordChangedAt) {
+// 		try {
+// 			await sendPasswordChangedEmail(adminDb, after, event.params.userId);
+// 		} catch (err) {
+// 			if (err instanceof EmailMissingError) {
+// 				console.warn(`[email] ${err.message}`);
+// 				return;
+// 			}
+// 			throw err;
+// 		}
+// 	}
+// });
 
 /**
  * Send cancellation email when a booking status changes to "cancelled".
@@ -209,22 +245,6 @@ export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes'
 	await cancelBookings(adminDb);
 });
 
-// ─── Agent Task Executor ──────────────────────────────────────────────
-
-/**
- * Agent task executor — listens for new agentTasks documents and executes them.
- * Trigger: document created in agentTasks/{taskId}
- *
- * Handles both skill and flow execution:
- *   - 'firestore-task' mode: executes directly (media-finder, orchestrator, etc.)
- *   - 'agent-only' mode: leaves as 'queued_for_agent' for external AI agent
- */
-export const onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
-	const snap = event.data;
-	if (!snap) return;
-	await executeAgentTask(adminDb, snap, event);
-});
-
 // ─── Emily Chat ───────────────────────────────────────────────────────
 
 /**
@@ -240,13 +260,12 @@ export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (reques
 import apiCoreApp from './src/apps/apiCore.js';
 import apiPaymentsApp from './src/apps/apiPayments.js';
 import apiWebhooksApp from './src/apps/apiWebhooks.js';
-import apiAgentsApp from './src/apps/apiAgents.js';
 
 const apiBaseConfig = {
   region: 'asia-southeast1',
   concurrency: 80,
   memory: '512MiB',
-  timeoutSeconds: 120,
+  timeoutSeconds: 300,
   minInstances: 0,
   cors: true,
 };
@@ -254,5 +273,5 @@ const apiBaseConfig = {
 export const apiCore = onRequest(apiBaseConfig, apiCoreApp);
 export const apiPayments = onRequest({ ...apiBaseConfig, timeoutSeconds: 300, minInstances: 0 }, apiPaymentsApp);
 export const apiWebhooks = onRequest({ ...apiBaseConfig, minInstances: 0 }, apiWebhooksApp);
-export const apiAgents = onRequest(apiBaseConfig, apiAgentsApp);
+
 
