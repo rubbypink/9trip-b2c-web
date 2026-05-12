@@ -3,7 +3,8 @@
     "source": ".",
     "ignore": ["firebase.json", "**/node_modules/**", "functions/",".github"],
     "frameworksBackend": {
-      "region": "asia-southeast1"
+      "region": "asia-southeast1",
+      "memory": "1GiB"
     },
     "rewrites": [
       {
@@ -82,15 +83,7 @@
       "predeploy": [
         "cp -r ~/projects/tripphuquoc-db-fs/packages/shared ./vendor-shared",
         "node -e \"const p=require('./package.json'); p.dependencies['@9trip/shared']='file:./vendor-shared'; require('fs').writeFileSync('package.json', JSON.stringify(p, null, '\\t')+'\\n')\""
-      ],
-      "postdeploy": [
-        "node -e \"const p=require('./package.json'); p.dependencies['@9trip/shared']='file:~/projects/tripphuquoc-db-fs/packages/shared'; require('fs').writeFileSync('package.json', JSON.stringify(p, null, '\\t')+'\\n')\"",
-        "rm -rf ./vendor-shared",
-        "rm -rf ../../.firebase"
       ]
     }
-  ],
-  "firestore": {
-    "rules": "packages/shared/firestore.rules"
-  }
+  ]
 }

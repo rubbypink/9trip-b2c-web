@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { cache } from "react";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelDetailClient from "@/components/hotels/HotelDetailClient";
@@ -29,6 +30,7 @@ const cachedGetRelatedHotels = cache(getRelatedHotels);
  * generateMetadata — dynamic metadata from Firestore.
  */
 export async function generateMetadata({ params }) {
+  try {
   const resolvedParams = await params;
   const { slug } = resolvedParams;
   const { hotel } = await cachedGetHotelBySlug(slug);
@@ -51,6 +53,10 @@ export async function generateMetadata({ params }) {
       images: hotel.featuredImage ? [hotel.featuredImage] : [],
     },
   };
+  } catch (error) {
+    logger.error("[HotelDetailPage] generateMetadata error:", error.message);
+    return { title: "Khách sạn — 9 Trip" };
+  }
 }
 
 /**
@@ -67,21 +73,7 @@ export default async function HotelDetailPage({ params }) {
   const { hotel: rawHotel } = await cachedGetHotelBySlug(slug);
 
   if (!rawHotel) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Breadcrumb
-          items={[
-            { label: "Trang chủ", href: "/" },
-            { label: "Khách sạn", href: "/hotels" },
-            { label: "Không tìm thấy" },
-          ]}
-        />
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Khách sạn không tồn tại</h1>
-          <p className="text-muted-foreground">Vui lòng kiểm tra lại đường dẫn hoặc quay về trang danh sách.</p>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   // 2. Fetch price, reviews, related in parallel — with fallback on failure

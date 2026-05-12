@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { adminDb, serializeSnap } from '@/lib/firestore-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { serializeSnap } from '@/lib/firestore-admin';
 import { logger } from '@9trip/shared/logger';
 
 /**
@@ -16,6 +17,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ success: false, error: 'Thiếu task ID' }, { status: 400 });
     }
 
+    const adminDb = getAdminDb();
     const doc = await adminDb.collection('agentTasks').doc(id).get();
 
     if (!doc.exists) {
@@ -47,6 +49,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ success: false, error: 'Thiếu task ID' }, { status: 400 });
     }
 
+    const adminDb = getAdminDb();
     const taskRef = adminDb.collection('agentTasks').doc(id);
     const doc = await taskRef.get();
 
@@ -67,7 +70,7 @@ export async function DELETE(request, { params }) {
     await taskRef.update({
       status: 'cancelled',
       completedAt: new Date().toISOString(),
-      error: 'Task bị hủy bởi người dùng.',
+      error: 'Task bị hủy bởi ngườ dùng.',
     });
 
     return NextResponse.json({

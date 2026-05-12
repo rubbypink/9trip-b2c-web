@@ -7,16 +7,31 @@
  * @see storage.js for Client SDK version (upload/download in browser)
  */
 
-import admin from 'firebase-admin';
+import { getApps, getApp } from 'firebase-admin/app';
+import { getStorage } from 'firebase-admin/storage';
 import './firebase-admin';
 
 let _bucket = null;
 function getBucket() {
   if (!_bucket) {
+    // Ensure Firebase Admin is initialized before accessing storage
+    if (!getApps().some(app => app.name === '9trip-admin')) {
+      throw new Error(
+        'Firebase Admin not initialized. Storage operations require Firebase Admin credentials.',
+      );
+    }
     const bucketName = process.env.APP_FIREBASE_STORAGE_BUCKET
       || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
       || `${process.env.APP_FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`;
-    _bucket = admin.storage().bucket(bucketName);
+
+    try {
+      const app = getApp('9trip-admin');
+      const storage = getStorage(app);
+      _bucket = storage.bucket(bucketName);
+    } catch (error) {
+      console.error('[storage-admin] Failed to initialize storage bucket:', error);
+      throw new Error(`Failed to initialize storage bucket: ${error.message}`);
+    }
   }
   return _bucket;
 }
@@ -82,31 +97,18 @@ export async function resolveDocImages(doc) {
   const result = { ...doc };
 
   for (const field of imageFields) {
-    if (result[field]) {
-      if (Array.isArray(result[field])) {
-        const resolved = await Promise.all(
-          result[field].map((url) => getStorageImageUrl(url))
-        );
-        result[field] = resolved.filter(Boolean);
-      } else if (typeof result[field] === "string") {
-        const resolved = await getStorageImageUrl(result[field]);
-        result[field] = resolved || result[field];
-      }
-    }
-  }
+    if (!doc[field]) continue;
 
-  if (result.rooms) {
-    if (Array.isArray(result.rooms)) {
-      result.rooms = await Promise.all(
-        result.rooms.map((room) => resolveDocImages(room))
+    if (typeof doc[field] === "string") {
+      result[field] = await getStorageImageUrl(doc[field]);
+    } else if (Array.isArray(doc[field])) {
+      result[field] = await Promise.all(
+        doc[field].map((img) =>
+          typeof img === "string" ? getStorageImageUrl(img) : resolveDocImages(img)
+        )
       );
-    } else if (typeof result.rooms === "object") {
-      const resolvedRooms = {};
-      const roomKeys = Object.keys(result.rooms);
-      for (const key of roomKeys) {
-        resolvedRooms[key] = await resolveDocImages(result.rooms[key]);
-      }
-      result.rooms = resolvedRooms;
+    } else if (typeof doc[field] === "object") {
+      result[field] = await resolveDocImages(doc[field]);
     }
   }
 
@@ -114,77 +116,30 @@ export async function resolveDocImages(doc) {
 }
 
 /**
- * Resolve images for multiple documents in parallel.
- * @param {Object[]} docs - Array of Firestore documents
- * @returns {Promise<Object[]>} Documents with resolved image URLs
+ * Resolve images for an array of documents.
+ * @param {Array<Object>} docs
+ * @returns {Promise<Array<Object>>}
  */
 export async function resolveDocsImages(docs) {
   if (!Array.isArray(docs)) return docs;
   return Promise.all(docs.map((doc) => resolveDocImages(doc)));
 }
 
-// ─── HTML Content Image Resolution ─────────────────────────────────────
-
 /**
- * Resolve Firebase Storage image URLs inside HTML content and add lazy loading.
+ * Batch-resolve image URLs for an array of objects (e.g., hotels, tours, activities).
+ * Identical logic to storage.js:resolveImageBatch but uses Admin Storage SDK.
  *
- * Scans an HTML string for <img> tags. For each tag:
- *  1. If `src` points to a Storage path (gs:// or relative), resolves it to an
- *     HTTPS download URL via the Admin SDK.
- *  2. If `src` is already an HTTP URL, leaves it unchanged.
- *  3. Adds `loading="lazy"` to every <img> that doesn't already have it.
- *  4. Adds `decoding="async"` for non-blocking decode.
- *
- * This is designed for the blog `content` field which stores rich HTML that may
- * embed Storage images inline.
- *
- * @param {string} htmlContent - Raw HTML string that may contain <img> tags
- * @returns {Promise<string>} HTML string with resolved URLs and lazy-load attrs
- * @updated 2025-05-08
+ * @param {Array<Object>} items
+ * @param {string} field
+ * @returns {Promise<Array<Object>>}
  */
-export async function resolveHtmlImages(htmlContent) {
-  if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+export async function resolveImageBatch(items, field = "featuredImage") {
+  if (!Array.isArray(items)) return items;
 
-  const imgRegex = /<img\s+([^>]*?)>/gi;
-  const matches = [...htmlContent.matchAll(imgRegex)];
-
-  if (matches.length === 0) return htmlContent;
-
-  const processedTags = await Promise.all(
-    matches.map(async (match) => {
-      const attrs = match[1];
-      const srcMatch = /src=["']([^"']+)["']/i.exec(attrs);
-      let newAttrs = attrs;
-
-      if (srcMatch) {
-        const originalSrc = srcMatch[1];
-        if (!originalSrc.startsWith('http://') && !originalSrc.startsWith('https://')) {
-          const resolvedUrl = await getStorageImageUrl(originalSrc);
-          if (resolvedUrl) {
-            newAttrs = newAttrs.replace(srcMatch[0], `src="${resolvedUrl}"`);
-          }
-        }
-      }
-
-      if (!/loading\s*=/i.test(newAttrs)) {
-        newAttrs += ' loading="lazy"';
-      }
-      if (!/decoding\s*=/i.test(newAttrs)) {
-        newAttrs += ' decoding="async"';
-      }
-
-      return `<img ${newAttrs}>`;
-    }),
+  return Promise.all(
+    items.map(async (item) => ({
+      ...item,
+      [field]: await getStorageImageUrl(item[field]),
+    }))
   );
-
-  let result = '';
-  let lastIndex = 0;
-  for (let i = 0; i < matches.length; i++) {
-    result += htmlContent.slice(lastIndex, matches[i].index);
-    result += processedTags[i];
-    lastIndex = matches[i].index + matches[i][0].length;
-  }
-  result += htmlContent.slice(lastIndex);
-
-  return result;
 }

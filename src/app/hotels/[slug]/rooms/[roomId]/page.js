@@ -35,6 +35,7 @@ function findRoomInHotel(hotel, roomId) {
  * generateMetadata — SEO metadata cho trang chi tiết phòng.
  */
 export async function generateMetadata({ params }) {
+  try {
   const resolvedParams = await params;
   const { slug, roomId } = resolvedParams;
 
@@ -61,6 +62,10 @@ export async function generateMetadata({ params }) {
       images: room.featuredImage ? [room.featuredImage] : [],
     },
   };
+  } catch (error) {
+    logger.error("[RoomDetailPage] generateMetadata error:", error.message);
+    return { title: "Phòng — 9 Trip" };
+  }
 }
 
 /**

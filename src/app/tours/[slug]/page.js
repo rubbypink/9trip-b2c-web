@@ -12,6 +12,7 @@ export const revalidate = 3600;
  * Dùng title, excerpt, featuredImage từ tour để tạo meta tags.
  */
 export async function generateMetadata({ params }) {
+  try {
   const resolvedParams = await params;
   const { tour } = await getTourBySlug(resolvedParams.slug);
 
@@ -37,8 +38,11 @@ export async function generateMetadata({ params }) {
       images: tour.featuredImage ? [tour.featuredImage] : [],
     },
   };
+  } catch (error) {
+    logger.error("[TourDetailPage] generateMetadata error:", error.message);
+    return { title: "Tour — 9 Trip" };
+  }
 }
-
 /**
  * generateStaticParams — pre-build các tour phổ biến (tối ưu ISR).
  * Trong thực tế có thể fetch danh sách slug từ Firestore.

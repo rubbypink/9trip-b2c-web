@@ -16,7 +16,7 @@ Before starting ANY code task, you MUST read the following files in order (if yo
 
 After reading, you must confirm with this exact statement:
 
-> "I have read the memory bank and understand the project structure."
+> "READ MEMORY DONE! LET'S START!"
 
 **THIS IS MUST DO STEP.** Even for small changes. Context prevents regressions.
 

@@ -1,6 +1,5 @@
-import { adminDb } from './firebase-admin';
-export { adminDb };
-import admin from 'firebase-admin';
+import { getAdminDb } from './firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { logger } from '@9trip/shared/logger';
 
 // ─── Serialization Helper ────────────────────────────────────────────
@@ -71,19 +70,19 @@ export function serializeDocs(snap) {
 
 // ─── Collection References ───────────────────────────────────────────
 
-const toursCol = () => adminDb.collection('tours');
-const hotelsCol = () => adminDb.collection('hotels');
-const activitiesCol = () => adminDb.collection('activities');
-const carsCol = () => adminDb.collection('cars');
-const rentalsCol = () => adminDb.collection('rentals');
-const locationsCol = () => adminDb.collection('locations');
-const bookingsCol = () => adminDb.collection('bookings');
-const reviewsCol = () => adminDb.collection('reviews');
-const usersCol = () => adminDb.collection('users');
-const couponsCol = () => adminDb.collection('coupons');
-const notificationsCol = () => adminDb.collection('notifications');
-const inventoryHoldsCol = () => adminDb.collection('inventory_holds');
-const blogsCol = () => adminDb.collection('blogs');
+const toursCol = () => getAdminDb().collection('tours');
+const hotelsCol = () => getAdminDb().collection('hotels');
+const activitiesCol = () => getAdminDb().collection('activities');
+const carsCol = () => getAdminDb().collection('cars');
+const rentalsCol = () => getAdminDb().collection('rentals');
+const locationsCol = () => getAdminDb().collection('locations');
+const bookingsCol = () => getAdminDb().collection('bookings');
+const reviewsCol = () => getAdminDb().collection('reviews');
+const usersCol = () => getAdminDb().collection('users');
+const couponsCol = () => getAdminDb().collection('coupons');
+const notificationsCol = () => getAdminDb().collection('notifications');
+const inventoryHoldsCol = () => getAdminDb().collection('inventory_holds');
+const blogsCol = () => getAdminDb().collection('blogs');
 
 // ─── In-Memory Cache ─────────────────────────────────────────────────
 
@@ -138,6 +137,7 @@ function _cacheKey(prefix, filters = {}) {
  * @returns {Promise<string>}
  */
 export async function generateNextId(colName) {
+  const adminDb = getAdminDb();
   const counterRef = adminDb.collection('counters').doc(colName);
   return adminDb.runTransaction(async (transaction) => {
     const snap = await transaction.get(counterRef);
@@ -161,6 +161,7 @@ export async function generateNextId(colName) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocById(colName, id) {
+  const adminDb = getAdminDb();
   logger.log('[getDocById] Called with:', { colName, id });
   try {
     const snap = await adminDb.collection(colName).doc(id).get();
@@ -181,6 +182,7 @@ export async function getDocById(colName, id) {
  * @returns {Promise<Object|null>}
  */
 export async function getDocBySlug(colName, slug) {
+  const adminDb = getAdminDb();
   logger.log('[getDocBySlug] Called with:', { colName, slug });
   try {
     const snap = await adminDb.collection(colName).where('slug', '==', slug).limit(1).get();
@@ -376,6 +378,7 @@ export async function getTourBySlug(slug) {
  * @returns {Promise<Object[]>}
  */
 export async function getTourPricing(tourId) {
+  const adminDb = getAdminDb();
   logger.log('[getTourPricing] Called with:', { tourId });
   try {
     const snap = await adminDb.collection('tours').doc(tourId).collection('tourPricing')
@@ -674,6 +677,7 @@ export async function getHotelReviews(slug) {
  * @returns {Promise<Object|null>}
  */
 export async function getHotelPriceSchedule(hotelId, year = new Date().getFullYear()) {
+  const adminDb = getAdminDb();
   logger.log('[getHotelPriceSchedule] Called with:', { hotelId, year });
   try {
     const docId = `${hotelId}_base_${year}`;
@@ -1446,6 +1450,7 @@ export async function getRealAvailabilityAdmin(serviceId, serviceType, startDate
  * @returns {Promise<string|null>} Hold document ID or null on failure
  */
 export async function createInventoryHoldAdmin(serviceId, serviceType, startDate, endDate, quantity, userId, roomId) {
+  const adminDb = getAdminDb();
   try {
     const col = getCollectionRef(serviceType);
     const serviceRef = col.doc(serviceId);
@@ -1460,7 +1465,7 @@ export async function createInventoryHoldAdmin(serviceId, serviceType, startDate
         endDate,
         quantity,
         userId,
-        heldAt: admin.firestore.FieldValue.serverTimestamp(),
+        heldAt: FieldValue.serverTimestamp(),
         expiresAt: new Date(Date.now() + 15 * 60 * 1000),
       });
 
@@ -1479,12 +1484,12 @@ export async function createInventoryHoldAdmin(serviceId, serviceType, startDate
                 tx.update(serviceRef, { rooms });
               }
             } else {
-              tx.update(serviceRef, `rooms.${roomId}.availability`, admin.firestore.FieldValue.increment(-quantity));
+              tx.update(serviceRef, `rooms.${roomId}.availability`, FieldValue.increment(-quantity));
             }
           }
         }
       } else {
-        tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(-quantity));
+        tx.update(serviceRef, 'availability', FieldValue.increment(-quantity));
       }
     });
 
@@ -1501,6 +1506,7 @@ export async function createInventoryHoldAdmin(serviceId, serviceType, startDate
  * @returns {Promise<boolean>}
  */
 export async function releaseInventoryHoldAdmin(holdId) {
+  const adminDb = getAdminDb();
   try {
     const holdRef = inventoryHoldsCol().doc(holdId);
 
@@ -1528,12 +1534,12 @@ export async function releaseInventoryHoldAdmin(holdId) {
                 tx.update(serviceRef, { rooms });
               }
             } else {
-              tx.update(serviceRef, `rooms.${hold.roomId}.availability`, admin.firestore.FieldValue.increment(hold.quantity));
+              tx.update(serviceRef, `rooms.${hold.roomId}.availability`, FieldValue.increment(hold.quantity));
             }
           }
         }
       } else {
-        tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(hold.quantity));
+        tx.update(serviceRef, 'availability', FieldValue.increment(hold.quantity));
       }
     });
 
@@ -1554,6 +1560,7 @@ export async function releaseInventoryHoldAdmin(holdId) {
  * @returns {Promise<string|null>} Booking document ID or null on failure
  */
 export async function createBookingAdmin(bookingData) {
+  const adminDb = getAdminDb();
   try {
     const rawItems = bookingData.items || [];
     const items = Array.isArray(rawItems) ? rawItems : Object.values(rawItems);
@@ -1626,12 +1633,12 @@ export async function createBookingAdmin(bookingData) {
                   tx.update(serviceRef, { rooms });
                 }
               } else {
-                tx.update(serviceRef, `rooms.${item.roomId}.availability`, admin.firestore.FieldValue.increment(-qty));
+                tx.update(serviceRef, `rooms.${item.roomId}.availability`, FieldValue.increment(-qty));
               }
             }
           }
         } else {
-          tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(-qty));
+          tx.update(serviceRef, 'availability', FieldValue.increment(-qty));
         }
       }
     });
@@ -1649,6 +1656,7 @@ export async function createBookingAdmin(bookingData) {
  * @returns {Promise<boolean>}
  */
 export async function cancelBookingAdmin(bookingId) {
+  const adminDb = getAdminDb();
   try {
     const bookingRef = bookingsCol().doc(bookingId);
 
@@ -1682,12 +1690,12 @@ export async function cancelBookingAdmin(bookingId) {
                     tx.update(serviceRef, { rooms });
                   }
                 } else {
-                  tx.update(serviceRef, `rooms.${item.roomId}.availability`, admin.firestore.FieldValue.increment(qty));
+                  tx.update(serviceRef, `rooms.${item.roomId}.availability`, FieldValue.increment(qty));
                 }
               }
             }
           } else {
-            tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(qty));
+            tx.update(serviceRef, 'availability', FieldValue.increment(qty));
           }
         }
       } else if (booking.serviceId && booking.serviceType) {
@@ -1709,12 +1717,12 @@ export async function cancelBookingAdmin(bookingId) {
                   tx.update(serviceRef, { rooms });
                 }
               } else {
-                tx.update(serviceRef, `rooms.${booking.roomId}.availability`, admin.firestore.FieldValue.increment(qty));
+                tx.update(serviceRef, `rooms.${booking.roomId}.availability`, FieldValue.increment(qty));
               }
             }
           }
         } else {
-          tx.update(serviceRef, 'availability', admin.firestore.FieldValue.increment(qty));
+          tx.update(serviceRef, 'availability', FieldValue.increment(qty));
         }
       }
     });

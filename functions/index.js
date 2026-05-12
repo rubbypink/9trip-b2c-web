@@ -17,7 +17,7 @@
 // registering process.on('uncaughtException', ...) for each exported function
 // trigger (14+ triggers exceeding the default 10-listener limit).
 process.setMaxListeners(0);
-
+import 'dotenv/config'; // Load environment variables from .env file
 import { onRequest, onCall } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
