@@ -1,6 +1,6 @@
 # Tech Context: 9Trip B2C
 
-> **Last updated:** 2026-05-11
+> **Last updated:** 2026-05-12
 
 ---
 
@@ -14,7 +14,9 @@
 | Styling      | Tailwind CSS      | v4             | Utility-first, không dùng CSS modules         |
 | Backend/BaaS | Firebase          | v11+ (Modular) | Client SDK + Admin SDK (server-side)          |
 | State Mgmt   | Zustand           | v5             | Persist middleware cho cart                   |
-| Hosting      | Vercel            | —              | Edge functions, ISR, CDN                      |
+| Hosting      | Firebase Hosting  | —              | Cloud Functions for API, Next.js for SSR, CDN |
+| Package Mgr  | NPM Workspaces    | —              | Monorepo with @9trip/shared shared package     |
+| Shared Pkg   | @9trip/shared     | 1.0.0          | Deduplicated code between Next.js and Functions  |
 
 ## 2. Ràng buộc Kỹ thuật (Code Standards)
 
@@ -42,7 +44,9 @@
 
 ### 2.3. Core Tenets
 
-- 🏛️ **Backend in separate repo** — Cloud Functions logic lives in a dedicated Firebase Functions repo. This frontend repo never writes service data directly. It calls ERP webhooks or Cloud Functions for mutations.
+- 🏛️ **Shared code in @9trip/shared** — Never duplicate code between `src/` and `functions/`. Shared constants, utils, logger, email, schemas, and Firebase helpers live in `packages/shared/`. Both modules import from `@9trip/shared/*`.
+- 🔀 **API Boundary: Functions vs Next.js** — Each API endpoint belongs to ONLY ONE module. Cloud Functions handle background/event-driven tasks (payments, email, booking mutations). Next.js handles synchronous/client-facing requests (Server Actions, SEO routes, CRM webhooks). No overlap.
+- 🔑 **No dotenv** — Both Next.js and Firebase Functions v2 auto-load `.env.local`. Use `@9trip/shared/env` helpers for env var resolution. No `dotenv` dependency.
 - ⚡ **Preload / dynamic load** — Critical data is preloaded server-side (JSON embed in HTML). Non-critical components use dynamic imports (`next/dynamic`) to reduce bundle size.
 - 🔄 **Auto-load next page** — List pages pre-fetch the next page of results when the user scrolls near the bottom, enabling instant pagination.
 - 📐 **Schema compliance is mandatory** — Every Firestore document must match the defined schema. No ad-hoc fields. When scraping data, map fields exactly to the schema before writing.
@@ -51,7 +55,7 @@
 
 # Product Context: 9Trip B2C
 
-> **Last updated:** 2026-05-11
+> **Last updated:** 2026-05-12
 
 ## 1 User Flow Chính
 

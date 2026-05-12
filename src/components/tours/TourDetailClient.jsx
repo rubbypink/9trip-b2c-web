@@ -6,7 +6,7 @@ import TourBookingWidget from "@/components/tours/TourBookingWidget";
 import WriteReviewForm from "@/components/reviews/WriteReviewForm";
 import Badge from "@/components/shared/Badge";
 import StarRating from "@/components/shared/StarRating";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 import ItineraryPanel from "@/components/tours/TourDetail/ItineraryPanel";
 import ReviewsPanel from "@/components/tours/TourDetail/ReviewsPanel";
 import GoogleMap from "@/components/shared/GoogleMap";

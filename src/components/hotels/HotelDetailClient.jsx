@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Badge from "@/components/shared/Badge";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 import { buildRoomPricingTable } from "@/lib/firestore";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import GoogleMap from "@/components/shared/GoogleMap";

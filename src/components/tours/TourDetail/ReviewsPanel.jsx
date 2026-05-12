@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import StarRating from "@/components/shared/StarRating";
-import { cn } from "@/lib/utils";
+import { cn } from "@9trip/shared/utils";
 
 /**
  * ReviewsPanel — hiển thị danh sách đánh giá + rating summary.

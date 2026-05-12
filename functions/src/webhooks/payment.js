@@ -20,6 +20,10 @@ const PAYPAL_API_BASE = PAYPAL_MODE === "live"
   ? "https://api-m.paypal.com"
   : "https://api-m.sandbox.paypal.com";
 
+// ─── ERP Configuration ──────────────────────────────────────────────────
+const ERP_BASE_URL = process.env.ERP_BASE_URL || "https://erp.9tripphuquoc.com";
+const ERP_WEBHOOK_SECRET = process.env.ERP_WEBHOOK_SECRET || "";
+
 let cachedPayPalToken = null;
 
 // ─── Signature Verification ────────────────────────────────────────────
@@ -216,6 +220,57 @@ async function logPaymentEvent(db, logData) {
   }
 }
 
+// ─── ERP Forwarding ─────────────────────────────────────────────────────
+
+/**
+ * Forward booking data to ERP after successful payment.
+ * @param {FirebaseFirestore.Firestore} db
+ * @param {string} bookingId
+ */
+async function forwardToERP(db, bookingId) {
+  try {
+    const snap = await db.collection("bookings").doc(bookingId).get();
+    if (!snap.exists) return;
+
+    const booking = snap.data();
+    const forwardUrl = new URL("/api/new-booking", ERP_BASE_URL);
+    forwardUrl.searchParams.set("action", "forward");
+    forwardUrl.searchParams.set("event", "new-booking");
+
+    const response = await fetch(forwardUrl.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-erp-secret": ERP_WEBHOOK_SECRET,
+      },
+      body: JSON.stringify({ id: bookingId, ...booking }),
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (response.ok) {
+      console.log(`[payment] ✅ ERP forward success for booking ${bookingId}`);
+      await db.collection("bookings").doc(bookingId).update({
+        erpSyncStatus: "synced",
+        erpSyncedAt: new Date(),
+      });
+    } else {
+      console.warn(`[payment] ERP forward returned ${response.status} for booking ${bookingId}`);
+      await db.collection("bookings").doc(bookingId).update({
+        erpSyncStatus: "failed",
+        erpSyncError: `HTTP ${response.status}`,
+      });
+    }
+  } catch (err) {
+    console.error(`[payment] ERP forward failed for booking ${bookingId}:`, err.message);
+    try {
+      await db.collection("bookings").doc(bookingId).update({
+        erpSyncStatus: "failed",
+        erpSyncError: err.message,
+      });
+    } catch (_) { /* best-effort */ }
+  }
+}
+
 // ─── Main Webhook Handler ──────────────────────────────────────────────
 
 /**
@@ -335,15 +390,25 @@ async function handlePaymentWebhook(req, db) {
     };
 
     if (payment.status === "paid") {
+      updateData.status = "paid"; // backward compat with onBookingPaid trigger
       updateData.bookingStatus = "confirmed";
       updateData.paidAt = now;
       updateData.paidAmount = payment.amount;
       updateData.currency = payment.currency;
+    } else {
+      updateData.status = "payment_failed";
     }
 
     await bookingRef.update(updateData);
 
-    // ── 6. Release inventory hold ─────────────────────────────────────
+    // ── 6. Forward to ERP ─────────────────────────────────────────────
+    if (payment.status === "paid") {
+      forwardToERP(db, payment.bookingId).catch((err) => {
+        console.error(`[payment] ERP forward error (non-blocking):`, err.message);
+      });
+    }
+
+    // ── 7. Release inventory hold ─────────────────────────────────────
     if (payment.status === "paid" && booking.inventoryHoldId) {
       try {
         await db.collection("inventory_holds").doc(booking.inventoryHoldId).delete();
@@ -353,7 +418,7 @@ async function handlePaymentWebhook(req, db) {
       }
     }
 
-    // ── 7. Log success ───────────────────────────────────────────────
+    // ── 8. Log success ───────────────────────────────────────────────
     await logPaymentEvent(db, {
       gateway,
       bookingId: payment.bookingId,

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn } from "@9trip/shared/utils";
 import StarRating from "@/components/shared/StarRating";
 import PriceDisplay from "@/components/shared/PriceDisplay";
-import { BLUR_DATA_URL } from "@/lib/constants";
+import { BLUR_DATA_URL } from "@9trip/shared/constants";
 
 /**
  * Helper to get amenities icons from included array

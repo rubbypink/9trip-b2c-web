@@ -8,7 +8,7 @@ import {
   getRelatedHotels,
 } from "@/lib/firestore-admin";
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 
 export const revalidate = 3600;
 

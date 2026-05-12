@@ -10,7 +10,7 @@ import ActivityBookingWidget from "@/components/activities/ActivityBookingWidget
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import GoogleMap from "@/components/shared/GoogleMap";
 import WriteReviewForm from "@/components/reviews/WriteReviewForm";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 
 const TABS = [
   { id: "overview", label: "Tổng quan" },

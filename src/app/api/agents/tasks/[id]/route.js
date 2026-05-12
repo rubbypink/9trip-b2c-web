@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminDb, serializeSnap } from '@/lib/firestore-admin';
-import { logger } from '@/lib/logger';
+import { logger } from '@9trip/shared/logger';
 
 /**
  * GET /api/agents/tasks/[id] — Get a single task by ID with full status and result.

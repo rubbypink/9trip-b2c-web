@@ -79,6 +79,8 @@ export const FIELDS = {
 	// Guest counts
 	adults: { type: 'number', description: 'Number of adults' },
 	children: { type: 'number', description: 'Number of children' },
+	startDate: { type: 'string', description: 'ISO date string YYYY-MM-DD' },
+	endDate: { type: 'string', description: 'ISO date string YYYY-MM-DD' },
 
 	// ERP
 	couponCode: { type: 'string', description: 'Applied coupon code, null if none' },

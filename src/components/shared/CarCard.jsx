@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import PriceDisplay from "./PriceDisplay";
 import StarRating from "./StarRating";
-import { BLUR_DATA_URL } from "@/lib/constants";
+import { BLUR_DATA_URL } from "@9trip/shared/constants";
 
 export default function CarCard({ car, item }) {
   const data = car || item;

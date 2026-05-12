@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getDocBySlug } from "@/lib/firestore-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 
 export const revalidate = 3600;
 

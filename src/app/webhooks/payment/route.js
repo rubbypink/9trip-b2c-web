@@ -17,7 +17,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { sendPaymentConfirmation, sendPaymentFailed } from '@/lib/email';
+import { sendPaymentConfirmation, sendPaymentFailed } from '@9trip/shared/email/service';
 import { PaymentService } from '@/lib/payments/payment';
 import { adminDb } from '@/lib/firebase-admin';
 

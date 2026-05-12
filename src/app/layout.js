@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer';
 import BackToTop from '@/components/shared/BackToTop';
 import ChatWidget from '@/emily/components/ChatWidget';
 import ThemeProvider from '@/components/shared/ThemeProvider';
-import { SITE, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants';
+import { SITE, SITE_DESCRIPTION, SITE_KEYWORDS } from '@9trip/shared/constants';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { searchCars, countCars } from "@/lib/firestore-admin";
-import { PAGE_SIZE } from "@/lib/constants";
-import { logger } from "@/lib/logger";
+import { PAGE_SIZE } from "@9trip/shared/constants";
+import { logger } from "@9trip/shared/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import CarFilters from "@/components/cars/CarFilters";
 import ServiceList from "@/components/shared/ServiceList";

@@ -10,7 +10,7 @@
  * @module email
  */
 
-import { EmailMissingError, sendMailWithRetry } from "./email-service.js";
+import { EmailMissingError, sendMailWithRetry } from "@9trip/shared/email/service";
 import {
 	bookingConfirmationTemplate,
 	paymentReceiptTemplate,

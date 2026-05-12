@@ -1,6 +1,6 @@
 import { PaymentHelper } from './paymentHelper';
 import crypto from 'crypto';
-import { logger } from '../logger';
+import { logger } from '@9trip/shared/logger';
 
 export class PaymentService {
     

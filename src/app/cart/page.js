@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useCart } from '@/lib/cart';
 import CartItem from '@/components/cart/CartItem';
 import Link from 'next/link';
-import { logger } from '@/lib/logger';
+import { logger } from '@9trip/shared/logger';
 
 /**
  * CartPage — hiển thị giỏ hàng với quantity controls, coupon, và tổng tiền.

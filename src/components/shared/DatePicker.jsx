@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@9trip/shared/utils";
 
 /**
  * DatePicker — chọn ngày đơn hoặc khoảng ngày (check-in/check-out).

@@ -1,0 +1,30 @@
+{
+	"name": "@9trip/shared",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"main": "./index.js",
+	"exports": {
+		".": "./index.js",
+		"./schemas": "./schemas/index.js",
+		"./schemas/bookings": "./schemas/bookings.js",
+		"./schemas/users": "./schemas/users.js",
+		"./schemas/hotels": "./schemas/hotels.js",
+		"./schemas/tours": "./schemas/tours.js",
+		"./schemas/activities": "./schemas/activities.js",
+		"./schemas/hotel-price-schedules": "./schemas/hotel-price-schedules.js",
+		"./email/service": "./email/service.js",
+		"./email/templates": "./email/templates.js",
+		"./constants": "./constants.js",
+		"./utils": "./utils.js",
+		"./logger": "./logger.js",
+		"./error-utils": "./error-utils.js",
+		"./rateLabels": "./rateLabels.js",
+		"./env": "./env.js",
+		"./firebase/admin-init": "./firebase/admin-init.js",
+		"./firebase/admin-helpers": "./firebase/admin-helpers.js",
+		"./firestore/collections": "./firestore/collections.js",
+		"./storage/paths": "./storage/paths.js",
+		"./payments/helpers": "./payments/helpers.js"
+  }
+}

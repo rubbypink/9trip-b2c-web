@@ -17,7 +17,7 @@
 
 import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, startAfter, updateDoc, deleteDoc, serverTimestamp, arrayUnion, arrayRemove, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase';
-import { logger } from './logger';
+import { logger } from '@9trip/shared/logger';
 
 // ─── Collection References ────────────────────────────────────────────
 

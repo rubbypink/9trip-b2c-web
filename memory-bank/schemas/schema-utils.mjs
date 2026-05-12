@@ -197,15 +197,3 @@ export const schemaToExtractSchema = fieldsToExtractSchema;
  */
 export const schemaToListExtractSchema = fieldsToListExtractSchema;
 
-// ============================================================================
-// DEFAULT EXPORT
-// ============================================================================
-
-// [DEAD CODE] Default export — never imported as default by any skill
-// export default {
-// 	fieldsToExtractSchema,
-// 	fieldsToListExtractSchema,
-// 	createListItemFields,
-// 	schemaToExtractSchema,
-// 	schemaToListExtractSchema,
-// };

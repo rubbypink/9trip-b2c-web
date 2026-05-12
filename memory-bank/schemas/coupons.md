@@ -19,6 +19,10 @@ This document defines the structure of the Coupon document in the Firestore `cou
   id: string,
   /** @type {string} Coupon code (e.g., "SUMMER26") */
   code: string,
+  /** @type {string} "hotels" | "tours" | "activites" | "all". Default "all" */
+  serviceType: string,
+  /** @type {string} exactly id of service that can apply coupon - Example: "the-nice-hotel-phu-quoc" or "tour-cano-3-dao" */
+  serviceName: string,  
   /** @type {string} "percentage" | "fixed" */
   discountType: string,
   /** @type {number} 10 (10%) or 100000 (100k VND fixed) */
@@ -43,3 +47,7 @@ This document defines the structure of the Coupon document in the Firestore `cou
   updatedAt: string
 }
 ```
+
+## Coupon Logic
+
+- `serviceName` require `serviceType` as "all" or match type of original service. Example `serviceName` = "tour-cano-3-dao", so this coupon must have `serviceType` as "all" or "tours".

@@ -3,9 +3,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 import { useCart } from "@/lib/cart";
-import { getRateTypeLabel, getRateTypeIcon, RATE_TYPES } from "@/lib/rateLabels";
+import { getRateTypeLabel, getRateTypeIcon, RATE_TYPES } from "@9trip/shared/rateLabels";
 
 /**
  * RoomImageWithLightbox — Main thumbnail that opens GalleryWithLightbox on click.

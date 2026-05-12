@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice } from "@9trip/shared/utils";
 
 /**
  * CartSummary — shows subtotal and checkout button for cart page.

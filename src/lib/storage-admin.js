@@ -13,9 +13,9 @@ import './firebase-admin';
 let _bucket = null;
 function getBucket() {
   if (!_bucket) {
-    const bucketName = process.env.FIREBASE_STORAGE_BUCKET
+    const bucketName = process.env.APP_FIREBASE_STORAGE_BUCKET
       || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-      || `${process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`;
+      || `${process.env.APP_FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`;
     _bucket = admin.storage().bucket(bucketName);
   }
   return _bucket;

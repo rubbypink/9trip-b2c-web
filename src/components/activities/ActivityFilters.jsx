@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@9trip/shared/utils";
 
 /**
  * ActivityFilters — sidebar filter cho trang danh sách hoạt động.

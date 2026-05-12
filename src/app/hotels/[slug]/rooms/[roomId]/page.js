@@ -2,10 +2,10 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getHotelBySlug, getHotelPriceSchedule, resolveRoomPricing } from "@/lib/firestore-admin";
 import { resolveDocImages } from "@/lib/storage-admin";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ImageCarousel from "@/components/shared/ImageCarousel";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 
 export const revalidate = 3600;
 

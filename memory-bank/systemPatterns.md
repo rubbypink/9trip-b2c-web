@@ -1,6 +1,6 @@
 # System Patterns: 9Trip B2C Web
 
-> **Last updated:** 05/11/2026
+> **Last updated:** 05/12/2026
 > 
 > **Purpose:** Architectural patterns, data flow, auth, payments, SEO, performance, components, error handling, and schema compliance. Read this before building any feature.
 
@@ -17,14 +17,18 @@
 | Language | JavaScript (ES6+) | No TypeScript. JSDoc for type annotations. |
 | Backend | Firebase v11+ (Modular SDK) | Dual SDK pattern: Client + Admin. |
 | State | Zustand v5 + React Context | Zustand with persist middleware for cart. Context for auth. |
-| Hosting | Vercel | Edge functions, ISR, CDN, proxy.js for auth middleware. |
+| Hosting | Firebase Hosting | Cloud Functions for API, Next.js for SSR, CDN. |
+| Package Manager | NPM Workspaces | Monorepo with @9trip/shared shared package. |
+| Shared Package | @9trip/shared | Deduplicated code between Next.js and Functions. |
 
 ### Dual Firebase SDK Pattern
 
 The project uses two Firebase SDKs that never mix:
 
-- **Client SDK** (`firebase.js` + `firestore.js`): Browser-side. Uses `firebase/app`, `firebase/auth`, `firebase/firestore` modular imports. Runs only in Client Components.
-- **Admin SDK** (`firebase-admin.js` + `firestore-admin.js`): Server-side. Uses `firebase-admin` package. Runs in Server Components, API Routes, and webhooks.
+- **Client SDK** (`src/lib/firebase.js` + `src/lib/firestore.js`): Browser-side. Uses `firebase/app`, `firebase/auth`, `firebase/firestore` modular imports. Runs only in Client Components.
+- **Admin SDK** (`@9trip/shared/firebase/admin-init` + `@9trip/shared/firebase/admin-helpers`): Server-side. Initialized via the shared package factory `initFirebaseAdmin({ useLazyProxy: true/false })`.
+  - **Next.js**: `useLazyProxy: true` (lazy Proxy for SSR, avoids cold-start overhead)
+  - **Cloud Functions**: `useLazyProxy: false` (direct init, functions already warm)
 
 **Rule:** Never import `firebase-admin` in a Client Component. Never import `firebase/app` in a Server Component or API Route.
 
@@ -41,17 +45,78 @@ All detail pages use Incremental Static Regeneration (ISR) with `revalidate = 36
 ### Project Structure Pattern
 
 ```
+packages/shared/    — Shared code between Next.js and Functions (@9trip/shared)
 src/
   app/          — Next.js App Router (Server Components only)
   components/   — React components (Client Components)
-  lib/          — Utilities, Firebase, data access (flat structure, no nested subdirs)
+  lib/          — Next.js-specific utilities (Firebase client SDK, auth, cart)
   hooks/        — Custom React hooks
   stores/       — Zustand stores
-  scripts/      — Admin scripts (seed, audit)
   styles/       — Global CSS (Tailwind v4 entry point)
+functions/
+  src/          — Cloud Functions (Express micro-monoliths)
+  index.js      — Functions entry point
 ```
 
-The `lib/` directory stays flat intentionally. No nested `lib/firebase/` subdirectory. Files like `firebase.js`, `firebase-admin.js`, `firestore.js`, `firestore-admin.js`, `auth.js`, `firebase-auth.js` all live at `lib/` root.
+Shared code (constants, utils, logger, email, schemas, etc.) lives in `packages/shared/`. Both `src/lib/` and `functions/src/lib/` import from `@9trip/shared`. Local lib files are thin wrappers or module-specific code.
+
+### NPM Workspaces
+
+The project uses NPM Workspaces for monorepo management:
+- Root `package.json` has `"workspaces": ["packages/*"]`
+- `packages/shared/package.json` defines `@9trip/shared` with subpath exports
+- Both `src/` and `functions/` import from `@9trip/shared/*`
+- No build step needed — NPM resolves workspace packages via symlinks
+
+#### @9trip/shared Package Exports
+| Export | Description |
+|--------|-------------|
+| `@9trip/shared/constants` | SITE, COMPANY, SOCIAL, PAGE_SIZE, BLUR_DATA_URL |
+| `@9trip/shared/utils` | formatCurrency, formatDate, slugify, cn, etc. |
+| `@9trip/shared/logger` | Logger utility with configurable levels |
+| `@9trip/shared/error-utils` | Error handling helpers |
+| `@9trip/shared/rateLabels` | Rate type definitions |
+| `@9trip/shared/env` | Environment variable resolution helpers |
+| `@9trip/shared/schemas/*` | Firestore collection schemas |
+| `@9trip/shared/email/templates` | Email HTML templates |
+| `@9trip/shared/email/service` | SMTP transporter + send helpers |
+| `@9trip/shared/firebase/admin-init` | Firebase Admin SDK initialization factory |
+| `@9trip/shared/firebase/admin-helpers` | serializeSnap, serializeDocs, generateNextId |
+| `@9trip/shared/firestore/collections` | Collection name constants |
+| `@9trip/shared/storage/paths` | Storage path builders |
+| `@9trip/shared/payments/helpers` | PaymentHelper (sortObject, generateHmac, etc.) |
+
+### @9trip/shared Import Convention
+
+All shared code is imported via the `@9trip/shared` package name, never via relative paths:
+
+```js
+// Correct — use package exports
+import { formatCurrency } from "@9trip/shared/utils";
+import { SITE } from "@9trip/shared/constants";
+import { initFirebaseAdmin } from "@9trip/shared/firebase/admin-init";
+
+// Wrong — never use relative paths into packages/shared/
+import { formatCurrency } from "../../packages/shared/utils";
+```
+
+Subpath exports are enforced by the `exports` field in `packages/shared/package.json`. Only listed subpaths are importable. Adding a new shared module requires adding a corresponding export entry.
+
+### API Boundary Rule
+
+Each API endpoint belongs to ONLY ONE module:
+- **Cloud Functions**: Background/event-driven tasks, payment processing, email sending, booking mutations, inventory holds, agent tasks
+- **Next.js**: Synchronous/client-facing requests, Server Actions, SEO routes (sitemap, robots.txt), CRM webhook handlers
+
+No endpoint should exist in both modules. If a route exists in Cloud Functions, the Next.js version should be removed (firebase.json rewrites handle routing).
+
+### Environment Variables
+
+- Both Next.js and Firebase Functions v2 auto-load `.env.local` — no `dotenv` dependency needed
+- Single root `.env.local` is the canonical source (functions/.env.local has been removed)
+- Cloud Functions secrets use `defineSecret()` from `firebase-functions/params` (in `functions/src/config/secrets.js`)
+- Shared env helpers in `@9trip/shared/env`: `getEnvVar()`, `getRequiredEnvVar()`, `getFirebaseConfig()`, `getAdminCredentials()`
+- No service account JSON files in repo — credentials come from env vars only
 
 ---
 
@@ -105,17 +170,17 @@ export default function AuthWrapper({ children }) {
 }
 ```
 
-### Data Serialization Boundary (`serializeDoc`)
+### Data Serialization Boundary (`serializeSnap`)
 
 Firestore returns special types (Timestamp, GeoPoint, DocumentReference) that cannot be serialized to JSON. All data crossing the server-client boundary must be serialized.
 
-**Admin SDK** → `serializeAdminDoc()` in `firestore-admin.js`:
+**Admin SDK** → `serializeSnap()` / `serializeDocs()` in `@9trip/shared/firebase/admin-helpers`:
 - Timestamp → ISO string
 - GeoPoint → `{lat, lng}`
 - DocumentReference → `{_ref: path}`
 - Bytes → base64
 
-**Client SDK** → `serializeTimestamp()` in `firestore.js`:
+**Client SDK** → `serializeTimestamp()` in `@/lib/firestore.js`:
 - Same conversion logic for client-side reads.
 
 Always call serialization before passing data from Server Component to Client Component props.
@@ -127,8 +192,9 @@ Always call serialization before passing data from Server Component to Client Co
 | `firebase/app` | Client Components only | `import { app } from "@/lib/firebase"` |
 | `firebase/auth` | Client Components only | `import { getAuth } from "firebase/auth"` |
 | `firebase/firestore` | Client Components only | `import { doc, getDoc } from "firebase/firestore"` |
-| `firebase-admin` | Server/API/Webhooks only | `import admin from "firebase-admin"` |
-| `@/lib/firestore-admin` | Server Components, API Routes, Webhooks | `import { getTourBySlug } from "@/lib/firestore-admin"` |
+| `firebase-admin` | Server/API/Webhooks only | `import admin from "firebase-admin"` (via `@9trip/shared/firebase/admin-init`) |
+| `@9trip/shared/firebase/admin-init` | Server Components, API Routes, Functions | `import { initFirebaseAdmin } from "@9trip/shared/firebase/admin-init"` |
+| `@9trip/shared/firebase/admin-helpers` | Server Components, API Routes, Functions | `import { serializeSnap } from "@9trip/shared/firebase/admin-helpers"` |
 | `@/lib/firestore` | Client Components only | `import { createBooking } from "@/lib/firestore"` |
 
 ---
@@ -141,12 +207,12 @@ This is the primary data-fetching path for page content:
 
 ```
 Server Component (page.js)
-  → firestore-admin.js (Admin SDK data access layer)
-    → firebase-admin.js (Admin SDK init, singleton)
-      → Firestore (direct read, no auth context needed)
+  → @9trip/shared/firebase/admin-init (Admin SDK init)
+  → @9trip/shared/firebase/admin-helpers (serializeSnap, etc.)
+    → Firestore (direct read, no auth context needed)
 ```
 
-All read operations for page content go through `firestore-admin.js`. The Admin SDK has full read access to Firestore, bypassing security rules. This is appropriate for server-side rendering and API routes.
+All read operations for page content go through the shared Admin SDK helpers. The Admin SDK has full read access to Firestore, bypassing security rules. This is appropriate for server-side rendering and API routes.
 
 **Pattern:**
 ```js
@@ -177,12 +243,12 @@ Use for: creating bookings, reviews, wishlist toggles, cart operations. These op
 
 ```
 API Route (route.js)
-  → firestore-admin.js (Admin SDK)
-    → firebase-admin.js
-      → Firestore
+  → @9trip/shared/firebase/admin-init
+  → @9trip/shared/firebase/admin-helpers
+    → Firestore
 ```
 
-API Routes run on the server, so they use the Admin SDK. This includes:
+API Routes run on the server, so they use the Admin SDK via the shared package. This includes:
 - Payment initiation endpoints
 - Cart validation endpoints
 - Contact form submission
@@ -191,16 +257,16 @@ API Routes run on the server, so they use the Admin SDK. This includes:
 
 ```
 Webhook Handler (route.js in /webhooks/)
-  → firestore-admin.js or adminDb directly
-    → firebase-admin.js
-      → Firestore
+  → @9trip/shared/firebase/admin-init or adminDb directly
+  → @9trip/shared/firebase/admin-helpers
+    → Firestore
 ```
 
-Webhooks receive external callbacks (payment gateways, ERP system) and update Firestore directly. They use the Admin SDK for full write access.
+Webhooks receive external callbacks (payment gateways, ERP system) and update Firestore directly. They use the Admin SDK via the shared package for full write access.
 
-### Cloud Functions (Separate Repo) → Firestore
+### Cloud Functions → Firestore
 
-Cloud Functions run in a separate Firebase project repository. They access Firestore directly through the Firebase Admin SDK initialized in that repo. The web app never calls Cloud Functions directly. Instead, Cloud Functions may trigger on Firestore writes made by the web app.
+Cloud Functions run in the same monorepo under `functions/`. They access Firestore via the shared Admin SDK (`@9trip/shared/firebase/admin-init` with `useLazyProxy: false`). The web app never calls Cloud Functions directly. Instead, Cloud Functions may trigger on Firestore writes made by the web app, or handle requests routed through firebase.json rewrites.
 
 ---
 
@@ -547,12 +613,12 @@ Hydration mismatches happen when server HTML differs from client render. Prevent
 
 ### Firestore Serialization Errors
 
-Firestore Timestamp and GeoPoint objects cannot be JSON-serialized. Always call `serializeAdminDoc()` or `serializeTimestamp()` on data before:
+Firestore Timestamp and GeoPoint objects cannot be JSON-serialized. Always call `serializeSnap()` / `serializeDocs()` from `@9trip/shared/firebase/admin-helpers` or `serializeTimestamp()` from `@/lib/firestore.js` on data before:
 - Passing from Server Component to Client Component via props.
 - Returning from API Routes.
 - Storing in Zustand or Context.
 
-Serialization happens in the data access layer (`firestore-admin.js` and `firestore.js`), not in components. If you get `Error: Cannot serialize object as JSON`, the data access function is missing serialization.
+Serialization happens in the data access layer (shared package admin-helpers and `@/lib/firestore.js`), not in components. If you get `Error: Cannot serialize object as JSON`, the data access function is missing serialization.
 
 ### withErrorFallback Helper
 
@@ -645,3 +711,6 @@ Before adding a new field to any collection:
 - **Canonical URLs on all pages:** Full path canonical resolution via Next.js metadata `alternates`.
 - **JSON-LD on server:** All structured data generated in Server Components, not client.
 - **Hotel ISR:** Changed from force-dynamic to ISR (revalidate=3600) because hotel data changes infrequently.
+- **Monorepo with NPM Workspaces:** Shared code lives in `packages/shared/` as `@9trip/shared`. No build step, symlink resolution.
+- **Single .env.local:** Root `.env.local` is canonical source. No `dotenv` dependency. Functions v2 auto-loads it.
+- **API routes in Cloud Functions only:** No duplicate endpoints between Next.js and Functions. firebase.json rewrites handle routing.

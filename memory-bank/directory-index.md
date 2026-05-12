@@ -1,6 +1,6 @@
 # Directory Index: 9Trip B2C
 
-> **Last updated:** 11/05/2026
+> **Last updated:** 12/05/2026
 > 
 > **Mục đích:** Tìm file nhanh theo mục đích. Mỗi thư mục mô tả ngắn gọn nội dung.
 
@@ -10,13 +10,41 @@
 
 ```
 tripphuquoc-db-fs/
-├── src/                    # Source code chính
+├── src/                    # Source code chính (Next.js)
+├── functions/              # Firebase Cloud Functions
+├── packages/shared/        # Shared code (@9trip/shared)
 ├── public/images/           # Static assets (favicon, social icons)
 ├── memory-bank/             # Project knowledge base (6 files)
 ├── .github/instructions/    # System rules cho agents
 ├── .agents/skills/          # Agent skills
 └── Config files (root)      # package.json, next.config.mjs, jsconfig.json, etc.
 ```
+
+---
+
+## `packages/shared/` — Shared Code (@9trip/shared)
+
+Mã dùng chung giữa Next.js và Cloud Functions. Không trùng lặp.
+
+| File | Mục đích |
+|------|-----------|
+| `package.json` | Package config với subpath exports |
+| `index.js` | Barrel export |
+| `constants.js` | SITE, COMPANY, SOCIAL, PAGE_SIZE, BLUR_DATA_URL |
+| `utils.js` | formatCurrency, formatDate, slugify, cn, v.v. |
+| `logger.js` | Logger utility |
+| `error-utils.js` | Error handling helpers |
+| `rateLabels.js` | Rate type definitions |
+| `env.js` | Environment variable resolution helpers |
+| `firebase/admin-init.js` | Firebase Admin SDK initialization factory |
+| `firebase/admin-helpers.js` | serializeSnap, serializeDocs, generateNextId |
+| `firestore/collections.js` | Collection name constants |
+| `firestore.rules` | Firestore security rules |
+| `storage/paths.js` | Storage path builders |
+| `email/templates.js` | Email HTML templates |
+| `email/service.js` | SMTP transporter + send helpers |
+| `payments/helpers.js` | PaymentHelper (sortObject, generateHmac, etc.) |
+| `schemas/` | Firestore collection schemas (bookings, tours, hotels, etc.) |
 
 ---
 
@@ -64,29 +92,27 @@ Mỗi route là 1 thư mục với `page.js` (Server Component). Client componen
 | `reviews/` | WriteReviewForm, ReviewCard |
 | `shared/` | Badge, LoadingSpinner, EmptyState, StarRating, PriceDisplay, GoogleMap, ImageCarousel, Pagination, SearchFormPopup, GalleryWithLightbox |
 
-## `src/lib/` — Libraries, Utils, Config (KHÔNG React components)
+## `src/lib/` — Next.js-specific Utilities
+
+Shared code (constants, utils, logger, email, etc.) đã chuyển sang `@9trip/shared`. Chỉ còn lại Next.js-specific code:
 
 | File | Mục đích |
-|---|---|
-| `firebase.js` | Client SDK init |
-| `firebase-admin.js` | Admin SDK init (server-side only) |
-| `firestore.js` | Client SDK data access layer |
-| `firestore-admin.js` | Admin SDK data access layer (server pages + webhooks) |
-| `storage.js` | Client Storage helpers |
-| `storage-admin.js` | Admin Storage helpers (signed URLs) |
-| `auth.js` | AuthProvider + useAuth hook |
-| `firebase-auth.js` | Auth utilities (login, register, social auth) |
-| `cart.js` | Zustand cart store (persist to localStorage) |
-| `constants.js` | Site constants (SITE, COMPANY, SOCIAL, PAGE_SIZE) |
-| `utils.js` | General utilities |
-| `error-utils.js` | Error handling helpers |
-| `email.js` + `email-templates.js` | Email sending |
-| `account-nav.js` | Account sidebar navigation config |
-| `mockData.js` | Dev seed data |
-| `logger.js` | Logging utility |
-| `payments/payment.js` | Payment gateway main logic |
-| `payments/paymentHelper.js` | Payment gateway helpers |
+|------|-----------|
+| `firebase-admin.js` | Thin wrapper: initFirebaseAdmin({ useLazyProxy: true }) |
+| `firestore-admin.js` | Collection refs + query functions (Next.js-specific) |
+| `firebase.js` | Client SDK initialization |
+| `firebase-auth.js` | Client auth (browser-only) |
+| `firestore.js` | Client Firestore SDK (browser-only) |
+| `storage.js` | Client Storage SDK (browser-only) |
+| `storage-admin.js` | Admin Storage (signed URLs) |
+| `auth.js` | React Auth context (AuthProvider) |
+| `cart.js` | Zustand cart store |
+| `mockData.js` | Dev mock data |
+| `account-nav.js` | Account navigation config |
+| `payments/payment.js` | PaymentService (local, uses @9trip/shared/payments/helpers) |
+| `payments/paymentHelper.js` | Payment gateway helpers (local) |
 | `payments/utils.js` | Payment utility functions |
+| `agents/registry.js` | Agent skill/flow registry |
 
 ## `src/hooks/` — Custom React Hooks
 
@@ -109,8 +135,22 @@ Dev & migration scripts (audit, seed, diagnostic).
 ## `src/styles/` — Global Styles
 
 | File | Mục đích |
-|---|---|
+|------|-----------|
 | `globals.css` | Tailwind CSS v4 imports + global styles |
+
+---
+
+## `functions/src/lib/` — Functions-specific Utilities
+
+Shared code đã chuyển sang `@9trip/shared`. Chỉ còn lại Functions-specific code:
+
+| File | Mục đích |
+|------|-----------|
+| `firebase-admin.js` | Thin wrapper: initFirebaseAdmin({ useLazyProxy: false }) |
+| `firestore-admin.js` | Collection refs + query functions (Functions-specific) |
+| `payments/payment.js` | PaymentService class (uses @9trip/shared/payments/helpers) |
+| `payments/utils.js` | Payment utility functions |
+| `agents/registry.js` | Agent skill/flow registry |
 
 ---
 

@@ -1,7 +1,7 @@
 import { searchHotels, getLocations, countHotels, enrichHotelsWithLowestPrices } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
-import { PAGE_SIZE } from "@/lib/constants";
-import { logger } from "@/lib/logger";
+import { PAGE_SIZE } from "@9trip/shared/constants";
+import { logger } from "@9trip/shared/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import HotelFilters from "@/components/hotels/HotelFilters";
 import ServiceList from "@/components/shared/ServiceList";

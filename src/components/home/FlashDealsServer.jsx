@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getTours } from "@/lib/firestore-admin";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 
 /**
  * FlashDealsServer — Server component hiển thị tour giảm giá.

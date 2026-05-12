@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { getSkill, getFlow, validateParams, EXEC_MODES } from '@/lib/agents/registry';
-import { logger } from '@/lib/logger';
+import { logger } from '@9trip/shared/logger';
 
 /**
  * POST /api/agents/trigger — Create a new agent task.

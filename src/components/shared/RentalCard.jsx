@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import PriceDisplay from "./PriceDisplay";
-import { BLUR_DATA_URL } from "@/lib/constants";
+import { BLUR_DATA_URL } from "@9trip/shared/constants";
 
 export default function RentalCard({ rental, item }) {
   const data = rental || item;

@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import StarRating from "./StarRating";
 import PriceDisplay from "./PriceDisplay";
-import { BLUR_DATA_URL } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { BLUR_DATA_URL } from "@9trip/shared/constants";
+import { cn } from "@9trip/shared/utils";
 
 const AMENITY_ICONS = {
   "wifi": "📶",

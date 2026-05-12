@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getActivityBySlug, getReviews, getRelatedActivities } from "@/lib/firestore-admin";
 import { resolveDocImages } from "@/lib/storage-admin";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import ActivityDetailClient from "@/components/activities/ActivityDetailClient";
 

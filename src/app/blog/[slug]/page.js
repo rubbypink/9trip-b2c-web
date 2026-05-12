@@ -3,7 +3,7 @@ import { getBlogBySlug, getRelatedBlogs } from "@/lib/firestore-admin";
 import { resolveDocImages, resolveDocsImages, resolveHtmlImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import BlogDetail from "@/components/blog/BlogDetail";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 
 export const revalidate = 3600;
 

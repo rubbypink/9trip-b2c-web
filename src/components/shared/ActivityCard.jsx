@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import StarRating from "./StarRating";
 import PriceDisplay from "./PriceDisplay";
-import { BLUR_DATA_URL } from "@/lib/constants";
+import { BLUR_DATA_URL } from "@9trip/shared/constants";
 
 /**
  * Maps items from the `included` array to emoji icons for activity amenities.

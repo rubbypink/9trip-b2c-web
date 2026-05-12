@@ -53,6 +53,10 @@ firebase-debug.log
 9trip-b2c-web.code-workspace
 tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 
+# Credential files (use env vars instead)
+*firebase-adminsdk*.json
+*serviceAccount*.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

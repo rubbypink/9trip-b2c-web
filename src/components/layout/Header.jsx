@@ -9,7 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
-import { SITE } from "@/lib/constants";
+import { SITE } from "@9trip/shared/constants";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 
 const logoImg = "/images/favicon.webp";

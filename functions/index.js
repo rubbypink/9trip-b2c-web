@@ -12,12 +12,17 @@
  * Firestore triggers and scheduled functions remain as individual exports
  * since they cannot be grouped into Express apps.
  */
-import 'dotenv/config';
+
+// Prevent MaxListenersExceededWarning caused by firebase-functions v2 SDK
+// registering process.on('uncaughtException', ...) for each exported function
+// trigger (14+ triggers exceeding the default 10-listener limit).
+process.setMaxListeners(0);
+
 import { onRequest, onCall } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import "./src/lib/logger.js";
-import admin from 'firebase-admin';
+import "@9trip/shared/logger";
+import { adminDb } from './src/lib/firebase-admin.js';
 import {
 	sendBookingConfirmation,
 	sendPaymentReceipt,
@@ -26,14 +31,10 @@ import {
 	sendBookingCancelledEmail,
 	sendBookingModifiedEmail,
 } from './src/notifications/email.js';
-import { EmailMissingError } from './src/notifications/email-service.js';
+import { EmailMissingError } from '@9trip/shared/email/service';
 import { cleanupExpiredHolds as cleanupHolds, cancelAbandonedBookings as cancelBookings } from './src/scheduled/cleanup.js';
 import { executeAgentTask } from './src/agents/executor.js';
 import { handleChat } from './emily/index.js';
-
-// Initialize Firebase Admin
-admin.initializeApp();
-const db = admin.firestore();
 
 // ─── Email Notifications ──────────────────────────────────────────────
 
@@ -44,7 +45,7 @@ export const onBookingCreated = onDocumentCreated({ document: 'bookings/{booking
 	const booking = event.data.data();
 	if (!booking) return;
 	try {
-		await sendBookingConfirmation(db, booking, event.params.bookingId);
+		await sendBookingConfirmation(adminDb, booking, event.params.bookingId);
 	} catch (err) {
 		if (err instanceof EmailMissingError) {
 			console.warn(`[email] ${err.message}`);
@@ -63,9 +64,9 @@ export const onBookingPaid = onDocumentUpdated({ document: 'bookings/{bookingId}
 	if (!before || !after) return;
 
 	// Only trigger when status changes to "paid"
-	if (before.paymentStatus !== 'paid' && after.paymentStatus === 'paid') {
+	if (before.status !== 'paid' && after.status === 'paid') {
 		try {
-			await sendPaymentReceipt(db, after, event.params.bookingId);
+			await sendPaymentReceipt(adminDb, after, event.params.bookingId);
 		} catch (err) {
 			if (err instanceof EmailMissingError) {
 				console.warn(`[email] ${err.message}`);
@@ -83,7 +84,7 @@ export const onUserCreated = onDocumentCreated({ document: 'users/{userId}', reg
 	const user = event.data.data();
 	if (!user) return;
 	try {
-		await sendWelcomeEmail(db, user, event.params.userId);
+		await sendWelcomeEmail(adminDb, user, event.params.userId);
 	} catch (err) {
 		if (err instanceof EmailMissingError) {
 			console.warn(`[email] ${err.message}`);
@@ -103,7 +104,7 @@ export const onPasswordChanged = onDocumentUpdated({ document: 'users/{userId}',
 
 	if (!before.passwordChangedAt && after.passwordChangedAt) {
 		try {
-			await sendPasswordChangedEmail(db, after, event.params.userId);
+			await sendPasswordChangedEmail(adminDb, after, event.params.userId);
 		} catch (err) {
 			if (err instanceof EmailMissingError) {
 				console.warn(`[email] ${err.message}`);
@@ -123,11 +124,11 @@ export const onBookingCancelled = onDocumentUpdated({ document: 'bookings/{booki
 	const after = event.data.after.data();
 	if (!before || !after) return;
 
-	// Only trigger when bookingStatus changes to "cancelled"
-	if (before.bookingStatus !== 'cancelled' && after.bookingStatus === 'cancelled') {
+	// Only trigger when status changes to "cancelled"
+	if (before.status !== 'cancelled' && after.status === 'cancelled') {
 		const reason = after.cancellationReason || after.cancelReason || after.note || '';
 		try {
-			await sendBookingCancelledEmail(db, after, event.params.bookingId, reason);
+			await sendBookingCancelledEmail(adminDb, after, event.params.bookingId, reason);
 		} catch (err) {
 			if (err instanceof EmailMissingError) {
 				console.warn(`[email] ${err.message}`);
@@ -145,6 +146,8 @@ export const onBookingCancelled = onDocumentUpdated({ document: 'bookings/{booki
 const FIELD_LABELS = {
 	startDate: 'Ngày bắt đầu',
 	endDate: 'Ngày kết thúc',
+	adults: 'Người lớn',
+	children: 'Trẻ em',
 	totalAmount: 'Tổng tiền',
 	serviceName: 'Dịch vụ',
 	serviceType: 'Loại dịch vụ',
@@ -158,12 +161,12 @@ export const onBookingModified = onDocumentUpdated({ document: 'bookings/{bookin
 	const before = event.data.before.data();
 	const after = event.data.after.data();
 	if (!before || !after) return;
-
-	// Only trigger for confirmed bookings
-	if (after.bookingStatus !== 'confirmed') return;
+  
+	// Only trigger for confirmed bookings (check both status fields)
+	if (after.status !== 'confirmed' && after.bookingStatus !== 'confirmed') return;
 
 	// Fields that indicate meaningful modifications
-	const watchedFields = ['startDate', 'endDate', 'totalAmount', 'serviceName', 'serviceType'];
+	const watchedFields = ['startDate', 'endDate', 'adults', 'children', 'items', 'payment'];
 	let hasChanged = false;
 	const changes = {};
 
@@ -177,17 +180,9 @@ export const onBookingModified = onDocumentUpdated({ document: 'bookings/{bookin
 		}
 	}
 
-	// Also watch guests sub-object
-	const oldGuests = JSON.stringify(before.guests || {});
-	const newGuests = JSON.stringify(after.guests || {});
-	if (oldGuests !== newGuests) {
-		hasChanged = true;
-		changes['Số khách'] = 'đã thay đổi';
-	}
-
 	if (hasChanged) {
 		try {
-			await sendBookingModifiedEmail(db, after, event.params.bookingId, changes);
+			await sendBookingModifiedEmail(adminDb, after, event.params.bookingId, changes);
 		} catch (err) {
 			if (err instanceof EmailMissingError) {
 				console.warn(`[email] ${err.message}`);
@@ -204,14 +199,14 @@ export const onBookingModified = onDocumentUpdated({ document: 'bookings/{bookin
  * Cleanup expired inventory holds — every 5 minutes.
  */
 export const cleanupExpiredHolds = onSchedule({ schedule: 'every 5 minutes', region: 'asia-southeast1' }, async () => {
-	await cleanupHolds(db);
+	await cleanupHolds(adminDb);
 });
 
 /**
  * Cancel abandoned unpaid bookings — every hour.
  */
 export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes', region: 'asia-southeast1' }, async () => {
-	await cancelBookings(db);
+	await cancelBookings(adminDb);
 });
 
 // ─── Agent Task Executor ──────────────────────────────────────────────
@@ -227,7 +222,7 @@ export const cancelAbandonedBookings = onSchedule({ schedule: 'every 60 minutes'
 export const onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{taskId}', region: 'asia-southeast1' }, async (event) => {
 	const snap = event.data;
 	if (!snap) return;
-	await executeAgentTask(db, snap, event);
+	await executeAgentTask(adminDb, snap, event);
 });
 
 // ─── Emily Chat ───────────────────────────────────────────────────────
@@ -237,7 +232,7 @@ export const onAgentTaskCreated = onDocumentCreated({ document: 'agentTasks/{tas
  * Trigger: Callable function (chatWithEmily)
  */
 export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (request) => {
-  return await handleChat(request, db);
+  return await handleChat(request, adminDb);
 });
 
 // ─── API Micro-Monoliths (Vercel API Routes Migration) ──────────────────

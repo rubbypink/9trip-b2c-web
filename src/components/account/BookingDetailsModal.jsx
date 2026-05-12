@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@9trip/shared/utils";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 /**

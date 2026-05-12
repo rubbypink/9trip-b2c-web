@@ -1,6 +1,6 @@
 import { getPublishedBlogs } from "@/lib/firestore-admin";
 import { resolveDocsImages } from "@/lib/storage-admin";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import BlogCard from "@/components/blog/BlogCard";
 

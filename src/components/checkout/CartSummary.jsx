@@ -1,7 +1,7 @@
 "use client";
 
 import { useCart } from "@/lib/cart";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@9trip/shared/utils";
 import Image from "next/image";
 
 /**

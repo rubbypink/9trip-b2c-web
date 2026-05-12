@@ -46,7 +46,40 @@ After reading, you must confirm with this exact statement:
 
 ---
 
-## 3. Code Quality Rules
+## 3. @9trip/shared Package
+
+The project uses NPM Workspaces with a shared package at `packages/shared/`, published as `@9trip/shared`.
+
+### Import Convention
+- **Always import shared code from `@9trip/shared/*`** — never from local `lib/` duplicates
+- Constants: `import { SITE, COMPANY } from '@9trip/shared/constants'`
+- Utils: `import { formatCurrency, slugify } from '@9trip/shared/utils'`
+- Logger: `import { logger } from '@9trip/shared/logger'`
+- Error utils: `import { AppError } from '@9trip/shared/error-utils'`
+- Rate labels: `import { RATE_LABELS } from '@9trip/shared/rateLabels'`
+- Email: `import { sendEmail } from '@9trip/shared/email/service'`
+- Email templates: `import { bookingConfirmationTemplate } from '@9trip/shared/email/templates'`
+- Firebase Admin: `import { initFirebaseAdmin } from '@9trip/shared/firebase/admin-init'`
+- Firestore helpers: `import { serializeSnap } from '@9trip/shared/firebase/admin-helpers'`
+- Firestore collections: `import { COLLECTIONS } from '@9trip/shared/firestore/collections'`
+- Schemas: `import { bookingSchema } from '@9trip/shared/schemas/bookings'`
+- Schemas (all): `import * as schemas from '@9trip/shared/schemas'`
+- Storage paths: `import { buildImagePath } from '@9trip/shared/storage/paths'`
+- Payment helpers: `import { verifyPaymentSignature } from '@9trip/shared/payments/helpers'`
+- Env: `import { getEnvVar, getRequiredEnvVar } from '@9trip/shared/env'`
+
+### Available Subpath Exports
+All exports are defined in `packages/shared/package.json` under the `exports` field. Do not import from internal file paths — always use the declared subpaths.
+
+### Environment Variables
+- Single root `.env.local` — no `functions/.env.local`
+- No `dotenv` dependency — both platforms auto-load `.env.local`
+- Use `@9trip/shared/env` helpers for env var resolution
+- No service account JSON files — credentials from env vars only
+
+---
+
+## 4. Code Quality Rules
 
 ### JSDoc
 Every function, component, and module must have JSDoc comments describing:
@@ -88,7 +121,7 @@ return <ClientComponent data={serializeDoc(snapshot)} />;
 
 ---
 
-## 4. Schema Compliance Enforcement
+## 5. Schema Compliance Enforcement
 
 ### Check Schemas Before Modifying Code
 Before reading or writing any Firestore data, check the canonical schema definitions in `memory-bank/schemas/`:
@@ -113,7 +146,7 @@ After modifying any code that accesses Firestore, cross-reference every field ag
 
 ---
 
-## 5. SEO & Performance Rules
+## 6. SEO & Performance Rules
 
 ### ISR / SSG
 - Use Incremental Static Regeneration for detail pages.
@@ -136,7 +169,7 @@ After modifying any code that accesses Firestore, cross-reference every field ag
 
 ---
 
-## 6. Additional Rules
+## 7. Additional Rules
 
 1. **No fake code results or reports.** Never return hardcoded data or fake reports. Always return real results based on actual code and data.
 2. **Use coding skills.** Example Load `tailwind-design-system` for UI consistency.

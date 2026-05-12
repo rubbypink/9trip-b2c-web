@@ -14,7 +14,7 @@
  */
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@9trip/shared/utils";
 
 export default function PriceDisplay({
   price = 0,

@@ -1,7 +1,7 @@
-import { SITE, SITE_DESCRIPTION, PAGE_SIZE } from '@/lib/constants';
+import { SITE, SITE_DESCRIPTION, PAGE_SIZE } from '@9trip/shared/constants';
 import { searchTours, countTours, searchHotels, searchActivities } from '@/lib/firestore-admin';
 import { getStorageImageUrl } from '@/lib/storage-admin';
-import { logger } from '@/lib/logger';
+import { logger } from '@9trip/shared/logger';
 import HeroBanner from '@/components/home/HeroBanner';
 import FeaturedHotelsServer from '@/components/home/FeaturedHotelsServer';
 import FlashDealsServer from '@/components/home/FlashDealsServer';

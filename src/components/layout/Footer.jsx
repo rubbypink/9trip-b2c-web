@@ -3,7 +3,7 @@
  */
 import Link from "next/link";
 import Image from "next/image";
-import { SITE, COMPANY, SOCIAL, SITE_DESCRIPTION } from "@/lib/constants";
+import { SITE, COMPANY, SOCIAL, SITE_DESCRIPTION } from "@9trip/shared/constants";
 
 const fbIcon = "/images/Facebook.webp";
 const igIcon = "/images/Insta.webp";

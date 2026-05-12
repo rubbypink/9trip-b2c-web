@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/cart"; // Import useCart của bro vào
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 
 export default function BookingConfirmationPage({ params }) {
     const { bookingId } = params; 

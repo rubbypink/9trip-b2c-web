@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@9trip/shared/utils";
 
 /**
  * ReviewCard — Hiển thị 1 đánh giá của khách hàng.

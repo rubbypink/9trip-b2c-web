@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import StarRating from '@/components/shared/StarRating';
 import PriceDisplay from '@/components/shared/PriceDisplay';
-import { formatDate } from '@/lib/utils';
+import { formatDate } from '@9trip/shared/utils';
 
 /** ĐANG KHÔNG SỬ DỤNG - DEAD CODE
  * TourHeader — header cho trang chi tiết tour.

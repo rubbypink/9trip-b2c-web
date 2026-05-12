@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { sendBookingConfirmation } from '@/lib/email';
-import { logger } from '@/lib/logger';
+import { sendBookingConfirmation } from '@9trip/shared/email/service';
+import { logger } from '@9trip/shared/logger';
 
 export async function POST(request) {
   try {

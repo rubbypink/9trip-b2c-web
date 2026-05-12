@@ -3,7 +3,7 @@ import { getTourBySlug, getRelatedTours, getTourReviews, getTourPricing } from "
 import { resolveDocImages, resolveDocsImages } from "@/lib/storage-admin";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import TourDetailClient from "@/components/tours/TourDetailClient";
-import { logger } from "@/lib/logger";
+import { logger } from "@9trip/shared/logger";
 
 export const revalidate = 3600;
 

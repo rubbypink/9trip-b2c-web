@@ -26,8 +26,8 @@
 
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { storage } from './firebase';
-import { logger } from './logger';
-import { getSafeImage } from './error-utils';
+import { logger } from '@9trip/shared/logger';
+import { getSafeImage } from '@9trip/shared/error-utils';
 
 // ─── Path Builders ────────────────────────────────────────────────────
 

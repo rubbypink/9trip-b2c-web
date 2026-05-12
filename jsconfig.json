@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@9trip/shared": ["./packages/shared/index.js"],
+      "@9trip/shared/*": ["./packages/shared/*"]
     }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatPrice } from "@/lib/utils";
+import { formatPrice } from "@9trip/shared/utils";
 
 /**
  * CartItem — single row in cart page with quantity controls and remove button.

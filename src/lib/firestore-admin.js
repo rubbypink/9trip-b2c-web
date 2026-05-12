@@ -1,7 +1,7 @@
 import { adminDb } from './firebase-admin';
 export { adminDb };
 import admin from 'firebase-admin';
-import { logger } from './logger';
+import { logger } from '@9trip/shared/logger';
 
 // ─── Serialization Helper ────────────────────────────────────────────
 

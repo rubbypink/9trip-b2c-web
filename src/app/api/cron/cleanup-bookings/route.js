@@ -6,8 +6,8 @@
  */
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { sendCancellationConfirmation } from '@/lib/email';
-import { logger } from '@/lib/logger';
+import { sendCancellationConfirmation } from '@9trip/shared/email/service';
+import { logger } from '@9trip/shared/logger';
 
 export async function GET() {
   try {
