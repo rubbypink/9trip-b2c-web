@@ -11,6 +11,26 @@ import { createBooking } from "@/lib/firestore";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 
+/**
+ * Retry a fetch request with exponential backoff.
+ * @param {string} url - API endpoint
+ * @param {Object} options - Fetch options
+ * @param {number} maxRetries - Maximum retry attempts
+ * @returns {Promise<Response>}
+ */
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || attempt === maxRetries) return response;
+    } catch (err) {
+      if (attempt === maxRetries) throw err;
+    }
+    const delay = Math.pow(2, attempt) * 300;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+}
+
 export function useBooking() {
   const { user } = useAuth();
   const { items, clearCart, subtotal, tax, grandTotal, couponData, couponDiscount } = useCart();
@@ -20,23 +40,24 @@ export function useBooking() {
   const [holdId, setHoldId] = useState(null);
   const [bookingId, setBookingId] = useState(null);
 
-  /**
-   * Create inventory hold for all items in cart.
-   * Note: In a production app, you might want to hold multiple items. 
-   * For 9 Trip, we'll start with holding the first item or handle multiple holds.
-   */
   const startCheckout = useCallback(async () => {
-    if (!user || items.length === 0) return null;
+    setError(null);
+
+    if (!user) {
+      setError("Vui lòng đăng nhập để tiếp tục.");
+      return null;
+    }
+    if (items.length === 0) {
+      setError("Giỏ hàng trống. Vui lòng thêm dịch vụ.");
+      return null;
+    }
     
     setLoading(true);
-    setError(null);
     
     try {
-      // For simplicity, we create hold for the first item. 
-      // If the project requirements evolve, we can map through items.
       const item = items[0];
       
-      const checkRes = await fetch('/api/availability/check', {
+      const checkRes = await fetchWithRetry('/api/availability/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,7 +72,7 @@ export function useBooking() {
         throw new Error("Rất tiếc, dịch vụ này đã hết chỗ vào ngày bạn chọn.");
       }
 
-      const holdRes = await fetch('/api/availability/hold', {
+      const holdRes = await fetchWithRetry('/api/availability/hold', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,14 +99,19 @@ export function useBooking() {
     }
   }, [user, items]);
 
-  /**
-   * Finalize booking after payment or for cash payment.
-   */
   const confirmBooking = useCallback(async (contactInfo, paymentGateway = "cash") => {
-    if (!user || items.length === 0) return null;
+    setError(null);
+
+    if (!user) {
+      setError("Vui lòng đăng nhập để tiếp tục.");
+      return null;
+    }
+    if (items.length === 0) {
+      setError("Giỏ hàng trống. Vui lòng thêm dịch vụ.");
+      return null;
+    }
     
     setLoading(true);
-    setError(null);
     
     try {
       const itemsObject = items.reduce((acc, currentItem, index) => {
@@ -109,7 +135,6 @@ export function useBooking() {
       const id = await createBooking(bookingData);
       setBookingId(id);
 
-      // Clear cart after successful booking creation
       clearCart();
       
       return id;
@@ -121,9 +146,6 @@ export function useBooking() {
     }
   }, [user, items, holdId, subtotal, tax, grandTotal, couponData, couponDiscount, clearCart]);
 
-  /**
-   * Cleanup hold if user leaves checkout or on unmount
-   */
   const cancelCheckout = useCallback(async () => {
     if (holdId) {
       await fetch('/api/availability/release', {
@@ -135,12 +157,8 @@ export function useBooking() {
     }
   }, [holdId]);
 
-  // Cleanup hold on unmount if booking wasn't completed
   useEffect(() => {
-    return () => {
-      // Logic for cleanup on unmount could be tricky if user just refreshed.
-      // Usually handled by TTL on Firestore but good to have a manual release.
-    };
+    return () => {};
   }, []);
 
   return {
