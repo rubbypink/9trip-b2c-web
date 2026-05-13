@@ -111,7 +111,7 @@ Firebase Emulator load env từ:
 |------|----------|---------|
 | **Firebase Secrets** | Secret keys, API keys | `firebase functions:secrets:set KEY` |
 | **`defineSecret()`** | Code-defined secrets với type safety | `import { defineSecret } from 'firebase-functions/params'` |
-| **`.env` files** | **Chỉ local emulator**, không deploy lên production | File `.env` trong functions/ |
+| **`.env`     files** | **Chỉ local emulator**, không deploy lên production | File `.env` trong functions/ |
 
 ### `FIREBASE_*` prefix
 
@@ -223,7 +223,7 @@ Nếu code đang dùng `FIREBASE_*` prefix và deploy vẫn chạy — **để n
 ### ✅ Clean build artifacts
 
 - Xóa `.next/` trước mỗi lần build production
-- Xóa `.firebase/` cache nếu gặp vấn đề staging
+- Xóa các phần tử trong `.firebase/` để bỏ cache nếu gặp vấn đề staging
 
 ### ✅ Dùng đúng ignore patterns
 

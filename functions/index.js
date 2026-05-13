@@ -192,6 +192,7 @@ export const chatWithEmily = onCall({ region: 'asia-southeast1' }, async (reques
 });
 export { onUserCreatedV2, onPasswordChangedV2, onUserDeletedV2 } from './src/triggers/users.js';
 export { onBookingCreatedV2, onBookingPaidV2, onBookingCancelledV2, onBookingModifiedV2 } from './src/triggers/bookings.js';
+export { apiCore, apiPayments, apiWebhooks } from './src/apps/index.js';
 // ─── API Micro-Monoliths (Vercel API Routes Migration) ──────────────────
 
 // import apiCoreApp from './src/apps/apiCore.js';
