@@ -129,12 +129,7 @@ export default function CheckoutPageClient() {
         setIsRedirecting(true); 
         localStorage.setItem("9trip_last_booking_id", data.bookingId);
         localStorage.setItem("9trip_cart_backup", JSON.stringify(items)); 
-        
         window.location.href = data.url;
-
-        setTimeout(() => {
-            clearCart();
-        }, 500);
       } else {
         setErrorMsg(data.message || "Có lỗi xảy ra khi tạo link thanh toán.");
         setIsLoading(false);

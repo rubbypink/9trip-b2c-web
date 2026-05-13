@@ -1,24 +1,30 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation"; // Thêm useRouter
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
-import { useCart } from "@/lib/cart"; // Import useCart của bro vào
+import { useState, useEffect } from "react";
+import { useCart } from "@/lib/cart";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import { logger } from "@9trip/shared/logger";
 
 export default function BookingConfirmationPage({ params }) {
     const { bookingId } = params; 
     const searchParams = useSearchParams();
-    const router = useRouter(); // Khởi tạo router
+    const router = useRouter();
     
-    // Gọi hàm restoreCart ra
-    const { restoreCart } = useCart(); 
+    const { restoreCart, clearCart } = useCart(); 
 
     const status = searchParams.get("status");
     const message = searchParams.get("message");
 
     const [isRestoring, setIsRestoring] = useState(false);
+
+    // Clear cart on successful payment confirmation
+    useEffect(() => {
+      if (status === "success") {
+        clearCart();
+      }
+    }, [status, clearCart]);
 
     // ==========================================
     // HÀM HỒI SINH GIỎ HÀNG VÀ QUAY LẠI CHECKOUT
