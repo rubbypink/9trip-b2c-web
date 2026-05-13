@@ -5,7 +5,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     
-    if (!body.productId || !body.date || !body.quantity) {
+    if (!body.serviceId || !body.startDate || !body.quantity) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 

@@ -5,8 +5,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
     
-    if (!body.to || !body.subject || !body.body) {
-      return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
+    if (!body.template || !body.data) {
+      return NextResponse.json({ success: false, message: "Missing template or data" }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: "Email sent" });

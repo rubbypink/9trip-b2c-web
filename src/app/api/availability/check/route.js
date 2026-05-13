@@ -5,11 +5,11 @@ export async function POST(request) {
   try {
     const body = await request.json();
     
-    if (!body.productId || !body.date) {
+    if (!body.serviceId || !body.startDate) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, available: true });
+    return NextResponse.json({ success: true, availability: 99 });
   } catch (error) {
     return NextResponse.json({ success: false, message: error.message || "Internal server error" }, { status: 500 });
   }

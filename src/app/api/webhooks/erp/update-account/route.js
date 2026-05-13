@@ -5,8 +5,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
     
-    if (!body.customerId) {
-      return NextResponse.json({ success: false, message: "Missing customerId" }, { status: 400 });
+    if (!body.id && !body.customerId) {
+      return NextResponse.json({ success: false, message: "Missing customerId or id" }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: "Customer updated in ERP" });
