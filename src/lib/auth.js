@@ -9,6 +9,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import {
   getAuth,
   onAuthStateChanged,
+  onIdTokenChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -74,8 +75,12 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Sync cookie cho middleware — defense-in-depth
-        document.cookie = `auth-session=1; path=/; max-age=86400; SameSite=Lax`;
+        try {
+          const idToken = await firebaseUser.getIdToken();
+          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
+        } catch (tokenErr) {
+          // Token unavailable (offline/etc) — proxy will redirect to login on next request
+        }
         try {
           const p = await getUserProfile(firebaseUser.uid);
           setProfile(p || { uid: firebaseUser.uid, id: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
@@ -83,12 +88,25 @@ export function AuthProvider({ children }) {
           setProfile({ uid: firebaseUser.uid, id: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         }
       } else {
-        // Clear cookie khi logout
         document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
         setProfile(null);
       }
       setLoading(false);
       setInitialized(true);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const idToken = await firebaseUser.getIdToken();
+          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
+        } catch (tokenErr) {
+          // Keep existing cookie on refresh failure
+        }
+      }
     });
     return unsubscribe;
   }, []);
