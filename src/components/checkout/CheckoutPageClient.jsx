@@ -13,7 +13,7 @@ import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 export default function CheckoutPageClient() {
   const router = useRouter();
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading, initialized } = useAuth();
   const { items, subtotal, tax, grandTotal, couponDiscount, couponData, clearCart } = useCart();
   const { confirmBooking } = useBooking();
   
@@ -71,6 +71,12 @@ export default function CheckoutPageClient() {
   const handleFinalizeBooking = async () => {
     setIsLoading(true);
     setErrorMsg(null);
+
+    if (!user) {
+      setErrorMsg("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      setIsLoading(false);
+      return;
+    }
 
     if (gateway === "CASH" || gateway === "BANK_TRANSFER") {
       try {
@@ -149,6 +155,32 @@ export default function CheckoutPageClient() {
         <LoadingSpinner className="w-12 h-12 text-primary-600 mb-4" />
         <h2 className="text-2xl font-bold text-foreground mb-2">Đang kết nối cổng thanh toán...</h2>
         <p className="text-muted-foreground">Vui lòng không đóng trình duyệt trong lúc này.</p>
+      </div>
+    );
+  }
+
+  if (authLoading || !initialized) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-border border-t-orange-600" />
+          <p className="mt-4 text-muted-foreground text-sm">Đang kiểm tra đăng nhập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    const checkoutLoginUrl = `/login?redirect=${encodeURIComponent('/checkout')}`;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center p-8 bg-card rounded-2xl shadow-sm border border-border max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Vui lòng đăng nhập</h2>
+          <p className="text-muted-foreground mb-6">Bạn cần đăng nhập để thanh toán đơn hàng.</p>
+          <Link href={checkoutLoginUrl} className="inline-block bg-orange-600 text-white font-medium px-6 py-2.5 rounded-xl hover:bg-orange-700 transition-colors w-full">
+            Đăng nhập ngay
+          </Link>
+        </div>
       </div>
     );
   }
