@@ -232,6 +232,13 @@ export default function CheckoutPageClient() {
                     Sửa thông tin
                   </button>
                 </div>
+
+                {isValidatingPrice && (
+                  <div className="mb-6 p-4 bg-surface-1 rounded-xl flex items-center gap-3 animate-pulse">
+                    <div className="h-5 w-5 rounded-full border-2 border-border border-t-primary-600 animate-spin" />
+                    <span className="text-sm text-muted-foreground">Đang kiểm tra giá...</span>
+                  </div>
+                )}
                 
                 <div className="flex flex-col gap-3 mb-6">
                     <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-colors ${gateway === 'VNPAY' ? 'border-blue-500 bg-blue-50' : 'border-border'}`}>
@@ -280,8 +287,20 @@ export default function CheckoutPageClient() {
                 </div>
 
                 {errorMsg && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
-                    {errorMsg}
+                  <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl">
+                    <p className="text-red-600 text-sm font-medium mb-3">{errorMsg}</p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleFinalizeBooking}
+                        disabled={isLoading}
+                        className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50"
+                      >
+                        Thử lại
+                      </button>
+                      <Link href="/cart" className="px-4 py-2 border border-border text-sm font-medium rounded-lg hover:bg-surface-1">
+                        Quay lại giỏ hàng
+                      </Link>
+                    </div>
                   </div>
                 )}
 

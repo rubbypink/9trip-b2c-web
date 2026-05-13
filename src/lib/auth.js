@@ -40,8 +40,8 @@ async function forwardToERP(event, payload) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-  } catch {
-    // Fire-and-forget — không xử lý lỗi, không chặn UX
+  } catch (err) {
+    console.error(`[forwardToERP] Failed to send ${event}:`, err.message);
   }
 }
 
