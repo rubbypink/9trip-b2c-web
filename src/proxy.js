@@ -47,7 +47,7 @@ function applySecurityHeaders(response) {
 export default async function proxy(request) {
   const { pathname, protocol, host } = request.nextUrl;
 
-  if (protocol === 'http:') {
+  if (protocol === 'http:' && !host.includes('localhost')) {
     const httpsUrl = new URL(`https://${host}${pathname}${request.nextUrl.search}`);
     return applySecurityHeaders(NextResponse.redirect(httpsUrl, 301));
   }

@@ -1,8 +1,13 @@
+
+> tripphuquoc-db-fs-web@1.0.0 dev
+> next dev --turbo
+
+⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
 ▲ Next.js 16.2.4 (Turbopack)
 - Local:         http://localhost:3001
 - Network:       http://10.255.255.254:3001
-- Environments: .env.local, .env
-✓ Ready in 753ms
+- Environments: .env.local
+✓ Ready in 824ms
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
  We detected multiple lockfiles and selected the directory of /home/rubbypink/package-lock.json as the root directory.
  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
@@ -10,50 +15,22 @@
  Detected additional lockfiles: 
    * /home/rubbypink/projects/tripphuquoc-db-fs/package-lock.json
 
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
 
-○ Compiling /hotels ...
-⨯ TypeError: rating.toFixed is not a function
-    at StarRating (src/components/shared/StarRating.jsx:18:69)
-  16 | ...0 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.63...
-  17 | ...
-> 18 | ...me="text-xs text-muted-foreground">{rating.toFixed(1)}</span>
-     |                                               ^
-  19 | ...
-  20 | ...
-  21 | ...ned && ( {
-  digest: '2077301257'
-}
- GET /hotels 200 in 15.5s (next.js: 12.6s, application-code: 2.9s)
-⨯ Error: Invalid src prop (https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800) on `next/image`, hostname "images.unsplash.com" is not configured under images in your `next.config.js`
-See more info: https://nextjs.org/docs/messages/next-image-unconfigured-host
-    at ignore-listed frames {
-  digest: '221619029@E231'
-}
- GET /hotels 200 in 742ms (next.js: 13ms, application-code: 730ms)
-⨯ Error: Invalid src prop (https://images.unsplash.com/photo-1571989795247-0b5295e3e4ef?w=800) on `next/image`, hostname "images.unsplash.com" is not configured under images in your `next.config.js`
-See more info: https://nextjs.org/docs/messages/next-image-unconfigured-host
-    at ignore-listed frames {
-  digest: '4211244711@E231'
-}
- GET /tours 200 in 2.2s (next.js: 1630ms, application-code: 612ms)
-⨯ Error: Invalid src prop (https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800) on `next/image`, hostname "images.unsplash.com" is not configured under images in your `next.config.js`
-See more info: https://nextjs.org/docs/messages/next-image-unconfigured-host
-    at ignore-listed frames {
-  digest: '221619029@E231'
-}
- GET /hotels 200 in 677ms (next.js: 13ms, application-code: 664ms)
-⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
-▲ Next.js 16.2.4 (Turbopack)
-- Local:         http://localhost:3001
-- Network:       http://10.255.255.254:3001
-- Environments: .env.local, .env
-✓ Ready in 613ms
-⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
- We detected multiple lockfiles and selected the directory of /home/rubbypink/package-lock.json as the root directory.
- To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
-   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
- Detected additional lockfiles: 
-   * /home/rubbypink/projects/tripphuquoc-db-fs/package-lock.json
+⨯ Another next dev server is already running.
 
+- Local:        http://localhost:3000
+- PID:          799603
+- Dir:          /home/rubbypink/projects/tripphuquoc-db-fs
+- Log:          .next/dev/logs/next-development.log
+
+Run kill 799603 to stop it.
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
 
 [?25h
