@@ -364,18 +364,23 @@ export async function findReviewsByEmail(email) {
  * @returns {Promise<{docId: string, data: Object}|null>}
  */
 async function getUserByUid(uid) {
-  const q = query(usersCol, where('uid', '==', uid), limit(1));
-  const snap = await getDocs(q);
-  if (!snap.empty) {
-    return { docId: snap.docs[0].id, data: serializeDoc(snap.docs[0]) };
-  }
-  // Legacy fallback: user doc ID might still be Auth UID (pre-migration)
-  const legacyRef = doc(db, 'users', uid);
-  const legacySnap = await getDoc(legacyRef);
-  if (legacySnap.exists()) {
-    return { docId: uid, data: serializeDoc(legacySnap) };
-  }
-  return null;
+	// Legacy fallback: user doc ID might still be Auth UID (pre-migration)
+	const legacyRef = doc(db, 'users', uid);
+	const legacySnap = await getDoc(legacyRef);
+	if (legacySnap.exists()) {
+		return { docId: uid, data: serializeDoc(legacySnap) };
+	}
+
+	let q = query(usersCol, where('uid', '==', uid), limit(1));
+	if (!q.exists()) {
+		q = query(usersCol, where('id', '==', uid), limit(1));
+	}
+	const snap = await getDocs(q);
+	if (!snap.empty) {
+		return { docId: snap.docs[0].id, data: serializeDoc(snap.docs[0]) };
+	}
+
+	return null;
 }
 
 

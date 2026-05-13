@@ -47,6 +47,7 @@ async function forwardToERP(event, payload) {
 /**
  * @typedef {Object} AuthUser
  * @property {string} uid
+ * @property {string} id
  * @property {string} email
  * @property {string} displayName
  * @property {string} photoURL
@@ -77,9 +78,9 @@ export function AuthProvider({ children }) {
         document.cookie = `auth-session=1; path=/; max-age=86400; SameSite=Lax`;
         try {
           const p = await getUserProfile(firebaseUser.uid);
-          setProfile(p || { uid: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
+          setProfile(p || { uid: firebaseUser.uid, id: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         } catch {
-          setProfile({ uid: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
+          setProfile({ uid: firebaseUser.uid, id: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         }
       } else {
         // Clear cookie khi logout
