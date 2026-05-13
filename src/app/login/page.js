@@ -3,8 +3,6 @@
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { loginWithEmail, loginWithGoogle, loginWithFacebook } from '@/lib/firebase-auth';
-import { upsertUserProfile } from '@/lib/firestore';
 import { useAuth } from '@/lib/auth';
 import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 
@@ -12,15 +10,14 @@ function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const redirect = searchParams.get('redirect') || '/';
-	const { user, loading: authLoading } = useAuth();
+	const { user, loading: authLoading, login, loginWithGoogle, loginWithFacebook } = useAuth();
 
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
-	const [socialLoading, setSocialLoading] = useState(null); // "google" | "facebook"
+	const [socialLoading, setSocialLoading] = useState(null);
 
-	// Nếu đã đăng nhập thì tự động chuyển hướng
 	useEffect(() => {
 		if (!authLoading && user) {
 			router.replace(redirect);
@@ -32,8 +29,7 @@ function LoginForm() {
 		setError(null);
 		setLoading(true);
 		try {
-			await loginWithEmail(email, password);
-			router.replace(redirect);
+			await login(email, password);
 		} catch (err) {
 			setError(err);
 		} finally {
@@ -45,14 +41,11 @@ function LoginForm() {
 		setError(null);
 		setSocialLoading(provider);
 		try {
-			const loginFn = provider === 'google' ? loginWithGoogle : loginWithFacebook;
-			const cred = await loginFn();
-			await upsertUserProfile(cred.user.uid, {
-				email: cred.user.email,
-				displayName: cred.user.displayName,
-				photoURL: cred.user.photoURL,
-			});
-			router.replace(redirect);
+			if (provider === 'google') {
+				await loginWithGoogle();
+			} else {
+				await loginWithFacebook();
+			}
 		} catch (err) {
 			setError(err);
 		} finally {
