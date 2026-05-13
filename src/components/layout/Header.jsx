@@ -7,6 +7,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import { SITE } from "@9trip/shared/constants";
@@ -15,6 +16,7 @@ import ThemeToggle from "@/components/shared/ThemeToggle";
 const logoImg = "/images/favicon.webp";
 
 export default function Header() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { items, updateItemQuantity, removeItem, getCartItemsForDropdown } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -170,7 +172,11 @@ export default function Header() {
                     <hr className="my-1" />
                     <button
                       className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-surface-1"
-                      onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                        onClick={async () => { 
+                          setIsUserMenuOpen(false);
+                          await logout(); 
+                          router.push('/');
+                        }}
                     >
                       Đăng xuất
                     </button>

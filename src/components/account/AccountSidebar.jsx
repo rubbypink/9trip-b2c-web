@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { User, Calendar, Heart, Star, LogOut, Menu, X, ChevronRight, CircleUserRound, Images } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 
@@ -20,6 +20,7 @@ const IMAGES_STUDIO_EMAILS = ['tranthuaanh90@gmail.com', '9tripphuquoc@gmail.com
  */
 export default function AccountSidebar() {
 	const pathname = usePathname();
+	const router = useRouter();
 	const { profile, user, logout } = useAuth();
 	const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -30,9 +31,10 @@ export default function AccountSidebar() {
 	const normalizedEmail = email?.toLowerCase?.() || '';
 	const showImagesStudio = IMAGES_STUDIO_EMAILS.includes(normalizedEmail);
 
-	function handleLogout() {
+	async function handleLogout() {
 		setMobileOpen(false);
-		logout();
+		await logout();
+		router.push('/');
 	}
 
 	function closeMobile() {

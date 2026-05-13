@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import Link from "next/link";
 
 /**
  * Bảo vệ route yêu cầu đăng nhập (Client-side hydration guard).
@@ -14,7 +15,7 @@ import { useAuth } from "@/lib/auth";
 export default function AuthGuard({ children, fallback }) {
   const { user, loading, initialized } = useAuth();
 
-  if (loading || !initialized || !user) {
+  if (loading || !initialized) {
     return (
       fallback || (
         <div className="flex items-center justify-center min-h-screen bg-background">
@@ -24,6 +25,20 @@ export default function AuthGuard({ children, fallback }) {
           </div>
         </div>
       )
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center p-8 bg-card rounded-2xl shadow-sm border border-border max-w-md w-full mx-4">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Bạn cần đăng nhập</h2>
+          <p className="text-muted-foreground mb-6">Vui lòng đăng nhập để xem trang này.</p>
+          <Link href="/login" className="inline-block bg-orange-600 text-white font-medium px-6 py-2.5 rounded-xl hover:bg-orange-700 transition-colors w-full">
+            Đăng nhập ngay
+          </Link>
+        </div>
+      </div>
     );
   }
 
