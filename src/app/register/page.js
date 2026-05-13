@@ -36,7 +36,7 @@ function RegisterForm() {
 
 		setLoading(true);
 		try {
-			await registerWithEmail(email, password, { displayName: name });
+			await registerWithEmail(email, password, name);
 			router.replace(redirect);
 		} catch (err) {
 			setError(err);
