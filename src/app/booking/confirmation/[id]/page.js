@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import { logger } from "@9trip/shared/logger";
@@ -12,6 +13,7 @@ export default function BookingConfirmationPage({ params }) {
     const searchParams = useSearchParams();
     const router = useRouter();
     
+    const { user, loading: authLoading, initialized } = useAuth();
     const { restoreCart, clearCart } = useCart(); 
 
     const status = searchParams.get("status");
@@ -46,6 +48,29 @@ export default function BookingConfirmationPage({ params }) {
             router.push("/cart"); // Lỗi thì cứ đá về cart cho an toàn
         }
     };
+
+    // 0. AUTH CHECK
+    if (authLoading || !initialized) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-muted">
+                <LoadingSpinner className="w-10 h-10 text-primary-600" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background px-4">
+                <div className="text-center p-8 bg-card rounded-2xl shadow-sm border border-border max-w-md w-full">
+                    <h2 className="text-2xl font-bold text-foreground mb-2">Vui lòng đăng nhập</h2>
+                    <p className="text-muted-foreground mb-6">Bạn cần đăng nhập để xem thông tin đơn hàng.</p>
+                    <Link href="/login" className="inline-block bg-orange-600 text-white font-medium px-6 py-2.5 rounded-xl hover:bg-orange-700 transition-colors w-full">
+                        Đăng nhập ngay
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     // 1. NẾU ĐANG LOAD HOẶC KHÔNG CÓ STATUS
     if (!status) {
