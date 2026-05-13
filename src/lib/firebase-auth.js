@@ -1,7 +1,5 @@
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
-import { app } from '@/lib/firebase';
-
-const auth = getAuth(app);
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, GoogleAuthProvider, signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 /**
  * Đăng ký tài khoản email/password
