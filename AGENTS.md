@@ -123,13 +123,6 @@ return <ClientComponent data={serializeDoc(snapshot)} />;
 
 ## 5. Schema Compliance Enforcement
 
-### Check Schemas Before Modifying Code
-Before reading or writing any Firestore data, check the canonical schema definitions in `memory-bank/schemas/`:
-- `memory-bank/schemas/hotels-schema.mjs` — Hotel-specific schema
-- `memory-bank/schemas/tours-schema.mjs` — Tour-specific schema
-- `memory-bank/schemas/activities-schema.mjs` — Activity-specific schema
-...
-
 ### Field Names and Types Must Match
 - Use the exact field name from the schema (e.g., `rating.average` not `ratingAverage`).
 - Check nested field paths carefully. Dotted paths in Firestore queries use string literals: `'rating.average'`.
