@@ -17,5 +17,6 @@ __tests__/
 .vscode/
 .idea/
 node_modules/
+/functions/eslint.config.mjs
 
 

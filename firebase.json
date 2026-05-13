@@ -55,7 +55,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=900"
+            "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
           }
         ]
       },
@@ -73,18 +73,14 @@
   "functions": [
     {
       "source": "functions",
-      "codebase": "default",
+      "codebase": "api",
       "disallowLegacyRuntimeConfig": true,
-      "ignore": ["firebase.json", "**/node_modules/**", "functions/", ".github", ".next/dev/**",  ".git", "firebase-debug.log", "firebase-debug.*.log", ".agents/", ".codenomad/", ".opencode/", ".vscode/", ".report/", "specs/", "/.*/"],
+      "ignore": ["firebase.json", "**/node_modules/**", ".github", ".next/dev/**",  ".git", "firebase-debug.log", "firebase-debug.*.log", ".agents/", ".codenomad/", ".opencode/", ".vscode/", ".report/", "specs/", "/.*/"],
       "predeploy": [
-			"rm -rf functions/vendor-shared",
-			"cp -r packages/shared functions/vendor-shared",
-			"node -e \"const fs=require('fs'); const p=JSON.parse(fs.readFileSync('functions/package.json')); p.dependencies['@9trip/shared']='file:./vendor-shared'; fs.writeFileSync('functions/package.json', JSON.stringify(p, null, '\\t')+'\\n');\"",
-			"rm -rf ~/projects/tripphuquoc-db-fs/.firebase"
-		   ],
+        "node scripts/predeploy.mjs"
+      ],
       "postdeploy": [
-        "node -e \"const fs=require('fs'); const p=JSON.parse(fs.readFileSync('functions/package.json')); p.dependencies['@9trip/shared']='file:../packages/shared'; fs.writeFileSync('functions/package.json', JSON.stringify(p, null, '\\t')+'\\n');\"",
-        "rm -rf functions/vendor-shared"
+        "node scripts/postdeploy.mjs"
       ]
     }
   ]

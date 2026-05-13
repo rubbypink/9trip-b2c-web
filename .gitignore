@@ -47,7 +47,6 @@ yarn-error.log*
 /test-output
 # env files (can opt-in for committing if needed)
 .env*
-.env
 .env.local
 firebase-debug.log
 9trip-b2c-web.code-workspace

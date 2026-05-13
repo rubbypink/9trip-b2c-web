@@ -73,13 +73,16 @@ All exports are defined in `packages/shared/package.json` under the `exports` fi
 
 ### Environment Variables
 - Single root `.env.local` — no `functions/.env.local`
-- No `dotenv` dependency — both platforms auto-load `.env.local`
+- Use `dotenv` dependency to load `.env.local` for `functions`
 - Use `@9trip/shared/env` helpers for env var resolution
 - No service account JSON files — credentials from env vars only
 
 ---
 
 ## 4. Code Quality Rules
+
+### Next.js: ALWAYS read docs before coding
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
 
 ### JSDoc
 Every function, component, and module must have JSDoc comments describing:
