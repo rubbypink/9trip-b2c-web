@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { adminAuth } from '@/lib/firebase-admin';
 
 /**
  * Next.js Edge Proxy — bảo vệ route yêu cầu đăng nhập + security headers.
@@ -41,9 +42,9 @@ function applySecurityHeaders(response) {
 /**
  * Proxy chính — chạy trên Edge Runtime.
  * @param {import('next/server').NextRequest} request
- * @returns {NextResponse}
+ * @returns {Promise<NextResponse>}
  */
-export default function proxy(request) {
+export default async function proxy(request) {
   const { pathname, protocol, host } = request.nextUrl;
 
   if (protocol === 'http:') {
@@ -59,10 +60,20 @@ export default function proxy(request) {
   const authCookie = request.cookies.get('auth-session');
   const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
 
-  if (isProtected && !authCookie?.value) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return applySecurityHeaders(NextResponse.redirect(loginUrl));
+  if (isProtected) {
+    if (!authCookie?.value) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return applySecurityHeaders(NextResponse.redirect(loginUrl));
+    }
+
+    try {
+      await adminAuth.verifyIdToken(authCookie.value);
+    } catch (error) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return applySecurityHeaders(NextResponse.redirect(loginUrl));
+    }
   }
 
   return applySecurityHeaders(NextResponse.next());
