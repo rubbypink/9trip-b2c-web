@@ -8,6 +8,7 @@
 
 import { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import { validateCoupon } from "./firestore";
+import { logger } from '@9trip/shared/logger';
 
 const CartContext = createContext(null);
 
@@ -254,7 +255,7 @@ export function CartProvider({ children }) {
         }
       }
     } catch (e) {
-      console.error('[CartProvider] Failed to restore cart from localStorage:', e);
+      logger.error('[CartProvider] Failed to restore cart from localStorage:', e);
     }
   }, []);
 
@@ -267,7 +268,7 @@ export function CartProvider({ children }) {
         localStorage.removeItem('9trip_cart');
       }
     } catch (e) {
-      console.error('[CartProvider] Failed to save cart to localStorage:', e);
+      logger.error('[CartProvider] Failed to save cart to localStorage:', e);
     }
   }, [items]);
 

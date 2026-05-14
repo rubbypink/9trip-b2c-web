@@ -83,6 +83,7 @@ const couponsCol = () => getAdminDb().collection('coupons');
 const notificationsCol = () => getAdminDb().collection('notifications');
 const inventoryHoldsCol = () => getAdminDb().collection('inventory_holds');
 const blogsCol = () => getAdminDb().collection('blogs');
+const postsCol = () => getAdminDb().collection('posts');
 
 // ─── In-Memory Cache ─────────────────────────────────────────────────
 
@@ -1840,5 +1841,28 @@ export async function getRelatedBlogs(category, currentSlug, count = 3) {
     logger.error('[getRelatedBlogs] Error:', error.message);
     logger.log('[getRelatedBlogs] Result: empty (error)');
     return { blogs: [] };
+  }
+}
+
+/**
+ * Fetch latest published posts ordered by creation date descending.
+ * @param {number} [limitCount=3] - Maximum number of posts to return.
+ * @returns {Promise<Object[]>}
+ */
+export async function getLatestPosts(limitCount = 3) {
+  logger.log('[getLatestPosts] Called with:', { limitCount });
+  try {
+    const snap = await postsCol()
+      .where('status', '==', 'published')
+      .orderBy('createdAt', 'desc')
+      .limit(limitCount)
+      .get();
+    const postsData = serializeDocs(snap);
+    logger.log('[getLatestPosts] Result:', { count: postsData.length });
+    return postsData;
+  } catch (error) {
+    logger.error('[getLatestPosts] Error:', error.message);
+    logger.log('[getLatestPosts] Result: empty (error)');
+    return [];
   }
 }

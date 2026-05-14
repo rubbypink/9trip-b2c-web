@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { getUserWishlist, removeFromWishlist } from "@/lib/firestore";
 import { Heart, Trash2, MapPin, Star, Calendar, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { logger } from '@9trip/shared/logger';
 
 /**
  * WishlistList — displays user's saved tours/hotels with remove functionality.
@@ -28,7 +29,7 @@ export default function WishlistList() {
       const data = await getUserWishlist(user.uid);
       setItems(data || []);
     } catch (err) {
-      console.error("Failed to fetch wishlist:", err);
+      logger.error('[WishlistList] Failed to fetch wishlist:', err);
       setError("Không thể tải danh sách yêu thích.");
     } finally {
       setLoading(false);
@@ -47,7 +48,7 @@ export default function WishlistList() {
         await removeFromWishlist(user.uid, wishlistId);
         setItems((prev) => prev.filter((item) => item.id !== wishlistId));
       } catch (err) {
-        console.error("Failed to remove from wishlist:", err);
+        logger.error('[WishlistList] Failed to remove from wishlist:', err);
       } finally {
         setRemovingId(null);
       }

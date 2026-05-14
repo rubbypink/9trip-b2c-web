@@ -12,6 +12,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // Public read-only collections — sync từ ERP, web chỉ đọc
+    match /{collection}/{docId} {
+      allow read: if collection in ['tours', 'hotels', 'activities', 'locations', 'rooms', 'cars', 'settings', 'coupons', 'hotel_price_schedules', 'tour_prices'];
+      allow write: if false; // Managed by backend/admin
+    }
+
     // Users can only read, create, and update their own profile.
     match /users/{userId} {
       allow read, update: if isOwner(userId);

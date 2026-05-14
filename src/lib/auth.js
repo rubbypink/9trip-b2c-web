@@ -24,6 +24,7 @@ import {
 } from "firebase/auth";
 import { app } from "./firebase";
 import { getUserProfile, upsertUserProfile } from "./firestore";
+import { logger } from '@9trip/shared/logger';
 
 const auth = getAuth(app);
 const AuthContext = createContext(null);
@@ -41,7 +42,7 @@ async function forwardToERP(event, payload) {
       body: JSON.stringify(payload),
     });
   } catch (err) {
-    console.error(`[forwardToERP] Failed to send ${event}:`, err.message);
+    logger.error(`[forwardToERP] Failed to send ${event}:`, err.message);
   }
 }
 
@@ -80,7 +81,7 @@ export function AuthProvider({ children }) {
           document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
           setUser(firebaseUser); // Only set user if cookie is successfully set
         } catch (tokenErr) {
-          console.error('[Auth] Failed to set session cookie:', tokenErr.message);
+          logger.error('[Auth] Failed to set session cookie:', tokenErr.message);
           document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
           await signOut(auth);
           return;
@@ -110,7 +111,7 @@ export function AuthProvider({ children }) {
           const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
           document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         } catch (tokenErr) {
-          console.error('[Auth] Failed to refresh session cookie:', tokenErr.message);
+          logger.error('[Auth] Failed to refresh session cookie:', tokenErr.message);
           document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
           await signOut(auth);
         }
@@ -148,7 +149,7 @@ export function AuthProvider({ children }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, userName: displayName }),
-    }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
+    }).catch(err => logger.error('[Auth] Welcome email failed:', err.message));
     return cred.user;
   }, []);
 
@@ -168,7 +169,7 @@ export function AuthProvider({ children }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cred.user.email, userName: cred.user.displayName }),
-      }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
+      }).catch(err => logger.error('[Auth] Welcome email failed:', err.message));
     }
     forwardToERP('update-account', { id: result.id, email: cred.user.email, displayName: cred.user.displayName, provider: 'google' });
     return cred.user;
@@ -190,7 +191,7 @@ export function AuthProvider({ children }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cred.user.email, userName: cred.user.displayName }),
-      }).catch(err => console.error('[Auth] Welcome email failed:', err.message));
+      }).catch(err => logger.error('[Auth] Welcome email failed:', err.message));
     }
     forwardToERP('update-account', { id: result.id, email: cred.user.email, displayName: cred.user.displayName, provider: 'facebook' });
     return cred.user;
@@ -260,7 +261,7 @@ export function AuthProvider({ children }) {
         template: "password-changed",
         data: { to: user.email, userName: user.displayName || user.email },
       }),
-    }).catch((err) => console.error("[Auth] Password changed email failed:", err.message));
+    }).catch((err) => logger.error("[Auth] Password changed email failed:", err.message));
 
     return { success: true };
   }, [user]);

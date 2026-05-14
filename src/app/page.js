@@ -11,7 +11,6 @@ import Testimonials from '@/components/home/Testimonials';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import LatestNews from '@/components/home/LatestNews';
 import ListingPreload from '@/components/home/ListingPreload';
-import { mockLatestNews } from '@/lib/mockData';
 
 export const metadata = {
 	title: `${SITE.name} — ${SITE.tagline}`,
@@ -172,8 +171,6 @@ export default async function HomePage() {
 
 	const preloadData = { tours: toursData, hotels: hotelsData, activities: activitiesData };
 
-	const latestPosts = mockLatestNews.map((post) => ({ ...post, featuredImage: post.thumbnail, createdAt: post.publishedAt }));
-
 	return (
 		<>
 			<script
@@ -211,7 +208,7 @@ export default async function HomePage() {
 			<DestinationGuide />
 			<WhyChooseUs />
 			<Testimonials />
-			<LatestNews posts={latestPosts} />
+			<LatestNews />
 		</>
 	);
 }

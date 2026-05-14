@@ -13,8 +13,7 @@ node_modules/
 
 # testing
 /coverage
-/tests/reports/
-/tests/emulator/*.log
+/tests/
 
 /test-results
 .temp/

@@ -1,4 +1,4 @@
-import { Geist_Mono, Roboto } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 import '../styles/globals.css';
 import AuthWrapper from '@/components/auth/AuthWrapper';
 import { CartProvider } from '@/lib/cart';
@@ -15,8 +15,6 @@ const roboto = Roboto({
   display: 'swap',
   variable: '--font-roboto',
 });
-
-const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
 
 export const metadata = {
 	metadataBase: new URL(SITE.url),
@@ -40,11 +38,17 @@ export const metadata = {
 	},
 };
 
+/**
+ * RootLayout — Root application layout wrapping all pages.
+ * Loads Roboto font as the primary typeface and applies global CSS variables.
+ * @param {{ children: import('react').ReactNode }} props
+ * @updated 2026-05-14
+ */
 export default function RootLayout({ children }) {
 	return (
 		<html
 			lang="vi"
-			className={`${roboto.variable} ${geistMono.variable} h-full antialiased`}
+			className={`${roboto.variable} h-full antialiased`}
 		>
 			<head>
 				<script dangerouslySetInnerHTML={{
