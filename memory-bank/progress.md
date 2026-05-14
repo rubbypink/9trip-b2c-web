@@ -169,13 +169,13 @@
 | #   | Task                                                      | Status | Ghi chú                                                     |
 | --- | --------------------------------------------------------- | ------ | ----------------------------------------------------------- |
 | 1   | Crawl & phân tích trang rootytrip.com để đối chiếu        | ✅     | Phân tích gap chi tiết: pricing, widget, policies, schedule |
-| 2   | Thiết kế schema Hybrid cho activities pricing             | ✅     | `memory-bank/schemas/activities.schema.md` (v2.0.0)         |
+| 2   | Thiết kế schema Hybrid cho activities pricing             | ✅     | `packages/shared/schemas/activities.schema.md` (v2.0.0)         |
 | 3   | Thêm `getActivityPricing(activityId)` vào firestore.js    | ✅     | Fetch pricing tiers từ subcollection                        |
 | 4   | Thêm `getRelatedActivities(slug, count)` vào firestore.js | ✅     | Fetch activities liên quan (cùng location)                  |
 | 5   | Tạo `ActivityBookingWidget.jsx`                           | ✅     | Date picker, package zone selector, qty adult/child, total  |
 | 6   | Mở rộng Server Component page.js — fetch song song        | ✅     | Pricing + related + reviews parallel                        |
 | 7   | Nâng cấp ActivityDetailClient.jsx — UI đầy đủ             | ✅     | Gallery carousel, badges, 8 tabs, booking widget, related   |
-| 8   | Tạo schema documentation                                  | ✅     | `memory-bank/schemas/activities.schema.md`                  |
+| 8   | Tạo schema documentation                                  | ✅     | `packages/shared/schemas/activities.schema.md`                  |
 | 9   | Build verification                                        | ✅     | Turbopack production build pass                             |
 
 ---
@@ -190,7 +190,7 @@
 | 4   | Mở rộng Server Component page.js — fetch song song        | ✅     | Pricing tiers + related + reviews parallel                |
 | 5   | Nâng cấp TourDetailClient.jsx — pricing+guide tabs+badges | ✅     | 8 tabs, pricing table, guide steps, product info badges   |
 | 6   | Nâng cấp TourHeader.jsx — gallery carousel                | ✅     | Grid → banner carousel với dot indicators                 |
-| 7   | Tạo schema documentation                                  | ✅     | `memory-bank/schemas/tours.schema.md` (v2.0.0)            |
+| 7   | Tạo schema documentation                                  | ✅     | `packages/shared/schemas/tours.schema.md` (v2.0.0)            |
 | 8   | Build verification                                        | ✅     | No errors                                                 |
 
 ---
@@ -227,7 +227,7 @@
 
 | #   | Task                                | Status | Ghi chú                                                                                                          |
 | --- | ----------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| 1   | Thiết kế hotel schema v3            | ✅     | `memory-bank/schemas/hotels.schema.v3.md`                                                                        |
+| 1   | Thiết kế hotel schema v3            | ✅     | `packages/shared/schemas/hotels.schema.v3.md`                                                                        |
 | 2   | Thêm Firestore helpers cho v3       | ✅     | `getRoomTypesByHotel`, `getRoomTypePricing`, `getPhysicalRooms`, `getHotelInventory`, `getHotelRoomAvailability` |
 | 3   | Backward compatibility với ERP sync | ✅     | Giữ nguyên rooms/ top-level collection                                                                           |
 
@@ -286,7 +286,7 @@
 
 | #   | Task                                             | Status | Ghi chú                                                  |
 | --- | ------------------------------------------------ | ------ | -------------------------------------------------------- |
-| 1   | Tạo `memory-bank/schemas/hotels.schema.md`       | ✅     | Schema hotels v2: hotel, room, roomPricing subcollection |
+| 1   | Tạo `packages/shared/schemas/hotels.schema.md`       | ✅     | Schema hotels v2: hotel, room, roomPricing subcollection |
 | 2   | Thêm `getRoomPricing(roomId)` vào firestore.js   | ✅     | Fetch pricing tiers từ subcollection `roomPricing`       |
 | 3   | Thêm `getHotelPricing(hotelId)` vào firestore.js | ✅     | Fetch tổng hợp pricing cho hotel                         |
 | 4   | Thêm `getHotelReviews(slug)` vào firestore.js    | ✅     | Fetch reviews cho hotel                                  |

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Settings Schema — Field definitions for the Firestore `settings` collection.
- * Based on memory-bank/schemas/settings.md
+ * Based on packages/shared/schemas/settings.md
  */
 
 /** @type {string} Firestore collection name */

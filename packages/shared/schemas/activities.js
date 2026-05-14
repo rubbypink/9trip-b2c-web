@@ -1,6 +1,6 @@
 /**
  * @fileoverview Activities Schema Module — Defines Firestore field structure for activities collection.
- * Based on memory-bank/schemas/activities.md
+ * Based on packages/shared/schemas/activities.md
  */
 
 /** @type {string} */

@@ -272,7 +272,7 @@ Task 5 (data audit) → Task 7 (booking filter) → Task 10 (Header) → Wave FI
 - [x] 2. Blog Firestore Collection + Seed Script
 
   **What to do**:
-  - Tạo Firestore collection schema cho `posts` trong `.agents/lib/schemas/blog-schema.mjs`:
+  - Tạo Firestore collection schema cho `posts` trong `.agents/lib/schemas/blog.js`:
     ```js
     // fields: title, slug, excerpt, content (HTML/markdown), featuredImage, author, category, tags[], createdAt, updatedAt, status (published/draft)
     ```
@@ -299,7 +299,7 @@ Task 5 (data audit) → Task 7 (booking filter) → Task 10 (Header) → Wave FI
 
   **References**:
   - `src/scripts/seedPriceData.js:1-50` — Pattern seed script dùng firebase-admin
-  - `.agents/lib/schemas/hotel-schema.mjs` — Pattern schema definition
+  - `.agents/lib/schemas/hotel.js` — Pattern schema definition
 
   **Acceptance Criteria**:
   - [ ] `posts` collection tồn tại trong Firestore với ≥3 documents
@@ -332,7 +332,7 @@ Task 5 (data audit) → Task 7 (booking filter) → Task 10 (Header) → Wave FI
 
   **Commit**: YES
   - Message: `feat(blog): add Firestore posts collection + seed script`
-  - Files: `.agents/lib/schemas/blog-schema.mjs`, `src/scripts/seedBlog.js`
+  - Files: `.agents/lib/schemas/blog.js`, `src/scripts/seedBlog.js`
 
 ---
 
@@ -478,8 +478,8 @@ Task 5 (data audit) → Task 7 (booking filter) → Task 10 (Header) → Wave FI
   **References**:
   - `src/lib/firestore.js:178-181` — Pattern: `getUserBookings()` query
   - `src/hooks/useBooking.js:86-104` — `contactInfo` structure
-  - `.agents/lib/schemas/tour-schema.mjs` — Tour schema fields
-  - `.agents/lib/schemas/activity-schema.mjs` — Activity schema fields
+  - `.agents/lib/schemas/tour.js` — Tour schema fields
+  - `.agents/lib/schemas/activity.js` — Activity schema fields
 
   **Acceptance Criteria**:
   - [ ] Audit report shows which fields exist/missing per service type
@@ -1033,7 +1033,7 @@ Task 5 (data audit) → Task 7 (booking filter) → Task 10 (Header) → Wave FI
 
   **Parallelization**: Wave 3 (parallel with 14-20), **Blocked By**: Tasks 1, 2
 
-  **References**: `src/components/home/LatestNews.jsx`, `src/app/hotels/[slug]/page.js`, `.agents/lib/schemas/blog-schema.mjs`
+  **References**: `src/components/home/LatestNews.jsx`, `src/app/hotels/[slug]/page.js`, `.agents/lib/schemas/blog.js`
 
   **Acceptance Criteria**:
   - [ ] `/blog` renders ≥3 posts từ Firestore; grid 3 columns; empty state; skeleton loading

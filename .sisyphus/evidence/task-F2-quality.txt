@@ -96,7 +96,7 @@ AI Slop Assessment: NONE
   - Clean, well-documented utility module
 
 ------------------------------------------------------------------------------
-5. .agents/lib/schemas/activity-schema.mjs     [CLEAN]
+5. .agents/lib/schemas/activity.js     [CLEAN]
 ------------------------------------------------------------------------------
 Lines: 428
 Syntax: PASS

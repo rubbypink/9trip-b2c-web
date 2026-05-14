@@ -11,7 +11,7 @@ SYNTAX CHECK (node --check)
 ✅ .agents/lib/adapters/ivivu-adapter.mjs       PASS
 ✅ .agents/lib/adapters/booking-adapter.mjs     PASS
 ✅ .agents/lib/pricing-extractor.mjs            PASS
-✅ .agents/lib/schemas/activity-schema.mjs      PASS
+✅ .agents/lib/schemas/activity.js      PASS
 ✅ .agents/lib/markdown-to-json.mjs             PASS
 ✅ .agents/skills/activity-scraper/scripts/activityScraper.mjs   PASS
 ✅ .agents/skills/activity-scraper/scripts/saveActivityData.mjs  PASS
@@ -53,7 +53,7 @@ STYLE ISSUES — 6 found
 
 3. [UNUSED IMPORT] .agents/skills/booking-scraper/scripts/getHotelImages.mjs:11
    HOTEL_EXTRACT_SCHEMA is imported but never used in the file.
-   import { HOTEL_EXTRACT_SCHEMA, mapHotelToFirestore } from '...hotel-schema.mjs';
+   import { HOTEL_EXTRACT_SCHEMA, mapHotelToFirestore } from '...hotel.js';
    Severity: LOW (dead code, no runtime impact)
 
 4. [UNUSED IMPORT] .agents/skills/booking-scraper/scripts/getHotelImages.mjs:8

@@ -16,7 +16,7 @@
 | `ratingCount` | ❌ NOT in tour schema | ⚠️ Referenced in code | `src/app/page.js` uses `t.ratingCount \|\| 0`; `src/app/tours/[slug]/page.js` uses `tour.ratingCount \|\| 0`. The `migrateData.js` script migrates `ratingCount` → `rating.count`. **May exist as legacy field in some documents** |
 | `reviewCount` | ❌ NOT in tour schema | ⚠️ Referenced in mock data | `src/lib/mockData.js` uses `reviewCount` for tours. Not in schema definition. **Legacy field, may exist in some documents** |
 
-### Tour Schema Fields (from `tour-schema.mjs`):
+### Tour Schema Fields (from `tour.js`):
 - Core: `title`, `slug`, `duration`, `durationDays`, `location`, `address`, `locationId`
 - Content: `description`, `excerpt`, `featuredImage`, `gallery`
 - Features: `highlights`, `included`, `excluded`, `categories`, `tags`
@@ -41,7 +41,7 @@
 | `ratingCount` | ✅ YES — defined in schema | ✅ Referenced in code | `ACTIVITY_SCHEMA.ratingCount` = `{ type: 'number', description: 'Number of reviews' }`. Also used in `src/app/page.js` as `a.ratingCount \|\| a.rating?.count \|\| 0` |
 | `reviewCount` | ❌ NOT in activity schema | ⚠️ Referenced in UI | `src/app/activities/[slug]/page.js` uses `reviewCount: totalRating`. Not a stored field — computed from reviews |
 
-### Activity Schema Fields (from `activity-schema.mjs`):
+### Activity Schema Fields (from `activity.js`):
 - Core: `slug`, `title`
 - Content: `excerpt`, `description`, `featuredImage`, `gallery`
 - Duration & Location: `duration`, `durationDetail`, `location`, `locationId`, `locationDetail`
@@ -67,7 +67,7 @@
 |-------|-------------------|-----------------|-------|
 | `amenities` | ✅ YES — `{ type: 'array', items: { type: 'string' }, description: 'Hotel facilities' }` | ✅ Used extensively | `searchHotels` in `firestore-admin.js` filters by amenities. Hotel rooms also have `amenities` arrays |
 
-### Hotel Schema Fields (from `hotel-schema.mjs`):
+### Hotel Schema Fields (from `hotel.js`):
 - Core: `name`, `slug`, `starRating`
 - Address: `address` object (street, city, cityId, country)
 - Pricing: `pricing` object (basePrice, currency)

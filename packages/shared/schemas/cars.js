@@ -1,6 +1,6 @@
 /**
  * @fileoverview Cars Schema — Field definitions for the Firestore `cars` collection.
- * Based on memory-bank/schemas/cars.md
+ * Based on packages/shared/schemas/cars.md
  */
 
 /** @type {string} Firestore collection name */

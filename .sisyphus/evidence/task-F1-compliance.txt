@@ -96,8 +96,8 @@ MUST NOT HAVE VERIFICATION [7/7 PASS]
 3. Do NOT change MAP_TO_FIRESTORE schema mapping functions
    STATUS: ✅ PASS
    EVIDENCE:
-   - mapActivityToFirestore imported from activity-schema.mjs (line 9) ✓
-   - mapTourToFirestore imported from tour-schema.mjs (line 22) ✓
+   - mapActivityToFirestore imported from activity.js (line 9) ✓
+   - mapTourToFirestore imported from tour.js (line 22) ✓
    - No modifications to schema mapping functions detected ✓
 
 4. Do NOT change adapter pattern structure

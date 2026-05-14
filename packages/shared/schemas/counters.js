@@ -1,6 +1,6 @@
 /**
  * @fileoverview Counters Schema — Field definitions for the Firestore `counters` collection.
- * Based on memory-bank/schemas/counters.md
+ * Based on packages/shared/schemas/counters.md
  */
 
 /** @type {string} Firestore collection name */

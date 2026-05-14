@@ -1,6 +1,6 @@
 /**
  * @fileoverview Coupons Schema — Field definitions for the Firestore `coupons` collection.
- * Based on memory-bank/schemas/coupons.md
+ * Based on packages/shared/schemas/coupons.md
  */
 
 /** @type {string} Firestore collection name */

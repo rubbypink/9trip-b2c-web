@@ -40,7 +40,7 @@ After reading, you must confirm with this exact statement:
 
 ### Project Scope
 - **Customer-facing only.** Only `customer` role exists. Never build `/admin`, `/partner`, or any dashboard.
-- **Schema compliance is mandatory.** All data access must match canonical schema definitions in `memory-bank/schemas/`.
+- **Schema compliance is mandatory.** All data access must match canonical schema definitions in `packages/shared/schemas/`.
 
 ---
 
@@ -125,10 +125,10 @@ return <ClientComponent data={serializeDoc(snapshot)} />;
 ## 5. Schema Compliance Enforcement
 
 ### Check Schemas Before Modifying Code
-Before reading or writing any Firestore data, check the canonical schema definitions in `memory-bank/schemas/`:
-- `memory-bank/schemas/hotels-schema.mjs` — Hotel-specific schema
-- `memory-bank/schemas/tours-schema.mjs` — Tour-specific schema
-- `memory-bank/schemas/activities-schema.mjs` — Activity-specific schema
+Before reading or writing any Firestore data, check the canonical schema definitions in `packages/shared/schemas/`:
+- `packages/shared/schemas/hotels.js` — Hotel-specific schema
+- `packages/shared/schemas/tours.js` — Tour-specific schema
+- `packages/shared/schemas/activities.js` — Activity-specific schema
 ...
 
 ### Field Names and Types Must Match
@@ -138,7 +138,7 @@ Before reading or writing any Firestore data, check the canonical schema definit
 
 ### New Fields Require Schema Update FIRST
 If you need a field that does not exist in the schema:
-1. Update the schema file FIRST (in `memory-bank/schemas/`).
+1. Update the schema file FIRST (in `packages/shared/schemas/`).
 2. Update Firestore security rules if needed.
 3. Then update application code.
 

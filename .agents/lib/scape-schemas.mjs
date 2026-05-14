@@ -1,6 +1,6 @@
 /**
  * @fileoverview Consolidated Schema Module — All schema definitions (hotel, tour, activity, blog) in one place.
- * Replaces individual files in .agents/lib/schemas/ and memory-bank/schemas/.
+ * Replaces individual files in .agents/lib/schemas/ and packages/shared/schemas/.
  * @module scape-schemas
  * @version 1.0.0
  */

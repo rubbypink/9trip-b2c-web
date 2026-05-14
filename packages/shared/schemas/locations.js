@@ -1,6 +1,6 @@
 /**
  * @fileoverview Locations Schema — Field definitions for the Firestore `locations` collection.
- * Based on memory-bank/schemas/locations.md
+ * Based on packages/shared/schemas/locations.md
  */
 
 /** @type {string} Firestore collection name */

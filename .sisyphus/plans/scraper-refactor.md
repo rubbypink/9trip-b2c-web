@@ -480,7 +480,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews):
   - `.agents/skills/activity-scraper/scripts/activityScraper.mjs` — main scraper, where merge needs to happen
   - `.agents/lib/browser-automation.mjs:819-956` — `extractChildPricesPerTier()` current implementation (evaluate-only)
   - `.agents/lib/browser-automation.mjs:974-1110` — `extractActivityPage()` where childPrices is returned
-  - `activity-schema.mjs:mapActivityToFirestore()` — how tiers map to Firestore
+  - `activity.js:mapActivityToFirestore()` — how tiers map to Firestore
 
   **Acceptance Criteria**:
   - [x] `childPrices` merged into `pricing.tiers[]` in activityScraper.mjs

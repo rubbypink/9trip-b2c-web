@@ -1,6 +1,6 @@
 /**
  * @fileoverview Inventory Holds Schema — Field definitions for the Firestore `inventory_holds` collection.
- * Based on memory-bank/schemas/inventory-holds.md
+ * Based on packages/shared/schemas/inventory-holds.md
  */
 
 /** @type {string} Firestore collection name */

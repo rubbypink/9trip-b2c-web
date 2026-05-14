@@ -1,6 +1,6 @@
 /**
  * @fileoverview Reviews Schema — Field definitions for the Firestore `reviews` collection.
- * Based on memory-bank/schemas/reviews.md
+ * Based on packages/shared/schemas/reviews.md
  */
 
 /** @type {string} Firestore collection name */

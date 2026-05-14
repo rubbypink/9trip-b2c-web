@@ -1,6 +1,6 @@
 /**
  * @fileoverview Notifications Schema — Field definitions for the Firestore `notifications` collection.
- * Based on memory-bank/schemas/notifications.md
+ * Based on packages/shared/schemas/notifications.md
  */
 
 /** @type {string} Firestore collection name */

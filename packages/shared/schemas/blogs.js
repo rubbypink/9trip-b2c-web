@@ -1,6 +1,6 @@
 /**
  * @fileoverview Blogs Schema — Field definitions for the Firestore `blogs` collection.
- * Based on memory-bank/schemas/blogs.md
+ * Based on packages/shared/schemas/blogs.md
  */
 
 /** @type {string} Firestore collection name */

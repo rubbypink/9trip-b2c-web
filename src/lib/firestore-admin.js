@@ -1269,16 +1269,17 @@ export async function getUserReviews(userId) {
 export async function getUserProfile(uid) {
   logger.log('[getUserProfile] Called with:', { uid });
   try {
-    const snap = await usersCol().where('uid', '==', uid).limit(1).get();
-    if (!snap.empty) {
-      const profileResult = serializeSnap(snap.docs[0]);
-      logger.log('[getUserProfile] Result:', { found: true, uid });
-      return profileResult;
-    }
-    // Legacy fallback: doc ID might still be Auth UID (pre-migration)
-    const fallbackResult = await getDocById('users', uid);
-    logger.log('[getUserProfile] Result:', { found: !!fallbackResult, uid });
-    return fallbackResult;
+		// Call Legacy fallback first: doc ID might still be Auth UID (pre-migration)
+		const fallbackResult = await getDocById('users', uid);
+		logger.log('[getUserProfile] Result:', { found: !!fallbackResult, uid });
+		if (fallbackResult) return fallbackResult;
+    
+		const snap = await usersCol().where('uid', '==', uid).limit(1).get();
+		if (!snap.empty) {
+			const profileResult = serializeSnap(snap.docs[0]);
+			logger.log('[getUserProfile] Result:', { found: true, uid });
+			return profileResult;
+		}
   } catch (error) {
     logger.error('[getUserProfile] Error:', error.message);
     logger.log('[getUserProfile] Result: null (error)');

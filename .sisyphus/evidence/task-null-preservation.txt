@@ -4,11 +4,11 @@ Date: 2026-05-06
 
 ## Changes Made
 
-1. .agents/lib/schemas/activity-schema.mjs:325
+1. .agents/lib/schemas/activity.js:325
    - OLD: childPrice: tier.childPrice || 0,
    - NEW: childPrice: tier.childPrice ?? null,
 
-2. .agents/lib/schemas/activity-schema.mjs:338
+2. .agents/lib/schemas/activity.js:338
    - OLD: childPrice: rawData.pricing.childPrice || 0,
    - NEW: childPrice: rawData.pricing.childPrice ?? null,
 
@@ -34,14 +34,14 @@ Date: 2026-05-06
 
 ## Syntax Checks (node --check)
 
-- activity-schema.mjs: OK
+- activity.js: OK
 - pricing-extractor.mjs: OK
 - markdown-to-json.mjs: OK
 - saveActivityData.mjs: OK
 
 ## LSP Diagnostics
 
-- activity-schema.mjs: No diagnostics found
+- activity.js: No diagnostics found
 - pricing-extractor.mjs: No diagnostics found
 - markdown-to-json.mjs: No diagnostics found
 - saveActivityData.mjs: No diagnostics found

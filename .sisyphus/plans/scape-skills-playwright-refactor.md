@@ -183,9 +183,9 @@ Wave 3 (sequential):
 - [ ] 3. Clean schemas — remove FireCrawl prompts + credits tracking
 
   **What to do**:
-  - In `hotel-schema.mjs`: Remove `HOTEL_AGENT_PROMPT` (keep HOTEL_SCHEMA, HOTEL_EXTRACT_SCHEMA, mapHotelToFirestore)
-  - In `tour-schema.mjs`: Remove `TOUR_AGENT_PROMPT` (keep schema + mapper — but tour already works without it)
-  - In `activity-schema.mjs`: Remove `ACTIVITY_AGENT_PROMPT` (keep schema + mapper)
+  - In `hotel.js`: Remove `HOTEL_AGENT_PROMPT` (keep HOTEL_SCHEMA, HOTEL_EXTRACT_SCHEMA, mapHotelToFirestore)
+  - In `tour.js`: Remove `TOUR_AGENT_PROMPT` (keep schema + mapper — but tour already works without it)
+  - In `activity.js`: Remove `ACTIVITY_AGENT_PROMPT` (keep schema + mapper)
   - In `schemas/index.mjs`: Remove AGENT_PROMPT exports
   - Remove any `_firecrawlCredits` field from schema mapping functions
   - DO NOT remove schema structures or mapping functions
@@ -375,9 +375,9 @@ grep -r "AGENT_PROMPT" .agents/lib/schemas/
 **Modified:**
 - `.agents/lib/browser-automation.mjs` (enhanced with domain helpers)
 - `.agents/lib/websearch.mjs` (FireCrawl engine removed)
-- `.agents/lib/schemas/hotel-schema.mjs` (AGENT_PROMPT removed)
-- `.agents/lib/schemas/tour-schema.mjs` (AGENT_PROMPT removed, if present)
-- `.agents/lib/schemas/activity-schema.mjs` (AGENT_PROMPT removed)
+- `.agents/lib/schemas/hotel.js` (AGENT_PROMPT removed)
+- `.agents/lib/schemas/tour.js` (AGENT_PROMPT removed, if present)
+- `.agents/lib/schemas/activity.js` (AGENT_PROMPT removed)
 - `.agents/lib/schemas/index.mjs` (AGENT_PROMPT exports removed)
 - `.agents/skills/booking-scraper/scripts/getHotelImages.mjs` (refactored)
 - `.agents/skills/activity-scraper/scripts/activityScraper.mjs` (refactored)

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Hotel Price Schedules Schema Module — Defines Firestore field structure for hotel_price_schedules collection.
- * Based on memory-bank/schemas/hotel-price-schedules.md
+ * Based on packages/shared/schemas/hotel-price-schedules.md
  */
 
 /** @type {string} */

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Tours Schema Module — Defines Firestore field structure for tours collection.
- * Based on memory-bank/schemas/tours.md
+ * Based on packages/shared/schemas/tours.md
  */
 
 /** @type {string} */

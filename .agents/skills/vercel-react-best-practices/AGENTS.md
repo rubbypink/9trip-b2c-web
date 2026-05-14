@@ -1,7 +1,6 @@
 # React Best Practices
 
 **Version 1.0.0**  
-Vercel Engineering  
 January 2026
 
 > **Note:**  

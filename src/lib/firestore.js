@@ -372,10 +372,13 @@ async function getUserByUid(uid) {
 	}
 
 	let q = query(usersCol, where('uid', '==', uid), limit(1));
-	if (!q.exists()) {
+	let snap = await getDocs(q);
+	
+	if (snap.empty) {
 		q = query(usersCol, where('id', '==', uid), limit(1));
+		snap = await getDocs(q);
 	}
-	const snap = await getDocs(q);
+
 	if (!snap.empty) {
 		return { docId: snap.docs[0].id, data: serializeDoc(snap.docs[0]) };
 	}

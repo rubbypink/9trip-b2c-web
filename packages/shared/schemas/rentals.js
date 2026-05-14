@@ -1,6 +1,6 @@
 /**
  * @fileoverview Rentals Schema — Field definitions for the Firestore `rentals` collection.
- * Based on memory-bank/schemas/rentals.md
+ * Based on packages/shared/schemas/rentals.md
  */
 
 /** @type {string} Firestore collection name */

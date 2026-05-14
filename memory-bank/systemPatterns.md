@@ -636,29 +636,29 @@ const result = await safeFetch();
 
 ### All Code Must Reference Schemas
 
-Every data structure used in the codebase must be documented in `memory-bank/schemas/`. Before writing data access code or rendering data fields, read the relevant schema file.
+Every data structure used in the codebase must be documented in `packages/shared/schemas/`. Before writing data access code or rendering data fields, read the relevant schema file.
 
 ### Schema Files
 
 | Schema | Collection | File |
 |--------|-----------|------|
-| Tours | `tours` | `memory-bank/schemas/tours.md` |
-| Hotels | `hotels` | `memory-bank/schemas/hotels.md` |
-| Activities | `activities` | `memory-bank/schemas/activities.md` |
-| Cars | `cars` | `memory-bank/schemas/cars.md` |
-| Rentals | `rentals` | `memory-bank/schemas/rentals.md` |
-| Bookings | `bookings` | `memory-bank/schemas/bookings.md` |
-| Reviews | `reviews` | `memory-bank/schemas/reviews.md` |
-| Inventory Holds | `inventory_holds` | `memory-bank/schemas/inventory-holds.md` |
-| Hotel Price Schedules | `hotel_price_schedules` | `memory-bank/schemas/hotel-price-schedules.md` |
-| Prepaid Pricing | `prepaid_pricing` | `memory-bank/schemas/prepaid-pricing.md` |
-| Coupons | `coupons` | `memory-bank/schemas/coupons.md` |
-| Users | `users` | `memory-bank/schemas/users.md` |
-| Locations | `locations` | `memory-bank/schemas/locations.md` |
-| Notifications | `notifications` | `memory-bank/schemas/notifications.md` |
-| Counters | `counters` | `memory-bank/schemas/counters.md` |
-| Blogs | `blogs` | `memory-bank/schemas/blogs.md` |
-| Settings | `settings` | `memory-bank/schemas/settings.md` |
+| Tours | `tours` | `packages/shared/schemas/tours.md` |
+| Hotels | `hotels` | `packages/shared/schemas/hotels.md` |
+| Activities | `activities` | `packages/shared/schemas/activities.md` |
+| Cars | `cars` | `packages/shared/schemas/cars.md` |
+| Rentals | `rentals` | `packages/shared/schemas/rentals.md` |
+| Bookings | `bookings` | `packages/shared/schemas/bookings.md` |
+| Reviews | `reviews` | `packages/shared/schemas/reviews.md` |
+| Inventory Holds | `inventory_holds` | `packages/shared/schemas/inventory-holds.md` |
+| Hotel Price Schedules | `hotel_price_schedules` | `packages/shared/schemas/hotel-price-schedules.md` |
+| Prepaid Pricing | `prepaid_pricing` | `packages/shared/schemas/prepaid-pricing.md` |
+| Coupons | `coupons` | `packages/shared/schemas/coupons.md` |
+| Users | `users` | `packages/shared/schemas/users.md` |
+| Locations | `locations` | `packages/shared/schemas/locations.md` |
+| Notifications | `notifications` | `packages/shared/schemas/notifications.md` |
+| Counters | `counters` | `packages/shared/schemas/counters.md` |
+| Blogs | `blogs` | `packages/shared/schemas/blogs.md` |
+| Settings | `settings` | `packages/shared/schemas/settings.md` |
 
 ### Field Name Compliance
 
@@ -681,7 +681,7 @@ Types used in code must match schema types:
 ### New Fields Require Schema Update First
 
 Before adding a new field to any collection:
-1. Update the corresponding schema file in `memory-bank/schemas/`.
+1. Update the corresponding schema file in `packages/shared/schemas/`.
 2. Add the field with its type, description, and whether it's required.
 3. Then write code that uses the new field.
 4. Never use a field that is not documented in the schema.

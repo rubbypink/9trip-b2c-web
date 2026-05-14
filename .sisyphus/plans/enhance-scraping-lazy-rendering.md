@@ -63,7 +63,7 @@ Before building Playwright MCP automation, test if Firecrawl Agent can capture m
 **QA Scenario**: Enhance `TOUR_AGENT_PROMPT` and `HOTEL_AGENT_PROMPT` with explicit interaction guidance:
 
 ```javascript
-// Add to prompts in .agents/lib/schemas/tour-schema.mjs
+// Add to prompts in .agents/lib/schemas/tour.js
 const ENHANCED_GUIDANCE = `
 CRITICAL: Before extracting data, you MUST:
 1. Scroll down to trigger lazy image loading (scroll 3-5 times with 500ms delay)
@@ -329,8 +329,8 @@ If Firecrawl Agent approach chosen, remove dead code to avoid confusion.
 **Modified**:
 - `.agents/skills/tour-scraper/scripts/tourScraper.mjs` (add automation flag)
 - `.agents/skills/booking-scraper/scripts/scrapeHotel.mjs` (add automation flag)
-- `.agents/lib/schemas/tour-schema.mjs` (enhanced prompts — if Option A)
-- `.agents/lib/schemas/hotel-schema.mjs` (enhanced prompts — if Option A)
+- `.agents/lib/schemas/tour.js` (enhanced prompts — if Option A)
+- `.agents/lib/schemas/hotel.js` (enhanced prompts — if Option A)
 - `.agents/skills/tour-scraper/SKILL.md` (documentation)
 - `.agents/skills/booking-scraper/SKILL.md` (documentation)
 

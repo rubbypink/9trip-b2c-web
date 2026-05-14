@@ -369,7 +369,7 @@ const result = await sanitizeScrapedData(data, {
 | `.agents/lib/websearch.mjs` | Shared module: `searchForSiteUrl()` — tìm URL bằng OpenRouter |
 | `.agents/lib/sanitize-data.mjs` | Shared module: `sanitizeScrapedData()` — làm sạch dữ liệu |
 | `.agents/lib/scape-schemas.mjs` | Shared module: `HOTEL_AGENT_PROMPT` + `mapHotelToFirestore` |
-| `memory-bank/schemas/hotels.schema.md` | Hotels schema v4 (rooms embedded Map) |
+| `packages/shared/schemas/hotels.schema.md` | Hotels schema v4 (rooms embedded Map) |
 | `.env.local` | `FIRECRAWL_API_KEY`, `OPENROUTER_API_KEY` |
 | `tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json` | Firebase Admin service account |
 
