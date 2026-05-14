@@ -480,8 +480,8 @@ SCRIPT
 
 | Rule | Giải thích |
 |------|-----------|
-| **Luôn click btn-less trước, btn-more sau** | Đảm bảo qty reset về minimum rồi increment lên 1 → giá hiển thị là đơn giá |
-| **Không click btn-less nếu nó bị disable** | `agent-browser click` tự handle lỗi, không crash |
+| **Luôn click giảm (btn-less,btn-minus...) trước, click tăng (btn-more, btn-more...) sau** | Đảm bảo qty reset về minimum rồi increment lên 1 → giá hiển thị là đơn giá |
+| **Không click giảm (btn-less) nếu nó bị disable** | `agent-browser click` tự handle lỗi, không crash |
 | **Đọc price SAU KHI click btn-more, TRƯỚC KHI click btn-less** | `.price-panel` chỉ hiển thị khi qty > 0 |
 | **Fallback: qty > 1 → price / qty** | Nếu btn-less bị chặn, chia price cho số lượng ra đơn giá |
 | **Luôn dùng CDP click, không dùng evaluate()** | CDP click qua `agent-browser click` trigger đúng event lifecycle của Angular |

@@ -73,14 +73,17 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
       if (firebaseUser) {
         try {
           const idToken = await firebaseUser.getIdToken();
           const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
           document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
+          setUser(firebaseUser); // Only set user if cookie is successfully set
         } catch (tokenErr) {
           console.error('[Auth] Failed to set session cookie:', tokenErr.message);
+          document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
+          await signOut(auth);
+          return;
         }
         try {
           const p = await getUserProfile(firebaseUser.uid);
@@ -89,6 +92,7 @@ export function AuthProvider({ children }) {
           setProfile({ uid: firebaseUser.uid, id: firebaseUser.uid, email: firebaseUser.email, displayName: firebaseUser.displayName });
         }
       } else {
+        setUser(null);
         document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
         setProfile(null);
       }
@@ -102,12 +106,16 @@ export function AuthProvider({ children }) {
     const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const idToken = await firebaseUser.getIdToken();
+          const idToken = await firebaseUser.getIdToken(true);
           const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
           document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         } catch (tokenErr) {
           console.error('[Auth] Failed to refresh session cookie:', tokenErr.message);
+          document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
+          await signOut(auth);
         }
+      } else {
+        document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
       }
     });
     return unsubscribe;

@@ -112,17 +112,17 @@ Always serialize Firestore data **before** passing it from a Server Component to
 
 | Collection | Purpose | Written by |
 |-----------|---------|------------|
-| `tours` | Tour services | ERP Webhook |
-| `hotels` | Hotel services | ERP Webhook |
-| `activities` | Activity services | ERP Webhook |
-| `cars` | Car rental services | ERP Webhook |
-| `rentals` | Property rentals | ERP Webhook |
-| `locations` | Location taxonomy | ERP Webhook |
-| `blogs` | Blog articles | ERP Webhook |
+| `tours` | Tour services | Firebase Admin SDK |
+| `hotels` | Hotel services | Firebase Admin SDK |
+| `activities` | Activity services | Firebase Admin SDK |
+| `cars` | Car rental services | Firebase Admin SDK |
+| `rentals` | Property rentals | Firebase Admin SDK |
+| `locations` | Location taxonomy | Firebase Admin SDK |
+| `blogs` | Blog articles | Firebase Admin SDK |
 | `bookings` | Customer bookings | Client SDK |
 | `reviews` | Customer reviews | Client SDK |
 | `users` | User profiles | Client SDK |
-| `coupons` | Discount coupons | ERP Webhook |
+| `coupons` | Discount coupons | Firebase Admin SDK |
 | `notifications` | User notifications | Cloud Functions |
 | `inventory_holds` | Temporary holds (TTL 10 min) | Client SDK |
 

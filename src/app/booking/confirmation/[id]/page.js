@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
@@ -20,10 +20,12 @@ export default function BookingConfirmationPage({ params }) {
     const message = searchParams.get("message");
 
     const [isRestoring, setIsRestoring] = useState(false);
+    const hasClearedRef = useRef(false);
 
     // Clear cart on successful payment confirmation
     useEffect(() => {
-      if (status === "success") {
+      if (status === "success" && !hasClearedRef.current) {
+        hasClearedRef.current = true;
         clearCart();
       }
     }, [status, clearCart]);

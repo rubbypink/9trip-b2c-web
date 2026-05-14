@@ -6,7 +6,11 @@
 		"dev": "next dev --turbo",
 		"build": "next build --webpack",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "next lint",
+		"test": "vitest run --config tests/vitest.config.js",
+		"test:watch": "vitest --config tests/vitest.config.js",
+		"test:emulators": "firebase emulators:exec --config tests/emulator/firebase.json 'vitest run --config tests/vitest.config.js'",
+		"test:integration": "firebase emulators:exec --config tests/emulator/firebase.json 'vitest run --config tests/vitest.config.js tests/integration/'"
 	},
 	"dependencies": {
 		"@9trip/shared": "file:./vendor-shared",
@@ -28,10 +32,13 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4.2.4",
+		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.2",
 		"babel-plugin-react-compiler": "1.0.0",
 		"eslint": "^9",
 		"eslint-config-next": "16.2.4",
-		"tailwindcss": "^4.2.4"
+		"jsdom": "^26.1.0",
+		"tailwindcss": "^4.2.4",
+		"vitest": "^3.2.4"
 	}
 }

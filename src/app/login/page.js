@@ -9,7 +9,7 @@ import FirebaseErrorHandler from '@/components/shared/FirebaseErrorHandler';
 function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const redirect = searchParams.get('redirect') || '/';
+	const redirectUrl = searchParams.get('redirect') || '/';
 	const { user, loading: authLoading, login, loginWithGoogle, loginWithFacebook } = useAuth();
 
 	const [email, setEmail] = useState('');
@@ -20,9 +20,9 @@ function LoginForm() {
 
 	useEffect(() => {
 		if (!authLoading && user) {
-			router.replace(redirect);
+			router.replace(redirectUrl);
 		}
-	}, [user, authLoading, router, redirect]);
+	}, [user, authLoading, router, redirectUrl]);
 
 	async function handleEmailLogin(e) {
 		e.preventDefault();
@@ -186,7 +186,7 @@ function LoginForm() {
 					<p className="text-center text-sm text-muted-foreground mt-6">
 						Chưa có tài khoản?{' '}
 						<Link
-							href={`/register?redirect=${encodeURIComponent(redirect)}`}
+							href={`/register?redirect=${encodeURIComponent(redirectUrl)}`}
 							className="text-orange-600 hover:text-orange-700 font-semibold"
 						>
 							Đăng ký ngay
