@@ -20,7 +20,17 @@ function LoginForm() {
 
 	useEffect(() => {
 		if (!authLoading && user) {
-			router.replace(redirectUrl);
+			const hasCookie = document.cookie.split(';').some(c => c.trim().startsWith('auth-session='));
+			if (hasCookie) {
+				router.replace(redirectUrl);
+				return;
+			}
+			const retry = setTimeout(() => {
+				if (document.cookie.includes('auth-session=')) {
+					router.replace(redirectUrl);
+				}
+			}, 300);
+			return () => clearTimeout(retry);
 		}
 	}, [user, authLoading, router, redirectUrl]);
 

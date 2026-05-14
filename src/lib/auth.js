@@ -79,11 +79,13 @@ export function AuthProvider({ children }) {
           const idToken = await firebaseUser.getIdToken();
           const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
           document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
-          setUser(firebaseUser); // Only set user if cookie is successfully set
+          setUser(firebaseUser);
         } catch (tokenErr) {
           logger.error('[Auth] Failed to set session cookie:', tokenErr.message);
           document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
           await signOut(auth);
+          setLoading(false);
+          setInitialized(true);
           return;
         }
         try {
@@ -103,6 +105,21 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  /**
+   * IdToken change listener — refreshes the auth-session cookie when the Firebase
+   * ID token changes (initial load, token refresh every ~55min, or forced refresh).
+   *
+   * IMPORTANT: This listener must NOT sign out or clear the cookie when a transient
+   * network error occurs during token refresh. Token refresh failures are expected
+   * (network blips, Firebase Auth server hiccups) and should only result in a stale
+   * cookie — the proxy will redirect to /login, preserving the Firebase session for a
+   * smooth re-login. Force-signing-out destroys the session and creates the infinite
+   * redirect loop: /checkout → /login → /checkout → …
+   *
+   * Likewise, when firebaseUser is null, do NOT clear the cookie here — the
+   * onAuthStateChanged listener owns the cookie lifecycle. Clearing from both
+   * listeners creates a race condition that can wipe a freshly-set cookie.
+   */
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -113,10 +130,7 @@ export function AuthProvider({ children }) {
         } catch (tokenErr) {
           logger.error('[Auth] Failed to refresh session cookie:', tokenErr.message);
           document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
-          await signOut(auth);
         }
-      } else {
-        document.cookie = 'auth-session=; path=/; max-age=0; SameSite=Lax';
       }
     });
     return unsubscribe;

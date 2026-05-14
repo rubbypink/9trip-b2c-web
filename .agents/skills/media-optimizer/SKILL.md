@@ -1,6 +1,6 @@
 ---
 name: media-optimizer
-description: Download và tối ưu ảnh/video từ URL, local file, hoặc input từ media-finder. Resize, convert format (WebP/AVIF), tối ưu chất lượng theo schema chuẩn từng nền tảng. Dùng Gemini Flash để phân tích và quyết định thông minh. Tự động upload Firebase Storage hoặc trả về local. Luôn dùng skill này khi cần xử lý, resize, convert, optimize ảnh/video, upload Storage, hoặc nhận output từ media-finder.
+description: Download và tối ưu ảnh/video từ URL, local file, hoặc input từ media-finder. Resize, convert format (WebP/AVIF), tối ưu chất lượng theo schema chuẩn từng nền tảng. Dùng Gemini Flash (gemini-3-flash-preview) để phân tích đa phương thức, và Gemini Image (gemini-3.1-flash-image-preview) để chỉnh sửa ảnh và quyết định thông minh. Tự động upload Firebase Storage hoặc trả về local. Luôn dùng skill này khi cần xử lý, resize, convert, optimize ảnh/video, upload Storage, hoặc nhận output từ media-finder.
 applyTo: '**'
 ---
 
@@ -56,7 +56,7 @@ Input → Download → Analyze → Transform → Optimize → Output
   │        │          │             - position: center/top/attention
   │        │          │             - responsive breakpoints
   │        │          │
-  │        │          └─ AI Analysis (Gemini Flash)
+  │        │          └─ AI Analysis & Editing (gemini-3-flash-preview / gemini-3.1-flash-image-preview)
   │        │             - Detect content type
   │        │             - Assess quality
   │        │             - Suggest optimal crop
@@ -71,11 +71,18 @@ Input → Download → Analyze → Transform → Optimize → Output
 
 ---
 
-## AI-Assisted Processing (Gemini Flash)
+## AI-Assisted Processing & Editing
 
-Sử dụng Gemini Flash (`generate_image` tool + prompt analysis) để:
+Sử dụng Gemini Interactions API (`@google/genai`) để phân tích và chỉnh sửa:
 
-### 1. Quality Assessment
+### 0. Image Editing & Retouching (Gemini Image)
+Sử dụng `gemini-3.1-flash-image-preview` (hoặc `gemini-3-pro-image-preview`) khi cần:
+- In-painting / Out-painting (mở rộng ảnh cho đúng tỉ lệ mà không cắt lẹm nội dung)
+- Tẩy xóa chi tiết thừa (Watermark removal)
+- Đổi màu/style cho phù hợp schema
+- Text-and-image-to-image prompt: Truyền base64 image + mô tả chỉnh sửa.
+
+### 1. Quality Assessment & Multimodal Analysis (Gemini Flash)
 
 Đánh giá chất lượng ảnh đầu vào trước khi xử lý:
 
@@ -465,11 +472,12 @@ Khi user yêu cầu "tìm và xử lý ảnh cho X":
 
 ### Prompt Design Principles cho AI Models
 
-1. **Gemini Flash cho phân tích** — rẻ hơn Pro, đủ cho quality assessment, crop suggestion, alt text
-2. **Batch prompt khi có thể** — gửi nhiều ảnh trong 1 prompt thay vì N prompts riêng
-3. **Cache intermediate results** — nếu cùng schema, cache quyết định transform
-4. **Lazy AI analysis** — chỉ gọi Gemini khi cần crop thông minh hoặc alt text, không gọi cho mọi ảnh
-5. **Pre-compute metadata** — dùng `sharp` để lấy dimensions/exif trước, chỉ gọi AI khi thực sự cần
+1. **Gemini 3 Flash (`gemini-3-flash-preview`) cho phân tích** — rẻ hơn Pro, hỗ trợ multimodal tốt, dùng cho quality assessment, crop suggestion, alt text. (Có thể dùng `gemini-3.1-flash-lite-preview` nếu cần rẻ và siêu nhanh).
+2. **Gemini Image (`gemini-3.1-flash-image-preview`) cho editing** — dùng khi cần tái tạo vùng ảnh, out-painting, xóa vật thể.
+3. **Batch prompt khi có thể** — gửi nhiều ảnh trong 1 prompt thay vì N prompts riêng
+4. **Cache intermediate results** — nếu cùng schema, cache quyết định transform
+5. **Lazy AI analysis** — chỉ gọi Gemini khi cần crop thông minh hoặc alt text, không gọi cho mọi ảnh
+6. **Pre-compute metadata** — dùng `sharp` để lấy dimensions/exif trước, chỉ gọi AI khi thực sự cần
 
 ### Cost-Effective Prompt Template
 
