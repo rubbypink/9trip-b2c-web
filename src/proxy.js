@@ -70,6 +70,7 @@ export default async function proxy(request) {
     try {
       await adminAuth.verifyIdToken(authCookie.value);
     } catch (error) {
+      console.error('[proxy] verifyIdToken error:', error.message);
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return applySecurityHeaders(NextResponse.redirect(loginUrl));

@@ -77,9 +77,10 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         try {
           const idToken = await firebaseUser.getIdToken();
-          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
+          const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         } catch (tokenErr) {
-          // Token unavailable (offline/etc) — proxy will redirect to login on next request
+          console.error('[Auth] Failed to set session cookie:', tokenErr.message);
         }
         try {
           const p = await getUserProfile(firebaseUser.uid);
@@ -102,9 +103,10 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         try {
           const idToken = await firebaseUser.getIdToken();
-          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax; Secure`;
+          const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+          document.cookie = `auth-session=${idToken}; path=/; max-age=3600; SameSite=Lax${isSecure ? '; Secure' : ''}`;
         } catch (tokenErr) {
-          // Keep existing cookie on refresh failure
+          console.error('[Auth] Failed to refresh session cookie:', tokenErr.message);
         }
       }
     });

@@ -3,8 +3,6 @@ applyTo: '**'
 description: 'System-wide instructions for 9 Trip B2C — Memory Bank, project tenets, code quality, schema compliance, SEO/performance.'
 ---
 
-# 9 Trip B2C — System Instructions
-
 ## 1. MANDATORY: Memory Bank Reading
 
 Before starting ANY code task, you MUST read the following files in order (if you have not already):

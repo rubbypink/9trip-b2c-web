@@ -118,8 +118,7 @@ export default function ActivityBookingWidget({
     } else {
       router.push(`/login?redirect=/checkout`);
     }
-    router.push(`/checkout`);
-  }, [router, addItem, activityId, activityTitle, featuredImage, selectedDate, selectedTier, adults, children, basePrice, tierCurrency]);
+  }, [router, addItem, activityId, activityTitle, featuredImage, selectedDate, selectedTier, adults, children, basePrice, tierCurrency, user]);
 
   const handleConsult = useCallback(() => {
     const phone = "0877.901.901";

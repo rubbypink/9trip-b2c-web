@@ -116,6 +116,45 @@ export async function resolveDocImages(doc) {
 }
 
 /**
+ * Resolve all image URLs inside an HTML string.
+ * Finds <img src="..."> and replaces gs:// paths with signed URLs.
+ *
+ * @param {string} htmlContent
+ * @returns {Promise<string>}
+ */
+export async function resolveHtmlImages(htmlContent) {
+  if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+
+  const srcRegex = /src=["']([^"']+)["']/g;
+  let match;
+  const replacements = [];
+
+  while ((match = srcRegex.exec(htmlContent)) !== null) {
+    const originalUrl = match[1];
+    if (originalUrl.startsWith('gs://') || (!originalUrl.startsWith('http') && !originalUrl.startsWith('data:') && !originalUrl.startsWith('/'))) {
+      replacements.push({
+        original: originalUrl,
+        promise: getStorageImageUrl(originalUrl)
+      });
+    }
+  }
+
+  if (replacements.length === 0) return htmlContent;
+
+  const resolvedUrls = await Promise.all(replacements.map(r => r.promise));
+  
+  let resolvedHtml = htmlContent;
+  for (let i = 0; i < replacements.length; i++) {
+    if (resolvedUrls[i]) {
+      resolvedHtml = resolvedHtml.split(`src="${replacements[i].original}"`).join(`src="${resolvedUrls[i]}"`);
+      resolvedHtml = resolvedHtml.split(`src='${replacements[i].original}'`).join(`src='${resolvedUrls[i]}'`);
+    }
+  }
+
+  return resolvedHtml;
+}
+
+/**
  * Resolve images for an array of documents.
  * @param {Array<Object>} docs
  * @returns {Promise<Array<Object>>}
