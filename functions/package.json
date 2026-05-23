@@ -7,7 +7,7 @@
 		"lint": "eslint .",
 		"serve": "firebase emulators:start --only functions",
 		"shell": "firebase functions:shell",
-		"start": "npm run shell",
+		"start": "pnpm run shell",
 		"deploy": "firebase deploy --only functions",
 		"logs": "firebase functions:log"
 	},
@@ -15,7 +15,7 @@
 		"node": "24"
 	},
 	"dependencies": {
-		"@9trip/shared": "file:../packages/shared",
+		"@9trip/shared": "workspace:*",
 		"@google/genai": "^2.0.1",
 		"cors": "^2.8.5",
 		"dotenv": "^17.4.2",

@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+  - 'functions'
+allowBuilds:
+  '@firebase/util': true
+  '@google/genai': true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true

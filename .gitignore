@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-node_modules/
+node_modules/*
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,6 +10,9 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 .github/
+.git/
+/.firebase/
+/scripts/
 
 # testing
 /coverage
@@ -28,6 +31,7 @@ node_modules/
 /playwright-*
 /.codenomad/
 /.report/
+/.agents/
 /.sisyphus
 /playwright-*
 /test*
@@ -62,53 +66,12 @@ tripphuquoc-db-fs-firebase-adminsdk-fbsvc-5695f7d555.json
 next-env.d.ts
 .gitignore
 .sisyphus/ralph-loop.local.md
+
+# Lock files (pnpm only — never commit npm/bun lock files)
+package-lock.json
+.bun.lock
 /.*/
-vendor-shared/constants.js
-vendor-shared/env.js
-vendor-shared/error-utils.js
-vendor-shared/firestore.rules
-vendor-shared/index.js
-vendor-shared/logger.js
-vendor-shared/package.json
-vendor-shared/rateLabels.js
-vendor-shared/utils.js
-vendor-shared/email/service.js
-vendor-shared/email/templates.js
-vendor-shared/firebase/admin-helpers.js
-vendor-shared/firebase/admin-init.js
-vendor-shared/firestore/collections.js
-vendor-shared/payments/helpers.js
-vendor-shared/schemas/activities.js
-vendor-shared/schemas/bookings.js
-vendor-shared/schemas/hotel-price-schedules.js
-vendor-shared/schemas/hotels.js
-vendor-shared/schemas/index.js
-vendor-shared/schemas/tour.js
-vendor-shared/schemas/tours.js
-vendor-shared/schemas/users.js
-vendor-shared/shared/constants.js
-vendor-shared/shared/env.js
-vendor-shared/shared/error-utils.js
-vendor-shared/shared/firestore.rules
-vendor-shared/shared/index.js
-vendor-shared/shared/logger.js
-vendor-shared/shared/package.json
-vendor-shared/shared/rateLabels.js
-vendor-shared/shared/utils.js
-vendor-shared/shared/email/service.js
-vendor-shared/shared/email/templates.js
-vendor-shared/shared/firebase/admin-helpers.js
-vendor-shared/shared/firebase/admin-init.js
-vendor-shared/shared/firestore/collections.js
-vendor-shared/shared/payments/helpers.js
-vendor-shared/shared/schemas/activities.js
-vendor-shared/shared/schemas/bookings.js
-vendor-shared/shared/schemas/hotel-price-schedules.js
-vendor-shared/shared/schemas/hotels.js
-vendor-shared/shared/schemas/index.js
-vendor-shared/shared/schemas/tour.js
-vendor-shared/shared/schemas/tours.js
-vendor-shared/shared/schemas/users.js
-vendor-shared/shared/storage/paths.js
-vendor-shared/storage/paths.js
-.gitignore
+
+# Vendored workspace packages (generated during deploy)
+vendor-shared/
+

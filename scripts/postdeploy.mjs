@@ -8,17 +8,22 @@ const ROOT = join(__dirname, '..');
 const FUNCTIONS_DIR = join(ROOT, 'functions');
 const PKG_PATH = join(FUNCTIONS_DIR, 'package.json');
 const VENDOR_SHARED_DIR = join(FUNCTIONS_DIR, 'vendor-shared');
+const FUNCTIONS_LOCKFILE = join(FUNCTIONS_DIR, 'pnpm-lock.yaml');
 
 try {
 	// 1. Restore functions/package.json to point back to workspace package
 	const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
-	pkg.dependencies['@9trip/shared'] = 'file:../packages/shared';
+	pkg.dependencies['@9trip/shared'] = 'workspace:*';
 	writeFileSync(PKG_PATH, JSON.stringify(pkg, null, '\t') + '\n');
 	console.log('[postdeploy] Restored functions/package.json');
 
 	// 2. Remove vendor-shared copy
 	rmSync(VENDOR_SHARED_DIR, { recursive: true, force: true });
 	console.log('[postdeploy] Removed functions/vendor-shared');
+
+	// 3. Remove copied pnpm-lock.yaml from functions/
+	rmSync(FUNCTIONS_LOCKFILE, { force: true });
+	console.log('[postdeploy] Removed functions/pnpm-lock.yaml');
 } catch (err) {
 	console.error('[postdeploy] Error:', err.message);
 	process.exit(1);
